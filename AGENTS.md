@@ -82,6 +82,14 @@ ruby -ryaml -e 'YAML.load_file(ARGV[0])' skills/<skill>/agents/openai.yaml
 plugin-eval analyze skills/<skill> --format markdown
 ```
 
+`plugin-eval analyze` is advisory for high-stakes skills when the extra budget is
+intentional. Do not let static budget findings alone block a local commit for a
+safety-critical or high-rigor skill after the user accepts the cost and the exact
+edited surfaces pass their functional, schema, reference, and behavior-contract
+checks. Do not waive loader errors, invalid YAML, missing referenced files, test
+failures, script/runtime errors, or behavior-contract failures; report any waived
+static budget finding in closeout.
+
 ## Marketplace Metadata
 
 `plugins/marketplace.json` is editable local metadata. It is not runtime proof.
