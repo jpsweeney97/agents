@@ -1,0 +1,149 @@
+# AGENTS.md
+
+Repo-specific instructions for `/Users/jp/.agents`.
+
+This repo is local source for Codex-facing skills, skill metadata, references,
+and personal plugin marketplace metadata. Higher-priority global instructions
+still apply.
+
+## Primary Work
+
+Optimize for day-to-day skill editing first.
+
+Primary source surfaces:
+
+- `skills/**/SKILL.md`
+- `skills/**/agents/openai.yaml`
+- `skills/**/references/*.md`
+- `skills/**/examples/*.md`
+- `plugins/marketplace.json`
+
+Treat `.plugin-eval/`, `.DS_Store`, bytecode, and virtual environments as local
+or generated artifacts unless the user explicitly asks to inspect them.
+
+## Working Defaults
+
+- Start file-changing work with `git status --short --branch`.
+- Read the live target files before editing. Match the existing skill shape.
+- Keep edits scoped to the requested skill, metadata file, reference, or
+  marketplace entry.
+- If the user asks for review, analysis, planning, or a grill-me session, stay
+  read-only until they explicitly ask for edits.
+- For behavior changes, inspect `SKILL.md`, `agents/openai.yaml`, and referenced
+  files together before patching.
+- A minimal local skill can be only `SKILL.md` plus `agents/openai.yaml` when
+  the value is the behavior contract itself. Add references, examples, or
+  scripts only when they reduce real load in the main skill file.
+
+## Skill Editing
+
+`SKILL.md`:
+
+- Keep YAML frontmatter parseable. Quote descriptions that contain colons or
+  other punctuation likely to confuse YAML.
+- Make the trigger and non-trigger boundaries explicit.
+- State the expected behavior, defaults, stop conditions, and output shape.
+- Keep long rubrics, examples, and rationale in `references/` or `examples/`
+  when they would make `SKILL.md` heavy.
+
+`agents/openai.yaml`:
+
+- Treat this as companion metadata, not a substitute for the skill contract.
+- Keep the display name, short description, and default prompt aligned with the
+  current `SKILL.md`.
+- Minimal metadata is acceptable for local skills.
+
+References and examples:
+
+- Use reference files for detailed rubrics, worked examples, and rationale.
+- Keep references named by purpose, and make every referenced path exist.
+- Do not move behavior-critical instructions into a reference unless
+  `SKILL.md` clearly says when to load it.
+
+## Validation Ladder
+
+Validate the exact surfaces you edited.
+
+1. Parse edited `SKILL.md` frontmatter and edited YAML metadata.
+2. Inspect every referenced path from the edited surfaces; each path must exist
+   and match the role claimed by the instruction.
+3. For metadata-only changes, parsing plus shape/alignment checks can be enough.
+4. For skill behavior changes, run the available local validator when one exists.
+   If no validator is available, state that and name the checks that replaced it.
+5. For material behavior changes, add one live invocation, forward-test, or
+   realistic dry run where practical.
+6. If validation fails or is blocked, do not claim the change works and do not
+   create the automatic local commit.
+
+Useful checks:
+
+```bash
+ruby -ryaml -e 'YAML.load_file(ARGV[0])' skills/<skill>/agents/openai.yaml
+plugin-eval analyze skills/<skill> --format markdown
+```
+
+## Marketplace Metadata
+
+`plugins/marketplace.json` is editable local metadata. It is not runtime proof.
+
+- Edit it when the task asks for personal marketplace metadata changes.
+- Do not claim installation, activation, loaded skill state, hook behavior, or
+  runtime plugin behavior from this file alone.
+- Before making runtime claims, verify through the relevant Codex or plugin
+  inspection path, such as installed cache inspection, app-server `plugin/read`,
+  `plugin/list`, `skills/list`, `hooks/list`, or another task-specific runtime
+  check.
+- Keep publishing explicit. Do not sync, push, publish, or mutate remote
+  marketplace state unless the user asks for that.
+
+## Design Gate
+
+Codex-facing systems should support Codex judgment instead of replacing it with
+rule machinery. Read `references/codex-facing-design.md` before adding or
+materially changing Codex-facing schema, workflow stages, routing logic,
+validation machinery, scripts that classify or decide, plugin behavior, or skill
+behavior.
+
+Run these tests before adding a structured field, status enum, workflow stage,
+validation rule, or imperative decision path:
+
+1. Whose failure is it? If a wrong value hurts the work product a non-plugin
+   reader consumes, the structure may be justified. If it only hurts internal
+   plugin machinery, remove it, make it transient, or count it as over-fit.
+2. Tooling or thinking? Keep fields that help Codex reason. Be skeptical of
+   fields that exist mainly for queries, audits, downstream automation, or
+   pipeline bookkeeping.
+3. Could Codex do this inline? If a thinking Codex with the same context could
+   classify, triage, score, route, or decide in prose, keep the decision in
+   Codex and put only deterministic mechanics in code.
+4. Re-test the whole artifact. Per-addition checks are not enough when a surface
+   has grown. Re-run the tests on the full artifact after roughly 25 commits in
+   its directory, after about 50% surface growth, or when the next addition makes
+   you hesitate.
+
+Test 3 does not block infrastructure code: synchronous hooks, security or policy
+guards, and deterministic computational machinery can be justified by latency,
+safety, or data-integrity constraints.
+
+## Communication
+
+- In chat, lead with the user-visible behavior, experience, or decision, then
+  map to technical choices.
+- Match the user's register. If they ask in technical terms, answer in technical
+  terms.
+- Use plain language for explanations. Save formal structure for artifacts that
+  need it, such as tickets, specs, handoffs, commit messages, and review reports.
+- These communication rules apply to conversation, not to authored artifacts.
+
+## Git And Cleanup
+
+- Before staging or committing, review `git diff --stat` and the relevant diff.
+- For completed, focused, file-changing work in this repo, create a local commit
+  by default after focused verification when a coherent commit can be made.
+- Do not create the automatic local commit if the user asked not to commit, the
+  turn was review-only or exploratory, validation is failing or blocked, the work
+  is incomplete, or unrelated/overlapping dirty files make safe staging
+  ambiguous.
+- Do not push commits, add remotes, create pull requests, sync marketplaces, or
+  otherwise publish changes unless the user asks for that.
+- Use `trash <path>` for deletion. Do not use `rm`.
