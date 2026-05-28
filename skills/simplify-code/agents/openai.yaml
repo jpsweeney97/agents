@@ -1,0 +1,4 @@
+interface:
+  display_name: "Simplify Code"
+  short_description: "Safely simplify scoped code"
+  default_prompt: "Use $simplify-code to simplify the targeted code while preserving behavior and reporting verification evidence."
