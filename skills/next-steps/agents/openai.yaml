@@ -1,0 +1,7 @@
+interface:
+  display_name: "Next Steps"
+  short_description: "Turn findings into sequenced plans"
+  default_prompt: "Use $next-steps to turn these findings into a dependency-aware action plan with gates and critical path."
+
+policy:
+  allow_implicit_invocation: false

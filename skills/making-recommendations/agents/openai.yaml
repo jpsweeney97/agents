@@ -1,0 +1,4 @@
+interface:
+  display_name: "Making Recommendations"
+  short_description: "Rank options and tradeoffs"
+  default_prompt: "Use $making-recommendations to compare these options, rank tradeoffs, and recommend the best path."
