@@ -8,73 +8,33 @@ description: >-
 
 # Simplify Code
 
-Simplify scoped code while preserving behavior. No implicit cleanup.
+Behavior-preserving simplification for an explicit target. Before any edit, load
+[`references/simplification-playbook.md`](references/simplification-playbook.md)
+and follow it as the execution procedure.
 
 ## Use
 
-Trigger: cleanup intent + target: paths/files, subsystem, current/staged diff,
-or commit/range.
+Trigger only on cleanup intent plus target. Intent: simplify, clean up,
+tidy, make easier to read, refactor for clarity, or explicit
+behavior-preserving refactor. Target: paths/files, subsystem, current/staged
+diff, commit, or range.
 
-Clarify ambiguous `refactor` / `make maintainable` asks unless paired with
-simplification, cleanup, clarity, or preservation.
+Clarify plain `refactor`, vague maintainability, or missing target. Do not use
+for implementation, fixes, reviews, formatting-only work, redesigns, or routine
+self-review.
 
-Status first. Same-file unrelated changes stop editing; ask whether to narrow,
-proceed with backup, or stop. Ignore/report other files.
+Status first. Same-file unrelated changes stop editing. Weak evidence needs
+approval. Always create a pre-edit rollback patch. Do not auto-commit unless
+asked or locally required.
 
-Broad: reconnaissance; patch/verify one high-value slice; report other
-candidates.
+Read-only unless opted in: migrations, schemas/persistence, security/auth/
+billing/permissions/data-loss, concurrency, generated/vendor, manifests,
+external contracts, release/packaging, and binaries. Behavior change is not
+simplification; stop and label it `not a simplification: behavior change
+required`.
 
-Monorepos: repo root for git/backup; target root for instructions/check.
-
-## Gates
-
-Value: rank by defect-risk reduction, cognitive load, duplication, local
-patterns, test/debug ease, then aesthetic ride-alongs. Deprioritize taste-only
-work.
-
-Evidence: `strong` = tests/probes plus no public/external contract diff;
-`moderate` = tight reasoning plus typecheck, lint, snapshot/caller audit, or
-manual probe; `weak` = static-only, no independent check, missing baseline, or
-blocked verification. Weak needs approval; no tests/type/lint means weak.
-
-Baseline required for broad scopes, weak evidence, high-risk-adjacent slices,
-cheap obvious checks.
-
-Backup every edit to
-`<repo-root>/.backup/YYYYMMDD-HHMMSS-<branch-or-no-branch>-<scope-slug>-simplify-code.patch`;
-create `.backup/` and prefer `.gitignore` setup. If blocked/dirty, fall back to
-`.git/info/exclude`, then `/Users/jp/backup/<repo-or-dir-slug>/`; stop if no
-backup works. Include scoped editable/untracked text; exclude/report unrelated,
-ignored, large/binary, secrets, generated/vendor unless scoped. No post patch by
-default.
-
-Read-only by default: migrations, schemas/persistence, security/auth/billing/
-permission/data-loss, concurrency, generated/vendor, manifests, external
-contracts, release/packaging, binaries.
-
-Sensitive paths need opt-in, strong evidence, baseline, narrow scope; fast mode
-cannot bypass. Internal APIs may change only when all callers are in scope and
-evidence is strong. External contracts require opt-in.
-
-Generated/vendor edits need confirmation; prefer generator/source. Do not edit
-binaries; use asset workflow. Tests editable only when scoped or test-only;
-never relax expectations. New abstractions must be small, local, evidence-backed,
-and justified by duplication or a stable concept.
-
-Intentional behavior change is not simplification. Stop and label it `not a
-simplification: behavior change required`.
-
-## Execute
-
-Patch coupled in-scope files coherently; otherwise use verified slices. Avoid
-half-migrations, restatement comments, and broad formatter/linter runs. Comment
-only non-obvious intent, invariants, compatibility, constraints, or tradeoffs.
-
-If verification fails, do root-cause analysis before test changes or rollback.
-Adjust only when cause and repair path are clear; label pre-existing failures.
-
-Do not auto-commit. Leave unstaged unless user asks or local instructions require
-a commit.
+Broad scopes need reconnaissance first: patch and verify one high-value coherent
+slice, then report remaining candidates.
 
 ## Closeout
 
