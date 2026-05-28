@@ -23,15 +23,16 @@ Clarify plain `refactor`, vague maintainability, or missing target. Do not use
 for implementation, fixes, reviews, formatting-only work, redesigns, or routine
 self-review.
 
-Status first. Same-file unrelated changes stop editing. Weak evidence needs
-approval. Always create a pre-edit rollback patch. Do not auto-commit unless
-asked or locally required.
+Status first. Same-file unrelated changes require an approved partial-scope plan
+or stop. Weak planned verification needs approval. Create a restorable pre-edit
+backup artifact. Follow repo-local commit rules; if none require a commit, leave
+changes unstaged unless asked.
 
 Read-only unless opted in: migrations, schemas/persistence, security/auth/
-billing/permissions/data-loss, concurrency, generated/vendor, manifests,
-external contracts, release/packaging, and binaries. Behavior change is not
-simplification; stop and label it `not a simplification: behavior change
-required`.
+billing/permissions/data-loss, concurrency, generated/vendor, dependency,
+package, plugin, app, project, or release manifests, external contracts,
+release/packaging, and binaries. Behavior change is not simplification; stop and
+label it `not a simplification: behavior change required`.
 
 Broad scopes need reconnaissance first: patch and verify one high-value coherent
 slice, then report remaining candidates.
@@ -42,5 +43,5 @@ Closeout: `What changed`, `Why this was the chosen slice`,
 `Behavior-preservation evidence`, `Verification performed`, `Files changed`,
 `Remaining risks`, `Commit readiness`, plus a copy-ready read-only same-machine
 Codex/Claude prompt with absolute paths/files, claim, evidence, commands/results,
-backup path, risks/exclusions, and blockers-first review. No
-rollback command.
+planned verification strength, observed evidence label, backup path,
+risks/exclusions, and blockers-first review. No rollback command.
