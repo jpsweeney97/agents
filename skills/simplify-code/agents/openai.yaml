@@ -1,4 +1,4 @@
 interface:
   display_name: "Simplify Code"
-  short_description: "Safely simplify scoped code"
-  default_prompt: "Use $simplify-code to simplify the targeted code while preserving behavior and reporting verification evidence."
+  short_description: "Safely simplify scoped code with lane checks"
+  default_prompt: "Use $simplify-code to simplify the targeted code while preserving behavior, selecting the correct safety lane, and reporting verification evidence."

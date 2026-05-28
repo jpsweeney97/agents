@@ -24,13 +24,22 @@ Clarify plain `refactor`, vague maintainability, or missing target. Do not use
 for implementation, fixes, reviews, formatting-only work, redesigns, or routine
 self-review.
 
-Status and applicable instructions first. Same-file unrelated changes require an
-approved partial-scope plan or stop. Weak planned verification needs approval.
-Create a secret-safe, restorable pre-edit backup artifact before editing. Follow
-repo-local commit rules; if none require a commit, leave changes unstaged unless
-asked.
+Status and applicable instructions first. Select either fast lane or full-safety
+lane before editing. Fast lane is only for clean tracked text files in a git repo
+with clean scoped pre-edit diff, `scripts/scoped_safety_scan.py` reporting
+`clean`, no protected/generated/vendor/secret-adjacent surface, small inspectable
+post-edit diff, and at least one runnable independent check. Fast lane uses the
+tracked git baseline as recovery and creates no backup artifact.
 
-Read-only unless explicitly opted in after the risk is named: migrations,
+Use full-safety lane for dirty or untracked files, non-git roots, broad scopes,
+protected surfaces, weak verification, generated/vendor files, secret-adjacent
+files, or unclear fast-lane eligibility. Same-file unrelated changes, weak
+planned verification, possible secret content, generated/binary overwrite risk,
+or protected-surface risk require approval or stop. Full-safety lane creates a
+secret-safe, restorable pre-edit backup artifact before editing.
+
+Read-only unless explicitly opted in after the exact risk property is named:
+migrations,
 schemas/persistence, security/auth/billing/permissions/data-loss, concurrency,
 generated/vendor, dependency, package, plugin, app, project, or release
 manifests, external contracts, release/packaging, and binaries. Naming one of
@@ -45,8 +54,10 @@ slice, then report remaining candidates.
 
 Closeout: `What changed`, `Why this was the chosen slice`,
 `Behavior-preservation evidence`, `Verification performed`, `Files changed`,
-`Remaining risks`, `Commit readiness`, plus a copy-ready read-only same-machine
-Codex/Claude prompt with absolute paths/files, claim, evidence, commands/results,
-planned verification strength, observed evidence label, backup path,
-risks/exclusions, and blockers-first review. Tiny low-risk changes may use compact
-entries, but do not omit the review prompt. No rollback command.
+`Remaining risks`, `Commit readiness`. Fast-lane closeout adds a compact review
+hook with absolute paths, behavior-preservation claim, command/result, and why
+fast-lane eligibility held. Full-safety closeout adds a copy-ready read-only
+same-machine Codex/Claude prompt with absolute paths/files, claim, evidence,
+commands/results, planned verification strength, observed evidence label, backup
+path, retention/cleanup expectation, risks/exclusions, and blockers-first review.
+No rollback command.
