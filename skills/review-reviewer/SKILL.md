@@ -1,0 +1,197 @@
+---
+name: review-reviewer
+description: >
+  Use when the user explicitly invokes `$review-reviewer` or asks to review,
+  adjudicate, or avoid rubber-stamping a supplied review, including PR review
+  feedback. Infer the original target from the review and immediate context,
+  read that target fresh, then produce independent issues, verdicts on each
+  review claim, missed issues, verification gaps, and an aggregate review
+  judgment. Do not use for first-pass artifact reviews, generic scrutiny,
+  implementation reviews, basic claim extraction, or follow-up fixes.
+---
+
+# Review Reviewer
+
+Adjudicate another review without rubber-stamping it. Treat the supplied review
+as allegations to test, not as authority or as an enemy to defeat.
+
+## Boundaries
+
+- Explicit-only: use this skill only when invoked as `$review-reviewer` or when
+  the user clearly asks to review a review, adjudicate review feedback, check
+  whether another reviewer is right, review PR review comments, or avoid
+  rubber-stamping a supplied review.
+- Required input: the supplied review. Do not require the user to also provide a
+  target path, PR, spec, or artifact; infer the target from the review and
+  immediate conversation context.
+- Non-trigger: ordinary critiques, first-pass reviews, implementation reviews,
+  "scrutinize this", "be adversarial", basic claim extraction, or implementation
+  follow-up without a supplied review to adjudicate.
+- Default to read-only. You may inspect files, diffs, git metadata, PR metadata,
+  docs, and run bounded non-mutating checks directly tied to a disputed claim.
+  Do not edit files, stage, commit, push, delete, install dependencies, sync
+  state, create tickets, run broad test suites, or implement fixes unless the
+  user explicitly widens scope after the adjudication.
+- Stop after the adjudication packet by default. Include terse dispositions and
+  next actions, but do not continue into fixes.
+
+## Anti-Anchoring Workflow
+
+1. Run a target-resolution prepass over the supplied review. Skim only for
+   locator facts: file paths, PR numbers, review or comment URLs, branch names,
+   commit SHAs, doc titles, issue IDs, quoted headings, artifact names, or
+   explicit target descriptions. Do not evaluate, summarize, or internalize
+   substantive review claims during this prepass.
+2. Use immediate conversation context, attached files, current repo/branch, and
+   explicitly mentioned PRs or paths only as locator evidence. If more than one
+   plausible target remains, output `needs-target` rather than guessing.
+3. Resolve and read the inferred target fresh. For PR reviews, bounded context
+   fetches are allowed when the review points to a PR, review, or comment:
+   relevant PR metadata, diff hunks, review comments, thread resolution state,
+   and commit SHAs needed for provenance. Do not broaden into full CI triage,
+   full PR review, or implementation.
+4. Record target provenance, including multiple targets when present. For PRs,
+   use a dual boundary when recoverable: the review snapshot for truth verdicts
+   and the current PR head for disposition.
+5. Form and write the independent assessment before adjudicating the review.
+   Include independent issues or state `no independent issues found`, plus the
+   basis read.
+6. Return to the review. Normalize compound review items into the smallest
+   meaningful factual, severity, or remedy claims. Preserve the parent review
+   item and assign stable IDs such as `R1`, `R1.a`, and `R1.b`.
+7. Adjudicate each normalized claim against inspected evidence. Deliberately
+   hunt for high-signal missed issues within the same inferred target(s),
+   evidence lanes, and apparent risk surface. Do not silently expand into a full
+   independent review.
+
+## Failure Modes
+
+- `needs-target`: target inference failed or found multiple plausible targets.
+  List locator facts found and do not adjudicate evidence-dependent claims.
+- `target-inaccessible`: the target is identifiable but inaccessible. List the
+  target locator and attempted read paths or checks. Only adjudicate claims that
+  can be settled from quoted evidence in the review; mark the rest
+  `needs-verification`.
+- `anchoring breach`: if you already absorbed substantive review claims before
+  reading the target, disclose this in `Target Provenance`, still perform the
+  independent assessment, and lower confidence in any `Missed Issues` claim. Do
+  not claim a fully fresh read.
+- If target resolution or target access fails, `Review Judgment` must be
+  `under-evidenced`. Do not call the review reliable without independent target
+  access.
+
+## Evidence Rules
+
+Evidence lanes:
+
+- `artifact evidence`: the reviewed artifact itself.
+- `authority evidence`: governing specs, docs, requirements, or policies the
+  artifact cites or is governed by.
+- `live evidence`: current code, tests, runtime behavior, repo state, PR state,
+  or command output.
+
+Authority order:
+
+- For truth verdicts on PR review claims, prefer the original review snapshot
+  when recoverable.
+- For disposition, prefer current PR head or current target state.
+- Then use governing specs and docs, then local code/tests/runtime evidence,
+  then reviewer quotations as lowest authority unless independently verified.
+- When sources conflict, name the conflict and do not upgrade a claim past what
+  inspected evidence supports.
+
+Each claim verdict needs a compact evidence pointer: file/path and line when
+available, PR/comment/commit/diff hunk when relevant, command output summary, or
+named doc/section for non-code artifacts. If no evidence pointer can be given,
+the claim should usually be `needs-verification`, unless it is challenged
+because the cited evidence is absent or inaccessible.
+
+## Verdicts And Dispositions
+
+Verdict says whether the review claim holds:
+
+- `confirmed`: the material claim and implied consequence both hold on inspected
+  evidence.
+- `challenged`: the core fact is wrong, the severity is materially inflated, the
+  recommendation does not follow, the claim is stale, or the cited evidence is
+  absent or contradicted.
+- `needs-verification`: available evidence cannot settle the claim; name the
+  exact check or artifact access that would.
+
+Disposition says what to do next:
+
+- `act`: address the confirmed issue now.
+- `defer`: real issue, but outside the current review scope or not urgent here.
+- `reject`: do not act on this review claim.
+- `verify-first`: perform the named check before accepting or rejecting it.
+
+Include one terse action sentence with each disposition, such as `act: patch the
+spec contradiction`, `reject: no change; review overstates the consequence`,
+`verify-first: inspect PR diff against the cited requirement`, or `defer: real
+but outside this review's scope`.
+
+## Output
+
+Use this fixed compact packet, in order:
+
+### Target Provenance
+
+- Inferred target(s), source of inference, resolved path/PR/branch/doc, current
+  commit or timestamp when available, dirty-state or drift notes when relevant.
+- For PRs, include `review snapshot` and `current snapshot` when recoverable.
+- For multiple targets, list `Target A`, `Target B`, etc. Each claim verdict
+  should carry its target ID.
+- Include `needs-target`, `target-inaccessible`, or `anchoring breach` when
+  applicable.
+
+### Independent Assessment
+
+- Basis read: target artifact(s), authority docs, and live evidence inspected.
+- Independent issues found before review adjudication, with evidence pointers;
+  or `no independent issues found`.
+
+### Review Claim Verdicts
+
+For each normalized claim:
+
+- `ID`: stable parent/child ID such as `R1` or `R1.a`.
+- `Target`: target ID or target name.
+- `Source`: short pointer to the original review item, avoiding long quotes.
+- `Claim`: concise paraphrase without changing scope.
+- `Verdict`: `confirmed`, `challenged`, or `needs-verification`.
+- `Evidence`: compact evidence pointer and evidence lane.
+- `Reasoning`: why the evidence supports the verdict, including whether the
+  concern is valid but overstated.
+- `Disposition`: `act`, `defer`, `reject`, or `verify-first` plus one terse
+  action sentence.
+
+### Missed Issues
+
+High-signal issues the supplied review missed, bounded to the inferred target(s)
+and inspected evidence lanes. Include evidence pointers. If none, say so.
+
+### Verification Gaps
+
+Claims, evidence lanes, target snapshots, or authority docs that could not be
+settled, with the exact check or access needed.
+
+### Review Judgment
+
+Use one label:
+
+- `reliable`: mostly correct, well-calibrated, and materially complete for the
+  inspected target and evidence lanes.
+- `partially reliable`: useful but mixed, incomplete, stale in places, or
+  unevenly calibrated.
+- `overreaching`: repeatedly overstates facts, severity, scope, or remedies.
+- `underpowered`: misses important risks, lacks evidence, or avoids necessary
+  verification.
+- `under-evidenced`: target resolution or access failed, or the evidence base is
+  too thin for a reliability judgment.
+
+Add a short rationale covering framing, severity calibration, and coverage.
+
+### Recommended Next Step
+
+One concise next action. Do not provide a detailed implementation plan unless
+the user explicitly asks for follow-through.
