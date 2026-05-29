@@ -33,10 +33,11 @@ as allegations to test, not as authority or as an enemy to defeat.
   claim-review skills only when the user asks for itemized claim validation
   against a current snapshot without the broader review-reviewer packet.
 - Default to read-only. You may inspect files, diffs, git metadata, PR metadata,
-  docs, and run bounded non-mutating checks directly tied to a disputed claim.
-  Do not edit files, stage, commit, push, delete, install dependencies, sync
-  state, create tickets, run broad test suites, or implement fixes unless the
-  user explicitly widens scope after the adjudication.
+  docs, and run bounded non-mutating checks directly tied to the inferred
+  target, a disputed claim, or a bounded independent or missed issue. Do not
+  edit files, stage, commit, push, delete, install dependencies, sync state,
+  create tickets, run broad test suites, or implement fixes unless the user
+  explicitly widens scope after the adjudication.
 - Stop after the adjudication packet by default. Include terse dispositions and
   next actions, but do not continue into fixes.
 
@@ -62,9 +63,13 @@ as allegations to test, not as authority or as an enemy to defeat.
 5. Record target provenance, including multiple targets when present. For PRs,
    use a dual boundary when recoverable: the review snapshot for truth verdicts
    and the current PR head for disposition. If the original review snapshot is
-   unavailable, historical truth claims cannot be `confirmed` or `challenged`
-   from current state alone; mark them `needs-verification` and limit any
-   current-state finding to disposition.
+   unavailable after available non-mutating recovery checks, historical truth
+   claims cannot be `confirmed` or `challenged` from current state alone; mark
+   them `needs-verification` and limit any current-state finding to disposition.
+   Minimum PR recovery checks: review/comment URL or ID, review timestamp, cited
+   commit SHA, PR head/base refs at review time, diff hunk or outdated-thread
+   metadata, branch names, and local git history or PR metadata when available.
+   Record which checks were attempted.
 6. Set a bounded review scope before the independent assessment. If the target is
    broad, inspect only the resolved target surface, locator-touched files or
    hunks, governing requirement sections, and directly adjacent failure modes.
@@ -89,9 +94,11 @@ as allegations to test, not as authority or as an enemy to defeat.
 - `missing-review`: no supplied review is present. Ask for the review text and
   stop instead of inferring a review from previous discussion.
 - `target-inaccessible`: the target is identifiable but inaccessible. List the
-  target locator and attempted read paths or checks. Only adjudicate claims that
-  can be settled from quoted evidence in the review; mark the rest
-  `needs-verification`.
+  target locator and attempted read paths or checks. Only review-internal claims
+  that can be settled from the supplied review text itself may receive a truth
+  verdict. Target-dependent truth claims backed only by reviewer quotations stay
+  `needs-verification`; the quote can identify the claim, but it is not artifact
+  evidence.
 - `anchoring breach`: normal locator exposure is not a breach. If you evaluated,
   summarized, ranked, or adjudicated substantive review claims before reading
   the target, disclose this in `Target Provenance`, still perform the independent
@@ -121,6 +128,9 @@ Authority order:
   then reviewer quotations as lowest authority unless independently verified.
 - When sources conflict, name the conflict and do not upgrade a claim past what
   inspected evidence supports.
+- Reviewer quotations can establish what the review claimed, but they cannot
+  confirm target-dependent truth without independent artifact, authority, or
+  live evidence.
 
 Each claim verdict needs a compact evidence pointer: file/path and line when
 available, PR/comment/commit/diff hunk when relevant, command output summary, or
@@ -176,6 +186,8 @@ Use this fixed compact packet, in order:
 - Inferred target(s), source of inference, resolved path/PR/branch/doc, current
   commit or timestamp when available, dirty-state or drift notes when relevant.
 - For PRs, include `review snapshot` and `current snapshot` when recoverable.
+  If a review snapshot is unavailable, list the snapshot recovery checks
+  attempted before using that fallback.
 - Include locator facts recorded before target reading, an anti-anchoring note,
   and `Bounded Review Scope` when the target is broader than the inspected
   surface.
