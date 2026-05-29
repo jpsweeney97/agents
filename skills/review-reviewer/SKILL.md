@@ -28,6 +28,10 @@ as allegations to test, not as authority or as an enemy to defeat.
   "scrutinize this", "be adversarial", "check whether this review is right"
   without `$review-reviewer`, basic claim extraction, or implementation follow-up
   without a supplied review to adjudicate.
+- Relationship to `$review-claude-claims`: use this skill for second-pass
+  review adjudication plus bounded independent target assessment. Use narrower
+  claim-review skills only when the user asks for itemized claim validation
+  against a current snapshot without the broader review-reviewer packet.
 - Default to read-only. You may inspect files, diffs, git metadata, PR metadata,
   docs, and run bounded non-mutating checks directly tied to a disputed claim.
   Do not edit files, stage, commit, push, delete, install dependencies, sync
@@ -38,33 +42,41 @@ as allegations to test, not as authority or as an enemy to defeat.
 
 ## Anti-Anchoring Workflow
 
-1. Run a target-resolution prepass over the supplied review. Record locator
+1. If no review text was supplied, output `missing-review`, ask for the review,
+   and stop. Do not infer a review from surrounding chatter.
+2. Run a target-resolution prepass over the supplied review. Record locator
    facts only: file paths, PR numbers, review or comment URLs, branch names,
    commit SHAs, doc titles, issue IDs, quoted headings, artifact names, or
    explicit target descriptions. Put those locator facts in `Target Provenance`
-   before writing any claim assessment. Do not evaluate, summarize, or
-   internalize substantive review claims during this prepass.
-2. Use immediate conversation context, attached files, current repo/branch, and
+   before writing any claim assessment. This is an anchoring mitigation, not a
+   pristine blind read: the review has been seen, so independence must be shown
+   through target-first evidence and recorded sequencing.
+3. Use immediate conversation context, attached files, current repo/branch, and
    explicitly mentioned PRs or paths only as locator evidence. If more than one
    plausible target remains, output `needs-target` rather than guessing.
-3. Resolve and read the inferred target fresh. For PR reviews, bounded context
+4. Resolve and read the inferred target fresh. For PR reviews, bounded context
    fetches are allowed when the review points to a PR, review, or comment:
    relevant PR metadata, diff hunks, review comments, thread resolution state,
    and commit SHAs needed for provenance. Do not broaden into full CI triage,
    full PR review, or implementation.
-4. Record target provenance, including multiple targets when present. For PRs,
+5. Record target provenance, including multiple targets when present. For PRs,
    use a dual boundary when recoverable: the review snapshot for truth verdicts
    and the current PR head for disposition. If the original review snapshot is
    unavailable, historical truth claims cannot be `confirmed` or `challenged`
    from current state alone; mark them `needs-verification` and limit any
    current-state finding to disposition.
-5. Form and write the independent assessment before adjudicating the review.
+6. Set a bounded review scope before the independent assessment. If the target is
+   broad, inspect only the resolved target surface, locator-touched files or
+   hunks, governing requirement sections, and directly adjacent failure modes.
+   State the bound in `Target Provenance` and do not imply a complete target or
+   PR review unless the inspected scope actually supports that.
+7. Form and write the independent assessment before adjudicating the review.
    Include independent issues or state `no independent issues found`, plus the
    basis read.
-6. Return to the review. Normalize compound review items into the smallest
+8. Return to the review. Normalize compound review items into the smallest
    meaningful factual, severity, or remedy claims. Preserve the parent review
    item and assign stable IDs such as `R1`, `R1.a`, and `R1.b`.
-7. Adjudicate each normalized claim against inspected evidence. Deliberately
+9. Adjudicate each normalized claim against inspected evidence. Deliberately
    hunt for high-signal missed issues only in concrete adjacent surfaces:
    claim-touched files or hunks, governing requirement sections, and directly
    adjacent failure modes. Do not inspect unrelated PR files, broaden into full
@@ -74,14 +86,17 @@ as allegations to test, not as authority or as an enemy to defeat.
 
 - `needs-target`: target inference failed or found multiple plausible targets.
   List locator facts found and do not adjudicate evidence-dependent claims.
+- `missing-review`: no supplied review is present. Ask for the review text and
+  stop instead of inferring a review from previous discussion.
 - `target-inaccessible`: the target is identifiable but inaccessible. List the
   target locator and attempted read paths or checks. Only adjudicate claims that
   can be settled from quoted evidence in the review; mark the rest
   `needs-verification`.
-- `anchoring breach`: if you already absorbed substantive review claims before
-  reading the target, disclose this in `Target Provenance`, still perform the
-  independent assessment, and lower confidence in any `Missed Issues` claim. Do
-  not claim a fully fresh read.
+- `anchoring breach`: normal locator exposure is not a breach. If you evaluated,
+  summarized, ranked, or adjudicated substantive review claims before reading
+  the target, disclose this in `Target Provenance`, still perform the independent
+  assessment, and lower confidence in any `Missed Issues` claim. Do not claim a
+  fully fresh read.
 - If target resolution or target access fails, `Review Judgment` must be
   `under-evidenced`. Do not call the review reliable without independent target
   access.
@@ -115,15 +130,23 @@ because the cited evidence is absent or inaccessible.
 
 ## Verdicts And Dispositions
 
-Verdict says whether the review claim holds:
+Truth verdict says whether the review claim held at its proper evidence
+boundary, usually the original review snapshot for PR comments:
 
 - `confirmed`: the material claim and implied consequence both hold on inspected
   evidence.
 - `challenged`: the core fact is wrong, the severity is materially inflated, the
-  recommendation does not follow, the claim is stale, or the cited evidence is
+  recommendation does not follow at the truth boundary, or the cited evidence is
   absent or contradicted.
 - `needs-verification`: available evidence cannot settle the claim; name the
   exact check or artifact access that would.
+
+Staleness is not itself a truth verdict. If a claim was true at the review
+snapshot but no longer applies at current head, keep the truth verdict
+`confirmed` and use disposition such as `reject` or `defer` with a stale/current
+note. If the review snapshot is unavailable and only current state is known, use
+`needs-verification` for historical truth and let current evidence inform only
+the disposition.
 
 Disposition says what to do next:
 
@@ -153,10 +176,13 @@ Use this fixed compact packet, in order:
 - Inferred target(s), source of inference, resolved path/PR/branch/doc, current
   commit or timestamp when available, dirty-state or drift notes when relevant.
 - For PRs, include `review snapshot` and `current snapshot` when recoverable.
+- Include locator facts recorded before target reading, an anti-anchoring note,
+  and `Bounded Review Scope` when the target is broader than the inspected
+  surface.
 - For multiple targets, list `Target A`, `Target B`, etc. Each claim verdict
   should carry its target ID.
-- Include `needs-target`, `target-inaccessible`, or `anchoring breach` when
-  applicable.
+- Include `needs-target`, `missing-review`, `target-inaccessible`, or
+  `anchoring breach` when applicable.
 
 ### Independent Assessment
 
@@ -172,7 +198,7 @@ For each normalized claim:
 - `Target`: target ID or target name.
 - `Source`: short pointer to the original review item, avoiding long quotes.
 - `Claim`: concise paraphrase without changing scope.
-- `Verdict`: `confirmed`, `challenged`, or `needs-verification`.
+- `Truth Verdict`: `confirmed`, `challenged`, or `needs-verification`.
 - `Evidence`: compact evidence pointer and evidence lane.
 - `Reasoning`: why the evidence supports the verdict, including whether the
   concern is valid but overstated.
