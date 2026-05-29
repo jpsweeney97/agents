@@ -75,20 +75,24 @@ Validate the exact surfaces you edited.
 6. If validation fails or is blocked, do not claim the change works and do not
    create the automatic local commit.
 
+`plugin-eval` was intentionally uninstalled for this repo and should not be
+used. Do not run `plugin-eval`, repair its wrapper, reinstall the plugin, or
+treat its absence as an environment problem. If older notes or memories mention
+`plugin-eval` as part of local skill validation, treat those notes as stale for
+this repo.
+
 Useful checks:
 
 ```bash
 ruby -ryaml -e 'YAML.load_file(ARGV[0])' skills/<skill>/agents/openai.yaml
-plugin-eval analyze skills/<skill> --format markdown
+python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/<skill>
+git diff --check -- skills/<skill>
 ```
 
-`plugin-eval analyze` is advisory for high-stakes skills when the extra budget is
-intentional. Do not let static budget findings alone block a local commit for a
-safety-critical or high-rigor skill after the user accepts the cost and the exact
-edited surfaces pass their functional, schema, reference, and behavior-contract
-checks. Do not waive loader errors, invalid YAML, missing referenced files, test
-failures, script/runtime errors, or behavior-contract failures; report any waived
-static budget finding in closeout.
+For skill behavior changes, supplement static checks with a realistic dry run or
+forward test when practical. Do not waive loader errors, invalid YAML, missing
+referenced files, test failures, script/runtime errors, or behavior-contract
+failures.
 
 ## Marketplace Metadata
 
