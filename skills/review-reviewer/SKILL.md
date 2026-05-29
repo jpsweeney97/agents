@@ -1,13 +1,14 @@
 ---
 name: review-reviewer
 description: >
-  Use when the user explicitly invokes `$review-reviewer` or asks to review,
+  Use only when the user explicitly invokes `$review-reviewer` to review,
   adjudicate, or avoid rubber-stamping a supplied review, including PR review
   feedback. Infer the original target from the review and immediate context,
   read that target fresh, then produce independent issues, verdicts on each
   review claim, missed issues, verification gaps, and an aggregate review
   judgment. Do not use for first-pass artifact reviews, generic scrutiny,
-  implementation reviews, basic claim extraction, or follow-up fixes.
+  implementation reviews, basic claim extraction, natural-language review
+  requests, or follow-up fixes.
 ---
 
 # Review Reviewer
@@ -17,16 +18,16 @@ as allegations to test, not as authority or as an enemy to defeat.
 
 ## Boundaries
 
-- Explicit-only: use this skill only when invoked as `$review-reviewer` or when
-  the user clearly asks to review a review, adjudicate review feedback, check
-  whether another reviewer is right, review PR review comments, or avoid
-  rubber-stamping a supplied review.
+- Explicit-only: use this skill only when invoked as `$review-reviewer`. Do not
+  silently route natural-language requests here while `agents/openai.yaml` has
+  `allow_implicit_invocation: false`.
 - Required input: the supplied review. Do not require the user to also provide a
   target path, PR, spec, or artifact; infer the target from the review and
   immediate conversation context.
 - Non-trigger: ordinary critiques, first-pass reviews, implementation reviews,
-  "scrutinize this", "be adversarial", basic claim extraction, or implementation
-  follow-up without a supplied review to adjudicate.
+  "scrutinize this", "be adversarial", "check whether this review is right"
+  without `$review-reviewer`, basic claim extraction, or implementation follow-up
+  without a supplied review to adjudicate.
 - Default to read-only. You may inspect files, diffs, git metadata, PR metadata,
   docs, and run bounded non-mutating checks directly tied to a disputed claim.
   Do not edit files, stage, commit, push, delete, install dependencies, sync
@@ -37,11 +38,12 @@ as allegations to test, not as authority or as an enemy to defeat.
 
 ## Anti-Anchoring Workflow
 
-1. Run a target-resolution prepass over the supplied review. Skim only for
-   locator facts: file paths, PR numbers, review or comment URLs, branch names,
+1. Run a target-resolution prepass over the supplied review. Record locator
+   facts only: file paths, PR numbers, review or comment URLs, branch names,
    commit SHAs, doc titles, issue IDs, quoted headings, artifact names, or
-   explicit target descriptions. Do not evaluate, summarize, or internalize
-   substantive review claims during this prepass.
+   explicit target descriptions. Put those locator facts in `Target Provenance`
+   before writing any claim assessment. Do not evaluate, summarize, or
+   internalize substantive review claims during this prepass.
 2. Use immediate conversation context, attached files, current repo/branch, and
    explicitly mentioned PRs or paths only as locator evidence. If more than one
    plausible target remains, output `needs-target` rather than guessing.
@@ -52,7 +54,10 @@ as allegations to test, not as authority or as an enemy to defeat.
    full PR review, or implementation.
 4. Record target provenance, including multiple targets when present. For PRs,
    use a dual boundary when recoverable: the review snapshot for truth verdicts
-   and the current PR head for disposition.
+   and the current PR head for disposition. If the original review snapshot is
+   unavailable, historical truth claims cannot be `confirmed` or `challenged`
+   from current state alone; mark them `needs-verification` and limit any
+   current-state finding to disposition.
 5. Form and write the independent assessment before adjudicating the review.
    Include independent issues or state `no independent issues found`, plus the
    basis read.
@@ -60,9 +65,10 @@ as allegations to test, not as authority or as an enemy to defeat.
    meaningful factual, severity, or remedy claims. Preserve the parent review
    item and assign stable IDs such as `R1`, `R1.a`, and `R1.b`.
 7. Adjudicate each normalized claim against inspected evidence. Deliberately
-   hunt for high-signal missed issues within the same inferred target(s),
-   evidence lanes, and apparent risk surface. Do not silently expand into a full
-   independent review.
+   hunt for high-signal missed issues only in concrete adjacent surfaces:
+   claim-touched files or hunks, governing requirement sections, and directly
+   adjacent failure modes. Do not inspect unrelated PR files, broaden into full
+   PR review, or expand beyond the inferred target unless the user asks.
 
 ## Failure Modes
 
@@ -93,7 +99,8 @@ Evidence lanes:
 Authority order:
 
 - For truth verdicts on PR review claims, prefer the original review snapshot
-  when recoverable.
+  when recoverable. If it is not recoverable, historical truth claims are
+  `needs-verification`; current state may only support a current disposition.
 - For disposition, prefer current PR head or current target state.
 - Then use governing specs and docs, then local code/tests/runtime evidence,
   then reviewer quotations as lowest authority unless independently verified.
@@ -130,6 +137,13 @@ spec contradiction`, `reject: no change; review overstates the consequence`,
 `verify-first: inspect PR diff against the cited requirement`, or `defer: real
 but outside this review's scope`.
 
+For independent and missed issues, use severity separately from disposition:
+
+- `blocker`: likely to break a material requirement, release, data integrity,
+  security boundary, or user-visible behavior in the reviewed scope.
+- `should-fix`: real issue with bounded impact or meaningful maintenance risk.
+- `note`: true observation that does not require immediate action.
+
 ## Output
 
 Use this fixed compact packet, in order:
@@ -147,8 +161,8 @@ Use this fixed compact packet, in order:
 ### Independent Assessment
 
 - Basis read: target artifact(s), authority docs, and live evidence inspected.
-- Independent issues found before review adjudication, with evidence pointers;
-  or `no independent issues found`.
+- Independent issues found before review adjudication, with evidence pointers,
+  severity, and disposition; or `no independent issues found`.
 
 ### Review Claim Verdicts
 
@@ -168,7 +182,8 @@ For each normalized claim:
 ### Missed Issues
 
 High-signal issues the supplied review missed, bounded to the inferred target(s)
-and inspected evidence lanes. Include evidence pointers. If none, say so.
+and inspected evidence lanes. Include evidence pointers, severity, and
+disposition. If none, say so.
 
 ### Verification Gaps
 
