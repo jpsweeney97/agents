@@ -14,8 +14,10 @@ Do not perform the review yourself unless the user asks separately.
 ## Boundaries
 
 - Output one copyable prompt for Claude Code.
-- Assume Claude Code can access the same local files, shell, and GitHub
-  authorization as Codex unless the user says otherwise.
+- Do not assume Claude Code can access the same local files, shell, GitHub
+  authorization, branch, or PR revision as Codex. The generated prompt must tell
+  Claude to verify repo root, PR URL, PR head SHA, local `HEAD`, and GitHub
+  access before reviewing.
 - Prefer live repo and PR context over conversation history.
 - Do not edit files, stage, commit, push, or change the PR.
 - The generated Claude prompt must also be review-only: tell Claude Code not to
@@ -26,6 +28,22 @@ Do not perform the review yourself unless the user asks separately.
   ask one targeted question before drafting the prompt.
 - If repo or GitHub context is unavailable, say exactly what is missing and ask
   one targeted question instead of drafting a confident prompt from partial data.
+
+## Review-Family Routing
+
+Explicit review-family invocation wins, including namespaced plugin forms such
+as `review-family:request-claude-pr-review`.
+
+- Use this skill only to draft a prompt for Claude Code to review a GitHub PR.
+  Do not perform the review yourself unless the user separately asks.
+- Use `implementation-review` when Codex should review completed code against a
+  plan/spec directly; use `scrutinize` for broad adversarial critique;
+  `system-design-review` for architecture tradeoffs; `review-reviewer` for
+  supplied-review adjudication; and `review-claude-claims` for itemized
+  pasted-claim validation.
+- If this skill is not the right review-family target, name the better skill
+  and switch only when invocation rules allow it; otherwise ask one routing
+  question.
 
 ## Context To Gather
 
@@ -108,6 +126,9 @@ Boundary:
   GitHub, close/reopen the PR, or mutate repository or PR state.
 - If repo, PR, revision, or authority-doc access is missing, stop and report the
   gap before reviewing.
+- Before reviewing, verify repo root, PR URL, PR head SHA, local HEAD, and
+  GitHub access. If any value differs from this prompt, report the mismatch
+  before findings.
 
 Local state:
 - Dirty paths: <none/list>

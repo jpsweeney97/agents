@@ -41,6 +41,25 @@ as allegations to test, not as authority or as an enemy to defeat.
 - Stop after the adjudication packet by default. Include terse dispositions and
   next actions, but do not continue into fixes.
 
+## Review-Family Routing
+
+Explicit review-family invocation wins, including namespaced plugin forms such
+as `review-family:review-reviewer`.
+
+- Use this skill only when explicitly invoked to adjudicate a supplied review,
+  including PR review feedback, and to produce an independent bounded target
+  assessment plus verdicts on the review's claims.
+- Use `review-claude-claims` instead for narrower itemized claim validation
+  against a current snapshot without the broader independent assessment and
+  review-judgment packet.
+- Use `implementation-review` for completed code against a plan/spec,
+  `scrutinize` for first-pass adversarial artifact critique,
+  `system-design-review` for architecture tradeoffs, and
+  `request-claude-pr-review` for drafting a Claude PR-review prompt.
+- If the user asks in natural language whether a review is right without
+  invoking this skill, do not silently run the full packet; answer normally or
+  ask whether they want `$review-reviewer`.
+
 ## Anti-Anchoring Workflow
 
 1. If no review text was supplied, output `missing-review`, ask for the review,

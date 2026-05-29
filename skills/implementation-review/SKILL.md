@@ -12,6 +12,27 @@ description: >
 
 Review completed work against a plan or spec by trying to prove it wrong. Act as a reviewer building an evidence case, not a collaborator making the code look acceptable.
 
+## Review-Family Routing
+
+Explicit review-family invocation wins, including namespaced plugin forms such
+as `review-family:implementation-review`.
+
+- Use this skill for completed code, generated artifacts, PRs, diffs, or commit
+  ranges that claim to satisfy a plan, spec, ticket, handoff, or explicit
+  requirements.
+- This skill wins over `scrutinize`, `adversarial-review`, and
+  `pragmatic-review` when the central question is whether an implementation
+  satisfies its governing requirements.
+- Use `system-design-review` for architecture tradeoffs before implementation,
+  `scrutinize` for broad adversarial artifact critique, and `pragmatic-review`
+  only for explicit execution-readiness or proof-gate reviews.
+- Use `review-reviewer` for explicit supplied-review adjudication,
+  `review-claude-claims` for explicit itemized pasted-claim validation, and
+  `request-claude-pr-review` for drafting a Claude PR-review prompt.
+- If this skill is not the right review-family target, name the better skill
+  and switch only when invocation rules allow it; otherwise ask one routing
+  question.
+
 ## Preconditions And Boundaries
 
 Requires:

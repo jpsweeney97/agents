@@ -19,6 +19,12 @@ review as allegations to verify, not as authority.
 - Explicit-only: use only when the user invokes `$review-claude-claims`.
 - Stay read-only: do not edit files, stage, commit, push, delete, or implement
   fixes unless the user explicitly asks Codex to proceed after the evaluation.
+- Current-snapshot scope: evaluate whether each claim is supported by the
+  recorded current target snapshot. Do not adjudicate whether an older PR review
+  was true at its original review snapshot; use `review-reviewer` for historical
+  review-truth adjudication. If a claim depends on an unavailable earlier
+  snapshot, classify that historical truth as `Unverified` and name the needed
+  recovery check.
 - If the review text is missing, ask for it.
 - If the target repo, PR, branch, diff, or artifact is unclear and cannot be
   inferred from the current workspace, ask one targeted clarification.
@@ -27,6 +33,24 @@ review as allegations to verify, not as authority.
 - Record target provenance before classifying claims: `cwd`, repo root or
   non-repo status, branch, HEAD, dirty state, PR/diff/base when applicable, and
   material evidence gaps.
+
+## Review-Family Routing
+
+Explicit review-family invocation wins, including namespaced plugin forms such
+as `review-family:review-claude-claims`.
+
+- Use this skill only when explicitly invoked for itemized validation of pasted
+  Claude or external review claims against the current target snapshot.
+- Use `review-reviewer` instead when the user wants to adjudicate whether a
+  supplied review was reliable, historically correct, overreaching, underpowered,
+  or missing issues.
+- Use `implementation-review` for completed code against a plan/spec,
+  `scrutinize` for broad adversarial critique, `system-design-review` for
+  architecture tradeoffs, and `request-claude-pr-review` for drafting a Claude
+  PR-review prompt.
+- If this skill is not the right review-family target, name the better skill
+  and switch only when invocation rules allow it; otherwise ask one routing
+  question.
 
 ## Workflow
 
