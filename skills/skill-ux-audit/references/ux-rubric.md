@@ -58,6 +58,18 @@ Useful modifiers include:
 
 Modifiers must not bypass protected safety, evidence, or approval gates.
 
+When auditing `skill-ux-audit` itself or applying this rubric to another skill,
+check whether modifiers have concrete behavior:
+
+- `quick` narrows inspection and labels skipped surfaces.
+- `targeted` names the inspected surface and boundary.
+- `exhaustive` adds an inspect-or-exclude coverage ledger.
+- `with verification` runs only focused safe checks.
+- `save report` writes only to an explicit or locally conventional path.
+- `read-only` blocks edits.
+- `apply accepted plan` applies only `Safe UX` items unless specific
+  `Contract-risky` items are approved.
+
 ## Interaction Fit
 
 Check whether the skill's interaction pattern matches the job:
@@ -79,7 +91,8 @@ Check whether another Codex instance can execute the desired UX reliably:
 - Defaults cover omitted target, scope, verification, artifact, and mutation
   choices.
 - Stop conditions are explicit and cheap to follow.
-- References are loaded only when needed and every referenced path exists.
+- References and behavior-shaping nearby files are loaded only when needed, and
+  every referenced path exists.
 - Examples show realistic low-friction prompts and expected behavior.
 - Validation instructions match the local repo's real tools.
 
@@ -108,10 +121,15 @@ Use this shape for each finding:
 ```markdown
 <rank>. <change> (Safe UX|Contract-risky)
 Why it helps: <human-readable UX improvement>
-Evidence: <specific observed section or missing behavior>
+Evidence: <file:line, file section, or not inspected + reason>
 Rigor guardrail: <protected behavior that must remain true>
 Apply scope: <files or sections likely touched>
 ```
+
+Evidence must be specific enough that the user can verify the claim cheaply. Use
+file/line evidence when available, a named section when line numbers are not
+available, or `not inspected` when the claim depends on a skipped surface. Do
+not use vague impressions as evidence.
 
 Mark a change `Contract-risky` when it touches trigger scope, non-trigger
 boundaries, destructive-action gates, evidence standards, validation ladders,

@@ -14,9 +14,10 @@ User: Audit the UX of skills/drift-audit.
 - Infer `skills/drift-audit` as the target skill.
 - Stay read-only because the user asked for an audit, not implementation.
 - Read the target `SKILL.md`, `agents/openai.yaml`, and relevant referenced
-  report/example files as needed.
+  or behavior-shaping nearby report/example files as needed.
 - Produce a concise `Result Brief` before any rubric detail.
-- Recommend 3-5 ranked UX improvements with compact evidence notes.
+- Recommend 3-5 ranked UX improvements with compact evidence notes that cite a
+  file/line, named section, or explicit `not inspected` label.
 - Label changes that touch triggers, evidence rules, validation, authority,
   safety, or mutation permissions as `Contract-risky`.
 - Preserve the target skill's rigor and quality requirements; do not suggest
@@ -24,3 +25,11 @@ User: Audit the UX of skills/drift-audit.
   to shorten the report.
 - Put optional rubric coverage or skipped-surface notes under `Details` only
   when they materially affect confidence.
+
+## Modifier Checks
+
+- `quick`: narrows the read set and labels skipped surfaces.
+- `targeted: output readability`: limits the audit to that surface and states
+  the boundary.
+- `apply accepted plan`: applies only `Safe UX` items unless specific
+  `Contract-risky` items are explicitly approved.

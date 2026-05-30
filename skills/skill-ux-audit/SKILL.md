@@ -34,6 +34,31 @@ lightweight forward-test shape after behavior-contract changes.
 - Ask only when the target skill is unclear or an apply request would touch a
   protected surface without explicit approval.
 
+## Mode Modifiers
+
+Honor compact modifiers when the user includes them:
+
+- `quick`: inspect `SKILL.md`, `agents/openai.yaml` when present, and the top
+  output/defaults surfaces. Read only the referenced or nearby behavior-shaping
+  files needed for the top 3 opportunities. Label skipped surfaces as
+  `not inspected`.
+- `targeted: <surface>`: inspect only the named UX surface, claim, file class,
+  or output path plus the files needed to support or contradict it. State the
+  targeted boundary in the report.
+- `exhaustive`: enumerate the target skill bundle and either inspect or
+  explicitly exclude every file class. Put the coverage ledger under `Details`.
+- `with verification`: run focused safe validation or dry-run checks that
+  directly support the audit or applied edit. Do not install dependencies,
+  mutate caches, run broad suites, or run unavailable tooling.
+- `save report`: write the final audit report only when the user supplies an
+  output path or the local repo has an obvious report convention. Otherwise ask
+  for the path before writing.
+- `read-only`: force audit-only behavior. Do not edit target files or apply a
+  plan, even if the request also discusses possible changes.
+- `apply accepted plan`: apply only `Safe UX` items from the accepted plan.
+  Apply `Contract-risky` items only when the user explicitly approves those
+  named items.
+
 ## Target And Context
 
 - If the user names a skill path, use that path as the target.
@@ -41,8 +66,10 @@ lightweight forward-test shape after behavior-contract changes.
   as the target unless the request is explicitly file-scoped.
 - If the current directory is a skill directory and no target is named, infer it
   as the target.
-- Inspect `SKILL.md`, `agents/openai.yaml` when present, and directly referenced
-  `references/` or `examples/` files needed to understand the output contract.
+- Inspect `SKILL.md`, `agents/openai.yaml` when present, and referenced or
+  behavior-shaping nearby files needed to understand the UX contract. Nearby
+  files include examples, references, report contracts, rubrics, and scripts
+  whose names or references indicate they affect skill behavior.
 - Avoid broad repo scans unless the user asks for a cross-skill audit.
 
 ## Safe UX Surfaces
@@ -87,7 +114,9 @@ behavior contract, so the user must see and approve that risk before edits.
    first-screen readability, visible assumptions, user control, interaction fit,
    safe defaults, and preserved rigor.
 4. Produce 3-5 ranked opportunities. Each opportunity must include a compact
-   evidence note from the target skill and a rigor guardrail.
+   evidence note from the target skill and a rigor guardrail. Evidence must be a
+   file path plus line number when available, a named file plus section heading,
+   or an explicit `not inspected` label with the reason.
 5. Separate safe UX changes from `Contract-risky` changes.
 6. In apply mode, re-read the live files before editing, keep changes scoped, and
    preserve protected surfaces unless the user has explicitly approved the
@@ -95,7 +124,8 @@ behavior contract, so the user must see and approve that risk before edits.
 7. After edits, validate the edited skill surfaces using the local repo's
    validation path. At minimum, parse changed YAML/frontmatter, check referenced
    paths, run the available skill validator when present, run whitespace checks,
-   and do a realistic dry run when practical.
+   and do a realistic dry run when practical. When the repo supplies concrete
+   validation commands, run or report those commands instead of generic labels.
 
 ## Default Audit Report
 
@@ -110,7 +140,7 @@ Bottom Line: <one-sentence UX diagnosis>
 Top Opportunities:
 1. <change> (Safe UX|Contract-risky)
    Why it helps: <user-visible improvement>
-   Evidence: <specific file/section signal>
+   Evidence: <file:line, file section, or not inspected + reason>
    Rigor guardrail: <what must remain true>
 
 Next Step: <apply plan, ask for approval, or no-op>
