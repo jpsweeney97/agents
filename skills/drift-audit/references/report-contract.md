@@ -2,31 +2,22 @@
 
 Use this contract for every `drift-audit` report. The report can be concise, but it must preserve the named sections and evidence boundaries below. Do not require the user to supply a baseline before reporting; infer authority from available context and mark unresolved authority as an investigation limit.
 
+Default chat reports should put the answer before the ledger: result, inferred setup, top findings, material gaps, and next steps first; detailed baseline and coverage evidence after that. Collapse empty or non-material ledger entries to `None` or one concise sentence in chat. Expand the ledger for saved reports, exhaustive audits, or when detail is material to the result.
+
 ## Required Report Shape
 
 ```markdown
 **Audit Result**
-Scope Mode: targeted|directory-wide|exhaustive
-Target: <path>
+Result Type: certified audit|investigation result
 Audit Certification: passed|failed
 Certification Rationale: <one to three sentences>
+Top Findings: <one sentence or "No confirmed drift.">
 
-**Baseline**
-| Claim Area | Baseline Source | Why It Outranks Conflicting Evidence | Scope / Freshness | Confidence |
-|---|---|---|---|---|
-
-**External Baseline Sources**
-- <path or none> - <why read>
-
-**Audit Coverage**
-- Target Directory Inventory: <file classes and notable surfaces inspected>
-- Baseline Sources Inspected: <contracts/specs/ADRs/manifests/docs/etc.>
-- External Baseline Sources Inspected: <parent instructions, referenced specs, tests, evidence>
-- Live Surfaces Inspected: <source/docs/tests/manifests/generated fixtures/etc.>
-- Tests/Docs/Manifests Checked: <specific files or classes>
-- Skipped Areas / Limits: <what was not inspected and why>
-- Verification Commands Suggested But Not Run: <exact commands, or none>
-- Verification Commands Run At User Request: <exact commands and result, or none>
+**Inferred Audit Setup**
+Target: <path> (inferred|user-supplied)
+Scope Mode: targeted|directory-wide|exhaustive (<why this mode>)
+Baseline Strategy: <sources used or unresolved>
+Correction Path: "Rerun with target <path> / baseline <path> if this boundary is wrong."
 
 **Confirmed Drift Findings**
 1. <title>
@@ -52,16 +43,35 @@ Certification Rationale: <one to three sentences>
 **Verification Gaps**
 - <missing runtime proof, stale evidence, unrun tests, inaccessible files, unresolved authority>
 
-**Non-Drift Historical Context**
-- <old paths, compatibility layers, archived plans, or retained artifacts that are intentionally historical>
-
 **Recommended Next Steps**
 - <ordered, concrete next actions>
+
+**Baseline**
+| Claim Area | Baseline Source | Why It Outranks Conflicting Evidence | Scope / Freshness | Confidence |
+|---|---|---|---|---|
+
+**External Baseline Sources**
+- <path or none> - <why read>
+
+**Audit Coverage**
+- Target Directory Inventory: <file classes and notable surfaces inspected>
+- Baseline Sources Inspected: <contracts/specs/ADRs/manifests/docs/etc.>
+- External Baseline Sources Inspected: <parent instructions, referenced specs, tests, evidence>
+- Live Surfaces Inspected: <source/docs/tests/manifests/generated fixtures/etc.>
+- Tests/Docs/Manifests Checked: <specific files or classes>
+- Skipped Areas / Limits: <what was not inspected and why>
+- Verification Commands Suggested But Not Run: <exact commands, or none>
+- Verification Commands Run At User Request: <exact commands and result, or none>
+
+**Non-Drift Historical Context**
+- <old paths, compatibility layers, archived plans, or retained artifacts that are intentionally historical>
 ```
 
 If there are no confirmed findings, keep `Confirmed Drift Findings` and write `None confirmed.` A `no confirmed drift` result is invalid unless `Audit Coverage` is complete.
 
 ## Certification Gate
+
+Set `Result Type: certified audit` only when `Audit Certification: passed`. Set `Result Type: investigation result` when certification fails or when the report intentionally stops short of certification.
 
 Set `Audit Certification: failed` when any of these are true:
 
@@ -75,7 +85,7 @@ Set `Audit Certification: failed` when any of these are true:
 - Skipped areas could hide material drift and are not disclosed.
 - The report says there is no confirmed drift without a complete coverage ledger.
 
-`Audit Certification: failed` does not mean the audit is useless. It means the report is an investigation result, not a certified drift result.
+`Audit Certification: failed` does not mean the audit is useless. It means the report is an investigation result, not a certified drift result. When certification fails, the rationale must say `Certification failed because <authority or coverage gap>; the audit still ran.`
 
 ## Baseline Source Guidance
 

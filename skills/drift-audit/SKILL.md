@@ -7,7 +7,7 @@ description: Perform a rigorous read-only drift audit of a directory against its
 
 Audit a target directory for drift between current live state and the right baseline for each claim. Do not report confirmed drift until you name the baseline source and why it outranks conflicting evidence.
 
-Read [report-contract.md](references/report-contract.md) before drafting the audit report. It defines the mandatory output sections, quality gate, taxonomy checklist, and certification failure rules.
+Read [report-contract.md](references/report-contract.md) before drafting the audit report. It defines the mandatory output sections, quality gate, taxonomy checklist, and certification failure rules. For behavior-change validation, use [agent-smoke-test.md](examples/agent-smoke-test.md) as the low-friction forward-test prompt.
 
 Default to doing the audit from available context. Infer the target, scope, and baseline before asking the user for missing inputs. Ask only when two or more plausible interpretations would materially change the audit and the repo context cannot resolve them.
 
@@ -21,6 +21,16 @@ Default to doing the audit from available context. Infer the target, scope, and 
 - Default to chat report only. Write a durable audit artifact only when the user explicitly asks. If asked to save and the repo already has `docs/audits/`, suggest `docs/audits/YYYY-MM-DD-<target>-drift-audit.md` unless the user gives another path.
 - Default to read-only discovery. You may run read-only inspection commands such as `rg`, `find`, `ls`, `sed`, `git status`, `git log`, and non-mutating `git diff`. Do not run tests, builds, linters, app-server/runtime probes, smoke tests, cache refreshes, install commands, or mutation commands unless the user explicitly asks for verification.
 - Always suggest exact verification commands that would raise confidence when useful, and list them under `Verification Commands Suggested But Not Run` unless the user asked you to run them.
+
+## Optional User Modifiers
+
+Honor compact modifiers when the user includes them:
+
+- `quick`: inspect narrow authority and top live surfaces only. Keep the report honest about skipped areas.
+- `targeted: <claim/path>`: inspect one claim, path, or file class.
+- `exhaustive`: prove every file class was read or explicitly excluded.
+- `with verification`: run focused safe checks that directly support the audit. Do not install dependencies, mutate caches, or run broad verification unless separately authorized.
+- `save report`: write the durable audit artifact after the audit. If no path is supplied and the repo has `docs/audits/`, suggest `docs/audits/YYYY-MM-DD-<target>-drift-audit.md`; otherwise ask for the output path before writing.
 
 ## Baseline Rules
 
