@@ -53,6 +53,12 @@ Use `git branch -d`, not `-D`, unless the user separately requests force deletio
 ```text
 Mode: audit
 
+Decision Summary:
+  Safe to apply now: none
+  Needs explicit choice: notes.md - track, ignore, delete, or leave
+  Destructive and blocked: tmp/debug.log - needs final trash confirmation
+  Recommended next command: apply-safe after lane approvals
+
 Lane: untracked-and-ignore
   .gitignore additions:
     + *.pyc
@@ -78,13 +84,20 @@ Lane: config-learning
     + ignorePatterns: ["*.pyc"]
 ```
 
-Shorten the preview under time pressure, but still show every lane with pending decisions.
+Decision Summary is a readable index, not consent. Shorten the preview under
+time pressure, but still show every lane with pending decisions and collect
+approvals lane by lane.
 
 ## Final Report Shape
 
 ```text
 Mode completed: apply-safe
 Cleanup branch: codex/cleanup/2026-03-20-143052
+Decision Summary:
+  Safe to apply now: none
+  Needs explicit choice: none
+  Destructive and blocked: approved trash deletions still need apply-destructive confirmation
+  Recommended next command: apply-destructive for approved deletions
 Lane results:
   commit-shaping:
     commits created: 2

@@ -45,7 +45,18 @@ If the current branch is ahead of the default branch, committed branch changes a
 
 ## Output Packet
 
-Use this fixed packet by default. Keep sections concise. If a section has no evidence, write `None found` or `Not enough evidence`; do not omit the section.
+Default chat output starts with a `Status Brief`, then puts the fixed packet
+under `Details`. The brief must include:
+
+- `Bottom Line`: strongest current-status conclusion.
+- `Current State`: branch/worktree/status-doc truth in one sentence.
+- `Active Blocker`: current blocker or `None found`.
+- `Recommended Next Step`: smallest high-leverage next action.
+- `Confidence / Limits`: what was checked and what could change the conclusion.
+
+Under `Details`, use this fixed packet by default. Keep sections concise. If a
+section has no evidence, write `None found` or `Not enough evidence`; do not
+omit the section.
 
 - `Target`: Identify the target path/name, type, boundary, and source classes inspected.
 - `Current State`: State branch/worktree/status-doc truth and the strongest current-status conclusion.

@@ -11,8 +11,11 @@ Buckets: `quick-wins` = `P0`/`P1` + `small`; `high-leverage` = `high` +
 `small`/`medium`; `strategic` = `P0`/`P1` + `large`; `watch` = `P2` or useful
 `P3`. Drop non-debt observations.
 
-Report sections: Scan Snapshot; Focus & Coverage; Quick Wins; High-Leverage
-Fixes; Strategic Items; Watch List; Tradeoff Map; Open Questions / Next Probes.
+Default chat report order: Result Brief; Details. Result Brief contains `Top
+Debt Calls`, `Do First`, `Why It Matters`, and `Coverage Limits`. Details
+preserves these report sections: Scan Snapshot; Focus & Coverage; Quick Wins;
+High-Leverage Fixes; Strategic Items; Watch List; Tradeoff Map; Open Questions /
+Next Probes.
 
 Finding fields: `id`, `severity`, `category`, `subcategory`, `anchor`,
 `problem`, `impact`, `recommendation`, `effort`, `leverage`, `confidence`,

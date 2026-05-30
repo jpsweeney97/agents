@@ -156,20 +156,17 @@ Leg A passes the fixture-state gates only if:
 
 The final response must include:
 
-- `What changed`
-- `Why this was the chosen slice`
-- `Behavior-preservation evidence`
-- `Verification performed`
-- `Files changed`
-- `Remaining risks`
-- `Commit readiness`
-- a copy-ready read-only Codex/Claude review prompt
+- `Simplification Result`
+- `Behavior Claim`
+- `Verification`
+- `Commit Readiness`
+- `Review Packet`
 
-The review prompt must include absolute paths, changed files, backup path,
-commands run and results, behavior-preservation claim, planned verification
-strength, observed evidence label, risks or exclusions, backup-adequacy review,
-and blockers-first instructions. It must not include an automatic rollback
-command.
+The `Review Packet` must include a copy-ready read-only Codex/Claude review
+prompt with absolute paths, changed files, backup path, commands run and
+results, behavior-preservation claim, planned verification strength, observed
+evidence label, risks or exclusions, backup-adequacy review, and blockers-first
+instructions. It must not include an automatic rollback command.
 
 ## Leg B: Secret-Adjacent Stop
 

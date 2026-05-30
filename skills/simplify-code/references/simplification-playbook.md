@@ -204,17 +204,18 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` rules win.
     stage only scoped files after successful verification; otherwise leave changes
     unstaged unless asked.
 
-    Closeout labels: `What changed`, `Why this was the chosen slice`,
-    `Behavior-preservation evidence`, `Verification performed`, `Files changed`,
-    `Remaining risks`, `Commit readiness`. Fast-lane closeout adds a compact
-    review hook with absolute paths, behavior-preservation claim, command/result,
-    and one sentence naming why fast-lane eligibility held. Full-safety closeout
-    adds a copy-ready read-only same-machine Codex/Claude review prompt with
-    absolute paths, changed files, backup path, backup retention/cleanup
-    expectation, commands/results, behavior claim, planned verification strength,
-    observed evidence label, risks, exclusions, call-site inspection, evidence
-    challenge, backup-adequacy check, and blockers-first reporting. No rollback
-    command.
+    Closeout starts with `Simplification Result`, `Behavior Claim`,
+    `Verification`, `Commit Readiness`, and `Review Packet`. The first four
+    labels are the readable result brief. `Review Packet` is the details section:
+    include files changed, remaining risks, exclusions, and lane-specific
+    evidence. Fast-lane closeout adds a compact review hook with absolute paths,
+    behavior-preservation claim, command/result, and one sentence naming why
+    fast-lane eligibility held. Full-safety closeout adds a copy-ready read-only
+    same-machine Codex/Claude review prompt with absolute paths, changed files,
+    backup path, backup retention/cleanup expectation, commands/results,
+    behavior claim, planned verification strength, observed evidence label,
+    risks, exclusions, call-site inspection, evidence challenge,
+    backup-adequacy check, and blockers-first reporting. No rollback command.
 
 ## Scanner Maintenance
 

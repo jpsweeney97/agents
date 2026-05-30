@@ -51,4 +51,16 @@ Collect approvals lane by lane. `ask` files require `track`, `ignore`, `delete`,
 
 Verify only executed lanes: `git status` after worktree or commit changes, `git log <original>..HEAD` after commits, and ref checks after pruning or branch deletion.
 
-End with mode or partial status, cleanup branch or `none`, lane results, intentional dirty state, and recommended next step.
+Before previews and final lane reports, include `Decision Summary`:
+
+- `Safe to apply now`: approved non-destructive lanes, or `None`.
+- `Needs explicit choice`: files, groups, or refs needing a user decision.
+- `Destructive and blocked`: trash or local branch deletion waiting on final confirmation.
+- `Recommended next command`: the smallest next mode or command to run.
+
+`Decision Summary` is not approval. Continue to require lane-by-lane approvals,
+per-file decisions for `ask` files, and explicit per-file confirmation for
+protected deletion.
+
+End with mode or partial status, cleanup branch or `none`, lane results,
+intentional dirty state, and recommended next step.

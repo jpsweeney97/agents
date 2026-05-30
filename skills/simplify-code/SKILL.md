@@ -52,12 +52,20 @@ slice, then report remaining candidates.
 
 ## Closeout
 
-Closeout: `What changed`, `Why this was the chosen slice`,
-`Behavior-preservation evidence`, `Verification performed`, `Files changed`,
-`Remaining risks`, `Commit readiness`. Fast-lane closeout adds a compact review
-hook with absolute paths, behavior-preservation claim, command/result, and why
-fast-lane eligibility held. Full-safety closeout adds a copy-ready read-only
-same-machine Codex/Claude prompt with absolute paths/files, claim, evidence,
-commands/results, planned verification strength, observed evidence label, backup
-path, retention/cleanup expectation, risks/exclusions, and blockers-first review.
-No rollback command.
+Closeout starts with:
+
+- `Simplification Result`: what changed and why this slice was chosen.
+- `Behavior Claim`: behavior-preservation claim plus evidence.
+- `Verification`: commands/results, or why verification is weaker than desired.
+- `Commit Readiness`: ready/not ready, with the blocking reason.
+- `Review Packet`: details for follow-up review.
+
+The first four sections are the readable result brief. `Review Packet` is the
+details section and includes files changed, remaining risks, exclusions, and any
+lane-specific evidence. Fast-lane closeout adds a compact review hook with
+absolute paths, behavior-preservation claim, command/result, and why fast-lane
+eligibility held. Full-safety closeout adds a copy-ready read-only same-machine
+Codex/Claude prompt with absolute paths/files, claim, evidence, commands/results,
+planned verification strength, observed evidence label, backup path,
+retention/cleanup expectation, risks/exclusions, and blockers-first review. No
+rollback command.

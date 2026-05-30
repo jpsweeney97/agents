@@ -40,6 +40,19 @@ Pick the lightest mode before recording findings:
 No-file-change requests force `chat-only`. If chat confidence runs out, label
 reduced coverage and recommend `artifact` or `tech-debt-audit`.
 
+Default chat reports start with `Result Brief`, then put the rigorous backlog
+under `Details`. The brief must include:
+
+- `Top Debt Calls`: 1-3 strongest conclusions, not every finding.
+- `Do First`: the smallest high-leverage next action.
+- `Why It Matters`: present user, runtime, review, or delivery cost.
+- `Coverage Limits`: skipped categories, capped findings, or reduced confidence.
+
+`Details` preserves the rubric report sections, finding fields, scoring,
+caps, metrics, sanity checks, and fidelity check. Artifact and handoff modes
+may use the full report shape directly, but must still keep the first screen
+readable.
+
 References:
 
 - [`references/debt-taxonomy.md`](references/debt-taxonomy.md): archetypes,
@@ -48,6 +61,8 @@ References:
   category surfaces, sentinels, cross-links, disconfirmation.
 - [`references/severity-leverage-rubric.md`](references/severity-leverage-rubric.md):
   scoring, caps, report contract, fidelity.
+- [`examples/agent-smoke-test.md`](examples/agent-smoke-test.md): low-friction
+  forward test for chat-first output.
 
 ## Workflow
 

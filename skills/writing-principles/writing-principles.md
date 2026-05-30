@@ -121,6 +121,18 @@ Pass 10, Coherence:
 
 ## Output
 
-Review-only output: `"[Principle #X]: [description] at [location]"`.
+Review-only output starts with:
 
-Edit output: what changed, why it changed, verification, remaining risks.
+- `Result Brief`
+  - `Blocking`: findings that make the artifact unsafe, ambiguous, or unusable
+    until fixed.
+  - `High-Leverage`: findings whose fix would materially improve correctness,
+    clarity, or user outcomes.
+  - `Polish`: low-risk readability or economy fixes.
+  - `No Action`: `None` unless a candidate issue is intentionally not worth
+    changing.
+- `Details`: principle-numbered findings using
+  `"[Principle #X]: [description] at [location]"`.
+
+Edit output: one result line, then what changed, why it changed, verification,
+remaining risks.

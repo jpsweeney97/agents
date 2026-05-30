@@ -30,8 +30,11 @@ Do not use for user-facing docs, conversational replies, code comments, or creat
    - Medium: passes 1-6.
    - High: passes 1-10, items 1-53.
 5. Report:
-   - Review-only: `"[Principle #X]: [description] at [location]"`, then wait.
-   - Edit/refactor/create: what changed, why, verification, remaining risks.
+   - Review-only: start with `Result Brief` grouped as `Blocking`,
+     `High-Leverage`, `Polish`, and `No Action`; then `Details` with
+     `"[Principle #X]: [description] at [location]"`, then wait.
+   - Edit/refactor/create: start with one result line, then what changed, why,
+     verification, remaining risks.
 
 Load `writing-principles.md` for Medium/High risk work, explicit audits, unclear violations, or full self-checks.
 
