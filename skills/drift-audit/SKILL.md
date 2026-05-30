@@ -1,6 +1,6 @@
 ---
 name: drift-audit
-description: Perform a rigorous read-only drift audit of a directory against its current authoritative baseline. Use when the user explicitly asks to "audit this directory for drift", "run a drift audit", "check this tree for contract/source/doc/test drift", or asks for baseline-vs-live drift analysis of a directory. Do not trigger for ordinary code review, tech-debt scans, doc cleanup, generic "is this up to date?" questions, or broad repo audits unless the user explicitly asks for drift or baseline-vs-live analysis.
+description: Perform a rigorous read-only drift audit of a directory against its current authoritative baseline. Use when the user asks to audit a directory, tree, skill, package, or current work area for drift; asks to compare live state against contracts, specs, docs, tests, manifests, releases, or another baseline; says "audit this directory for drift", "run a drift audit", "check this tree for contract/source/doc/test drift"; or asks for baseline-vs-live drift analysis. Do not trigger for ordinary code review, tech-debt scans, doc cleanup, generic "is this up to date?" questions, or broad repo audits unless the user explicitly asks for drift or baseline-vs-live analysis.
 ---
 
 # Drift Audit
@@ -9,8 +9,12 @@ Audit a target directory for drift between current live state and the right base
 
 Read [report-contract.md](references/report-contract.md) before drafting the audit report. It defines the mandatory output sections, quality gate, taxonomy checklist, and certification failure rules.
 
+Default to doing the audit from available context. Infer the target, scope, and baseline before asking the user for missing inputs. Ask only when two or more plausible interpretations would materially change the audit and the repo context cannot resolve them.
+
 ## Defaults
 
+- If the user names a path, use it as the target. If the user says `this directory`, `this tree`, `current work area`, or omits a path, use the current working directory or the most specific directory already in the request/context.
+- Do not require the user to provide a baseline. Resolve baselines from local authority sources using the baseline order below. If no defensible baseline exists, complete the audit as an investigation result with `baseline unresolved` rather than asking the user to invent authority.
 - Default scope mode is `directory-wide`: inspect the full target inventory, authority surfaces, docs, manifests, tests, and representative source paths, but do not promise every line was semantically reviewed.
 - Use `targeted` when the user names a narrow surface or claim.
 - Use `exhaustive` only when the user asks for exhaustive coverage. The coverage ledger must then prove every file class was read or explicitly excluded.
@@ -51,7 +55,7 @@ Avoid broad repo-wide scans unless the user explicitly asks. If outward authorit
 
 ## Workflow
 
-1. Identify the target directory and scope mode.
+1. Infer the target directory, scope mode, and omitted baseline hints from the request, current working directory, repo instructions, nearby manifests, and target-local files. Ask one clarifying question only if unresolved ambiguity would materially change the audit boundary.
 2. Inventory the target directory enough to understand file classes, public surfaces, source surfaces, tests, manifests, generated fixtures, docs, and local history artifacts.
 3. Resolve baseline sources per claim, including narrow external baseline sources when needed.
 4. Inspect live state in the target directory and compare it to the relevant baseline for each claim.

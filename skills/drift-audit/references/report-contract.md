@@ -1,6 +1,6 @@
 # Drift Audit Report Contract
 
-Use this contract for every `drift-audit` report. The report can be concise, but it must preserve the named sections and evidence boundaries below.
+Use this contract for every `drift-audit` report. The report can be concise, but it must preserve the named sections and evidence boundaries below. Do not require the user to supply a baseline before reporting; infer authority from available context and mark unresolved authority as an investigation limit.
 
 ## Required Report Shape
 
@@ -80,6 +80,8 @@ Set `Audit Certification: failed` when any of these are true:
 ## Baseline Source Guidance
 
 Resolve baseline per claim. Do not assume one file controls the whole directory.
+
+If the user did not provide a baseline, resolve one from the target's repo instructions, current contracts, active specs, manifests, source files, docs, tests, and narrow external authority sources. Ask for a baseline only when two plausible authorities conflict and choosing between them would change confirmed findings.
 
 Strong baseline sources:
 
