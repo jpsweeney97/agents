@@ -32,6 +32,10 @@ Honor compact modifiers when the user includes them:
 - `with verification`: run focused safe checks that directly support the audit. Do not install dependencies, mutate caches, or run broad verification unless separately authorized.
 - `save report`: write the durable audit artifact after the audit. If no path is supplied and the repo has `docs/audits/`, suggest `docs/audits/YYYY-MM-DD-<target>-drift-audit.md`; otherwise ask for the output path before writing.
 
+Show honored modifiers and verification mode in `Inferred Audit Setup`. Treat
+`quick` as a scope modifier, not as a certification shortcut; if skipped areas
+could hide material drift, disclose them and fail certification.
+
 ## Baseline Rules
 
 - Resolve a baseline per claim. A directory can have different baselines for source behavior, installed runtime behavior, public docs, tests, manifests, evidence, and historical compatibility.

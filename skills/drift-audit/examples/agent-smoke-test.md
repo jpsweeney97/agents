@@ -20,3 +20,21 @@ User: Run a drift audit here.
 - Put unresolved authority under `Candidate Mismatches` or `Verification Gaps`.
 - Include `Inferred Audit Setup` so the user can correct the target or baseline
   boundary without restating the whole request.
+- Show honored modifiers and verification mode in `Inferred Audit Setup`.
+
+## Modifier Prompt
+
+```markdown
+User: quick targeted: report output Run a drift audit here with verification.
+```
+
+## Modifier Expected Behavior
+
+- Treat `quick` as a modifier on inspection depth, not as a fourth scope mode.
+- Set scope mode to `targeted` and state that the boundary is report output.
+- Show `Modifiers Honored: quick; targeted: report output; with verification`
+  or equivalent in `Inferred Audit Setup`.
+- Show `Verification Mode` near the top setup block, including whether focused
+  safe checks were run or no safe direct check existed.
+- Keep skipped surfaces visible under `Skipped Areas / Limits`; fail
+  certification if skipped areas could hide material drift.

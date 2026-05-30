@@ -2,7 +2,7 @@
 
 Use this contract for every `drift-audit` report. The report can be concise, but it must preserve the named sections and evidence boundaries below. Do not require the user to supply a baseline before reporting; infer authority from available context and mark unresolved authority as an investigation limit.
 
-Default chat reports should put the answer before the ledger: result, inferred setup, top findings, material gaps, and next steps first; detailed baseline and coverage evidence after that. Collapse empty or non-material ledger entries to `None` or one concise sentence in chat. Expand the ledger for saved reports, exhaustive audits, or when detail is material to the result.
+Default chat reports should put the answer before the ledger: result, inferred setup, top findings, material gaps, and next steps first; detailed baseline and coverage evidence after that. Collapse empty or non-material ledger entries to `None` or one concise sentence in chat. Expand the ledger for saved reports, exhaustive audits, or when detail is material to the result. When user modifiers are present, show the honored modifiers and verification mode in the top setup block.
 
 ## Required Report Shape
 
@@ -16,7 +16,9 @@ Top Findings: <one sentence or "No confirmed drift.">
 **Inferred Audit Setup**
 Target: <path> (inferred|user-supplied)
 Scope Mode: targeted|directory-wide|exhaustive (<why this mode>)
+Modifiers Honored: quick|targeted: <claim/path>|exhaustive|with verification|save report|none (<effect on boundary>)
 Baseline Strategy: <sources used or unresolved>
+Verification Mode: suggested-only|run at user request|not applicable (<why>)
 Correction Path: "Rerun with target <path> / baseline <path> if this boundary is wrong."
 
 **Confirmed Drift Findings**
@@ -68,6 +70,11 @@ Correction Path: "Rerun with target <path> / baseline <path> if this boundary is
 ```
 
 If there are no confirmed findings, keep `Confirmed Drift Findings` and write `None confirmed.` A `no confirmed drift` result is invalid unless `Audit Coverage` is complete.
+
+`quick` is a modifier on inspection depth, not a fourth scope mode and not a
+certification shortcut. If `quick` or another modifier skips areas that could
+hide material drift, disclose that under `Skipped Areas / Limits` and fail
+certification.
 
 ## Certification Gate
 
