@@ -5,7 +5,8 @@ description: Use when the user explicitly asks to be grilled, stress-tested inte
 
 # Grill Me
 
-Interrogate the user's plan or design until the important decisions, assumptions, risks, and dependencies are clear.
+Stress-test the user's plan or design until the important decisions, assumptions,
+risks, and dependencies are clear.
 
 ## Core Behavior
 
@@ -16,8 +17,22 @@ Interrogate the user's plan or design until the important decisions, assumptions
 - Prefer the highest-leverage unresolved issue over a fixed checklist order.
 - Challenge weak, vague, or inconsistent answers before moving to a new topic.
 - Across turns, track resolved decisions, unresolved assumptions, and the current blocker.
+- Lead with the user-visible decision, behavior, or outcome the answer will
+  settle, then connect it to technical choices.
 - Inspect only enough to avoid asking for information already available. If inspection would become broad or unavailable, state the limitation and ask the next useful question.
 - Artifact and codebase inspection is read-only unless the user explicitly asks for edits.
+
+## Conversation Style
+
+- Treat the drill as requirements alignment, not a formal audit. When the
+  desired outcome is unclear, make the user clarify what they want to be true
+  before framing how to build, verify, or trade off that choice.
+- Match the user's register. Use technical terms when the user is being
+  technical, and use plain direct language when they are not.
+- Prefer concrete questions and examples over abstract categories. For example,
+  ask what breaks for users if the plan fails before asking for a risk taxonomy.
+- Keep the active drill conversational and compact. Save formal structure for
+  stop summaries or requested artifacts.
 
 ## Defaults
 
@@ -44,20 +59,27 @@ Do not mechanically exhaust this list. Use it to guide judgment.
 
 Use natural conversation, but make each turn contain:
 
+- the decision, behavior, or user-visible outcome being tested when it is useful
 - the question
 - why it matters, when not obvious
 - your recommended answer or leaning
 
 Keep the format compact. Use explicit labels only when they improve clarity.
+Do not turn each drill turn into a report.
 
 Illustrative shape, not a template:
 
 ```markdown
-Question: What has to be true for the rollback path to work under production load?
+Decision to settle: Whether rollback must protect customer-facing availability
+or only preserve data integrity.
 
-Why it matters: If rollback only works in a clean test environment, the migration is not actually reversible.
+Question: If the migration fails under load, what must users still be able to do?
 
-My leaning: Treat rollback rehearsal as a release gate, not a nice-to-have.
+Why it matters: This decides whether rollback rehearsal is a release gate or a
+cleanup task.
+
+My leaning: Treat customer-visible recovery as the bar unless you have a clear
+non-user-facing failure mode.
 ```
 
 ## Stopping Point
