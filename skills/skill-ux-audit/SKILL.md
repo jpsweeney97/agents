@@ -1,6 +1,6 @@
 ---
 name: skill-ux-audit
-description: "Use when the user asks to audit, improve, or apply UX improvements to a Codex skill, SKILL.md, agents/openai.yaml, skill reference, or skill example. Produces a concise read-only UX improvement plan by default and edits only when the user explicitly says apply, implement, or approves a specific plan. Focuses on clearer chat output, visible assumptions, low-friction user control, examples, stop conditions, and execution defaults without weakening rigor, evidence, validation, authority, safety, or mutation boundaries."
+description: "Use when the user asks to audit, improve, or apply UX improvements to a Codex skill, SKILL.md, agents/openai.yaml, skill reference, or skill example. Trigger only for explicit UX language or clear user-facing synonyms such as usability, ease of use, chat output, readability, interaction flow, or friction. Do not trigger for general skill improvement, rigor, validation, correctness, or safety work unless the user explicitly frames it as UX. Produces a concise read-only UX improvement plan by default and edits only when the user explicitly says apply, implement, or approves a specific plan."
 ---
 
 # Skill UX Audit
@@ -11,6 +11,14 @@ contract.
 Read [ux-rubric.md](references/ux-rubric.md) before any substantive audit or
 apply pass. Use [agent-smoke-test.md](examples/agent-smoke-test.md) as the
 lightweight forward-test shape after behavior-contract changes.
+
+## Trigger Boundaries
+
+- Trigger only when the request is explicitly about UX or a user-facing synonym
+  such as usability, ease of use, chat output, readability, interaction flow, or
+  friction.
+- Do not trigger for general skill improvement, rigor, validation, correctness,
+  or safety work unless the user explicitly frames it as UX.
 
 ## Defaults
 
