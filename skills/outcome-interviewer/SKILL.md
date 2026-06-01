@@ -1,6 +1,6 @@
 ---
 name: outcome-interviewer
-description: "Use when the user explicitly asks to clarify, shape, unpack, or talk through an idea, plan, workflow, strategy, design, or decision through an interview. This skill reads relevant context and translates messy or technical material into plain-language outcomes so the user can correct the intent before details take over. Do not trigger for ordinary one-off clarification, implementation requests, reviews, audits, complete critiques, adversarial stress tests, or incidental mentions; use grill-me or review skills for those."
+description: "Use when the user explicitly asks to clarify, shape, unpack, or talk through an idea, artifact, plan, workflow, strategy, design, or decision through an interview. This skill reads relevant context and translates messy or technical material into plain-language outcomes so the user can correct the intent before details take over. Do not trigger for ordinary one-off clarification, implementation requests, reviews, audits, complete critiques, adversarial stress tests, or incidental mentions; use grill-me or review skills for those."
 ---
 
 # Outcome Interviewer
@@ -13,10 +13,10 @@ adversarial stress test.
 
 ## Core Behavior
 
-- Ask exactly one question at a time.
+- Ask exactly one question at a time in interview turns.
 - Keep the interview conversational and low-friction.
 - Read relevant context when the user points at a concrete artifact, path, plan,
-  design, code area, or decision.
+  design, code area, or decision, before or during the interview.
 - Translate messy or technical material into plain everyday language.
 - Maintain a compact evolving read of what the user seems to want.
 - Rewrite that read as understanding improves; do not append each answer into a
@@ -33,8 +33,13 @@ adversarial stress test.
 
 ## Context Inspection
 
-When the user provides a concrete artifact or path, inspect the artifact and the
-relevant surrounding context before asking the first substantive question.
+Context inspection can happen at any point in the interview.
+
+When the user points at an artifact, path, plan, code area, workflow, or prior
+decision, read the context needed to ask a better next question. Read before the
+first question when asking immediately would be performative. Read later when
+the user's answer reveals that more context would clarify the outcome, audience,
+constraints, failure mode, tradeoff, or next useful move.
 
 Relevant context includes referenced files, adjacent source or docs, examples,
 tests, prior decisions, related plans, and nearby artifacts that explain the
@@ -42,7 +47,8 @@ audience, operator experience, constraints, current behavior, failure modes,
 vocabulary, or intended outcome.
 
 Do not limit inspection to the named file when surrounding context is needed to
-understand the discussion. Do not impose arbitrary read caps. Follow relevance.
+understand the discussion. Do not impose arbitrary read caps. Follow relevance
+and keep the purpose clear: reading must serve the interview.
 
 Inspection has one job: improve the interview.
 
@@ -50,9 +56,19 @@ Use inspected context to form a better plain-language read, choose a better next
 question, notice when the user's framing may be incomplete, and connect desired
 outcomes to practical technical paths.
 
+A context-only turn is allowed when the named artifact is substantial and a
+question without inspection would waste the user's effort. If the relevant path
+or artifact is obvious, inspect it without narrating the tool use. If the needed
+context is unclear, broad, or likely to take a noticeable detour, briefly say
+what you are checking and why.
+
 Do not turn inspected context into a review report, audit ledger, source
 inventory, findings list, implementation plan, or file-by-file explanation. Do
 not show "context inspected" notes by default.
+
+A context-only turn should not include findings or a report. When resuming the
+interview after inspection, return with a better plain-language read and exactly
+one next question unless the user asked you to stop or summarize.
 
 If inspection reveals a likely issue, translate it into the next interview move
 instead of reporting it as a finding.
@@ -120,13 +136,14 @@ frame.
 After asking the question, stop and wait for the user's answer unless the user
 asked you to stop, summarize, or produce a brief.
 
-## Recommendations
+## Recommendations During The Interview
 
 Offer a tentative recommendation when it helps the user answer, choose between
 interpretations, or understand the consequence of a framing.
 
-Recommendations may include technical direction, architecture, sequencing, or
-implementation shape when that helps the user reach the intended outcome.
+Recommendations may include light technical direction, architecture, sequencing,
+or implementation shape when that helps the user understand what the desired
+outcome would require in practice.
 
 Ground recommendations in the experience first: what changes for the person
 using, operating, reviewing, or depending on the result?
@@ -134,8 +151,8 @@ using, operating, reviewing, or depending on the result?
 Then connect the technical choice to that outcome. Do not recommend architecture
 as an isolated preference.
 
-Recommendations should sound like a useful starting point, not a final verdict.
-Make them easy to correct.
+Recommendations should sound like a useful starting point, not a final verdict,
+ranked comparison, or settled decision. Make them easy to correct.
 
 Prefer:
 
@@ -151,6 +168,22 @@ Avoid:
 My recommendation is to optimize the verification model around reduced operator
 validation frequency.
 ```
+
+## Recommendation Synergy
+
+This skill can prepare a recommendation, but it should not silently become a
+recommendation workflow.
+
+Use the interview when the user is not ready for a ranked recommendation because
+the desired outcome, audience, constraints, options, non-goals, or tradeoff are
+still muddy.
+
+As the interview clarifies, notice when the decision criteria and serious
+options are clear enough to compare. At that point, ask before switching: "Do
+you want me to recommend now?"
+
+If the user says yes, use the relevant recommendation workflow. If the user says
+no, continue clarifying or summarize the current shape.
 
 ## Handling Vague Or Technical Answers
 
@@ -182,7 +215,8 @@ That does not define the success criterion.
   clearly blocks the others.
 - If the user provides a technical artifact, translate it into human-facing or
   operator-facing outcomes before asking about implementation mechanics.
-- If the user asks for adversarial pressure-testing, defer to `grill-me`.
+- If the user asks for pressure-testing, challenge, drilling, or to be pushed on
+  weak answers, defer to `grill-me`.
 - If the user asks for a complete critique, report, review, or audit, prefer the
   relevant review skill.
 - Default to conversational closure. Produce a concise brief only when the user
@@ -272,10 +306,14 @@ natural handoff point.
 ## Stopping Point
 
 Continue until the desired outcome, audience or operator, success signs,
-non-goals, main tradeoff, and next useful move are clear enough.
+non-goals, main tradeoff, and any naturally clear next useful move are clear
+enough.
 
 When stopping, summarize conversationally. Do not create a formal spec,
-checklist, implementation plan, or decision log unless the user asks.
+checklist, implementation plan, or decision log unless the user asks. Include a
+named next useful move only when it is naturally clear from the interview. If the
+next move is still uncertain, name the remaining uncertainty instead of forcing a
+recommendation.
 
 A concise brief, when useful, should stay lightweight:
 
@@ -285,6 +323,5 @@ Here is the clarified shape:
 You want <outcome> to feel true for <audience/operator>.
 The experience should feel <qualities>.
 The main thing to avoid is <failure/non-goal>.
-The unresolved choice is <remaining question>, or the next useful move is
-<brief/plan/spec/review>.
+The remaining uncertainty is <question>, or the next useful move is <move>.
 ```

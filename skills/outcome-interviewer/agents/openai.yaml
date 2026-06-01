@@ -1,4 +1,4 @@
 interface:
   display_name: "Outcome Interviewer"
   short_description: "Clarify outcomes through an interview"
-  default_prompt: "Use $outcome-interviewer to help me clarify this idea or plan through a plain-language interview before we get into details."
+  default_prompt: "Use $outcome-interviewer to help me clarify this idea, artifact, workflow, or decision through a context-aware plain-language interview before we get into details."
