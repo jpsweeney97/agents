@@ -1,6 +1,8 @@
-# Example
+# Examples
 
-Use only for output-shape calibration.
+Use only for output-shape and edge-case calibration.
+
+## Standard Case
 
 **User:** "$next-steps Findings: F1 weak service-to-service trust boundaries; F2 incomplete rollback procedures, marked high likelihood and high impact by the audit; F3 unclear recovery ownership, which the audit says depends on the rollback strategy; F4 decide rollout readiness after F1 and F2 are settled; non-critical cosmetic docs cleanup can wait until rollout readiness is decided. What should we tackle first?"
 
@@ -31,10 +33,20 @@ Active findings are F1: weak service-to-service trust boundaries, F2: incomplete
 
 ### 5. Critical Path
 
-**Dependency-critical chain:** tied: T2 -> T3 and T1/T2 -> T4. No durations or deadlines were supplied, so this is not a scheduling-critical claim.
+**Dependency-critical chain:** tied: T2 -> T3 and T1/T2 -> T4.
+
+**Scheduling-critical status:** not claimed - no durations or deadlines supplied.
 
 **Highest-risk task:** T2 - likelihood: high; impact: high; on critical path: yes; why: the supplied audit marks rollback risk high, and F3 depends on the rollback strategy.
 
 ### 6. Out of Scope (Parked)
 
 - non-critical cosmetic docs cleanup - revisit when rollout readiness is decided
+
+## Edge Case: Ambiguous Source
+
+**User:** "$next-steps Use the findings above."
+
+**Context:** The prior conversation includes one review finding set and one later audit finding set, and the user did not name a target artifact.
+
+**Response:** "I see two possible finding sets: the earlier review findings and the later audit findings. Which one should I plan from?"
