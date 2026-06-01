@@ -1,6 +1,6 @@
 ---
 name: outcome-interviewer
-description: "Use when the user explicitly asks to clarify, shape, unpack, or talk through an idea, artifact, plan, workflow, strategy, design, or decision through an interview. Reads relevant context and translates messy or technical material into plain-language outcomes so the user can correct intent before details take over. Do not trigger for ordinary one-off clarification, implementation requests, reviews, audits, complete critiques, adversarial stress tests, or incidental mentions; use grill-me for pressure tests and review skills for critiques."
+description: Use when the user explicitly asks to clarify, shape, unpack, or talk through an idea, artifact, plan, workflow, strategy, design, or decision through an interview — for example "interview me about this", "help me figure out what I actually want here", or "I'm not sure what I'm even trying to do". Reads relevant context and translates messy or technical material into plain-language outcomes so the user can correct intent before details take over. Clarifies the desired outcome; it does not produce the design or the critique. Once the outcome is clear, hands off to whatever fits — superpowers:brainstorming to design it, making-recommendations to choose between options — or simply stops. Do not trigger for ordinary one-off clarification, implementation requests, reviews, audits, complete critiques, adversarial stress tests, or incidental mentions; use grill-me for pressure tests and review skills for critiques.
 ---
 
 # Outcome Interviewer
@@ -18,7 +18,8 @@ workflow.
 These are the load-bearing invariants. Each section below adds depth rather than
 restating them.
 
-- Ask exactly one question per interview turn, and keep it conversational and
+- Ask exactly one question per interview turn, except on a context-only
+  inspection turn (see Context Inspection); keep it conversational and
   low-friction.
 - Maintain one compact, evolving plain-language read of what the user wants.
   Rewrite it as understanding improves; never append each answer into a growing
@@ -64,15 +65,13 @@ context is unclear, broad, or likely to take a noticeable detour, briefly say
 what you are checking and why.
 
 Do not turn inspected context into a review report, audit ledger, source
-inventory, findings list, implementation plan, or file-by-file explanation. Do
-not show "context inspected" notes by default.
+inventory, findings list, implementation plan, or file-by-file explanation, and
+do not show "context inspected" notes by default. If inspection reveals a likely
+issue, translate it into the next interview move rather than reporting it as a
+finding.
 
-A context-only turn should not include findings or a report. When resuming the
-interview after inspection, return with a better plain-language read and exactly
-one next question unless the user asked you to stop or summarize.
-
-If inspection reveals a likely issue, translate it into the next interview move
-instead of reporting it as a finding.
+When resuming the interview after inspection, return with a better plain-language
+read and exactly one next question unless the user asked you to stop or summarize.
 
 Prefer:
 
@@ -174,7 +173,7 @@ decision criteria and serious options are clear enough to compare. At that point
 ask before switching: "Do you want me to recommend now?" If yes, hand off to
 `making-recommendations`. If no, keep clarifying or summarize the current shape.
 
-## Handling Vague Or Technical Answers
+## Handling Vague or Technical Answers
 
 When the user answers with vague, abstract, or mostly technical language, first
 translate it into a plain-language guess and ask the user to correct it.
@@ -204,16 +203,29 @@ That does not define the success criterion.
   clearly blocks the others.
 - If the user provides a technical artifact, translate it into human-facing or
   operator-facing outcomes before asking about implementation mechanics.
-- If the user is ready to turn the clarified outcome into a design, spec, or
-  implementation, offer a handoff to the relevant workflow, such as
-  `superpowers:brainstorming` for design work. Do not force a full design
-  workflow when the user only wants clarification or a lightweight next move.
-- If the user asks for pressure-testing, challenge, drilling, or to be pushed on
-  weak answers, defer to `grill-me`.
-- If the user asks for a complete critique, report, review, or audit, prefer the
-  relevant review skill.
-- Default to conversational closure. Produce a concise brief only when the user
-  asks for one or the interview naturally reaches a handoff point.
+- When the work shifts from clarifying the outcome to designing, deciding,
+  pressure-testing, or critiquing it, hand off rather than continuing (see
+  Handoffs).
+- Produce a concise brief only when the user asks for one or the interview
+  naturally reaches a handoff point.
+
+## Handoffs
+
+This skill clarifies the outcome; it does not design, decide, critique, or
+implement. When the work shifts to one of those, name the move and hand off
+rather than silently becoming that workflow. Default to conversational closure
+when no downstream workflow is needed.
+
+| The interview has done its job when…                                          | Hand off to                         |
+| ----------------------------------------------------------------------------- | ----------------------------------- |
+| The outcome is clear and the user wants to turn it into a design or spec      | `superpowers:brainstorming`         |
+| Decision criteria and two or more serious options are clear enough to compare | `making-recommendations`            |
+| The user asks to be pressure-tested, challenged, or drilled on weak answers   | `grill-me`                          |
+| The user asks for a complete critique, report, review, or audit               | the relevant review skill           |
+| The outcome is clear and no downstream workflow is needed                     | conversational closure (no handoff) |
+
+Ask before switching: name the move and let the user decline. A handoff the user
+did not choose is just the interview ending early.
 
 ## Turn Shape
 
@@ -274,6 +286,23 @@ We now have clear criteria and two real options on the table. Do you want me to
 recommend one now, or keep clarifying first?
 ```
 
+The read evolving across turns (rewrite it; do not append):
+
+```markdown
+Turn 1 — My read so far: You want the nightly job to stop paging people for
+problems that clear up on their own by morning.
+
+[User replies: "It is not the paging itself — it is that when it does page, no
+one can tell the real outage from the same flaky timeout we see every week."]
+
+Turn 2 — My read so far: You want whoever is on call to instantly tell a real
+failure from the familiar flaky one, so they trust the page enough to act fast.
+```
+
+The Turn 2 read replaces Turn 1; it does not become a list of "Turn 1 decision,
+Turn 2 decision." Each turn is the current best single sentence, rewritten as the
+user corrects you.
+
 ## Anti-Patterns
 
 Avoid turning the interview into a technical review.
@@ -320,11 +349,9 @@ without correction.
 
 When stopping, summarize conversationally. Do not create a formal spec,
 checklist, implementation plan, or decision log unless the user asks. Include a
-named next useful move only when it is naturally clear from the interview, for
-example offering a handoff to `superpowers:brainstorming` to design the outcome,
-or handing off to `making-recommendations` to choose between clear options. If
-the next move is still uncertain, name the remaining uncertainty instead of
-forcing a recommendation.
+named next useful move only when it is naturally clear from the interview (see
+Handoffs). If the next move is still uncertain, name the remaining uncertainty
+instead of forcing a recommendation.
 
 A concise brief, when useful, should stay lightweight:
 
