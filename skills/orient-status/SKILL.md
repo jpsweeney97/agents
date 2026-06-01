@@ -1,6 +1,6 @@
 ---
 name: orient-status
-description: Run a thorough read-only orientation of a project, codebase, repository, plugin, skill, or local work area to determine current status. Use when the user asks where things stand, what happened recently, what is in flight, what is next, where the target is on the roadmap, what decisions or open questions exist, what work is deferred, or how live state compares with handoffs, tickets, issues, PRs, roadmaps, specs, or status docs. Default to strict read-only, chat-only operation unless the user explicitly asks for an artifact or handoff output mode.
+description: "Run a read-only orientation of a project, codebase, repository, plugin, skill, or local work area to determine current status, in-flight work, source conflicts, freshness limits, and the smallest status-derived next step. Use when the user asks where things stand, what happened recently, what is in flight, what is blocked, where the target sits against status or roadmap context, or how live state compares with handoffs, tickets, issues, PRs, roadmaps, specs, or status docs. Do not use for explicit drift audits, code review, cleanup, branch landing, implementation/debugging, next-step planning from known findings, or handoff save/load/update unless the user also asks for status orientation."
 ---
 
 # Orient Status
@@ -15,7 +15,26 @@ Default to strict read-only, chat-only orientation.
 - If the user explicitly asks for `artifact` or `handoff` mode, perform the orientation first, then write only the requested output artifact. Do not edit source code unless the user separately asks for implementation.
 
 Treat memory, handoffs, and prior summaries as context that can guide where to look, not as current truth. Verify drift-prone claims against live target state when feasible.
-Inspect untracked paths by name first. Read untracked file contents only when they are directly status-relevant, such as an active local handoff or branch-specific evidence note.
+
+## Trigger Boundaries
+
+Use this skill for status orientation:
+
+- Current state, recent activity, in-flight work, blockers, open decisions, deferred work, source conflicts, roadmap position, or live-vs-handoff/status-doc comparisons.
+- A status-derived next step: the smallest action implied by current evidence.
+
+Do not use this skill as the primary lane for:
+
+- Explicit drift or baseline-vs-live audits; use a drift-audit skill instead.
+- Code review, implementation review, plan scrutiny, or security review.
+- Branch cleanup, branch landing, repo hygiene, staging, committing, pushing, or publishing.
+- Implementation, debugging, test fixing, verification runs, or dependency work.
+- Next-step planning from already-known findings; use a planning or next-steps lane.
+- Handoff save/load/update or ticket create/update operations.
+
+For mixed requests, complete the read-only status orientation, name the adjacent
+lane, and stop before doing that other work unless the user explicitly asked for
+it too.
 
 ## Discovery Ladder
 
@@ -30,33 +49,58 @@ Adapt this ladder to the target. Say when a source class is unavailable, skipped
 7. Read handoffs as context, not authority. Re-anchor any handoff claim against live state before presenting it as current.
 8. Summarize source conflicts, evidence gaps, and the recommended next step.
 
-## Authority Order
+## Freshness Labels
 
-When sources conflict, use this order by default:
+Do not use unqualified `current` for a claim whose source could be stale.
+Attach a freshness label when it affects the conclusion:
 
-1. Live working tree and branch state.
-2. Tracked current-status and open-work docs.
-3. Issue and ticket systems.
-4. Recent commits and PRs.
-5. Handoffs, roadmaps, specs, and plans as context only.
+- `confirmed-current`: directly checked against the live target in this turn.
+- `local-only`: checked in the local checkout or local refs, with no remote/API refresh.
+- `remote-unrefreshed`: remote, PR, or issue state matters but was not refreshed.
+- `connector-unavailable`: the relevant ticket, issue, PR, runtime, or app connector was unavailable, unauthenticated, or failed.
+- `stale-context`: memory, handoff, old status doc, or prior summary was not re-anchored.
+- `unknown`: the source class was not inspected.
+
+If remote truth matters and scope forbids refresh, say what local evidence shows
+and what command or connector query would raise confidence.
+
+## Claim-Specific Authority
+
+Resolve authority by claim type instead of applying one global source order:
+
+- File and worktree state: live files, `git status`, and local diffs outrank docs.
+- Branch publication state: current branch, upstream configuration, remote refs, and PR queries if inspected.
+- Intended scope, roadmap, or acceptance state: active/current specs, status docs, roadmap docs, and explicit user direction outrank branch inference.
+- Open work: ticket, issue, and PR systems outrank stale handoffs; tracked status docs can outrank them only when they explicitly declare current ownership.
+- Runtime or installed state: live runtime inspection, installed cache inspection, or task-specific runtime queries outrank source metadata. Metadata alone is not runtime proof.
+- History and rationale: git log, handoffs, old plans, and prior summaries explain why the state changed; they do not prove current state unless re-anchored.
 
 Call out conflicts explicitly. Do not silently reconcile stale docs, old handoffs, aspirational roadmap text, or inferred next steps into live truth.
 If the current branch is ahead of the default branch, committed branch changes are part of the selected target's live state. When those branch changes update tickets, evidence, or plans without updating status/register docs, report a branch-vs-status publication conflict instead of flattening the branch evidence into mainline truth.
 
+## Untracked And Ignored Paths
+
+Treat untracked files and local diffs as in-flight evidence, not clutter, unless
+the user asks for cleanup.
+
+- Inspect untracked paths by name first. Read untracked file contents only when they are directly status-relevant, such as an active local handoff or branch-specific evidence note.
+- Skip ignored paths by default. Inspect or disclose ignored state when the user asks about cleanliness, residue, generated evidence, environment status, or anything where ignored files could change the answer.
+- If ignored paths were skipped and could affect the status conclusion, list them as an evidence gap or suggest the exact read-only ignored-status check.
+
 ## Output Packet
 
-Default chat output starts with a `Status Brief`, then puts the fixed packet
-under `Details`. The brief must include:
+Default chat output starts with a `Status Brief`. The brief must include:
 
 - `Bottom Line`: strongest current-status conclusion.
-- `Current State`: branch/worktree/status-doc truth in one sentence.
+- `Current State`: branch/worktree/status-doc truth in one sentence, with freshness labels where needed.
 - `Active Blocker`: current blocker or `None found`.
-- `Recommended Next Step`: smallest high-leverage next action.
+- `Recommended Next Step`: smallest high-leverage status-derived action.
 - `Confidence / Limits`: what was checked and what could change the conclusion.
 
-Under `Details`, use this fixed packet by default. Keep sections concise. If a
-section has no evidence, write `None found` or `Not enough evidence`; do not
-omit the section.
+Under `Details`, adapt the packet to the size of the request. Broad orientation
+should use the full packet below. Narrow status checks may compress irrelevant
+sections, but must still name the target, inspected source classes, source
+conflicts, evidence gaps, and next step.
 
 - `Target`: Identify the target path/name, type, boundary, and source classes inspected.
 - `Current State`: State branch/worktree/status-doc truth and the strongest current-status conclusion.
@@ -69,11 +113,14 @@ omit the section.
 - `Evidence Gaps`: State what could not be checked, what sources were missing, and what would improve confidence.
 - `Recommended Next Step`: Give the smallest high-leverage next action consistent with the evidence.
 
+If a full-packet section has no evidence, write `None found` or `Not enough
+evidence`; do not omit it in broad orientation mode. If the next action would
+be implementation, cleanup, verification, or planning rather than status
+orientation, name that lane instead of expanding into a plan.
+
 ## Operating Notes
 
 - Prefer exact file paths, branch names, commit hashes, ticket IDs, PR numbers, and dates over vague status language.
-- Separate `confirmed-current`, `likely-current`, `stale-context`, and `unknown` claims.
-- Treat untracked files and local diffs as in-flight evidence, not clutter, unless the user asks for cleanup.
 - Read only the latest or explicitly relevant handoffs by default. Do not scan broad handoff archives unless the user asks or the active status trail directly depends on them.
 - Keep the final answer focused on status and next action. Do not drift into implementation planning unless the user asks.
 - If the target is materially ambiguous and multiple reasonable boundaries would change the answer, ask one clarifying question before inspecting broadly.
