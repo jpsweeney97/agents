@@ -12,9 +12,12 @@ Default to strict read-only, chat-only orientation.
 - Do not edit files, create artifacts, update handoffs, stage commits, run formatters, install dependencies, run normal verification, or mutate caches.
 - Do not run commands that write local state, such as `git fetch`, package-manager installs, test/lint/build commands, or generated-report commands, unless the user explicitly widens scope.
 - Use read-only inspection commands and tools, such as `pwd`, `ls`, `find`, `rg`, `sed`, `git status --short --branch`, `git branch --show-current`, `git log`, `git remote -v`, `git diff --stat`, and read-only issue/PR/ticket queries when in scope.
-- If the user explicitly asks for `artifact` or `handoff` mode, perform the orientation first, then write only the requested output artifact. Do not edit source code unless the user separately asks for implementation.
+- Write files only in explicit artifact or handoff-save mode, and only after the orientation. Do not edit source code unless the user separately asks for implementation.
 
 Treat memory, handoffs, and prior summaries as context that can guide where to look, not as current truth. Verify drift-prone claims against live target state when feasible.
+
+If routing is ambiguous, read [routing-examples.md](references/routing-examples.md)
+before deciding whether to use orient-status or a narrower lane.
 
 ## Trigger Boundaries
 
@@ -37,9 +40,12 @@ project, repo, or work-area status brief. If the user's primary object is the
 ticket system, handoff system, backlog, or triage queue itself, name the narrower
 lane and do not run orient-status as the primary skill.
 
-For mixed requests, complete the read-only status orientation, name the adjacent
-lane, and stop before doing that other work unless the user explicitly asked for
-it too.
+For mixed requests, use orient-status only for the orientation part. If the same
+user message explicitly asks for a second deliverable, such as a recommendation,
+plan, cleanup, ticket operation, implementation, verification run, or saved
+handoff, first give a compact status brief, then switch to the named adjacent
+lane only if that lane's rules and mutation gates allow it. If the adjacent work
+was not explicitly requested, name the lane and stop.
 
 ## Discovery Ladder
 
@@ -124,8 +130,9 @@ conflicts, and evidence gaps.
 
 If a full-packet section has no evidence, write `None found` or `Not enough
 evidence`; do not omit it in broad orientation mode. If the user asks for
-implementation, cleanup, verification, planning, or prioritization, name that
-lane instead of expanding into a plan or recommendation.
+implementation, cleanup, verification, planning, prioritization, or ticket or
+handoff operations, apply the mixed-request rule above instead of letting the
+status brief expand into that work by implication.
 
 ## Operating Notes
 
@@ -138,5 +145,16 @@ lane instead of expanding into a plan or recommendation.
 
 Use these modes only when the user explicitly requests them:
 
-- `artifact`: Write or update a named orientation/status artifact after producing the same evidence-grounded packet. Keep the artifact narrow and avoid source edits.
-- `handoff`: Prepare a handoff-style orientation using the relevant project or handoff workflow. Preserve the read-only investigation boundary unless the user explicitly asks to save or update the handoff file.
+- `artifact`: Write or update only the named orientation/status artifact after
+  producing the evidence-grounded packet. If the user asks for an artifact but
+  gives no destination and no repo convention resolves it, ask one path question
+  before writing. Do not update source code, handoff files, tickets, indexes, or
+  generated reports as a side effect.
+- `handoff-style`: Produce a handoff-shaped status brief in chat only. Use this
+  when the user asks to prepare, draft, or format a handoff-style orientation but
+  does not explicitly ask to save or update a handoff file.
+- `handoff-save`: Save or update a handoff only when the user explicitly asks to
+  save, write, update, or run the relevant handoff workflow. Keep the orientation
+  investigation read-only, then switch to that handoff workflow for the file
+  mutation. Do not treat broad status orientation as permission to mutate
+  handoff artifacts.
