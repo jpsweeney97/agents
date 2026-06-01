@@ -11,7 +11,8 @@ when the right lane is unclear from the trigger text alone.
   Behavior: Use handoffs as evidence, re-anchor claims against live state, and
   label stale or unverified claims.
 - User: "Write a status note at `docs/status/current.md`."
-  Behavior: Run orientation, then write only that named status artifact.
+  Behavior: Use `artifact` mode; run orientation, then write only that named
+  status artifact.
 
 ## Orient First, Then Switch Only If Explicit
 
@@ -32,6 +33,9 @@ when the right lane is unclear from the trigger text alone.
   Better lane: ticket listing, search, review, or update skills.
 - User: "Save a handoff for this session."
   Better lane: the relevant handoff save workflow.
+- User: "Show me open tickets."
+  Better lane: ticket listing or search. If that lane is unavailable, say so
+  and do not substitute a broad status orientation.
 
 ## Handoff Distinction
 

@@ -47,6 +47,10 @@ handoff, first give a compact status brief, then switch to the named adjacent
 lane only if that lane's rules and mutation gates allow it. If the adjacent work
 was not explicitly requested, name the lane and stop.
 
+If a narrower lane is unavailable, name that limit and keep the answer inside
+orient-status. Do not approximate ticket, handoff, cleanup, review, audit, or
+planning workflows under a status-orientation label.
+
 ## Discovery Ladder
 
 Adapt this ladder to the target. Say when a source class is unavailable, skipped, or out of scope.
@@ -60,12 +64,21 @@ Adapt this ladder to the target. Say when a source class is unavailable, skipped
 7. Read handoffs as context, not authority. Re-anchor any handoff claim against live state before presenting it as current.
 8. Summarize source conflicts, evidence gaps, and the strongest supported status conclusion.
 
+For large targets, start bounded: inspect the named path or repo root,
+instructions, branch/worktree state, recent commits, and the most directly
+named or discoverable status sources. Expand into tickets, issues, PRs,
+handoff archives, roadmaps, or broad doc searches only when the user's question
+depends on them. If the status conclusion would change with omitted sources,
+mark those sources as evidence gaps instead of silently expanding forever.
+
 ## Freshness Labels
 
 Do not use unqualified `current` for a claim whose source could be stale.
 Attach a freshness label when it affects the conclusion:
 
-- `confirmed-current`: directly checked against the live target in this turn.
+- `confirmed-current`: directly checked against the live target in this turn
+  for the stated source class, such as local files, remote PR state, or runtime
+  state. Do not use it to imply uninspected source classes are also current.
 - `local-only`: checked in the local checkout or local refs, with no remote/API refresh.
 - `remote-unrefreshed`: remote, PR, or issue state matters but was not refreshed.
 - `connector-unavailable`: the relevant ticket, issue, PR, runtime, or app connector was unavailable, unauthenticated, or failed.
