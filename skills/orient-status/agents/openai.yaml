@@ -1,4 +1,4 @@
 interface:
   display_name: "Orient Status"
   short_description: "Read-only live status orientation"
-  default_prompt: "Use $orient-status to get a read-only status brief with in-flight work, source conflicts, freshness limits, and the smallest status-derived next step."
+  default_prompt: "Use $orient-status to get a read-only status brief with in-flight work, blockers, source conflicts, and freshness limits."

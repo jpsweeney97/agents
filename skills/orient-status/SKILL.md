@@ -1,6 +1,6 @@
 ---
 name: orient-status
-description: "Run a read-only orientation of a project, codebase, repository, plugin, skill, or local work area to determine current status, in-flight work, source conflicts, freshness limits, and the smallest status-derived next step. Use when the user asks where things stand, what happened recently, what is in flight, what is blocked, where the target sits against status or roadmap context, or how live state compares with handoffs, tickets, issues, PRs, roadmaps, specs, or status docs. Do not use for explicit drift audits, code review, cleanup, branch landing, implementation/debugging, next-step planning from known findings, or handoff save/load/update unless the user also asks for status orientation."
+description: "Run a read-only orientation of a project, codebase, repository, plugin, skill, or local work area to determine current status, in-flight work, source conflicts, and freshness limits. Use when the user asks where things stand, what happened recently, what is in flight, what is blocked, where the target sits against status or roadmap context, or how live state compares with handoffs, tickets, issues, PRs, roadmaps, specs, or status docs. Do not use for explicit drift audits, code review, cleanup, branch landing, implementation/debugging, next-step planning, backlog prioritization, ticket listing/search/triage, or handoff save/load/list/update unless the user also asks for broader status orientation."
 ---
 
 # Orient Status
@@ -11,7 +11,7 @@ Default to strict read-only, chat-only orientation.
 
 - Do not edit files, create artifacts, update handoffs, stage commits, run formatters, install dependencies, run normal verification, or mutate caches.
 - Do not run commands that write local state, such as `git fetch`, package-manager installs, test/lint/build commands, or generated-report commands, unless the user explicitly widens scope.
-- Use read-only inspection commands and tools, such as `pwd`, `ls`, `find`, `rg`, `sed`, `git status --short --branch`, `git branch --show-current`, `git log`, `git remote -v`, `git diff --stat`, and read-only issue/PR/ticket queries when available.
+- Use read-only inspection commands and tools, such as `pwd`, `ls`, `find`, `rg`, `sed`, `git status --short --branch`, `git branch --show-current`, `git log`, `git remote -v`, `git diff --stat`, and read-only issue/PR/ticket queries when in scope.
 - If the user explicitly asks for `artifact` or `handoff` mode, perform the orientation first, then write only the requested output artifact. Do not edit source code unless the user separately asks for implementation.
 
 Treat memory, handoffs, and prior summaries as context that can guide where to look, not as current truth. Verify drift-prone claims against live target state when feasible.
@@ -21,7 +21,6 @@ Treat memory, handoffs, and prior summaries as context that can guide where to l
 Use this skill for status orientation:
 
 - Current state, recent activity, in-flight work, blockers, open decisions, deferred work, source conflicts, roadmap position, or live-vs-handoff/status-doc comparisons.
-- A status-derived next step: the smallest action implied by current evidence.
 
 Do not use this skill as the primary lane for:
 
@@ -29,8 +28,14 @@ Do not use this skill as the primary lane for:
 - Code review, implementation review, plan scrutiny, or security review.
 - Branch cleanup, branch landing, repo hygiene, staging, committing, pushing, or publishing.
 - Implementation, debugging, test fixing, verification runs, or dependency work.
-- Next-step planning from already-known findings; use a planning or next-steps lane.
-- Handoff save/load/update or ticket create/update operations.
+- Next-step planning, backlog prioritization, or "what should I work on next" analysis.
+- Ticket listing, ticket search, ticket lookup, close-readiness checks, ticket backlog triage, or ticket create/update/close/reopen operations.
+- Handoff save, load, resume, list, update, or `/triage` operations.
+
+Use tickets and handoffs as evidence only when the user is asking for a broader
+project, repo, or work-area status brief. If the user's primary object is the
+ticket system, handoff system, backlog, or triage queue itself, name the narrower
+lane and do not run orient-status as the primary skill.
 
 For mixed requests, complete the read-only status orientation, name the adjacent
 lane, and stop before doing that other work unless the user explicitly asked for
@@ -44,10 +49,10 @@ Adapt this ladder to the target. Say when a source class is unavailable, skipped
 2. Read local instructions and metadata: `AGENTS.md`, README, manifests, package metadata, plugin metadata, skill metadata, and repo-specific status entry points.
 3. Inspect live state: current directory, branch, worktree status, upstream/remotes if present, local diffs, branch-vs-base diffs, and recent local commits. On a non-main branch, inspect changed file names and recent branch commits before trusting older status docs.
 4. Read current-status and open-work docs: files named like `current-state`, `status`, `reconciliation`, `tickets`, `roadmap`, `plans`, `todo`, `backlog`, or repo-specific equivalents.
-5. Inspect ticket, issue, and PR systems if available and in scope. Prefer read-only local ticket files or connector/API queries; avoid refreshing local git state unless asked.
+5. Inspect ticket, issue, and PR systems only when they are evidence for the broader status question. Prefer read-only local files first. Use read-only connector/API queries when the user names a remote PR, issue, branch, or publication state, or when the status conclusion materially depends on remote truth. Do not refresh local git state unless asked.
 6. Read roadmap, spec, design, and plan docs to understand intended sequencing and acceptance boundaries.
 7. Read handoffs as context, not authority. Re-anchor any handoff claim against live state before presenting it as current.
-8. Summarize source conflicts, evidence gaps, and the recommended next step.
+8. Summarize source conflicts, evidence gaps, and the strongest supported status conclusion.
 
 ## Freshness Labels
 
@@ -64,6 +69,12 @@ Attach a freshness label when it affects the conclusion:
 If remote truth matters and scope forbids refresh, say what local evidence shows
 and what command or connector query would raise confidence.
 
+Default to local-only status orientation unless the user names remote state or
+remote truth materially affects the conclusion. Read-only connector/API queries
+are allowed in that case when available. If they fail or are unavailable, label
+the affected claims `connector-unavailable` or `remote-unrefreshed`; do not
+substitute stale local refs for confirmed remote state.
+
 ## Claim-Specific Authority
 
 Resolve authority by claim type instead of applying one global source order:
@@ -75,7 +86,7 @@ Resolve authority by claim type instead of applying one global source order:
 - Runtime or installed state: live runtime inspection, installed cache inspection, or task-specific runtime queries outrank source metadata. Metadata alone is not runtime proof.
 - History and rationale: git log, handoffs, old plans, and prior summaries explain why the state changed; they do not prove current state unless re-anchored.
 
-Call out conflicts explicitly. Do not silently reconcile stale docs, old handoffs, aspirational roadmap text, or inferred next steps into live truth.
+Call out conflicts explicitly. Do not silently reconcile stale docs, old handoffs, aspirational roadmap text, or inferred action items into live truth.
 If the current branch is ahead of the default branch, committed branch changes are part of the selected target's live state. When those branch changes update tickets, evidence, or plans without updating status/register docs, report a branch-vs-status publication conflict instead of flattening the branch evidence into mainline truth.
 
 ## Untracked And Ignored Paths
@@ -94,13 +105,12 @@ Default chat output starts with a `Status Brief`. The brief must include:
 - `Bottom Line`: strongest current-status conclusion.
 - `Current State`: branch/worktree/status-doc truth in one sentence, with freshness labels where needed.
 - `Active Blocker`: current blocker or `None found`.
-- `Recommended Next Step`: smallest high-leverage status-derived action.
 - `Confidence / Limits`: what was checked and what could change the conclusion.
 
 Under `Details`, adapt the packet to the size of the request. Broad orientation
 should use the full packet below. Narrow status checks may compress irrelevant
 sections, but must still name the target, inspected source classes, source
-conflicts, evidence gaps, and next step.
+conflicts, and evidence gaps.
 
 - `Target`: Identify the target path/name, type, boundary, and source classes inspected.
 - `Current State`: State branch/worktree/status-doc truth and the strongest current-status conclusion.
@@ -111,18 +121,17 @@ conflicts, evidence gaps, and next step.
 - `Deferred Work`: Name explicitly deferred items, backlog rows, parked handoff items, or accepted follow-ups.
 - `Source Conflicts`: Identify disagreements across live state, docs, tickets, PRs, handoffs, and roadmaps.
 - `Evidence Gaps`: State what could not be checked, what sources were missing, and what would improve confidence.
-- `Recommended Next Step`: Give the smallest high-leverage next action consistent with the evidence.
 
 If a full-packet section has no evidence, write `None found` or `Not enough
-evidence`; do not omit it in broad orientation mode. If the next action would
-be implementation, cleanup, verification, or planning rather than status
-orientation, name that lane instead of expanding into a plan.
+evidence`; do not omit it in broad orientation mode. If the user asks for
+implementation, cleanup, verification, planning, or prioritization, name that
+lane instead of expanding into a plan or recommendation.
 
 ## Operating Notes
 
 - Prefer exact file paths, branch names, commit hashes, ticket IDs, PR numbers, and dates over vague status language.
 - Read only the latest or explicitly relevant handoffs by default. Do not scan broad handoff archives unless the user asks or the active status trail directly depends on them.
-- Keep the final answer focused on status and next action. Do not drift into implementation planning unless the user asks.
+- Keep the final answer focused on status, blockers, conflicts, and evidence limits. Do not drift into recommendations or implementation planning unless the user asks.
 - If the target is materially ambiguous and multiple reasonable boundaries would change the answer, ask one clarifying question before inspecting broadly.
 
 ## Artifact And Handoff Modes
