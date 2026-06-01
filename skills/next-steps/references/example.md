@@ -2,11 +2,11 @@
 
 Use only for output-shape calibration.
 
-**User:** "We finished a security review and reliability audit. What should we tackle first?"
+**User:** "$next-steps Findings: F1 weak service-to-service trust boundaries; F2 incomplete rollback procedures, marked high likelihood and high impact by the audit; F3 unclear recovery ownership; non-critical cosmetic docs cleanup. What should we tackle first?"
 
 ### 1. Current State
 
-Active findings are weak service-to-service trust boundaries, incomplete rollback procedures, and unclear recovery ownership. Cosmetic docs cleanup is parked. Production changes wait on trust and rollback decisions.
+Active findings are F1: weak service-to-service trust boundaries, F2: incomplete rollback procedures, and F3: unclear recovery ownership. Non-critical cosmetic docs cleanup is parked. Production changes wait on trust and rollback decisions.
 
 ### 2. Dependency Map
 
@@ -31,9 +31,9 @@ Active findings are weak service-to-service trust boundaries, incomplete rollbac
 
 ### 5. Critical Path
 
-**Scheduling:** T2 -> T3
+**Dependency-critical chain:** T2 -> T3
 
-**Highest-risk task:** T2 - likelihood: high; impact: high; on critical path: yes; why: rollout cannot safely continue without credible rollback.
+**Highest-risk task:** T2 - likelihood: high; impact: high; on critical path: yes; why: the supplied audit marks rollback risk high, and rollout cannot safely continue without credible rollback.
 
 ### 6. Out of Scope (Parked)
 
