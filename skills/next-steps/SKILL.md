@@ -40,6 +40,7 @@ Read [references/example.md](references/example.md) only when the user asks for 
 ## Output Sections
 
 For non-early-exit cases, return: `Current State`, `Dependency Map`, `Sequenced Plan`, `Decision Gates`, `Critical Path`, and `Out of Scope (Parked)`.
+After those sections, add one concise sentence offering to save the plan to a file. Do not save automatically. If the user accepts without naming a path, ask one path question before writing.
 
 - `Decision Gates`: use `None - all tasks have a single forward path.` when applicable.
 - `Critical Path`: include `Dependency-critical chain`, `Scheduling-critical status`, and `Highest-risk task`.
@@ -49,4 +50,4 @@ For non-early-exit cases, return: `Current State`, `Dependency Map`, `Sequenced 
 
 ## Pre-Final Checklist
 
-Before finalizing, verify: finding source selected; active findings mapped; no findings, risks, or parked items invented; dependencies closed or marked inferred; phase ordering valid; critical path subclaims separated or limits stated; parked items justified.
+Before finalizing, verify: finding source selected; active findings mapped; no findings, risks, or parked items invented; dependencies closed or marked inferred; phase ordering valid; critical path subclaims separated or limits stated; parked items justified; save offer included for non-early-exit plans.
