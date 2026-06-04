@@ -25,8 +25,8 @@ when the right lane is unclear from the trigger text alone.
 
 ## Do Not Use Orient Status As The Primary Lane
 
-- User: "Audit this directory for drift against the spec."
-  Better lane: `drift-audit`.
+- User: "What is the baseline for this directory against the spec?"
+  Better lane: `baseline`.
 - User: "Review this implementation against the plan."
   Better lane: implementation review or the explicitly invoked review skill.
 - User: "List open tickets" or "triage the backlog."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Drift Audit"
-  short_description: "Audit directories for baseline drift"
-  default_prompt: "Use $drift-audit to audit the current directory for contract/source/doc/test drift; infer the target and baseline unless I specify one."

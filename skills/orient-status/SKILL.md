@@ -1,6 +1,6 @@
 ---
 name: orient-status
-description: "Run a read-only orientation of a project, codebase, repository, plugin, skill, or local work area to determine current status, in-flight work, source conflicts, and freshness limits. Use when the user asks where things stand, what happened recently, what is in flight, what is blocked, where the target sits against status or roadmap context, or how live state compares with handoffs, tickets, issues, PRs, roadmaps, specs, or status docs. Do not use for explicit drift audits, code review, cleanup, branch landing, implementation/debugging, next-step planning, backlog prioritization, ticket listing/search/triage, or handoff save/load/list/update unless the user also asks for broader status orientation."
+description: "Run a read-only orientation of a project, codebase, repository, plugin, skill, or local work area to determine current status, in-flight work, source conflicts, and freshness limits. Use when the user asks where things stand, what happened recently, what is in flight, what is blocked, where the target sits against status or roadmap context, or how live state compares with handoffs, tickets, issues, PRs, roadmaps, specs, or status docs. Do not use for explicit source-of-truth, baseline, or baseline-vs-live authority questions, code review, cleanup, branch landing, implementation/debugging, next-step planning, backlog prioritization, ticket listing/search/triage, or handoff save/load/list/update unless the user also asks for broader status orientation."
 ---
 
 # Orient Status
@@ -27,7 +27,8 @@ Use this skill for status orientation:
 
 Do not use this skill as the primary lane for:
 
-- Explicit drift or baseline-vs-live audits; use a drift-audit skill instead.
+- Explicit source-of-truth, baseline, or baseline-vs-live authority questions;
+  use the baseline skill instead.
 - Code review, implementation review, plan scrutiny, or security review.
 - Branch cleanup, branch landing, repo hygiene, staging, committing, pushing, or publishing.
 - Implementation, debugging, test fixing, verification runs, or dependency work.

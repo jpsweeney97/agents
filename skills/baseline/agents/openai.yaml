@@ -1,0 +1,4 @@
+interface:
+  display_name: "Baseline"
+  short_description: "Resolve source-of-truth questions"
+  default_prompt: "Use $baseline to identify the source of truth for this claim and say what is trustworthy, weak, competing, or missing."
