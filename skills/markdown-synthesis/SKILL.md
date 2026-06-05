@@ -18,7 +18,8 @@ new upgraded document that rewrites and reorganizes the source material.
 - Infer the natural document shape from the request and sources.
 - Bias toward clean prose when source structure is incidental.
 - Preserve source-essential Markdown structure when it helps the reader trust,
-  use, or inspect the result.
+  use, or inspect the result, but gate exact code, configuration, frontmatter,
+  and tool-facing structure under Markdown Structure Handling.
 - Do not include source notes, citations, "derived from" sections, or visible
   file-by-file traces unless the user explicitly asks.
 - Rewrite freely when it improves clarity, flow, structure, or quality, while
@@ -55,6 +56,9 @@ field guide, academic, warm expert, or custom.
 - Broad requests such as "all relevant docs in this area": inspect candidate
   Markdown files, choose the relevant set, then ask the user to confirm the
   selected files before drafting.
+- For broad source confirmation, keep the question compact and include:
+  selected files, excluded groups, confidence or why the selected set is enough,
+  and one question such as "Use this set, or change it?"
 - If broad source selection is risky, explain the risk plainly and ask for a
   tighter scope.
 - Ignore generated or local artifact directories unless the user explicitly
@@ -129,8 +133,9 @@ dump or a pasted bundle of source fragments.
 - Preserve, rebuild, or summarize source-essential structures when they help the
   reader trust, use, or inspect the result.
 - Keep links when the destination matters to the reader's next action or trust.
-- Keep code blocks, commands, configuration, or frontmatter when the output is
-  meant to be used by a human or tool that needs the exact structure.
+- Preserve exact code blocks, commands, configuration, frontmatter, or other
+  tool-facing structure only when the user requested a structure-rich artifact,
+  the source purpose clearly requires exact structure, or you ask first.
 - Keep tables, lists, or checklists when comparison, scanning, or step-by-step
   use would be worse in prose.
 - Ask only when preserving or dropping structure would change meaning, purpose,
