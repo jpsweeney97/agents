@@ -1,0 +1,4 @@
+interface:
+  display_name: "Markdown Synthesis"
+  short_description: "Synthesize Markdown into polished prose"
+  default_prompt: "Use $markdown-synthesis to synthesize these Markdown sources into one polished standalone prose document."
