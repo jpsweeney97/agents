@@ -6,7 +6,8 @@ Load this only for high-stakes decisions: hard-to-reverse choices, broad blast r
 
 - Include explicit `Commitment Point`, `Rollback / Blast Radius`, and
   `Gaps / What Could Flip` sections unless the user asks for a very short
-  answer.
+  answer. In a very short answer, compress these risk dimensions into prose
+  instead of silently dropping them.
 - Define the commitment point: when the decision becomes costly to reverse.
 - Name owners, affected systems or people, and rollback options.
 - Separate must-have constraints from preferences.

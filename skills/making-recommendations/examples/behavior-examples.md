@@ -16,7 +16,8 @@ Expected behavior:
 
 - Treat this as a recommendation request because the user is choosing between
   viable options.
-- Include the null option if distinct from the named options.
+- Include the null option only if it is distinct from the named options and
+  material to the decision.
 - Rank by the user's constraints and obvious failure modes, such as maintenance
   cost, plugin support, compatibility, and migration risk.
 - Recommend one option if the evidence supports it.

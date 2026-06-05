@@ -1,6 +1,6 @@
 ---
 name: making-recommendations
-description: Use when the user explicitly asks for a recommendation, comparison, trade-off analysis, or decision between viable options. Trigger on "recommend", "which is better", "help me decide", or "should I choose X or Y" when the ask is about choosing among serious options. Do not use for factual questions, trivial choices, or broad "best way to build/design/fix" requests where the real work is still clarification, brainstorming, or implementation design.
+description: Use when the user explicitly asks for a recommendation, comparison, trade-off analysis, or decision between viable options. Trigger on "recommend", "which is better", "help me decide", or "should I choose X or Y" when the ask is about choosing among serious options, including low-stakes but real trade-offs. Do not use for factual questions, trivial preferences, or broad "best way to build/design/fix" requests where the real work is still clarification, brainstorming, or implementation design.
 ---
 
 # Structured Recommendations
@@ -19,6 +19,8 @@ stakes, or output calibration is unclear.
 
 - Use for explicit recommendation, comparison, trade-off, ranking, or choice
   requests where the user wants judgment between serious options.
+- Low-stakes recommendation requests still trigger when the options are serious
+  enough that judgment would help; only trivial preferences are out of scope.
 - Use for "best way to..." only when the user is clearly asking to choose among
   approaches, not when they need outcome clarification, brainstorming,
   debugging, design, or implementation.
@@ -34,6 +36,9 @@ failure modes, and stakes are clear enough to compare.
 
 - If one missing detail would materially change the recommendation, ask one
   question and stop.
+- If the user asks to be grilled, stress-tested, challenged, or drilled on a
+  decision, name `grill-me` as the better lane and switch only when the same
+  message explicitly asks for that workflow.
 - If the ask needs clarification rather than choice, name `outcome-interviewer`
   as the better lane, say why, and ask before switching.
 - If the ask needs design exploration before a choice can exist, name
@@ -71,6 +76,8 @@ Handoffs are permissioned and non-silent.
   message, you may switch after naming the move.
 - Use `outcome-interviewer` when the desired outcome, criteria, or real decision
   is still muddy.
+- Use `grill-me` when the user wants an interactive pressure test of a decision,
+  not a one-shot recommendation.
 - Use `superpowers:brainstorming` when the user needs design exploration before
   serious options exist.
 - Use the relevant review, status, baseline, debugging, planning, or
@@ -80,7 +87,8 @@ Handoffs are permissioned and non-silent.
 
 1. State the decision and decision type.
 2. Set stakes from reversibility and blast radius: `low`, `medium`, or `high`.
-3. Generate before evaluating: user options, distinct alternatives, and the null option.
+3. Generate before evaluating: user options first, plus distinct alternatives or
+   the null option only when they are serious and material to the decision.
 4. For medium/high stakes, name gaps and what could resolve or flip them.
 5. Evaluate options against criteria from the user's constraints and failure modes.
 6. Rank every serious option, recommend one only if evidence supports it, and
@@ -90,6 +98,8 @@ Handoffs are permissioned and non-silent.
 
 - Keep generation and evaluation separate.
 - Verify unstable facts before ranking when the answer depends on current prices, laws, availability, schedules, APIs, or similar details.
+- Do not add alternatives or a null/no-change option unless they could
+  realistically win, reveal a constraint, or change the recommendation.
 - Do not invent weak alternatives; use the `only one serious option` exit when
   only one option is viable.
 - If the recommendation does not follow from the ranking, fix the ranking or explain the exception.
@@ -141,3 +151,6 @@ For high-stakes decisions, also include:
 
 - `Commitment Point`
 - `Rollback / Blast Radius`
+
+If the user explicitly asks for a very short high-stakes answer, compress these
+risk dimensions instead of silently dropping them.
