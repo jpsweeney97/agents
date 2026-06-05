@@ -14,15 +14,23 @@ User: Run a tech debt scan here.
 - Select `artifact` by default and write
   `docs/audits/YYYY-MM-DD-<target-slug>-debt-scan.md` unless the user explicitly
   asks for chat-only, read-only, or no file changes.
+- Read repo instructions first for artifact conflicts, but do not require an
+  existing audit convention before using the default path.
 - Write only the audit artifact. Do not edit source, tests, manifests, lock
   files, dependency files, `.gitignore`, or docs outside the artifact unless the
   user separately asks for implementation after the scan.
-- State scan depth, finding cap, artifact path, and any truncation limit before
-  recording findings.
+- Start with a concrete frame naming target, depth, finding cap, artifact path,
+  draft status, and security boundary.
+- Default to `medium` over the current repo or workspace target. Ask only when
+  target boundaries would materially change findings, or when high-stakes or
+  broad-monorepo scope would mislead without a boundary.
 - Return a concise chat `Result Brief`, including `Top Debt Calls`, `Do First`,
   `Why It Matters`, `Audit Path`, and `Coverage Limits`.
 - Treat the saved artifact as the durable continuation surface for a future
   Codex or agent.
+- Mark the in-progress artifact `Status: draft - incomplete`; switch to
+  `Status: complete` only after synthesis, caps, metrics, coverage limits, and
+  fidelity checks pass.
 - Make the artifact's `Evidence Trail` the authority; treat the ranked backlog
   as synthesis and coverage gaps / next probes as trust boundaries.
 - Give every relevant debt category at least a first-pass check before ranking
@@ -33,10 +41,15 @@ User: Run a tech debt scan here.
   sanity checks, and fidelity requirements.
 - Label reduced coverage, capped findings, and omitted categories instead of
   implying exhaustive coverage.
-- Treat CVEs, GHSAs, exploitability questions, and vulnerability discovery as
-  out of scope for this skill; route that work to
-  `codex-security:security-scan` and keep only proof-limited dependency
-  maintenance debt in the audit.
+- Keep dependency review maintenance-only: version skew, unused deps, upgrade
+  drag, lockfile drift, license, compatibility, and maintenance cost.
+- Treat CVEs, GHSAs, exploitability questions, package-audit output, and
+  vulnerability claims as out of scope for this skill; route that work to
+  `codex-security:security-scan` and do not use the security signal as debt
+  evidence.
+- Do not include owners, dependency-aware sequencing, decision gates, ticket
+  mutations, or handoff planning. Hand off to `next-steps` only when the user
+  explicitly asks for those after the audit.
 
 ## Routing Checks
 
@@ -44,10 +57,21 @@ User: Run a tech debt scan here.
 User: Audit our dependencies for tech debt.
 ```
 
-Expected: use `tech-debt-scan` for upgrade, compatibility, deployment, license,
-unused dependency, and maintenance-risk debt. If the work turns into advisory
-validation, exploitability, or vulnerability discovery, stop that part and name
-`codex-security:security-scan` as the right lane.
+Expected: use `tech-debt-scan` for version skew, unused deps, upgrade drag,
+lockfile drift, license, compatibility, and maintenance-risk debt. If CVEs,
+GHSAs, exploitability, package-audit output, or vulnerability claims surface,
+stop that branch, name `codex-security:security-scan` as the right lane, and do
+not record the security signal as debt evidence.
+
+```markdown
+User: Run a tech debt scan here.
+```
+
+Expected: default to `medium` over the current repo or workspace target, read
+repo instructions for artifact conflicts, then write
+`docs/audits/YYYY-MM-DD-<target-slug>-debt-scan.md` as
+`Status: draft - incomplete` while collecting evidence. Do not ask for an
+artifact path merely because the repo has no existing audit convention.
 
 ```markdown
 User: What should we clean up first?
@@ -55,3 +79,11 @@ User: What should we clean up first?
 
 Expected: use `tech-debt-scan` when the user wants prioritization or a cleanup
 backlog. Do not start edits; return `Do First` as the recommended next action.
+
+```markdown
+User: Turn this debt scan into an owner-based plan with dependencies and gates.
+```
+
+Expected: do not expand `tech-debt-scan` into handoff or planning mode. Finish
+or reference the audit artifact, then name `next-steps` as the right lane for
+dependency-aware sequencing, owners, and gates.
