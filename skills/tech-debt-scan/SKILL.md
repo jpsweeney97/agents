@@ -1,11 +1,6 @@
 ---
 name: tech-debt-scan
-description: >-
-  Use when a user asks for a fast technical debt scan of a repo, service,
-  package, subsystem, or interface. Produces a prioritized cleanup backlog
-  across code health, architecture, dependency, test, operational, and knowledge
-  debt. For PR/file review use code review; for exhaustive high-stakes scans
-  recommend tech-debt-audit.
+description: "Use when a user asks for a fast technical debt scan of a repo, service, package, subsystem, or interface. Produces a prioritized cleanup backlog across code health, architecture, dependency, test, operational, and knowledge debt."
 allowed-tools:
   - Read
   - Write
@@ -23,9 +18,7 @@ single-pass debt scan."
 
 Use for cleanup planning, refactoring backlogs, handoffs, pre-scaling checks, and
 "where is our worst debt?" Do not use for PR/file review, incident RCA,
-greenfield design, or docs-only review. Recommend `tech-debt-audit` for large,
-high-stakes, 4+ category, or outpacing-one-agent scans. If continuing anyway,
-label reduced coverage.
+greenfield design, or docs-only review.
 
 ## Output
 
