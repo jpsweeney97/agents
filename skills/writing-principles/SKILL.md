@@ -36,7 +36,8 @@ Do not use for user-facing docs, conversational replies, code comments, or creat
    - Edit/refactor/create: start with one result line, then what changed, why,
      verification, remaining risks.
 
-Load `writing-principles.md` for Medium/High risk work, explicit audits, unclear violations, or full self-checks.
+Load `references/writing-principles.md` for Medium/High risk work, explicit
+audits, unclear violations, or full self-checks.
 
 ## Hard Rules
 

@@ -1,13 +1,6 @@
 ---
 name: tech-debt-scan
 description: "Use when a user asks for a technical debt scan, audit, cleanup backlog, or debt-prioritization pass over a repo, service, package, subsystem, or interface. Produces a saved evidence-led audit with a concise chat summary across code health, architecture, dependency, test, operational, and knowledge debt."
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
 ---
 
 # Tech Debt Scan
@@ -34,7 +27,7 @@ lock files, dependency files, docs outside the audit artifact, `.gitignore`, or
 cleanup artifacts. `Do First` is a recommendation, not permission to start the
 work. If the user wants dependency-aware sequencing, owners, gates, or
 continuation planning after the audit, name `$next-steps` as the right lane and
-stop. Do not execute it unless the user explicitly invokes or selects that skill.
+stop. Do not execute it unless the user clearly asks for that planning work.
 
 ## Output
 

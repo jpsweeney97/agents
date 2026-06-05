@@ -54,8 +54,8 @@ User: Run a tech debt scan here.
   evidence.
 - Do not include owners, dependency-aware sequencing, decision gates, ticket
   mutations, or handoff planning. Name `$next-steps` as the right lane and stop
-  only when the user explicitly asks for those after the audit; do not execute it
-  unless the user explicitly invokes or selects that skill.
+  only when the user asks for those after the audit; do not execute it unless the
+  user clearly asks for that planning work.
 
 ## Routing Checks
 
@@ -102,4 +102,4 @@ User: Turn this debt scan into an owner-based plan with dependencies and gates.
 Expected: do not expand `tech-debt-scan` into handoff or planning mode. Finish
 or reference the audit artifact, then name `$next-steps` as the right lane for
 dependency-aware sequencing, owners, and gates, and stop unless the user
-explicitly invokes or selects that skill.
+clearly asks for that planning work.

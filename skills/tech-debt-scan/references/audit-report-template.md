@@ -59,7 +59,7 @@ Do not include owners, dependency chains, decision gates, ticket mutations,
 implementation steps, or security vulnerability claims. If the user wants
 dependency-aware sequencing, owners, gates, or continuation planning after the
 audit, name `$next-steps` as the right lane and stop; do not execute it unless
-the user explicitly invokes or selects that skill. If dependency review surfaces
+the user clearly asks for that planning work. If dependency review surfaces
 CVEs, GHSAs, exploitability, package-audit output, or vulnerability claims, stop
 that branch and route to `codex-security:security-scan`; do not use the security
 signal as debt evidence.

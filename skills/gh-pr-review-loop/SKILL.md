@@ -1,12 +1,12 @@
 ---
 name: gh-pr-review-loop
 description: >
-  Use only when the user explicitly invokes `$gh-pr-review-loop` or explicitly
-  asks for the full GitHub PR review-response loop: discover unresolved PR
-  review threads, independently verify each comment, fix all real actionable
-  issues, run focused verification, create one coherent commit when code changes
-  are needed, push once, reply to and resolve appropriate threads, then request
-  another `@codex review`. Do not use for ordinary "address comments" requests,
+  Use when the user invokes `$gh-pr-review-loop` or clearly asks for the full
+  GitHub PR review-response loop: discover unresolved PR review threads,
+  independently verify each comment, fix all real actionable issues, run focused
+  verification, create one coherent commit when code changes are needed, push
+  once, reply to and resolve appropriate threads, then request another
+  `@codex review`. Do not use for ordinary "address comments" requests,
   first-pass PR reviews, CI debugging, issue triage, or GitHub comment summaries
   that do not authorize push, thread resolution, and re-review.
 ---
@@ -20,11 +20,11 @@ review-comment workflows for the mechanics when available.
 
 ## Boundaries
 
-- Explicit-only: use this skill only when the user invokes
-  `$gh-pr-review-loop` or clearly requests the full commit, push,
-  reply/resolve, and re-review lifecycle.
-- Full-loop authorization: explicit invocation authorizes local edits, one
-  coherent commit when needed, one push, thread replies and resolution, and a
+- Full-loop trigger: use this skill when the user invokes `$gh-pr-review-loop`
+  or clearly requests the full commit, push, reply/resolve, and re-review
+  lifecycle.
+- Full-loop authorization: that clear full-loop request authorizes local edits,
+  one coherent commit when needed, one push, thread replies and resolution, and a
   top-level `@codex review` request when all checkpoint conditions are clear.
 - Non-trigger: ordinary "address PR comments", comment summaries, first-pass PR
   reviews, CI triage, issue triage, or requests that do not clearly authorize

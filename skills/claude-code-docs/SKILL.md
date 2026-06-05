@@ -40,7 +40,6 @@ Non-trigger examples:
 1. Classify the question.
    - If it is a single focused Claude Code docs question, answer inline.
    - If it spans multiple documentation areas or will likely require 3 or more searches, use the inline broad-query path below by default.
-   - Delegate to `claude-code-docs-researcher` only when a compatible agent mechanism is actually available and the user explicitly asked for or approved delegation.
 2. Confirm the tool surface.
    - In Codex, the expected MCP namespace is `mcp__claude_code_docs`, with `search_docs`, `reload_docs`, and `get_status`.
    - If `mcp__claude_code_docs.search_docs` is not visible, use `tool_search` for `claude-code-docs search_docs`.
@@ -120,8 +119,7 @@ If the question spans multiple documentation areas or needs 3 or more searches:
 
 1. Break the question into 2-6 focused sub-queries.
 2. Run 3-8 searches inline through `mcp__claude_code_docs.search_docs`.
-3. Use a compatible researcher agent only when the user explicitly asked for or approved delegation and the current runtime exposes an agent mechanism that can use it.
-4. Keep single-lookups inline. Do not delegate a question that one or two searches can answer directly.
+3. Keep single-lookups inline. Do not broaden a question that one or two searches can answer directly.
 
 If the MCP server appears unavailable:
 
