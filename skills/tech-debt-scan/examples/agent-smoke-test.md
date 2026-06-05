@@ -16,6 +16,11 @@ User: Run a tech debt scan here.
   asks for chat-only, read-only, or no file changes.
 - Read repo instructions first for artifact conflicts, but do not require an
   existing audit convention before using the default path.
+- If the default parent directory is missing and repo instructions do not forbid
+  it, create the parent directory before writing the artifact.
+- If parent-directory creation or artifact writing fails, fall back to chat-only,
+  label the missing artifact as a proof limit, and do not claim the saved audit
+  exists.
 - Write only the audit artifact. Do not edit source, tests, manifests, lock
   files, dependency files, `.gitignore`, or docs outside the artifact unless the
   user separately asks for implementation after the scan.
@@ -48,8 +53,9 @@ User: Run a tech debt scan here.
   `codex-security:security-scan` and do not use the security signal as debt
   evidence.
 - Do not include owners, dependency-aware sequencing, decision gates, ticket
-  mutations, or handoff planning. Hand off to `next-steps` only when the user
-  explicitly asks for those after the audit.
+  mutations, or handoff planning. Name `$next-steps` as the right lane and stop
+  only when the user explicitly asks for those after the audit; do not execute it
+  unless the user explicitly invokes or selects that skill.
 
 ## Routing Checks
 
@@ -70,8 +76,9 @@ User: Run a tech debt scan here.
 Expected: default to `medium` over the current repo or workspace target, read
 repo instructions for artifact conflicts, then write
 `docs/audits/YYYY-MM-DD-<target-slug>-debt-scan.md` as
-`Status: draft - incomplete` while collecting evidence. Do not ask for an
-artifact path merely because the repo has no existing audit convention.
+`Status: draft - incomplete` while collecting evidence, creating the default
+parent directory when allowed. Do not ask for an artifact path merely because the
+repo has no existing audit convention.
 
 ```markdown
 User: What should we clean up first?
@@ -81,9 +88,18 @@ Expected: use `tech-debt-scan` when the user wants prioritization or a cleanup
 backlog. Do not start edits; return `Do First` as the recommended next action.
 
 ```markdown
+User: Which of these three debt items should we do first?
+```
+
+Expected: use `making-recommendations` when the user supplied the options and
+asks for a choice without asking for a new audit, evidence gathering, or backlog
+discovery.
+
+```markdown
 User: Turn this debt scan into an owner-based plan with dependencies and gates.
 ```
 
 Expected: do not expand `tech-debt-scan` into handoff or planning mode. Finish
-or reference the audit artifact, then name `next-steps` as the right lane for
-dependency-aware sequencing, owners, and gates.
+or reference the audit artifact, then name `$next-steps` as the right lane for
+dependency-aware sequencing, owners, and gates, and stop unless the user
+explicitly invokes or selects that skill.

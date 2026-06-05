@@ -22,13 +22,19 @@ docs-only review, git hygiene, branch cleanup, dirty-worktree cleanup, handoff
 planning, dependency-aware sequencing, ticket work, or security vulnerability
 discovery.
 
+If the user asks to choose among already-supplied debt options without asking for
+an audit or evidence gathering, use `making-recommendations`. Use
+`tech-debt-scan` when evidence gathering, debt discovery, or backlog synthesis is
+needed.
+
 This is an audit-and-backlog skill, not an implementation, handoff, ticket, or
 planning skill. Unless the user separately asks for implementation after the
 scan, write only the audit artifact. Do not edit source files, tests, manifests,
 lock files, dependency files, docs outside the audit artifact, `.gitignore`, or
 cleanup artifacts. `Do First` is a recommendation, not permission to start the
 work. If the user wants dependency-aware sequencing, owners, gates, or
-continuation planning, hand off to `next-steps` after the audit.
+continuation planning after the audit, name `$next-steps` as the right lane and
+stop. Do not execute it unless the user explicitly invokes or selects that skill.
 
 ## Output
 
@@ -43,6 +49,10 @@ Pick the output mode before recording findings:
 Read repo instructions first for artifact conflicts, but do not require an
 existing repo audit convention. `tech-debt-scan` owns the default
 `docs/audits/YYYY-MM-DD-<target-slug>-debt-scan.md` convention.
+If the default parent directory is missing and repo instructions do not forbid
+it, create the parent directory before writing the artifact. If parent-directory
+creation or artifact writing fails, fall back to `chat-only`, label the missing
+artifact as a proof limit, and do not claim the saved audit exists.
 
 Also pick scan depth before recording findings:
 
@@ -143,8 +153,9 @@ Run `Frame -> Triage -> Evidence Sweep -> Synthesize -> Deliver`.
    rubric metrics.
 6. **Deliver:** use the audit report template, rubric caps, sanity checks, and
    fidelity check. For `artifact`, write the audit file before claiming
-   completion and change status to `complete` only after final checks pass.
-   `chat-only` answers in chat and labels the missing artifact. If capped with
-   material findings left, label the artifact truncated and name the next
-   evidence slice. If writing fails, report the blocker, include the concise
-   summary, and do not claim the saved audit exists.
+   completion, creating the default parent directory when allowed, and change
+   status to `complete` only after final checks pass. `chat-only` answers in chat
+   and labels the missing artifact. If capped with material findings left, label
+   the artifact truncated and name the next evidence slice. If writing fails,
+   report the blocker, include the concise summary, label the missing artifact as
+   a proof limit, and do not claim the saved audit exists.

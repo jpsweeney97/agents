@@ -19,6 +19,11 @@ use `docs/audits/`; this skill owns that convention. If repo instructions forbid
 or redirect audit artifacts, follow the repo instruction or ask one path question
 when the conflict cannot be resolved safely.
 
+If the default parent directory is missing and repo instructions do not forbid
+it, create the parent directory before writing the artifact. If parent-directory
+creation or artifact writing fails, return a chat-only summary, label the missing
+artifact as a proof limit, and do not claim the saved audit exists.
+
 ## Status Lifecycle
 
 Start the artifact with:
@@ -52,11 +57,12 @@ trail. If a synthesis sentence drifts, fix the synthesis or lower confidence.
 
 Do not include owners, dependency chains, decision gates, ticket mutations,
 implementation steps, or security vulnerability claims. If the user wants
-dependency-aware sequencing, owners, gates, or continuation planning, hand off to
-`next-steps` after the audit. If dependency review surfaces CVEs, GHSAs,
-exploitability, package-audit output, or vulnerability claims, stop that branch
-and route to `codex-security:security-scan`; do not use the security signal as
-debt evidence.
+dependency-aware sequencing, owners, gates, or continuation planning after the
+audit, name `$next-steps` as the right lane and stop; do not execute it unless
+the user explicitly invokes or selects that skill. If dependency review surfaces
+CVEs, GHSAs, exploitability, package-audit output, or vulnerability claims, stop
+that branch and route to `codex-security:security-scan`; do not use the security
+signal as debt evidence.
 
 ## Report Template
 
