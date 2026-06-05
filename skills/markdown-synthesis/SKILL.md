@@ -1,12 +1,12 @@
 ---
 name: markdown-synthesis
-description: Use when the user asks to synthesize, consolidate, combine, distill, or rewrite multiple Markdown sources into one stronger standalone prose Markdown document on disk. Supports exact files, folders, globs, and broad "relevant docs" inputs. Do not use for structure-only Markdown cleanup, preserving original wording/order, simple summaries, non-Markdown outputs, or outputs that need tables, code blocks, links, images, or frontmatter.
+description: "Use when the user asks to synthesize, consolidate, combine, distill, or rewrite multiple Markdown sources into one stronger standalone Markdown document on disk. Supports exact files, folders, globs, broad relevant-docs inputs, clean prose documents, and structure-rich Markdown when source structure carries meaning. Do not use for structure-only Markdown cleanup, preserving original wording/order, simple summaries, or non-Markdown outputs."
 ---
 
 # Markdown Synthesis
 
-Turn multiple Markdown sources into one cohesive, source-grounded prose
-Markdown document written to disk.
+Turn multiple Markdown sources into one cohesive, source-grounded Markdown
+document written to disk.
 
 This is not formatting cleanup. Use `markdown-reformat` when the user wants to
 preserve wording, order, detail, and voice. Use this skill when the user wants a
@@ -15,53 +15,46 @@ new upgraded document that rewrites and reorganizes the source material.
 ## Core Contract
 
 - Produce one standalone finished Markdown file on disk.
-- Write prose Markdown: headings and paragraphs by default.
-- Do not include tables, code blocks, links, images, frontmatter, source
-  notes, citations, "derived from" sections, or visible file-by-file traces.
+- Infer the natural document shape from the request and sources.
+- Bias toward clean prose when source structure is incidental.
+- Preserve source-essential Markdown structure when it helps the reader trust,
+  use, or inspect the result.
+- Do not include source notes, citations, "derived from" sections, or visible
+  file-by-file traces unless the user explicitly asks.
 - Rewrite freely when it improves clarity, flow, structure, or quality, while
   preserving source-supported meaning.
 - Add framing, transitions, and organization when they help the document cohere;
   do not invent substantive claims beyond what the sources support.
-- Distill duplicated, conflicting, or low-quality material into high-quality
-  material that fits the whole document.
+- Distill duplicated, lightly inconsistent, or low-quality material into
+  high-quality material that fits the whole document.
 - If the sources cannot support a confident finished document, stop before
   writing and ask for the smallest needed decision.
 - Never stage or commit the synthesis file unless the user explicitly asks.
 
 ## Setup Questions
 
-Before synthesis, collect the document's purpose, audience, and tone. If the
-user already supplied any of these, do not ask again for that field. If any are
-missing, ask one compact setup question that requests the missing fields.
+Do not ask setup questions as the first move when exact or obvious sources are
+available. Inspect those sources first, then infer the likely purpose, audience,
+tone, document shape, and structure policy.
 
-Offer this tone menu when tone is missing:
+Ask one compact correction question only when an inferred default would be risky
+or would materially change the finished document. If the user already supplied a
+field, do not ask again for that field.
 
-1. Plainspoken: clear, direct, human, low-jargon.
-2. Neutral professional: polished, balanced, and credible without sounding
-   promotional.
-3. LinkedIn / corporate professional: public-facing, upbeat, brand-safe, and
-   business-friendly.
-4. Executive brief: concise, strategic, decision-oriented, and written for busy
-   senior readers.
-5. Editorial / magazine-style: fluid, engaging, and polished with stronger
-   narrative flow.
-6. Thought-leadership: confident, thesis-driven, elevated, and insight-forward.
-7. Tutorial / explanatory: patient, structured, and designed to teach the
-   reader step by step.
-8. Field guide / practical: action-oriented, concrete, and focused on usable
-   takeaways.
-9. Academic / analytical: precise, careful, formal, and argument-driven.
-10. Warm expert: approachable and reassuring while still authoritative.
-11. Custom blend: the user may combine options or describe a tone in their own
-    words.
+Use a clean, direct, source-grounded tone by default when tone is not material to
+the output. Offer tone choices only when tone is a real decision; keep the menu
+short, such as plainspoken, neutral professional, executive brief, tutorial,
+field guide, academic, warm expert, or custom.
 
 ## Source Selection
 
 - Exact files: use the named Markdown files directly when they exist. If a
   named file is missing, stop and ask instead of substituting another file.
-- Folders, globs, or broad requests such as "all relevant docs in this area":
-  inspect candidate Markdown files, choose the relevant set, then ask the user
-  to confirm the selected files before synthesizing.
+- Clear selection rules, such as exact globs or "all Markdown files in this
+  folder except archive", can proceed after applying the rule.
+- Broad requests such as "all relevant docs in this area": inspect candidate
+  Markdown files, choose the relevant set, then ask the user to confirm the
+  selected files before drafting.
 - If broad source selection is risky, explain the risk plainly and ask for a
   tighter scope.
 - Ignore generated or local artifact directories unless the user explicitly
@@ -87,29 +80,36 @@ Do not overwrite existing files unless the user explicitly asks.
 
 ## Synthesis Workflow
 
-1. Clarify purpose, audience, and tone if missing.
-2. Resolve the source set:
+1. Resolve the source set:
    - exact files can proceed directly;
-   - broad inputs require source confirmation before synthesis.
-3. Read every selected source file fully enough to understand its meaning,
+   - clear selection rules can proceed after applying the rule;
+   - broad relevance inputs require source confirmation before drafting.
+2. Read every selected source file fully enough to understand its meaning,
    quality, structure, overlaps, contradictions, and reusable material.
-4. Identify the central through-line and the document shape that would serve the
-   stated purpose and audience.
-5. Collapse repetition, reconcile light inconsistencies, and upgrade weak
-   wording into cohesive prose.
-6. Apply the confidence gate before writing.
-7. Write the output file to a non-destructive path.
-8. Reread or inspect the finished file for coherence, prose-only Markdown, and
-   source-grounded meaning.
+3. Infer purpose, audience, tone, document shape, and structure policy from the
+   request and sources.
+4. Ask one compact correction question only when the inference is unsafe or a
+   meaning-level choice belongs to the user.
+5. Identify the central through-line and the document shape that would serve the
+   purpose and audience.
+6. Collapse repetition, reconcile light editorial inconsistencies, and upgrade
+   weak wording into cohesive Markdown.
+7. Apply the confidence gate before writing.
+8. Write the output file to a non-destructive path.
+9. Reread or inspect the finished file for coherence, appropriate Markdown
+   structure, and source-grounded meaning.
+10. Reply with the output path, document shape, source count, notable preserved
+   structure if any, and verification performed.
 
 ## Confidence Gate
 
 Proceed when the problems are editorial: repetition, weak organization, uneven
-tone, scattered points, minor inconsistencies, or missing transitions.
+tone, scattered points, incidental structure, minor inconsistencies, or missing
+transitions.
 
 Stop before writing when the sources contain unresolved contradictions, missing
-core context, or ambiguity that would force a meaning-level decision. In that
-case:
+core context, uncertain source selection, or ambiguity that would force a
+meaning-level decision. In that case:
 
 - Explain the blocker in plain language.
 - Name the smallest decision needed from the user.
@@ -118,17 +118,25 @@ case:
 - Do not write a caveated or TODO-filled "finished" document unless the user
   explicitly asks for that format.
 
-## Prose-Only Handling
+## Markdown Structure Handling
 
-The finished document should be readable prose, not a technical dump.
+The finished document should feel intentionally written, not like a technical
+dump or a pasted bundle of source fragments.
 
-- Translate code, commands, URLs, tables, diagrams, metadata, and structured
-  source details into prose when that preserves the point.
-- Omit source structures that are not needed for the document's purpose.
-- Stop and ask when code, commands, URLs, tables, links, images, or structured
-  data seem essential rather than illustrative.
-- Do not include Markdown link syntax. If a URL matters and the user wants it
-  retained, ask whether to allow an exception or describe it in prose.
+- Use headings and paragraphs for the main spine by default.
+- Translate or omit source structures when they are incidental, decorative,
+  redundant, or only evidence of source formatting.
+- Preserve, rebuild, or summarize source-essential structures when they help the
+  reader trust, use, or inspect the result.
+- Keep links when the destination matters to the reader's next action or trust.
+- Keep code blocks, commands, configuration, or frontmatter when the output is
+  meant to be used by a human or tool that needs the exact structure.
+- Keep tables, lists, or checklists when comparison, scanning, or step-by-step
+  use would be worse in prose.
+- Ask only when preserving or dropping structure would change meaning, purpose,
+  audience, or expected use.
+- Do not add synthetic citations, source-file notes, or visible provenance
+  sections unless the user explicitly asks.
 
 ## Quality Bar
 
@@ -137,9 +145,26 @@ The output is done when:
 - It reads as one intentional document, not a merged pile of notes.
 - A human reader can follow the argument or explanation without knowing the
   source files existed.
+- The document shape fits the purpose, audience, and source material.
 - Headings are useful, shallow, and coherent.
 - Paragraphs have clear transitions and no duplicated filler.
-- The tone matches the user's selected option or custom blend.
-- The prose does not overstate, flatten, or invent source meaning.
+- Preserved structure earns its place by helping the reader trust, use, or
+  inspect the result.
+- Incidental source scaffolding is removed or turned into clearer prose.
+- The tone matches the user's selected option, supplied style, or safely inferred
+  default.
+- The document does not overstate, flatten, or invent source meaning.
 - The file was written to a non-destructive path and left uncommitted by
   default.
+
+## Final Response
+
+After writing the file, keep the chat response concise and include:
+
+- Output path.
+- Document shape, such as prose brief, field guide, reference page, operating
+  guide, or structure-rich Markdown artifact.
+- Source count.
+- Notable preserved structure, or `None` when no source structure was worth
+  preserving visibly.
+- Verification performed.
