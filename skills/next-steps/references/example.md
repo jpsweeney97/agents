@@ -25,11 +25,13 @@ Active findings are F1: weak service-to-service trust boundaries, F2: incomplete
 
 **Phase 2** (after Phase 1):
 - T3: assign recovery ownership - done when: owner, escalation criteria, and operations artifact are recorded
-- T4: decide rollout readiness - done when: go/no-go criteria and the next planning workflow choice are recorded
+- T4: decide rollout readiness - done when: go/no-go criteria and the next implementation-planning lane is recorded
 
 ### 4. Decision Gates
 
-- After T1 and T2: decide rollout readiness. If readiness is approved, ask which planning workflow to use; if not, keep the plan at the decision stage.
+- After T1 and T2: decide rollout readiness. If readiness is approved, hand off
+  to `superpowers:writing-plans` or another explicit implementation-planning
+  lane; if not, keep the plan at the decision stage.
 
 ### 5. Critical Path
 

@@ -1,22 +1,26 @@
 ---
 name: next-steps
-description: Use when the user asks to turn existing findings into a strategic action plan with dependencies, gates, and critical path.
+description: Use when the user explicitly invokes `$next-steps` to turn existing findings into a strategic action plan with dependencies, gates, and critical path.
 ---
 
 # Action Plan
 
-Turn existing findings into a small dependency-aware strategic plan.
+Turn existing findings into a small dependency-aware strategic plan. This skill
+is explicit-only; use it only when the user selects `$next-steps`.
 
 Read [references/example.md](references/example.md) only when the user asks for an example or needs output or edge-case calibration.
 
 ## Use
 
 - For review findings, audit results, retrospectives, brainstorming notes, or similar analysis.
+- For sequencing supplied findings. Use `making-recommendations` instead when
+  the user wants to choose among options, prioritize options, or rank trade-offs.
 - Not for step-by-step coding plans, direct execution, or session-sized implementation plans.
 - These are early exits that do not need the full output packet:
   - No findings: ask what artifact or discussion to plan from.
   - One obvious next step: say so instead of fabricating phases.
-  - Implementation-ready work: say this is ready for implementation planning and ask which planning workflow to use.
+  - Implementation-ready work: say this is ready for `superpowers:writing-plans`
+    or another explicit implementation-planning lane, then stop.
 
 ## Build
 
