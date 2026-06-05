@@ -21,6 +21,12 @@ Use for cleanup planning, refactoring backlogs, handoffs, pre-scaling checks, an
 greenfield design, docs-only review, git hygiene, branch cleanup, dirty-worktree
 cleanup, or security vulnerability discovery.
 
+This is an audit-and-backlog skill, not an implementation skill. Unless the
+user separately asks for implementation after the scan, write only the audit
+artifact. Do not edit source files, tests, manifests, lock files, dependency
+files, docs outside the audit artifact, `.gitignore`, or cleanup artifacts.
+`Do First` is a recommendation, not permission to start the work.
+
 ## Output
 
 Pick the output mode before recording findings:
@@ -32,6 +38,18 @@ Pick the output mode before recording findings:
   location. Label the missing artifact as a proof limit.
 - `handoff`: explicit ownership transfer, continuation, or team tracking; write
   the artifact with owners, next probes, truncation, and follow-ups.
+
+Also pick scan depth before recording findings:
+
+- `low`: narrow target or quick pass; cap findings at 4-8 and name omitted
+  categories.
+- `medium` default: normal repo or subsystem scan; cap findings at 8-15.
+- `high`: broad or high-stakes scan; cap findings at 12-20 and name the next
+  continuation slice before deep reading.
+
+Depth controls how much evidence to gather, not the proof bar. If the selected
+depth cannot cover every relevant category, label the scan truncated and keep
+uncovered categories in `Coverage Gaps / Next Probes`.
 
 The saved artifact is for a future Codex or agent continuing the work. Its
 authority order is:
@@ -73,9 +91,9 @@ References:
 Run `Frame -> Triage -> Evidence Sweep -> Synthesize -> Deliver`.
 
 1. **Frame:** state scope (`system`, `subsystem`, `interface`), output mode, top
-   1-2 archetypes, stakes, artifact path, and evidence map. Use the taxonomy.
-   Choose higher stakes when uncertain. Pause only when stakes are high and
-   scope/archetype is uncertain.
+   1-2 archetypes, stakes, scan depth, finding cap, artifact path, and evidence
+   map. Use the taxonomy. Choose higher stakes when uncertain. Pause only when
+   stakes are high and scope/archetype is uncertain.
 2. **Triage:** mark categories `primary`, `secondary`, `background`, or
    `inapplicable`. Every relevant category must get at least a first-pass check
    before ranking top calls. Announce scanned, skipped, and deep-emphasis
@@ -84,7 +102,11 @@ Run `Frame -> Triage -> Evidence Sweep -> Synthesize -> Deliver`.
    architecture-drift, operational, and knowledge debt. For active categories,
    read the relevant repo instructions, manifests, dependency or lock files,
    tests and CI surfaces, architecture docs or imports, operational setup, and
-   knowledge sources before promoting findings. Keep named-cost debt only.
+   knowledge sources before promoting findings. Keep named-cost debt only. If
+   dependency review surfaces CVEs, GHSAs, advisories, exploitability questions,
+   or vulnerability claims, route that work to `codex-security:security-scan`;
+   in this audit, record only maintenance, compatibility, deploy, or upgrade
+   debt with a proof limit.
 4. **Record:** record evidence in the artifact as you go. Do not create
    `.tech-debt-scan-notes.md`, edit `.gitignore`, or create scratch files unless
    the user explicitly asks for that separate file. Record cross-links and
