@@ -1,4 +1,4 @@
 interface:
   display_name: "Making Recommendations"
-  short_description: "Choose between viable options"
-  default_prompt: "Use $making-recommendations to compare viable options, rank tradeoffs, recommend only when evidence supports it, and label readiness."
+  short_description: "Recommend without overranking"
+  default_prompt: "Use $making-recommendations to compare viable options, avoid ranking muddy or incomparable choices, recommend only when evidence supports it, and label readiness."

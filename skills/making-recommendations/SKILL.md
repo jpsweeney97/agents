@@ -9,8 +9,8 @@ Recommend only after comparing real options and ranking trade-offs.
 
 Use this skill when the user wants a decision between viable options. If the
 request is really asking to clarify a muddy outcome, design a solution, build a
-feature, fix a bug, or plan implementation, hand off to the appropriate skill
-instead of forcing a ranking.
+feature, fix a bug, or plan implementation, name the better lane and stop or
+ask before switching instead of forcing a ranking.
 
 Read [examples/behavior-examples.md](examples/behavior-examples.md) when routing,
 stakes, or output calibration is unclear.
@@ -24,8 +24,8 @@ stakes, or output calibration is unclear.
   debugging, design, or implementation.
 - Do not use for factual questions, simple lookups, trivial preferences, or
   status orientation.
-- If the desired outcome or serious options are still muddy, ask one clarifying
-  question or hand off to `outcome-interviewer` or `superpowers:brainstorming`.
+- If the desired outcome or serious options are still muddy, use a pre-ranking
+  exit or permissioned handoff instead of ranking.
 
 ## First Move
 
@@ -34,12 +34,47 @@ failure modes, and stakes are clear enough to compare.
 
 - If one missing detail would materially change the recommendation, ask one
   question and stop.
-- If the ask needs clarification rather than choice, hand off to
-  `outcome-interviewer`.
-- If the ask needs design exploration before a choice can exist, hand off to
-  `superpowers:brainstorming`.
+- If the ask needs clarification rather than choice, name `outcome-interviewer`
+  as the better lane, say why, and ask before switching.
+- If the ask needs design exploration before a choice can exist, name
+  `superpowers:brainstorming` as the better lane, say why, and ask before
+  switching.
 - If enough is clear to proceed, state any assumptions before evaluating.
 - Do not generate a full ranking from a muddy prompt.
+
+## Pre-Ranking Exits
+
+Use these exits before the normal workflow. Do not include a full ranking when
+an exit applies.
+
+- `material missing detail`: A missing fact, constraint, criterion, owner,
+  deadline, or stake would materially change the recommendation. Ask one focused
+  question, mark readiness `not enough to recommend yet`, and stop.
+- `options not comparable`: The options optimize for different outcomes or need
+  different criteria. State the mismatch, ask the decision-frame question, mark
+  readiness `options not comparable`, and stop.
+- `only one serious option`: Only one option remains viable after applying the
+  user's constraints. Name the viable option, explain why the other named
+  options are not serious, and do not invent a weak alternative just to rank.
+  You may recommend the viable option with honest readiness, or say what check
+  could reveal a second serious option.
+
+## Handoffs
+
+Handoffs are permissioned and non-silent.
+
+- Do not silently continue under another skill after `making-recommendations`
+  triggers.
+- When another lane is better, name the lane, say why recommendation cannot
+  proceed yet, ask whether to switch, and stop.
+- If the user already explicitly asked for the adjacent workflow in the same
+  message, you may switch after naming the move.
+- Use `outcome-interviewer` when the desired outcome, criteria, or real decision
+  is still muddy.
+- Use `superpowers:brainstorming` when the user needs design exploration before
+  serious options exist.
+- Use the relevant review, status, baseline, debugging, planning, or
+  implementation skill when the request is not primarily a choice.
 
 ## Workflow
 
@@ -55,7 +90,8 @@ failure modes, and stakes are clear enough to compare.
 
 - Keep generation and evaluation separate.
 - Verify unstable facts before ranking when the answer depends on current prices, laws, availability, schedules, APIs, or similar details.
-- Do not invent weak alternatives; say when only one serious option exists.
+- Do not invent weak alternatives; use the `only one serious option` exit when
+  only one option is viable.
 - If the recommendation does not follow from the ranking, fix the ranking or explain the exception.
 - If verification is needed but not practical in the current turn, name the gap
   and use an honest exit or `best available` readiness instead of overstating
@@ -81,7 +117,16 @@ failure modes, and stakes are clear enough to compare.
 
 ## Output
 
-Use this shape for normal chat answers:
+Match output weight to stakes and user request.
+
+- Pre-ranking exits: use `Decision`, `Why No Ranking`, `Next Move`, and
+  `Readiness`.
+- Low stakes: use a concise shape, usually `Recommendation`, `Why`,
+  `Trade-off`, and `Readiness`. Include gaps only when they matter.
+- Medium stakes, high stakes, or when the user asks for depth: use the fuller
+  packet below.
+
+Fuller packet:
 
 1. `Decision`
 2. `Stakes`
