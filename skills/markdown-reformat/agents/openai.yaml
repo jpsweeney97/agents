@@ -1,4 +1,4 @@
 interface:
   display_name: "Markdown Reformat"
-  short_description: "Convert rough text to Markdown"
+  short_description: "Format text as Markdown without rewriting"
   default_prompt: "Use $markdown-reformat to format this rough text as Markdown while preserving wording, order, and voice."

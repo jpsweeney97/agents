@@ -29,9 +29,7 @@ The current parser is too eager.
 - first issue
 - second issue
 
-### Correctness
-
-The current parser is too eager.
+**Correctness.** The current parser is too eager.
 ```
 
 ## Code-Like Blocks

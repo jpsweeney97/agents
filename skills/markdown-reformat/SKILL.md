@@ -17,6 +17,7 @@ Format text into Markdown structure. Change headings, lists, wrapping, spacing, 
 ## Do Not Use When
 
 - The user wants a summary, rewrite, stronger prose, proofreading, `.docx`, HTML, PDF, or another non-Markdown output.
+- The user wants to consolidate, synthesize, distill, or rewrite multiple Markdown sources into a new standalone document; use `markdown-synthesis` instead.
 - Choosing a hierarchy would change meaning. Ask one focused question instead.
 
 ## References
@@ -48,7 +49,7 @@ Before delivery, compare source and output:
 
 ## Output Contract
 
-- For file edits, patch the file in place with the smallest coherent change.
+- For file edits, patch the file in place with the smallest coherent change; then reread the changed output or inspect the diff, and scan for trailing whitespace or conflict markers when practical.
 - For pasted text, return copyable Markdown in a fenced `markdown` block unless the user asks for rendered output.
 - Mention conservative choices only when they affect readability or interpretation.
 
