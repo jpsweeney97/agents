@@ -1,6 +1,6 @@
 ---
 name: skill-ux-audit
-description: "Use when the user asks to audit, improve, or apply UX improvements to a Codex skill, SKILL.md, agents/openai.yaml, skill reference, or skill example. Trigger only for explicit UX language or clear user-facing synonyms such as usability, ease of use, chat output, readability, interaction flow, or friction. Do not trigger for general skill improvement, rigor, validation, correctness, or safety work unless the user explicitly frames it as UX. Produces a concise read-only UX improvement plan by default and edits only when the user explicitly says apply, implement, or approves a specific plan."
+description: "Use when the user asks to audit, improve, or apply UX improvements to a Codex skill, SKILL.md, agents/openai.yaml, skill reference, or skill example. Trigger only for explicit UX language or clear user-facing synonyms such as usability, ease of use, chat output, user-facing/chat/report readability, interaction flow, or friction. Do not trigger for general skill improvement, plain instruction-doc prose quality, rigor, validation, correctness, or safety work unless the user explicitly frames it as UX. Produces a concise read-only UX improvement plan by default and edits only when the user explicitly says apply, implement, or approves a specific plan."
 ---
 
 # Skill UX Audit
@@ -14,10 +14,14 @@ apply pass.
 ## Trigger Boundaries
 
 - Trigger only when the request is explicitly about UX or a user-facing synonym
-  such as usability, ease of use, chat output, readability, interaction flow, or
-  friction.
-- Do not trigger for general skill improvement, rigor, validation, correctness,
-  or safety work unless the user explicitly frames it as UX.
+  such as usability, ease of use, chat output, user-facing/chat/report
+  readability, interaction flow, or friction.
+- Do not trigger for general skill improvement, plain instruction-doc prose
+  quality, general readability, rigor, validation, correctness, or safety work
+  unless the user explicitly frames it as UX.
+- Route plain `SKILL.md`, `agents/openai.yaml`, skill reference, `AGENTS.md`, or
+  `CLAUDE.md` prose-quality and readability work to `writing-principles` unless
+  the user frames the problem as skill UX or user chat experience.
 
 ## Defaults
 
@@ -30,8 +34,9 @@ apply pass.
   full rubric dump.
 - Put detailed rubric notes under `Details` only when they materially affect
   confidence or scope.
-- Ask only when the target skill is unclear or an apply request would touch a
-  protected surface without explicit approval.
+- Ask only when the target skill is unclear, an apply request would touch a
+  protected surface without explicit approval, or `apply accepted plan` is
+  requested without an accepted plan visible in the current context.
 
 ## Mode Modifiers
 
@@ -48,7 +53,9 @@ Honor compact modifiers when the user includes them:
   explicitly exclude every file class. Put the coverage ledger under `Details`.
 - `with verification`: run focused safe validation or dry-run checks that
   directly support the audit or applied edit. Do not install dependencies,
-  mutate caches, run broad suites, or run unavailable tooling.
+  mutate caches, run broad suites, or run unavailable tooling. Label the proof
+  class in the result, such as `Verification: structural only`,
+  `Verification: behavior dry run`, or `Verification: runtime not inspected`.
 - `save report`: write the final audit report only when the user supplies an
   output path or the local repo has an obvious report convention. Otherwise ask
   for the path before writing.
@@ -56,7 +63,9 @@ Honor compact modifiers when the user includes them:
   plan, even if the request also discusses possible changes.
 - `apply accepted plan`: apply only `Safe UX` items from the accepted plan.
   Apply `Contract-risky` items only when the user explicitly approves those
-  named items.
+  named items. If no accepted plan is visible in the current context, stop and
+  ask for the accepted plan or rerun/read out the audit first. Do not invent
+  plan items.
 
 ## Target And Context
 
@@ -129,6 +138,8 @@ behavior contract, so the user must see and approve that risk before edits.
    paths, run the available skill validator when present, run whitespace checks,
    and do a realistic dry run when practical. When the repo supplies concrete
    validation commands, run or report those commands instead of generic labels.
+   Label whether the proof is structural only, behavior dry run, runtime not
+   inspected, or runtime proof.
 
 ## Default Audit Report
 
@@ -139,6 +150,7 @@ Start with:
 Target: <skill path>
 Mode: read-only audit
 Scope: <inspected surfaces; skipped surfaces or none>
+Verification: <structural only|behavior dry run|runtime not inspected|not requested>
 Bottom Line: <one-sentence UX diagnosis>
 
 Top Opportunities:
@@ -168,6 +180,7 @@ When edits are made, close with:
 <UX effect and protected-surface guardrails>
 
 **Verification performed**
+Verification: <structural only|behavior dry run|runtime not inspected>
 <commands and dry-run checks>
 
 **Remaining risks**
