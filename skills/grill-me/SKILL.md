@@ -1,6 +1,6 @@
 ---
 name: grill-me
-description: Use when the user explicitly asks to be grilled, stress-tested interactively, challenged one question at a time, or interviewed about a plan, design, architecture, strategy, or decision. This is an interactive drill mode where each turn asks one high-leverage question and includes the agent's recommended direction. Do not trigger for incidental mentions of "grill me", meta-discussion of this skill, or requests for a complete critique/report unless the user explicitly wants an interactive grilling session.
+description: Use when the user explicitly asks to be grilled, stress-tested interactively, or challenged one question at a time about a plan, design, architecture, strategy, or decision. This is an interactive drill mode where each turn asks one high-leverage question and includes the agent's recommended direction. Do not trigger for incidental mentions of "grill me", meta-discussion of this skill, neutral "interview me", "talk this through", "help me clarify", or "figure out what I want" requests, or requests for a complete critique/report unless the user explicitly wants an interactive grilling session. Route neutral clarification interviews to outcome-interviewer unless the user also asks to be challenged or stress-tested.
 ---
 
 # Grill Me
@@ -19,7 +19,12 @@ risks, and dependencies are clear.
 - Across turns, track resolved decisions, unresolved assumptions, and the current blocker.
 - Lead with the user-visible decision, behavior, or outcome the answer will
   settle, then connect it to technical choices.
-- Inspect only enough to avoid asking for information already available. If inspection would become broad or unavailable, state the limitation and ask the next useful question.
+- When the user names a file, plan, doc, PR, or code area, read the named target
+  and the obvious adjacent authority needed to avoid a fake high-leverage
+  question before asking the first drill question. If inspection would become
+  broad or unavailable, state the boundary and ask the best grounded question.
+- Otherwise inspect only enough to avoid asking for information already
+  available.
 - Artifact and codebase inspection is read-only unless the user explicitly asks for edits.
 
 ## Conversation Style
