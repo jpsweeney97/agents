@@ -83,7 +83,7 @@ These are usually safe to recommend or edit in apply mode:
 - low-friction user modifiers
 - examples and smoke prompts
 - correction paths
-- clearer stop conditions
+- clearer wording for already-stated stop conditions
 
 ## Protected Surfaces
 
@@ -98,6 +98,7 @@ specific change:
 - validation ladders
 - authority precedence
 - permission or mutation rules
+- adding, removing, or changing stop-condition behavior
 
 Protected does not mean untouchable. It means the change may alter the skill's
 behavior contract, so the user must see and approve that risk before edits.
@@ -117,10 +118,13 @@ behavior contract, so the user must see and approve that risk before edits.
    file path plus line number when available, a named file plus section heading,
    or an explicit `not inspected` label with the reason.
 5. Separate safe UX changes from `Contract-risky` changes.
-6. In apply mode, re-read the live files before editing, keep changes scoped, and
+6. If the top findings are mostly non-UX contract, validation, correctness, or
+   safety issues, report them as out of scope or `Contract-risky` and route to
+   the appropriate broader skill instead of applying them in this lane.
+7. In apply mode, re-read the live files before editing, keep changes scoped, and
    preserve protected surfaces unless the user has explicitly approved the
    specific contract-risky change.
-7. After edits, validate the edited skill surfaces using the local repo's
+8. After edits, validate the edited skill surfaces using the local repo's
    validation path. At minimum, parse changed YAML/frontmatter, check referenced
    paths, run the available skill validator when present, run whitespace checks,
    and do a realistic dry run when practical. When the repo supplies concrete
@@ -134,6 +138,7 @@ Start with:
 **Result Brief**
 Target: <skill path>
 Mode: read-only audit
+Scope: <inspected surfaces; skipped surfaces or none>
 Bottom Line: <one-sentence UX diagnosis>
 
 Top Opportunities:

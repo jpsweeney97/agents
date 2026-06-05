@@ -110,6 +110,8 @@ For each proposed change, name what must remain true:
 - Validation remains explicit.
 - Detailed findings, ledgers, or review packets remain available below the
   brief or in durable artifacts.
+- Clarifying already-stated stop conditions is safe UX; adding, removing, or
+  changing stop-condition behavior is `Contract-risky`.
 
 If preserving rigor requires a new output label, correction path, or clarification
 of certification language, prefer that over removing the rigorous section.
@@ -133,7 +135,8 @@ not use vague impressions as evidence.
 
 Mark a change `Contract-risky` when it touches trigger scope, non-trigger
 boundaries, destructive-action gates, evidence standards, validation ladders,
-authority precedence, or permission and mutation rules.
+authority precedence, permission and mutation rules, or added, removed, or
+changed stop-condition behavior.
 
 ## Common Anti-Patterns
 
