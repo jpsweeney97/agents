@@ -4,12 +4,16 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` rules win.
 
 ## Checklist
 
-1. Scope and target: require cleanup intent plus target. Ask once for plain
-   `refactor`, vague maintainability, or missing target. Do not use this workflow
-   for implementation, fixes, reviews, formatting-only work, redesigns, or routine
-   self-review. If the useful change intentionally changes behavior, stop:
-   `not a simplification: behavior change required`; explain benefit and
-   consequence and ask whether to switch tasks.
+1. Scope, routing, and target: require cleanup intent plus target for an actual
+   behavior-preserving edit. Ask once for plain `refactor`, vague
+   maintainability, or missing target. Do not use this workflow for
+   implementation, fixes, reviews, formatting-only work, redesigns, routine
+   self-review, cleanup planning, refactoring backlogs, or candidate
+   prioritization. For planning/backlog requests, route to `tech-debt-scan`; use
+   this workflow after the user chooses a scoped behavior-preserving edit. If the
+   useful change intentionally changes behavior, stop: `not a simplification:
+   behavior change required`; explain benefit and consequence and ask whether to
+   switch tasks.
 
    Treat current/staged diff, commit, and range targets as discovery inputs only.
    Before editing, expand them to explicit editable paths and report the
@@ -18,6 +22,10 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` rules win.
    pre-edit index state and leave new edits unstaged unless the user explicitly
    asks to stage or restage them; never rewrite existing staged hunks without
    approval.
+
+   If a narrower platform, framework, or refactor skill owns the target, use that
+   skill unless the user explicitly invokes `simplify-code` or asks for generic
+   behavior-preserving cleanup outside the narrower skill's contract.
 
 2. Roots/instructions/status: run status first. From the target directory, or the
    parent directory for a file target, run `git rev-parse --show-toplevel`; if it
@@ -157,13 +165,31 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` rules win.
    unless a behavior-focused test, snapshot, probe, or equivalent manual check
    exercised the changed behavior.
 
-8. Full-safety backup: create a secret-safe pre-edit backup artifact at
-   `<repo-root>/.backup/YYYYMMDD-HHMMSS-<branch-or-no-branch>-<scope-slug>-simplify-code/`
-   or, outside git,
-   `/Users/jp/backup/<repo-or-dir-slug>/YYYYMMDD-HHMMSS-<scope-slug>-simplify-code/`
-   after verifying the backup root is writable. If the outside-git backup root is
-   unavailable or outside the writable sandbox, ask for approval of a writable
-   backup location or stop before editing.
+8. Full-safety backup: create the secret-safe pre-edit backup artifact with the
+   helper:
+
+   ```bash
+   python skills/simplify-code/scripts/create_simplify_backup.py \
+     --scope-slug <scope-slug> \
+     --planned-verification "<strong|moderate|weak plan>" \
+     --retention "<retention/cleanup expectation>" \
+     <explicit-editable-paths>
+   ```
+
+   Resolve the script path relative to this skill directory when used outside
+   `/Users/jp/.agents`. In git repos the helper creates the artifact under
+   `<repo-root>/.backup/`, writes git evidence, and adds `.backup/` to the
+   repo-local exclude file from `git rev-parse --git-path info/exclude` when
+   missing. Outside git it uses `/Users/jp/backup/<repo-or-dir-slug>/` by default;
+   if that root is unavailable or outside the writable sandbox, ask for approval
+   of a writable `--backup-root` or stop before editing.
+
+   Exit `0` means every scoped editable file has a restorable copied pre-edit
+   file. Exit `1` means an artifact was created but one or more scoped files were
+   excluded and are not restorable from that artifact; get explicit approval for
+   the named restore limit, choose a secure backup mode, pick a safer target, or
+   stop. Exit `2` means no valid backup artifact was produced; stop before
+   editing.
 
    `Restorable` means every edited text file can be reconstructed from copied
    pre-edit content. Files excluded from backup are not restorable from the
@@ -182,14 +208,13 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` rules win.
    location, or explicit exclusion with acknowledgement that the file will not be
    restorable from the artifact.
 
-   In git repos, also save pre-edit `status.txt`, scoped `diff.patch`, scoped
-   `cached.diff.patch` when staged changes exist, and scoped `untracked.txt`. Use
-   `git rev-parse --git-path info/exclude` to locate the repo-local exclude file
-   and add `.backup/` there when missing. Do not edit tracked `.gitignore` solely
-   to ignore backup artifacts. Before editing, verify every scoped editable text
-   file is present in `manifest.txt` and either copied under `files/` with a
-   matching hash or explicitly excluded with a reason, restore limit, and user
-   approval. Stop if no adequate backup works.
+   The helper also writes `scanner.json`, and in git repos saves pre-edit
+   `status.txt`, scoped `diff.patch`, scoped `cached.diff.patch`, and scoped
+   `untracked.txt`. Do not edit tracked `.gitignore` solely to ignore backup
+   artifacts. Before editing, verify every scoped editable text file is present in
+   `manifest.txt` and either copied under `files/` with a matching hash or
+   explicitly excluded with a reason, restore limit, and user approval. Stop if no
+   adequate backup works.
 
 9. Patch/verify: keep tightly coupled files in one coherent patch; otherwise use
    sequential verified slices. Internal signatures may change only when all
@@ -205,21 +230,39 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` rules win.
     unstaged unless asked.
 
     Closeout starts with `Simplification Result`, `Behavior Claim`,
-    `Verification`, `Commit Readiness`, and `Review Packet`. The first four
-    labels are the readable result brief. `Review Packet` is the details section:
-    include files changed, remaining risks, exclusions, and lane-specific
-    evidence. Fast-lane closeout adds a compact review hook with absolute paths,
-    behavior-preservation claim, command/result, and one sentence naming why
-    fast-lane eligibility held. Full-safety closeout adds a copy-ready read-only
-    same-machine Codex/Claude review prompt with absolute paths, changed files,
+    `Verification`, `Commit Readiness`, and `Review Packet`. Keep the first four
+    labels concise: user-visible result, behavior-preservation evidence,
+    commands/results, and readiness/blocker. `Review Packet` is the details
+    section: include files changed, remaining risks, exclusions, and
+    lane-specific evidence. Fast-lane closeout adds a compact review hook with
+    absolute paths, behavior-preservation claim, command/result, and one sentence
+    naming why fast-lane eligibility held. Full-safety closeout puts the
+    copy-ready read-only same-machine Codex/Claude review prompt under `Review
+    Packet`, with absolute paths, changed files, backup helper command/result,
     backup path, backup retention/cleanup expectation, commands/results,
     behavior claim, planned verification strength, observed evidence label,
     risks, exclusions, call-site inspection, evidence challenge,
     backup-adequacy check, and blockers-first reporting. No rollback command.
 
-## Scanner Maintenance
+## Script Maintenance
 
-Run `uv run pytest skills/simplify-code/tests/test_scoped_safety_scan.py` after
-any edit touching `scripts/`, scanner output schema, lane eligibility, backup
-handling, or secret/generated/vendor screening language. For unrelated
-wording-only edits, YAML parsing and reference/path checks are enough.
+Run these focused tests after any edit touching `scripts/`, scanner output
+schema, lane eligibility, backup handling, or secret/generated/vendor screening
+language:
+
+```bash
+uv run pytest skills/simplify-code/tests/test_scoped_safety_scan.py \
+  skills/simplify-code/tests/test_create_simplify_backup.py
+```
+
+For unrelated wording-only edits, YAML parsing and reference/path checks are
+enough.
+
+## Behavior Proof
+
+Structural checks such as YAML parsing, `quick_validate.py`, and the focused
+pytest files do not prove that an agent will follow the behavior contract. After
+any behavior-contract change, run the manual smoke test in
+[`../examples/agent-smoke-test.md`](../examples/agent-smoke-test.md) as the
+behavior proof path, or explicitly report `Behavior smoke test: not run` with
+the reason and do not claim behavior proof.

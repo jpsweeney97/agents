@@ -2,8 +2,9 @@
 name: simplify-code
 description: >-
   Use when user asks to simplify, clean up, tidy, or refactor-for-clarity code
-  while preserving behavior. Do not use for implementation, fixes, reviews,
-  format-only, vague maintainability, or redesigns.
+  through an actual behavior-preserving edit. Do not use for cleanup planning,
+  backlog creation, implementation, fixes, reviews, format-only, vague
+  maintainability, or redesigns.
 ---
 
 # Simplify Code
@@ -14,15 +15,21 @@ and follow it as the execution procedure.
 
 ## Use
 
-Trigger only on cleanup intent plus target. Intent: simplify, clean up,
-tidy, make easier to read, refactor for clarity, or explicit
-behavior-preserving refactor. Target: paths/files, subsystem, current/staged
-diff, commit, or range. Diff, commit, and range targets are discovery inputs;
-expand them to explicit editable paths before patching.
+Trigger only on cleanup intent plus target for an actual edit. Intent:
+simplify, clean up, tidy, make easier to read, refactor for clarity, or
+explicit behavior-preserving refactor. Target: paths/files, subsystem,
+current/staged diff, commit, or range. Diff, commit, and range targets are
+discovery inputs; expand them to explicit editable paths before patching.
 
 Clarify plain `refactor`, vague maintainability, or missing target. Do not use
-for implementation, fixes, reviews, formatting-only work, redesigns, or routine
-self-review.
+for implementation, fixes, reviews, formatting-only work, redesigns, routine
+self-review, cleanup planning, refactoring backlogs, or candidate
+prioritization. For planning/backlog requests, route to `tech-debt-scan`; use
+`simplify-code` after the user chooses a scoped behavior-preserving edit.
+
+If a narrower platform, framework, or refactor skill owns the target, use that
+skill unless the user explicitly invokes `simplify-code` or asks for generic
+behavior-preserving cleanup outside the narrower skill's contract.
 
 Status and applicable instructions first. Select either fast lane or full-safety
 lane before editing. Fast lane is only for clean tracked text files in a git repo
@@ -60,12 +67,12 @@ Closeout starts with:
 - `Commit Readiness`: ready/not ready, with the blocking reason.
 - `Review Packet`: details for follow-up review.
 
-The first four sections are the readable result brief. `Review Packet` is the
-details section and includes files changed, remaining risks, exclusions, and any
-lane-specific evidence. Fast-lane closeout adds a compact review hook with
-absolute paths, behavior-preservation claim, command/result, and why fast-lane
-eligibility held. Full-safety closeout adds a copy-ready read-only same-machine
-Codex/Claude prompt with absolute paths/files, claim, evidence, commands/results,
-planned verification strength, observed evidence label, backup path,
-retention/cleanup expectation, risks/exclusions, and blockers-first review. No
-rollback command.
+Keep the first four sections concise: user-visible result first, then evidence
+and readiness. `Review Packet` is the details section and includes files
+changed, remaining risks, exclusions, and lane-specific evidence. Fast-lane
+closeout adds a compact review hook with absolute paths, behavior-preservation
+claim, command/result, and why fast-lane eligibility held. Full-safety closeout
+keeps the copy-ready read-only same-machine Codex/Claude prompt under `Review
+Packet`, with absolute paths/files, claim, evidence, commands/results, planned
+verification strength, observed evidence label, backup path, retention/cleanup
+expectation, risks/exclusions, and blockers-first review. No rollback command.
