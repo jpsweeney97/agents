@@ -9,8 +9,7 @@ Improve how a skill feels to use while preserving the skill's rigor and behavior
 contract.
 
 Read [ux-rubric.md](references/ux-rubric.md) before any substantive audit or
-apply pass. Use [agent-smoke-test.md](examples/agent-smoke-test.md) as the
-lightweight forward-test shape after behavior-contract changes.
+apply pass.
 
 ## Trigger Boundaries
 

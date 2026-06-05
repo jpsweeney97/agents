@@ -262,7 +262,6 @@ enough.
 
 Structural checks such as YAML parsing, `quick_validate.py`, and the focused
 pytest files do not prove that an agent will follow the behavior contract. After
-any behavior-contract change, run the manual smoke test in
-[`../examples/agent-smoke-test.md`](../examples/agent-smoke-test.md) as the
-behavior proof path, or explicitly report `Behavior smoke test: not run` with
+any behavior-contract change, use a realistic live invocation or dry run as the
+behavior proof path, or explicitly report that behavior proof was not run with
 the reason and do not claim behavior proof.

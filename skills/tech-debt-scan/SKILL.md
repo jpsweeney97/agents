@@ -101,8 +101,6 @@ References:
 - [`references/audit-report-template.md`](references/audit-report-template.md):
   proprietary artifact convention, status lifecycle, section template, finding
   fields.
-- [`examples/agent-smoke-test.md`](examples/agent-smoke-test.md): forward test
-  for default artifact output with concise chat summary.
 
 ## Workflow
 
