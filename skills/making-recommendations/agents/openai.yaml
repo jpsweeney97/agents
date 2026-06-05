@@ -1,4 +1,4 @@
 interface:
   display_name: "Making Recommendations"
-  short_description: "Rank options and tradeoffs"
-  default_prompt: "Use $making-recommendations to compare these options, rank tradeoffs, and recommend the best path."
+  short_description: "Choose between viable options"
+  default_prompt: "Use $making-recommendations to compare viable options, rank tradeoffs, recommend only when evidence supports it, and label readiness."
