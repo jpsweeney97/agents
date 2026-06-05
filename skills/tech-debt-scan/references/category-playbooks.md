@@ -1,10 +1,11 @@
 # Category Playbooks
 
-Read only the active category. Keep named-cost debt and cross-link causes.
+Give every relevant category a first-pass check before ranking top calls. Read
+deeply only in active categories. Keep named-cost debt and cross-link causes.
 
 | Category | Check and record threshold |
 | --- | --- |
-| dependency | deps, locks, imports, advisories, licenses, workspaces; record upgrade/security/deploy/compatibility cost |
+| dependency | deps, locks, imports, advisories, licenses, workspaces; record upgrade/security/deploy/compatibility cost, but route vulnerability discovery to security-scan |
 | code-health | churned files, TODOs, lint, generated code, broad exceptions, duplication; record slow review, bugs, onboarding drag, unsafe cleanup, repeated edits |
 | test-debt | tests, coverage, CI, mocks, critical paths, runtime; record hidden regressions, blocked refactors, slow delivery, deploy distrust |
 | architecture-drift | imports, ADRs, boundaries, shared state, utilities, seams; record coordinated changes, blocked tests, duplication, deploy coupling, false docs |

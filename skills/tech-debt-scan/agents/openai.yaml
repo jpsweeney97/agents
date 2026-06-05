@@ -1,4 +1,4 @@
 interface:
   display_name: "Tech Debt Scan"
-  short_description: "Prioritize technical debt cleanup"
-  default_prompt: "Use $tech-debt-scan to scan this repo or subsystem and produce a prioritized cleanup backlog."
+  short_description: "Produce an evidence-led technical debt audit"
+  default_prompt: "Use $tech-debt-scan to audit this repo or subsystem, save the evidence-led debt report, and return a concise summary with the audit path."

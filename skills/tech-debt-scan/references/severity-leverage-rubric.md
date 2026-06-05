@@ -11,26 +11,36 @@ Buckets: `quick-wins` = `P0`/`P1` + `small`; `high-leverage` = `high` +
 `small`/`medium`; `strategic` = `P0`/`P1` + `large`; `watch` = `P2` or useful
 `P3`. Drop non-debt observations.
 
-Default chat report order: Result Brief; Details. Result Brief contains `Top
-Debt Calls`, `Do First`, `Why It Matters`, and `Coverage Limits`. Details
-preserves these report sections: Scan Snapshot; Focus & Coverage; Quick Wins;
-High-Leverage Fixes; Strategic Items; Watch List; Tradeoff Map; Open Questions /
-Next Probes.
+Default artifact report order: Result Brief; Scan Snapshot; Focus & Coverage;
+Evidence Trail; Ranked Backlog; Quick Wins; High-Leverage Fixes; Strategic
+Items; Watch List; Tradeoff Map; Coverage Gaps / Next Probes; Metrics; Fidelity
+Check. Result Brief contains `Top Debt Calls`, `Do First`, `Why It Matters`,
+`Audit Path`, and `Coverage Limits`.
+
+Chat summary order: Result Brief only, plus the artifact path. Do not reproduce
+the full backlog in chat unless the user explicitly asks.
 
 Finding fields: `id`, `severity`, `category`, `subcategory`, `anchor`,
 `problem`, `impact`, `recommendation`, `effort`, `leverage`, `confidence`,
-`corroboration`, optional `evidence_sources`, optional `cross_link`. Prefixes:
-`CH`, `AD`, `DP`, `TD`, `OP`, `KN`, `SY`.
+`corroboration`, `evidence_sources`, optional `cross_link`, optional
+`next_probe`. Prefixes: `CH`, `AD`, `DP`, `TD`, `OP`, `KN`, `SY`.
+
+Top-call gate: each `Top Debt Calls` entry needs `evidence_corroborated`, at
+least two evidence sources or independently observed signals, and a present-tense
+cost. Singleton evidence may be a finding, watch item, coverage gap, or next
+probe, but not a top call.
 
 Caps: low 4-8/10; medium 8-15/18; high 12-20/24. If capped with material
-findings left, label truncated and recommend `tech-debt-audit`.
+findings left, label truncated and name the next continuation slice.
 
 Metrics: raw/canonical findings, merged clusters, corroborated count,
-contradictions, skipped categories, quick wins, strategic items, tradeoffs.
+contradictions, skipped categories, singleton count, quick wins, strategic
+items, tradeoffs.
 
 Sanity: >50% quick-wins means low effort; >30% strategic means high severity;
 zero high-stakes quick wins needs small-fix pass; >40% watch means observation
 leakage.
 
-Fidelity: before writing, compare each report `anchor` and `recommendation` with
-the first finding; restore drifted symbols, paths, flags, config, qualifiers.
+Fidelity: before writing, compare each report `anchor`, `recommendation`, and
+top-call summary with the evidence trail; restore drifted symbols, paths, flags,
+config, qualifiers, and confidence limits.
