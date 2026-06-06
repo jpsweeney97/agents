@@ -21,6 +21,20 @@ Primary source surfaces:
 Treat `.plugin-eval/`, `.DS_Store`, bytecode, and virtual environments as local
 or generated artifacts unless the user explicitly asks to inspect them.
 
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues for `jpsweeney97/agents`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the default five-label triage vocabulary. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repo uses a single-context domain-doc layout. See `docs/agents/domain.md`.
+
 ## Working Defaults
 
 - Start file-changing work with `git status --short --branch`.
