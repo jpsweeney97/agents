@@ -1,4 +1,0 @@
-interface:
-  display_name: "Grill Me"
-  short_description: "Outcome-first stress-test questions"
-  default_prompt: "Use $grill-me to challenge this plan one question at a time in plain language that matches my register, leading with the decision or outcome at stake and giving your recommended direction."
