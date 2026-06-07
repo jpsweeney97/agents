@@ -1,16 +1,35 @@
 # Skill UX Audit Rubric
 
-Use this rubric to find improvements that make a skill easier for users to
-trust, steer, and understand without weakening the skill's behavior contract.
+Use this rubric to translate a skill into likely chat-experience friction, then
+find concrete fixes that make the skill easier for users to trust, steer, and
+understand without weakening the skill's behavior contract.
 
 ## Priority Order
 
 1. Preserve rigor, safety, evidence, authority, validation, and mutation rules.
-2. Make the first screen useful to a human.
-3. Make assumptions visible and cheap to correct.
-4. Let users steer cost and depth with compact language.
-5. Give the agent enough defaults, stop conditions, and examples to produce the
+2. Name the user's likely chat friction in plain language.
+3. Make the first screen useful to a human.
+4. Make assumptions visible and cheap to correct.
+5. Let users steer cost and depth with compact language.
+6. Give the agent enough defaults, stop conditions, and examples to produce the
    intended experience reliably.
+
+## Chat Friction Translation
+
+Before recommending or editing, translate the instruction contract into what the
+user will feel in chat.
+
+Look for moments where the user may have to:
+
+- decode agent-facing terminology
+- correct an inferred target, mode, or next step
+- wait through a report when they expected an edit
+- ask for concrete text after receiving abstract themes
+- double-check whether the agent changed behavior, only presentation, or
+  runtime state
+
+Useful fixes name the friction directly, then change the skill text that causes
+it. Prefer exact replacement or addition text over broad advice.
 
 ## Readable First Screen
 
@@ -39,7 +58,9 @@ Check whether the skill shows important inferred choices:
 - output mode such as chat-only, saved artifact, or handoff
 
 Useful fixes include an inferred setup block, a correction path, or labels such
-as `inferred`, `user-supplied`, `unresolved`, and `not inspected`.
+as `inferred`, `user-supplied`, `unresolved`, and `not inspected`. When the
+target and fix are clear and the change is `Safe UX`, editing directly is better
+than forcing the user through a second approval loop.
 
 ## User Control
 
@@ -75,7 +96,8 @@ check whether modifiers have concrete behavior:
 Check whether the skill's interaction pattern matches the job:
 
 - Interactive skills should ask one high-leverage question at a time.
-- Audit and review skills should default to read-only reports.
+- Explicit audit/review or `read-only` requests should produce read-only
+  reports.
 - Editing skills should distinguish plan, apply, verification, and closeout.
 - Skills that infer context should show what they inferred.
 - Skills that can be heavy should lead with the answer before machinery.
@@ -118,14 +140,14 @@ of certification language, prefer that over removing the rigorous section.
 
 ## Opportunity Format
 
-Use this shape for each finding:
+Use this shape for each fix:
 
 ```markdown
 <rank>. <change> (Safe UX|Contract-risky)
-Why it helps: <human-readable UX improvement>
+User friction: <what the user has to decode, correct, wait through, or ask again>
+Change shape: <exact replacement/addition/removal, or the file and section to edit>
 Evidence: <file:line, file section, or not inspected + reason>
 Rigor guardrail: <protected behavior that must remain true>
-Apply scope: <files or sections likely touched>
 ```
 
 Evidence must be specific enough that the user can verify the claim cheaply. Use
@@ -141,8 +163,11 @@ changed stop-condition behavior.
 ## Common Anti-Patterns
 
 - Leading with a full evidence ledger before the result.
+- Reporting abstract improvement themes without showing the text-level change.
 - Saying `failed` when the result is really an uncertified investigation.
 - Hiding inferred target, baseline, scope, or verification choices.
+- Asking for approval again when the target is clear, the fix is low-risk, and
+  the user did not request read-only behavior.
 - Forcing users to know exact prompt wording to choose quick, targeted, saved,
   or verified modes.
 - Replacing a rigorous packet with a summary instead of moving the packet below
