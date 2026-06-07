@@ -13,6 +13,12 @@ is a pause before adding structure that future agents must obey.
 Start with the user's work product: the artifact, behavior, recovery path,
 review, ticket, handoff, or decision someone will rely on.
 
+If the target already exists, inspect the live target and nearby authority before
+deciding. Read only enough to name the current obligation, the work product at
+stake, and the surface that controls it: prompt text, skill body, metadata,
+referenced examples, schema, validator, hook, script, repo instruction, or
+workflow doc. If a needed surface is unavailable, say what is unverified.
+
 Then ask:
 
 ```text
@@ -59,6 +65,24 @@ contract, or would be hard for a future agent to reconstruct.
 
 Passing the test justifies this guard, not a framework around it.
 
+## Workflow Boundary
+
+This skill is a design gate, not the owner of every agent-facing edit. Use it to
+decide whether the proposed structure is justified, then continue with the
+workflow that owns the requested work.
+
+Examples:
+
+- use `writing-principles` for instruction-doc writing or editing
+- use `skill-creator` or `write-a-skill` for skill construction
+- use the relevant review-family skill for critique or review
+- use the domain or implementation skill that owns the product change
+
+Do not silently become a UX audit, design interview, review report, skill-writing
+workflow, or implementation workflow. If the user only asked for this gate's
+judgment, stop after the brief answer. If the user asked for an edit and the
+owning workflow is already clear, apply the smaller clearer design there.
+
 ## Calibration
 
 Read [references/calibration.md](references/calibration.md) when the case is
@@ -70,12 +94,15 @@ Use the examples for judgment, not checklist compliance.
 
 ## Output Shape
 
-For implementation work, apply the smaller clearer design directly.
+For implementation work, apply the smaller clearer design directly only when the
+owning edit path is already clear.
 
 For review or design discussion, answer briefly:
 
 ```markdown
 My read: <context or machinery, and what work product is at stake>.
+Evidence: <live target/context inspected, or what is unverified>.
 The lighter path is <prose/example/recoverable state/deterministic mechanic>.
 Machinery is justified only if <specific damage or failure mode>.
+Next move: <apply directly | hand off to owning skill | ask one question>.
 ```
