@@ -124,32 +124,18 @@ failures.
 
 ## Design Gate
 
-Codex-facing systems should support Codex judgment instead of replacing it with
-rule machinery. Read `references/codex-facing-design.md` before adding or
-materially changing Codex-facing schema, workflow stages, routing logic,
-validation machinery, scripts that classify or decide, plugin behavior, or skill
-behavior.
+The canonical behavior lives in `skills/agent-facing-design/SKILL.md`. Use
+`$agent-facing-design` when creating or materially changing prompts, skills,
+agent rules, workflows, schemas, validators, routers, hooks, tools, commands,
+scripts, or persistent artifacts that an agent must read, populate, follow, or
+call.
 
-Run these tests before adding a structured field, status enum, workflow stage,
-validation rule, or imperative decision path:
-
-1. Whose failure is it? If a wrong value hurts the work product a non-plugin
-   reader consumes, the structure may be justified. If it only hurts internal
-   plugin machinery, remove it, make it transient, or count it as over-fit.
-2. Tooling or thinking? Keep fields that help Codex reason. Be skeptical of
-   fields that exist mainly for queries, audits, downstream automation, or
-   pipeline bookkeeping.
-3. Could Codex do this inline? If a thinking Codex with the same context could
-   classify, triage, score, route, or decide in prose, keep the decision in
-   Codex and put only deterministic mechanics in code.
-4. Re-test the whole artifact. Per-addition checks are not enough when a surface
-   has grown. Re-run the tests on the full artifact after roughly 25 commits in
-   its directory, after about 50% surface growth, or when the next addition makes
-   you hesitate.
-
-Test 3 does not block infrastructure code: synchronous hooks, security or policy
-guards, and deterministic computational machinery can be justified by latency,
-safety, or data-integrity constraints.
+Default to context that helps agents exercise judgment: examples, boundaries,
+recoverable state, structured evidence, preconditions, and failure behavior.
+Before adding required fields, statuses, workflow stages, validators,
+classifiers, scoring, confidence, hard rules, or semantic decision scripts, use
+the skill to check whether the machinery protects the user's work product more
+than lighter context would.
 
 ## Communication
 
