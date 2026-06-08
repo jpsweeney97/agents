@@ -31,7 +31,10 @@ restating them.
   return to the user; never inspect to produce findings (see Context Inspection).
 - Offer likely interpretations before recommendations. Recommend only when it
   helps the user answer the current clarification question (see Recommendations).
-- Stay read-only unless the user explicitly asks for edits or implementation.
+- Keep the interview itself read-only. If the user asks for edits or
+  implementation, clarify the outcome only as needed, then name the downstream
+  workflow and ask or switch according to the handoff rules before changing
+  files.
 
 ## Context Inspection
 
@@ -68,6 +71,10 @@ question without inspection would waste the user's effort. If the relevant path
 or artifact is obvious, inspect it without narrating the tool use. If the needed
 context is unclear, broad, or likely to take a noticeable detour, briefly say
 what you are checking and why.
+
+When silent inspection depends on an inferred target or scope, fold that
+inference into `My read so far` in one short phrase so the user can correct it
+without receiving a file inventory.
 
 Do not turn inspected context into a review report, audit ledger, source
 inventory, findings list, implementation plan, or file-by-file explanation, and
@@ -286,6 +293,10 @@ checklist, implementation plan, or decision log unless the user asks. Include a
 named next useful move only when it is naturally clear from the interview (see
 Handoffs). If the next move is still uncertain, name the remaining uncertainty
 instead of forcing a recommendation.
+
+Briefs are chat-only by default. Write, save, ticket, hand off, or create any
+durable artifact only when the user explicitly asks or approves that lifecycle
+step.
 
 A concise brief, when useful, should stay lightweight:
 
