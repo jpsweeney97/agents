@@ -267,7 +267,7 @@ For direct `Safe UX` edits, close with:
 
 ```markdown
 Changed: <files/sections>
-Safe UX because... <one sentence explaining why this clarified existing behavior without changing protected surfaces>
+Safe UX because <one sentence explaining why this clarified existing behavior without changing protected surfaces>
 Verified: <frontmatter/YAML/quick_validate/diff check/etc.>
 Proof boundary: source validation only; installed/cache/marketplace/runtime-loaded behavior was not verified.
 Not touched: <protected surfaces intentionally left alone>
