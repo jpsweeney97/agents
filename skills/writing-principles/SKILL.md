@@ -41,8 +41,8 @@ completed-code review.
 Use the neighboring lane when it owns the work:
 
 - `agent-facing-design`: deciding whether to add fields, statuses, workflow
-  stages, validators, routers, classifiers, scoring, hard rules, or semantic
-  decision scripts
+  stages, validators, routers, classifiers, scoring, confidence fields, hard
+  rules, or semantic decision scripts
 - `skill-creator` or `write-a-skill`: constructing a skill bundle
 - `scrutinize-skill` or another review-family skill: adversarial review of a
   skill, artifact, PR, plan, or completed work
@@ -61,6 +61,12 @@ what controls the obligation: repo instructions, companion metadata, referenced
 examples, validators, workflows, or neighboring docs. Keep edits scoped to the
 requested instruction surface.
 
+Stay in this skill for edits that remove, lighten, or clarify existing
+obligations. If the edit would add or materially change fields, statuses,
+workflow stages, validators, routers, classifiers, scoring, confidence fields,
+hard rules, or semantic decision scripts, use `agent-facing-design` first. Then
+return to the owning edit path only if the machinery earns its place.
+
 Challenge before clarifying:
 
 - If no meaningful protected work is visible, delete the obligation.
@@ -73,8 +79,8 @@ Challenge before clarifying:
 Do not preserve an obligation just because it already exists. Do not polish a
 bad obligation into a clearer bad obligation.
 
-Stop and ask when the target, requested scope, or controlling authority is
-missing, or when the needed edit would cross into an unrequested file,
+Stop and ask when the target, requested scope, or required controlling authority
+is missing, or when the needed edit would cross into an unrequested file,
 destructive behavior, publishing, runtime activation, or an unresolved conflict
 between higher-priority instructions.
 
@@ -106,6 +112,9 @@ Lead with obligation failures, ordered by impact. For each finding, name the
 user-visible failure and the edit shape: delete, lighten, clarify, narrow, add
 evidence, or resolve conflict. Do not pad with generic writing advice.
 
+After findings, close with the target and scope inspected, an explicit `No edits
+made` statement, and the proof boundary. Wait for the user before editing.
+
 ## Output
 
 After direct edits, report briefly:
@@ -115,7 +124,8 @@ After direct edits, report briefly:
 - verification performed
 - remaining risk or proof boundary
 
-After review-only work, report findings first and wait.
+After review-only work, report findings first, include the target/scope
+inspected, state `No edits made`, name the proof boundary, and wait.
 
 Always separate proof classes. Source validation does not prove installed,
 cached, marketplace, runtime-loaded, hook, sync, or behavior state unless that
