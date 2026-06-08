@@ -188,7 +188,7 @@ Suggested fixes:
 
 Mention the UX phase only when it clarifies the issue, skipped scope, or fix.
 For audit/exhaustive mode, include enough coverage detail to show which phases
-were inspected or excluded.
+and material sub-surfaces were inspected or excluded.
 
 ## Common Anti-Patterns
 
