@@ -1,4 +1,4 @@
 interface:
   display_name: "Writing Principles"
-  short_description: "Quality gate for Codex instructions"
-  default_prompt: "Use $writing-principles to review or edit this Codex instruction document against the local writing principles."
+  short_description: "Edit Codex instructions by challenging agent obligations"
+  default_prompt: "Use $writing-principles to improve this Codex instruction document by challenging, removing, lightening, or clarifying the obligations it places on future agents."
