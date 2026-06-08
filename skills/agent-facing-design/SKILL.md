@@ -19,6 +19,11 @@ stake, and the surface that controls it: prompt text, skill body, metadata,
 referenced examples, schema, validator, hook, script, repo instruction, or
 workflow doc. If a needed surface is unavailable, say what is unverified.
 
+If there is no existing target and no concrete proposed structure yet, do not
+run the gate as an abstract design exercise. Name the likely work product, then
+ask one question or hand off to the owning design, creation, interview, or
+writing workflow.
+
 Then ask:
 
 ```text
@@ -95,9 +100,12 @@ Use the examples for judgment, not checklist compliance.
 ## Output Shape
 
 For implementation work, apply the smaller clearer design directly only when the
-owning edit path is already clear.
+owning edit path is already clear. After direct edits, validate through that
+owning workflow and state the proof boundary; source checks do not prove loaded
+or runtime behavior.
 
-For review or design discussion, answer briefly:
+For obvious gate decisions, a single crisp sentence is enough. For review or
+design discussion where the reasoning matters, answer briefly:
 
 ```markdown
 My read: <context or machinery, and what work product is at stake>.
