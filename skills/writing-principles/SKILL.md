@@ -1,6 +1,6 @@
 ---
 name: writing-principles
-description: "Use when the user asks to improve, tighten, simplify, rewrite, edit, draft obligation text inside, or run an obligation-focused review of existing or pasted Codex-facing instruction docs such as AGENTS.md, SKILL.md, skill support docs, agents/*.md, or agents/*.yaml. Acts as an obligation edit gate: challenge what the text makes future agents do, decide, avoid, verify, remember, or maintain; remove or lighten obligations that do not protect meaningful user work; clarify obligations that earn their place. Do not use for constructing new skill bundles, defining new agent-facing capabilities, user-facing docs, ordinary Markdown formatting, creative writing, code comments, completed-code review, broad adversarial skill review, UX review, proof-gate review, or material agent-facing design decisions owned by agent-facing-design."
+description: "Use when the user asks to improve, tighten, simplify, rewrite, edit, draft obligation text inside, or run an obligation-focused review of existing or pasted Codex-facing instruction docs such as AGENTS.md, SKILL.md, skill support docs, agents/*.md, or agents/*.yaml. Acts as an obligation edit gate: challenge what the text makes future agents do, decide, avoid, verify, remember, or maintain; remove or lighten obligations that do not protect meaningful user work; clarify obligations that earn their place. Do not use for constructing new skill bundles, changing skill capabilities or bundle structure, user-facing docs, ordinary Markdown formatting, creative writing, code comments, completed-code review, broad adversarial skill review, UX review, full proof-gate review, or material agent-facing design decisions owned by agent-facing-design."
 ---
 
 # Writing Principles
@@ -36,7 +36,7 @@ Use for existing or pasted Codex-facing instruction docs:
 
 Do not use for user-facing docs, ordinary Markdown formatting, conversational
 replies, code comments, creative writing, broad adversarial skill review, skill
-UX review, proof-gate review, or completed-code review.
+UX review, full proof-gate review, or completed-code review.
 
 Use the neighboring lane when it owns the work:
 
@@ -46,11 +46,13 @@ Use the neighboring lane when it owns the work:
   it before adding fields, statuses, workflow stages, validators, routers,
   classifiers, scoring, confidence fields, hard rules, or semantic decision
   scripts
-- `skill-creator` or `write-a-skill`: constructing a new skill bundle or
-  defining a new agent-facing capability
+- `skill-creator` or `write-a-skill`: constructing a new skill bundle, defining
+  or changing an agent-facing capability, changing bundle structure, adding or
+  changing resources or scripts, or generating metadata
 - `scrutinize-skill` or another review-family skill: behavior-contract review,
   broad adversarial review, completed implementation review, execution-readiness
-  or proof-gate review, PR review, plan review, or completed-work review
+  review, full proof-gate, certification, or proof-chain review, PR review, plan
+  review, or completed-work review
 - `skill-ux-design`: skill UX, usability, invocation, steering, output,
   recovery, or durable-aftermath review
 - `markdown-reformat`: structure-only Markdown cleanup that preserves wording
@@ -69,6 +71,13 @@ target: a named existing file, a pasted instruction text target, or an existing
 document the user already asked to edit. Do not construct new skill bundles or
 define new agent-facing capabilities here; route those to `skill-creator`,
 `write-a-skill`, or `agent-facing-design` as appropriate.
+
+This skill wins for obligation-only prose edits inside an existing `SKILL.md`,
+`AGENTS.md`, support doc, `agents/*.md`, or `agents/*.yaml` when the requested
+change removes, lightens, narrows, or clarifies what future agents must do.
+Neighboring skill-authoring workflows win when the change alters the capability,
+bundle shape, resources, scripts, generated metadata, or install/runtime
+surface.
 
 Before editing, read the live target and nearby authority needed to understand
 what controls the obligation: repo instructions, companion metadata, referenced
@@ -104,6 +113,12 @@ place. If the edit would add or materially change fields, statuses, workflow
 stages, validators, routers, classifiers, scoring, confidence fields, hard
 rules, or semantic decision scripts, treat that as machinery and apply the
 stricter `agent-facing-design` test.
+
+Editing false-proof wording in an existing instruction doc stays in this skill
+when the user is asking for obligation or prose tightening, such as preventing a
+structural check from implying runtime, install, sync, certification, or loaded
+behavior proof. Route to review-family when the user asks whether a proof gate,
+execution-readiness claim, certification, release claim, or proof chain is valid.
 
 Challenge before clarifying:
 
