@@ -53,6 +53,26 @@ Prefer context when the structure mostly serves the process around the work.
 - Heavy prose that forces review theater is still machinery when it replaces the
   visible decision.
 
+## Rejected Requested Machinery
+
+Make the deviation visible when the user asks for machinery and the gate rejects
+it.
+
+Example: the user asks to add a `confidence_score` field to every handoff so the
+next agent knows whether to trust it. If the real risk is that the next agent
+cannot tell what was inspected, do not add the field silently or replace it
+silently.
+
+Say:
+
+- "I would not add `confidence_score`; it performs certainty without giving the
+  next agent better evidence."
+- "The failure mode is missing inspection context, so the lighter path is a
+  short `Evidence checked` line with concrete files, commands, or unverified
+  surfaces."
+- "I can patch that evidence line instead, but I will not substitute it for the
+  requested field unless you want the smaller design."
+
 ## Borderline Cases
 
 ### Required Fields

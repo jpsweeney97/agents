@@ -1,4 +1,4 @@
 interface:
   display_name: "Agent-Facing Design"
-  short_description: "Keep agent systems judgment-supporting"
+  short_description: "Avoid unnecessary agent-process machinery"
   default_prompt: "Use $agent-facing-design to inspect the live target and keep this agent-facing change judgment-supporting without unnecessary process machinery."

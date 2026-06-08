@@ -55,6 +55,13 @@ Otherwise, prefer the smaller clearer design: prose, examples, a boundary,
 recoverable state, or a deterministic mechanic that does not make the semantic
 decision.
 
+If the user explicitly asked for a field, status, schema, validator, router,
+classifier, score, hard rule, or semantic script and the gate says it is not
+justified, do not silently substitute a lighter design. Say what you would not
+add, why the failure mode does not justify it, and what lighter path would
+preserve the work. Ask before applying the substitute unless the user already
+asked you to choose the smaller design.
+
 ## When Machinery Survives
 
 Keep the surviving machinery narrow. Be able to say plainly:
