@@ -30,6 +30,19 @@ My guess: Start with one useful first action, not a full tour. If they can do
 something real quickly, the rest of the product has more time to explain itself.
 ```
 
+## Artifact First
+
+When reading first would save the user from answering a performative question,
+fold the inspected context into the read instead of reporting a file inventory.
+
+```markdown
+My read so far: You want the migration plan to make reviewers stop worrying that
+a routine cleanup will quietly change behavior.
+
+Question: What should a reviewer be able to trust without re-reading every call
+path?
+```
+
 ## Vague Or Technical Answer
 
 Translate first. Do not cross-examine.
@@ -71,6 +84,21 @@ failure from the familiar flaky one, so they trust the page enough to act fast.
 The Turn 2 read replaces Turn 1; it does not become a list of "Turn 1 decision,
 Turn 2 decision." Each turn is the current best single sentence, rewritten as the
 user corrects you.
+
+## Lightweight Closure
+
+When the user asks to summarize or the next useful move is clear, stop without
+turning the interview into a spec.
+
+```markdown
+Here is the clarified shape:
+
+You want support to answer "what changed?" without asking engineering.
+The experience should feel quick and boring.
+The main thing to avoid is making every support case become an investigation.
+The next useful move is to sketch the smallest status view that answers that
+question.
+```
 
 ## Anti-Patterns
 

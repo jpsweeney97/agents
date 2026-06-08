@@ -141,6 +141,22 @@ frame.
 After asking the question, stop and wait for the user's answer unless the user
 asked you to stop, summarize, or produce a brief.
 
+## User Steering
+
+Let the user steer the interview in ordinary language. Treat these as local
+conversation controls, not new trigger phrases or permission to switch workflows.
+
+- "Quick outcome check" means keep inspection and the read short, then ask only
+  the next useful clarification question.
+- "Read this first" means inspect the relevant artifact before the first
+  question when the target is clear.
+- "No recommendations yet" means offer likely interpretations without adding
+  tentative direction.
+- "Stay with this" means keep clarifying the current uncertainty before any
+  handoff.
+- "Summarize where we are" or "turn this into a brief" means stop interviewing
+  and summarize the current clarified shape.
+
 ## Recommendations
 
 First offer likely interpretations that help the user correct your read. Add a
