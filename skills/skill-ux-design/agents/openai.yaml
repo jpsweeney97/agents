@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill UX Design"
+  short_description: "Improve the user journey through using a skill"
+  default_prompt: "Use $skill-ux-design to improve the user journey through invoking and using a target skill without weakening rigor."

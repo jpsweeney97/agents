@@ -1,4 +1,0 @@
-interface:
-  display_name: "Skill UX Audit"
-  short_description: "Design better skill chat UX without weakening rigor"
-  default_prompt: "Use $skill-ux-audit to translate a target skill into chat-experience friction and make low-risk UX fixes when clear."
