@@ -100,6 +100,10 @@ pass.
 The vocabulary names where friction can appear. It does not require one finding,
 score, field, or recommendation per surface.
 
+A phase is not covered by naming it. For `audit` or `exhaustive` coverage,
+inspect the material sub-surfaces within each phase that plausibly apply to the
+target skill, or explicitly mark them out of scope with a reason.
+
 ## Mode And Steering Language
 
 Honor plain language as well as explicit modifiers. Users should not have to
@@ -108,10 +112,11 @@ remember magic words.
 - `read-only`, "do not edit", or "no changes": do not edit; use the normal
   bounded whole-journey scan unless the user also asks for audit, exhaustive,
   full coverage, every surface, or a complete pass.
-- `audit`: run a read-only exhaustive UX pass; inspect every UX phase or
-  explicitly mark it out of scope.
+- `audit`: run a read-only exhaustive UX pass; inspect every UX phase and the
+  material sub-surfaces within it, or explicitly mark them out of scope.
 - `exhaustive`, "full pass", "every surface", or "complete audit": inspect every
-  UX phase with an inspect-or-exclude coverage ledger.
+  UX phase and its material sub-surfaces with an inspect-or-exclude coverage
+  ledger.
 - `quick`: narrow inspection and label skipped surfaces.
 - `targeted: <surface>` or plain language such as "look at recovery", "just
   output", or "check validation trust": focus the named UX surface.
@@ -128,9 +133,9 @@ remember magic words.
   path or the local repo has an obvious report convention. Otherwise ask for the
   path before writing.
 
-Plain `audit` means full read-only coverage. `quick`, `targeted`, or an explicit
-narrower request can narrow an audit, but the output must label the narrowed
-coverage.
+Plain `audit` means full read-only coverage across the six phases and their
+material sub-surfaces. `quick`, `targeted`, or an explicit narrower request can
+narrow an audit, but the output must label the narrowed coverage.
 
 ## Target And Context
 
@@ -197,7 +202,7 @@ patch-shaped proposal requiring explicit approval.
    skill and the likely sources of friction.
 3. Use the six UX phases as a coverage lens. In default mode, scan broadly
    enough to find the highest-leverage 1-3 frictions; in audit/exhaustive mode,
-   inspect or explicitly exclude every phase.
+   inspect or explicitly exclude every phase and material sub-surface.
 4. Translate each top issue into concrete user friction: what the user has to
    guess, decode, correct, wait through, trust, approve, recover from, or follow
    up on.
@@ -256,9 +261,9 @@ proposal-first rationale, unresolved assumptions, or audit/exhaustive ledgers.
 If no high-leverage fixes are found, say that directly and list any confidence
 limits.
 
-## Direct Edit Closeout
+## Edit Closeout
 
-When edits are made, close with:
+For direct `Safe UX` edits, close with:
 
 ```markdown
 Changed: <files/sections>
@@ -274,6 +279,22 @@ edit clarified already-existing behavior without changing routing, promise,
 proof, authority, mutation, external access, persistence, runtime/source claims,
 or lifecycle expectations. If that sentence is hard to write honestly, the
 change was proposal-first.
+
+For approved proposal-first or protected edits, do not use `Safe UX because...`
+as the edit-path receipt. Close with an approval and lifecycle rationale instead:
+
+```markdown
+Changed: <files/sections>
+Approved change: <named user-approved proposal-first/protected change>
+Lifecycle/protected-surface rationale: <what expectation, authority, proof, mutation, persistence, runtime/source, or lifecycle surface changed>
+Verified: <frontmatter/YAML/quick_validate/diff check/etc.>
+Proof boundary: source validation only; installed/cache/marketplace/runtime-loaded behavior was not verified.
+Not touched: <protected surfaces intentionally left alone>
+```
+
+For mixed edits, split the closeout: use `Safe UX because...` only for the
+separable safe portion, and use the approval/lifecycle rationale for the
+approved proposal-first or protected portion.
 
 Always include a source-vs-runtime proof boundary after edits, including
 low-risk text changes. Keep it one line by default. Expand it when the edit

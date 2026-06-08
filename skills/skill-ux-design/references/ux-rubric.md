@@ -38,7 +38,13 @@ finding, score, field, or recommendation per phase unless the user asks for
 
 Default mode should scan across these phases only far enough to find the top 1-3
 likely frictions. `Audit` and `exhaustive` modes should inspect or explicitly
-exclude each phase.
+exclude each phase and the material sub-surfaces within it.
+
+A phase is not covered by naming it. In audit/exhaustive mode, inspect the
+phase's material sub-surfaces that plausibly apply to the target skill, such as
+external access, persistence, or runtime/source proof when those surfaces could
+affect the user's experience. If a sub-surface does not apply, mark it out of
+scope instead of silently skipping it.
 
 ## Friction Translation
 
@@ -107,8 +113,8 @@ Check whether the skill's rhythm matches the user's intent:
 - Default UX design should be a bounded whole-journey scan with 1-3 top
   frictions, not a full ledger.
 - `read-only` should disable edits without implying exhaustive coverage.
-- Plain `audit` should be read-only and exhaustive unless narrowed by `quick`,
-  `targeted`, or explicit ordinary-language scope.
+- Plain `audit` should be read-only and exhaustive across material sub-surfaces
+  unless narrowed by `quick`, `targeted`, or explicit ordinary-language scope.
 - Targeted requests should stay focused and label their boundary.
 - Long audit/exhaustive runs should show progress only when it helps the user
   understand scope, cost, confidence, or remaining uncertainty.
@@ -193,7 +199,9 @@ were inspected or excluded.
 - Applying trigger, proof, authority, mutation, external-access, persistence, or
   runtime/source changes as casual UX edits.
 - Treating `audit` as a synonym for `read-only` instead of full read-only
-  coverage.
+  coverage of material sub-surfaces.
+- Satisfying audit coverage by naming the six phases while skipping applicable
+  sub-surfaces such as external access, persistence, or runtime/source proof.
 - Forcing users to memorize exact modifiers when ordinary language was clear.
 - Hiding inferred target, mode, authority, edit boundary, skipped context, or
   proof boundary.

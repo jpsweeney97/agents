@@ -48,8 +48,9 @@ surface coverage with no edits.
 
 Expected behavior:
 
-- Inspect or explicitly exclude every UX phase: before use, starting state,
-  during use, proof and safety, durable aftermath, and agent support.
+- Inspect or explicitly exclude every UX phase and material sub-surface: before
+  use, starting state, during use, proof and safety, durable aftermath, and
+  agent support.
 - Include an inspect-or-exclude coverage ledger.
 - Present findings as user frictions with patch-shaped fixes.
 - Do not edit unless the user later approves a named fix.
@@ -105,6 +106,9 @@ Expected behavior:
   already-existing edit boundary.
 - Present auto-commit behavior as a named proposal-first change requiring
   explicit approval.
-- Close direct edits with `Safe UX because...`, verification, proof boundary,
-  and protected surfaces not touched.
+- Close the direct safe portion with `Safe UX because...`, verification, proof
+  boundary, and protected surfaces not touched.
+- If the user later approves the auto-commit behavior, close that protected edit
+  with an approval/lifecycle rationale instead of a `Safe UX because...`
+  receipt.
 - Do not bundle the protected change into the safe wording edit.
