@@ -1,4 +1,4 @@
 interface:
   display_name: "Writing Principles"
   short_description: "Edit Codex instructions by challenging agent obligations"
-  default_prompt: "Use $writing-principles to improve this Codex instruction document by challenging existing agent obligations, routing new or material obligations through $agent-facing-design, and returning either focused edits or obligation-focused findings."
+  default_prompt: "Use $writing-principles to improve this existing or pasted Codex instruction document by challenging agent obligations, routing net-new or materially expanded obligations through $agent-facing-design, and returning either focused edits or obligation-focused findings."

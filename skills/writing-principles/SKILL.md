@@ -1,6 +1,6 @@
 ---
 name: writing-principles
-description: "Use when the user asks to write, improve, tighten, simplify, rewrite, edit, or run an obligation-focused review of Codex-facing instruction docs such as AGENTS.md, SKILL.md, skill support docs, agents/*.md, or agents/*.yaml. Acts as an obligation edit gate: challenge what the text makes future agents do, decide, avoid, verify, remember, or maintain; remove or lighten obligations that do not protect meaningful user work; clarify obligations that earn their place. Do not use for user-facing docs, ordinary Markdown formatting, creative writing, code comments, completed-code review, broad adversarial skill review, UX review, proof-gate review, or material agent-facing design decisions owned by agent-facing-design."
+description: "Use when the user asks to improve, tighten, simplify, rewrite, edit, draft obligation text inside, or run an obligation-focused review of existing or pasted Codex-facing instruction docs such as AGENTS.md, SKILL.md, skill support docs, agents/*.md, or agents/*.yaml. Acts as an obligation edit gate: challenge what the text makes future agents do, decide, avoid, verify, remember, or maintain; remove or lighten obligations that do not protect meaningful user work; clarify obligations that earn their place. Do not use for constructing new skill bundles, defining new agent-facing capabilities, user-facing docs, ordinary Markdown formatting, creative writing, code comments, completed-code review, broad adversarial skill review, UX review, proof-gate review, or material agent-facing design decisions owned by agent-facing-design."
 ---
 
 # Writing Principles
@@ -27,7 +27,7 @@ not original wording or assumed intent.
 
 ## Scope
 
-Use for Codex-facing instruction docs:
+Use for existing or pasted Codex-facing instruction docs:
 
 - `AGENTS.md`
 - `SKILL.md`
@@ -40,12 +40,14 @@ UX review, proof-gate review, or completed-code review.
 
 Use the neighboring lane when it owns the work:
 
-- `agent-facing-design`: deciding whether to add or materially change
-  agent-facing obligations, even when the change is prose, examples, context, or
-  boundaries rather than machinery; always use it before adding fields,
-  statuses, workflow stages, validators, routers, classifiers, scoring,
-  confidence fields, hard rules, or semantic decision scripts
-- `skill-creator` or `write-a-skill`: constructing a skill bundle
+- `agent-facing-design`: deciding whether to add net-new or materially expanded
+  agent-facing obligations, proof standards, authority rules, lifecycle
+  behavior, mutation boundaries, persistence, routing, or machinery; always use
+  it before adding fields, statuses, workflow stages, validators, routers,
+  classifiers, scoring, confidence fields, hard rules, or semantic decision
+  scripts
+- `skill-creator` or `write-a-skill`: constructing a new skill bundle or
+  defining a new agent-facing capability
 - `scrutinize-skill` or another review-family skill: behavior-contract review,
   broad adversarial review, completed implementation review, execution-readiness
   or proof-gate review, PR review, plan review, or completed-work review
@@ -58,30 +60,50 @@ Use the neighboring lane when it owns the work:
 
 ## Edit Gate
 
-Default to direct edits when the user asks to write, improve, tighten,
-simplify, rewrite, refactor, create, or edit instruction docs, after any needed
+Default to direct edits when the user asks to improve, tighten, simplify,
+rewrite, refactor, or edit instruction docs, after any needed
 `agent-facing-design` pre-gate.
+
+Use this skill to draft or create instruction prose only inside an already-owned
+target: a named existing file, a pasted instruction text target, or an existing
+document the user already asked to edit. Do not construct new skill bundles or
+define new agent-facing capabilities here; route those to `skill-creator`,
+`write-a-skill`, or `agent-facing-design` as appropriate.
 
 Before editing, read the live target and nearby authority needed to understand
 what controls the obligation: repo instructions, companion metadata, referenced
 examples, validators, workflows, or neighboring docs. Keep edits scoped to the
 requested instruction surface.
 
+Use this authority map:
+
+- `AGENTS.md`: read applicable higher-priority and repo-local instruction files
+  plus linked references that control the requested edit.
+- Skill bundles: read `SKILL.md`, `agents/openai.yaml`, and behavior-shaping
+  references or examples that define triggers, instructions, evidence, output,
+  validation, or handoff behavior.
+- Metadata-only edits such as `agents/openai.yaml`: compare `display_name`,
+  `short_description`, and `default_prompt` against the current `SKILL.md`.
+- Pasted instruction text: treat the paste as the target, and do not require a
+  file path unless the user asks to patch a file.
+
 If the user pastes instruction text instead of naming a file, treat the pasted
 text as the target. Do not demand a path just to use this skill. Return the
 rewritten instruction text in chat, normally in a fenced `markdown` block, and
 state that no source file was edited unless the user also asks to patch a file.
 
-Stay in this skill for edits that remove, lighten, or clarify existing
-obligations. If the edit would add a new obligation or materially change what a
-future agent must do, decide, avoid, verify, remember, or maintain, use
-`agent-facing-design` first, even when the proposed change is prose, context, an
-example, a boundary, or failure behavior. Then return to this edit path only if
-the pre-gate says the obligation earns its place. If the edit would add or
-materially change fields, statuses, workflow stages, validators, routers,
-classifiers, scoring, confidence fields, hard rules, or semantic decision
-scripts, treat that as machinery and apply the stricter `agent-facing-design`
-test.
+Stay in this skill for edits that remove, lighten, narrow, clarify, or make
+explicit an existing obligation when the edit does not expand future agent
+duties, proof standards, authority, lifecycle behavior, mutation, persistence,
+routing, or external-surface expectations. If the edit would add a net-new
+obligation or materially expand what a future agent must do, decide, avoid,
+verify, remember, or maintain, use `agent-facing-design` first, even when the
+proposed change is prose, context, an example, a boundary, or failure behavior.
+Then return to this edit path only if the pre-gate says the obligation earns its
+place. If the edit would add or materially change fields, statuses, workflow
+stages, validators, routers, classifiers, scoring, confidence fields, hard
+rules, or semantic decision scripts, treat that as machinery and apply the
+stricter `agent-facing-design` test.
 
 Challenge before clarifying:
 
