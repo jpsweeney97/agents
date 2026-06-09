@@ -85,7 +85,8 @@ Use these six phases as the internal UX lens, not as required output sections:
 3. **During use**: interaction rhythm, progress visibility, steering depth/cost,
    context acquisition, and handoffs.
 4. **Proof and safety**: validation language, evidence standards, approval gates,
-   external access, privacy, and runtime/source distinctions.
+   external access, privacy, behavior-smoke boundaries, and plugin/runtime
+   surfaces when applicable.
 5. **Durable aftermath**: saved artifacts, tickets, handoffs, commits, pushes,
    installs, refreshes, uncommitted outputs, and next lifecycle step.
 6. **Agent support**: whether the skill gives Codex enough context, examples,
@@ -277,9 +278,9 @@ Not touched: <protected surfaces intentionally left alone>
 When the skill edits directly without prior approval, the closeout must include
 one sentence beginning `Safe UX because...`. The sentence must explain why the
 edit clarified already-existing behavior without changing routing, promise,
-proof, authority, mutation, external access, persistence, runtime/source claims,
-or lifecycle expectations. If that sentence is hard to write honestly, the
-change was proposal-first.
+proof, authority, mutation, external access, persistence, behavior-smoke claims,
+plugin/runtime claims, or lifecycle expectations. If that sentence is hard to
+write honestly, the change was proposal-first.
 
 For approved proposal-first or protected edits, do not use `Safe UX because...`
 as the edit-path receipt. Close with an approval and lifecycle rationale instead:
@@ -287,7 +288,7 @@ as the edit-path receipt. Close with an approval and lifecycle rationale instead
 ```markdown
 Changed: <files/sections>
 Approved change: <named user-approved proposal-first/protected change>
-Lifecycle/protected-surface rationale: <what expectation, authority, proof, mutation, persistence, runtime/source, or lifecycle surface changed>
+Lifecycle/protected-surface rationale: <what expectation, authority, proof, mutation, persistence, behavior-smoke, plugin/runtime, or lifecycle surface changed>
 Verified: <frontmatter/YAML/quick_validate/diff check/etc.>
 Proof boundary: structural/source validation only; no realistic behavior smoke test was run. Plugin/cache/marketplace/runtime surfaces were not checked unless named above.
 Not touched: <protected surfaces intentionally left alone>

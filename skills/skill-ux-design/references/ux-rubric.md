@@ -7,7 +7,8 @@ behavior contract.
 ## Priority Order
 
 1. Preserve rigor, safety, evidence, authority, validation, permission,
-   mutation, persistence, external-access, and runtime/source boundaries.
+   mutation, persistence, external-access, behavior-smoke, and plugin/runtime
+   surface boundaries.
 2. Name the user's likely friction in plain language.
 3. Use the six UX phases as a coverage lens, not as a required report schema.
 4. Make the user's assumptions visible and cheap to correct.
@@ -29,7 +30,8 @@ finding, score, field, or recommendation per phase unless the user asks for
 3. **During use**: interaction rhythm, progress visibility, steering depth/cost,
    context acquisition, and handoffs.
 4. **Proof and safety**: validation language, evidence standards, approval gates,
-   external access, privacy, and runtime/source distinctions.
+   external access, privacy, behavior-smoke boundaries, and plugin/runtime
+   surfaces when applicable.
 5. **Durable aftermath**: saved artifacts, tickets, handoffs, commits, pushes,
    installs, refreshes, uncommitted outputs, and next lifecycle step.
 6. **Agent support**: whether the skill gives Codex enough context, examples,
@@ -42,9 +44,9 @@ exclude each phase and the material sub-surfaces within it.
 
 A phase is not covered by naming it. In audit/exhaustive mode, inspect the
 phase's material sub-surfaces that plausibly apply to the target skill, such as
-external access, persistence, or runtime/source proof when those surfaces could
-affect the user's experience. If a sub-surface does not apply, mark it out of
-scope instead of silently skipping it.
+external access, persistence, behavior-smoke proof, or plugin/runtime surfaces
+when they could affect the user's experience. If a sub-surface does not apply,
+mark it out of scope instead of silently skipping it.
 
 ## Friction Translation
 
@@ -59,8 +61,8 @@ Look for moments where the user may have to:
 - decode agent-facing terminology
 - ask for concrete text after receiving abstract themes
 - tell whether a recommendation is direct-edit safe or proposal-first
-- understand whether proof is structural, behavior-level, runtime-loaded, or not
-  checked
+- understand whether proof is structural, behavior smoke checked,
+  plugin/runtime checked, or not checked
 - recover when the skill guesses wrong or hits a boundary
 - track saved artifacts, commits, tickets, installs, refreshes, or runtime
   activation after the run
@@ -104,7 +106,8 @@ Useful steering phrases include:
   "audit only", "do not edit", or "check validation trust"
 
 Steering must not bypass proposal-first protected surfaces, evidence standards,
-approval gates, external-access boundaries, or runtime/source proof boundaries.
+approval gates, external-access boundaries, behavior-smoke boundaries, or
+plugin/runtime proof boundaries.
 
 ## Interaction Fit
 
@@ -142,8 +145,8 @@ Usually `Safe UX`:
 Proposal-first protected surfaces include routing, triggers, non-triggers,
 handoffs, promises, lifecycle guarantees, validation/proof/evidence standards,
 authority/source-of-truth rules, mutation/edit/approval boundaries, external
-access, privacy, persistence, runtime/source claims, runtime activation, and stop
-condition changes.
+access, privacy, persistence, behavior-smoke claims, plugin/runtime claims,
+live runtime activation, and stop condition changes.
 
 When a fix mixes `Safe UX` and protected behavior, split it. Apply only the
 separable safe portion directly and present the protected portion as a named
@@ -196,17 +199,18 @@ and material sub-surfaces were inspected or excluded.
 - Reporting abstract UX themes without showing the text-level change.
 - Asking for approval again when the target is clear, the fix is `Safe UX`, and
   the user did not request read-only behavior.
-- Applying trigger, proof, authority, mutation, external-access, persistence, or
-  runtime/source changes as casual UX edits.
+- Applying trigger, proof, authority, mutation, external-access, persistence,
+  behavior-smoke, or plugin/runtime changes as casual UX edits.
 - Treating `audit` as a synonym for `read-only` instead of full read-only
   coverage of material sub-surfaces.
 - Satisfying audit coverage by naming the six phases while skipping applicable
-  sub-surfaces such as external access, persistence, or runtime/source proof.
+  sub-surfaces such as external access, persistence, behavior-smoke proof, or
+  plugin/runtime surfaces.
 - Forcing users to memorize exact modifiers when ordinary language was clear.
 - Hiding inferred target, mode, authority, edit boundary, skipped context, or
   proof boundary.
 - Leading with a full evidence ledger when default mode only needs the top
   frictions.
 - Replacing rigorous evidence or validation with a friendly summary.
-- Treating source edits, metadata changes, marketplace state, installed cache,
-  and runtime-loaded behavior as the same thing.
+- Treating local live skill source, metadata changes, marketplace state, plugin
+  cache, distributed copies, and live runtime behavior as the same thing.

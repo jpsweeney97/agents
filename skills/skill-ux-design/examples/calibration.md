@@ -20,7 +20,9 @@ Expected behavior:
 - Scan across the six UX phases only far enough to find the top 1-3 frictions.
 - Directly edit separable wording, correction-path, setup-visibility, or output
   shape fixes that do not change protected behavior.
-- Close with `Safe UX because...` and a source-vs-runtime proof boundary.
+- Close with `Safe UX because...` and a proof boundary that separates
+  structural validation, behavior smoke testing, and plugin/runtime surfaces
+  when applicable.
 
 ## Read-Only Bounded Pass
 
@@ -66,11 +68,13 @@ Why: The user named a proof-and-safety concern in ordinary language.
 Expected behavior:
 
 - Focus proof and safety: validation language, evidence standards,
-  certification claims, and runtime/source distinctions.
+  certification claims, behavior-smoke boundaries, and plugin/runtime surfaces
+  when applicable.
 - Inspect neighboring files only when they affect validation-trust UX.
 - Label the targeted boundary in the response.
-- Treat proof, evidence, certification, and runtime/source changes as
-  proposal-first unless the user explicitly approves the named change.
+- Treat proof, evidence, certification, behavior-smoke, and plugin/runtime
+  surface changes as proposal-first unless the user explicitly approves the
+  named change.
 
 ## Mixed Request Routing
 

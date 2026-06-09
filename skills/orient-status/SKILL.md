@@ -102,7 +102,10 @@ Resolve authority by claim type instead of applying one global source order:
 - Branch publication state: current branch, upstream configuration, remote refs, and PR queries if inspected.
 - Intended scope, roadmap, or acceptance state: active/current specs, status docs, roadmap docs, and explicit user direction outrank branch inference.
 - Open work: ticket, issue, and PR systems outrank stale notes; tracked status docs can outrank them only when they explicitly declare current ownership.
-- Runtime or installed state: live runtime inspection, installed cache inspection, or task-specific runtime queries outrank source metadata. Metadata alone is not runtime proof.
+- Runtime and install-surface state: live runtime inspection outranks source
+  metadata for runtime claims. Installed cache or copied-surface inspection
+  applies only to plugin, marketplace, distributed-copy, or other install-surface
+  claims. Metadata alone is not runtime or install-surface proof.
 - History and rationale: git log, old plans, status notes, and prior summaries explain why the state changed; they do not prove current state unless re-anchored.
 
 Call out conflicts explicitly. Do not silently reconcile stale docs, old notes, aspirational roadmap text, or inferred action items into live truth.
