@@ -8,7 +8,7 @@
       "name": "handoff",
       "source": {
         "source": "local",
-        "path": "./.codex/plugins/handoff"
+        "path": "./.agents/plugins/handoff"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -20,7 +20,7 @@
       "name": "review-family",
       "source": {
         "source": "local",
-        "path": "./.codex/plugins/review-family"
+        "path": "./.agents/plugins/review-family"
       },
       "policy": {
         "installation": "AVAILABLE",

@@ -1,0 +1,40 @@
+{
+  "name": "handoff",
+  "version": "3.0.0",
+  "description": "Skill-only session continuity with Markdown handoffs",
+  "author": {
+    "name": "JP"
+  },
+  "license": "MIT",
+  "keywords": [
+    "handoff",
+    "session",
+    "context",
+    "continuity",
+    "markdown",
+    "search"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Handoff",
+    "shortDescription": "Save, load, and search Markdown handoffs",
+    "longDescription": "Save Markdown handoffs for session continuity, load handoffs as read-only resume context, and search project handoffs with plain text search.",
+    "developerName": "JP",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Save a handoff for this session",
+      "Load the latest handoff",
+      "Search handoffs for a decision"
+    ],
+    "websiteURL": "https://github.com/jpsweeney97/codex-tool-dev/tree/main/plugins/turbo-mode/handoff",
+    "privacyPolicyURL": "https://github.com/jpsweeney97/codex-tool-dev/blob/main/plugins/turbo-mode/handoff/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/jpsweeney97/codex-tool-dev/blob/main/plugins/turbo-mode/handoff/TERMS.md",
+    "brandColor": "#2563EB",
+    "screenshots": []
+  }
+}

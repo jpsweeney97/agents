@@ -1,0 +1,42 @@
+{
+  "name": "review-family",
+  "version": "0.2.0",
+  "description": "Evidence-first review, scrutiny, and review-adjudication skills",
+  "author": {
+    "name": "JP"
+  },
+  "license": "MIT",
+  "keywords": [
+    "review",
+    "scrutiny",
+    "skills",
+    "implementation",
+    "architecture",
+    "adjudication"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Review Family",
+    "shortDescription": "Evidence-first review and review-adjudication skills",
+    "longDescription": "Run bounded, evidence-first reviews across implementation, architecture, skill behavior, execution-readiness, adversarial scrutiny, and supplied-review or claim adjudication.",
+    "developerName": "JP",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "defaultPrompt": [
+      "Run an execution-readiness review: check whether this plan is ready to execute",
+      "Run a formal stress test of this proposal",
+      "Review this skill as a behavior contract",
+      "Review this implementation against the spec",
+      "Check these claims against the current repo",
+      "Adjudicate this review before I act"
+    ],
+    "websiteURL": "https://github.com/jpsweeney97/codex-tool-dev/tree/main/plugins/turbo-mode/review-family",
+    "privacyPolicyURL": "https://github.com/jpsweeney97/codex-tool-dev/blob/main/plugins/turbo-mode/review-family/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/jpsweeney97/codex-tool-dev/blob/main/plugins/turbo-mode/review-family/TERMS.md",
+    "brandColor": "#4F46E5",
+    "screenshots": []
+  }
+}
