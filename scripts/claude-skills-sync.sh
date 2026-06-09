@@ -9,6 +9,23 @@
 # Usage:
 #   claude-skills-sync.sh [--check]   report violations; exit 1 if any (default)
 #   claude-skills-sync.sh --link NAME create the symlink for a new skill
+#   claude-skills-sync.sh --link-all  create every missing symlink (bootstrap)
+#
+# Bootstrap / recovery (fresh machine or restored repo):
+#   1. Clone the repo to ~/.agents, then run:
+#        scripts/claude-skills-sync.sh --link-all
+#      Creates ~/.claude/skills if needed and links every skill. Existing
+#      correct links are skipped; conflicting entries are reported, never
+#      deleted.
+#   2. Recreate the SessionStart canary in the repo's untracked
+#      .claude/settings.local.json (untracked by design: .gitignore ignores
+#      .claude/):
+#        {"hooks": {"SessionStart": [{"hooks": [{"type": "command",
+#          "command": "/Users/jp/.agents/scripts/claude-skills-sync.sh --check || true",
+#          "timeout": 15, "statusMessage": "Checking managed-skill invariant"}]}]}}
+#   3. The pre-migration backup of ~/.claude/skills (including the retired
+#      exiting-worktrees eval artifacts, which exist nowhere else) lives at
+#      ~/.claude/skills-backup-20260609.tar.gz.
 #
 # This script never deletes anything. Remove stale entries manually with
 # `trash`. A branch without skills-claude/ reports MISSING/DANGLING until
@@ -90,6 +107,33 @@ check() {
   return "$fail"
 }
 
+link_all() {
+  local fail=0 src dir name expected target actual
+  mkdir -p "$DEST"
+  for src in "${SOURCES[@]}"; do
+    [ -d "$src" ] || { echo "MISSING-SOURCE-DIR: $src"; fail=1; continue; }
+    for dir in "$src"/*/; do
+      name="$(basename "$dir")"
+      expected="${dir%/}"
+      target="$DEST/$name"
+      if [ -L "$target" ]; then
+        actual="$(readlink "$target")"
+        if [ "$actual" != "$expected" ]; then
+          echo "WRONG-TARGET: $name -> $actual (expected $expected)"
+          fail=1
+        fi
+      elif [ -e "$target" ]; then
+        echo "NOT-A-SYMLINK: $target (hand-managed copy; expected link to $expected)"
+        fail=1
+      else
+        ln -s "$expected" "$target"
+        echo "linked: $target -> $expected"
+      fi
+    done
+  done
+  return "$fail"
+}
+
 link_skill() {
   local name="$1" src
   src="$(source_dir_for "$name")" || {
@@ -110,5 +154,6 @@ case "${1:---check}" in
     [ $# -eq 2 ] || { echo "usage: $0 --link <skill-name>" >&2; exit 1; }
     link_skill "$2"
     ;;
-  *) echo "usage: $0 [--check | --link <skill-name>]" >&2; exit 1 ;;
+  --link-all) link_all ;;
+  *) echo "usage: $0 [--check | --link <skill-name> | --link-all]" >&2; exit 1 ;;
 esac
