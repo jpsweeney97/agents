@@ -1,6 +1,6 @@
 # Simplification Playbook
 
-Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` rules win.
+Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` or `CLAUDE.md` rules win.
 
 ## Checklist
 
@@ -31,9 +31,9 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` rules win.
    parent directory for a file target, run `git rev-parse --show-toplevel`; if it
    fails, use the explicit target root as a non-git root and state that git
    diff/status evidence is unavailable. Before planning edits, discover and read
-   applicable instructions: repo-root `AGENTS.md`, any nearer `AGENTS.md` between
-   the root and target path, and local package/tool config that controls
-   formatter, linter, tests, or generated files.
+   applicable instructions: repo-root `AGENTS.md` or `CLAUDE.md`, any nearer
+   instruction file between the root and target path, and local package/tool
+   config that controls formatter, linter, tests, or generated files.
 
    In a git repo, run `git status --short --branch` from the repo root and use
    path-limited checks: `git diff -- <paths>`, `git diff --cached -- <paths>`,
