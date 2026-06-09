@@ -58,11 +58,12 @@ trail. If a synthesis sentence drifts, fix the synthesis or lower confidence.
 Do not include owners, dependency chains, decision gates, ticket mutations,
 implementation steps, or security vulnerability claims. If the user wants
 dependency-aware sequencing, owners, gates, or continuation planning after the
-audit, name `$next-steps` as the right lane and stop; do not execute it unless
-the user clearly asks for that planning work. If dependency review surfaces
-CVEs, GHSAs, exploitability, package-audit output, or vulnerability claims, stop
-that branch and route to `codex-security:security-scan`; do not use the security
-signal as debt evidence.
+audit, name `/next-steps` or `$next-steps` as the right lane and stop; do not
+execute it unless the user clearly asks for that planning work. If dependency
+review surfaces CVEs, GHSAs, exploitability, package-audit output, or
+vulnerability claims, stop that branch and route to a security-scan skill when
+one is available (such as `codex-security:security-scan`); otherwise name it as
+out of scope for this audit. Do not use the security signal as debt evidence.
 
 ## Report Template
 
@@ -106,7 +107,7 @@ Artifact Path: docs/audits/YYYY-MM-DD-<target-slug>-debt-scan.md
 - Stakes: low|medium|high - <reason>
 - Output Mode: artifact|chat-only
 - Security Boundary: dependency maintenance only; vulnerability work routes to
-  `codex-security:security-scan`
+  a security-scan skill, not this audit
 - Repo Instructions Checked: <paths or none found>
 
 ## Focus & Coverage

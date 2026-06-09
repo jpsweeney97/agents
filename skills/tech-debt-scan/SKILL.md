@@ -64,7 +64,7 @@ current repo or workspace target. Ask only when multiple plausible target
 boundaries would materially change findings, or when a high-stakes or broad
 monorepo scan would mislead without an explicit boundary.
 
-The saved artifact is for a future Codex or agent continuing from evidence. Its
+The saved artifact is for a future agent continuing from evidence. Its
 authority order is:
 
 1. `Evidence Trail`: anchors, corroboration, present cost, and source notes.
@@ -127,9 +127,10 @@ Run `Frame -> Triage -> Evidence Sweep -> Synthesize -> Deliver`.
    Dependency review is maintenance-only: version skew, unused dependencies,
    upgrade drag, lockfile drift, license, compatibility, and maintenance cost. If
    dependency review surfaces CVEs, GHSAs, exploitability, package-audit output,
-   or vulnerability claims, stop that branch and route it to
-   `codex-security:security-scan`; do not use the security signal as debt
-   evidence.
+   or vulnerability claims, stop that branch and route it to a security-scan
+   skill when one is available (such as `codex-security:security-scan`);
+   otherwise name it as out of scope for this audit. Do not use the security
+   signal as debt evidence.
 4. **Record:** record evidence in the artifact as you go using
    `references/audit-report-template.md`. Keep the artifact status as
    `draft - incomplete` until the final checks pass. Do not create
