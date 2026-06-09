@@ -2,9 +2,9 @@
 
 Repo-specific instructions for `/Users/jp/.agents`.
 
-This repo is local source for Codex-facing skills, skill metadata, references,
-and personal plugin marketplace metadata. Higher-priority global instructions
-still apply.
+This repo is the single source for skills used by both Codex and Claude Code,
+plus skill metadata, references, and personal plugin marketplace metadata.
+Higher-priority global instructions still apply.
 
 ## Primary Work
 
@@ -17,10 +17,31 @@ Primary source surfaces:
 - `skills/**/references/*.md`
 - `skills/**/examples/*.md`
 - `skills/**/scripts/*`
+- `skills-claude/**` (same shapes, Claude-only skills)
 - `plugins/marketplace.json`
 
 Treat `.plugin-eval/`, `.DS_Store`, bytecode, and virtual environments as local
 or generated artifacts unless the user explicitly asks to inspect them.
+
+## Skill Layout And Delivery
+
+- `skills/` is dual-runtime by contract. Codex scans it in place at
+  `$HOME/.agents/skills`; Claude Code serves each skill through a symlink in
+  `~/.claude/skills`. Editing source here edits the live skill for both
+  runtimes.
+- `skills-claude/` holds Claude-only skills. They depend on Claude-specific
+  tooling, and `openai-docs` would collide with Codex's bundled skill, so Codex
+  must never scan them; they reach Claude through the same `~/.claude/skills`
+  symlinks.
+- After adding or renaming a skill, run
+  `scripts/claude-skills-sync.sh --link <name>`. Run
+  `scripts/claude-skills-sync.sh --check` to verify delivery; it never deletes.
+  Remove stale `~/.claude/skills` entries with `trash`.
+- Do not edit files under `~/.claude/skills`; entries there are symlinks into
+  this repo, so edit the repo source.
+- In skill text, name invocation tokens for both runtimes (`/skill-name` or
+  `$skill-name`), name instruction files jointly (`AGENTS.md` or `CLAUDE.md`),
+  and phrase routing to single-runtime skills availability-conditionally.
 
 ## Agent skills
 
@@ -123,9 +144,9 @@ forward test when practical. Do not waive loader errors, invalid YAML, missing
 referenced files, test failures, script/runtime errors, or behavior-contract
 failures.
 
-For local skills in `skills/`, the edited source is the live local skill source
-for future Codex invocations. Do not invent a separate installed-runtime proof
-layer for those files. Keep the proof boundary narrower: structural checks show
+For local skills in `skills/` and `skills-claude/`, the edited source is the
+live local skill source for future Codex and Claude Code invocations. Do not
+invent a separate installed-runtime proof layer for those files. Keep the proof boundary narrower: structural checks show
 the files parse, while a realistic invocation, forward test, or dry run shows
 whether the changed behavior is followed. Installed/cache/marketplace proof is
 only relevant for plugin-distributed skills or other copied runtime surfaces.
@@ -149,7 +170,7 @@ only relevant for plugin-distributed skills or other copied runtime surfaces.
 ## Design Gate
 
 The canonical behavior lives in `skills/agent-facing-design/SKILL.md`. Use
-`$agent-facing-design` when creating or materially changing prompts, skills,
+the `agent-facing-design` skill when creating or materially changing prompts, skills,
 agent rules, workflows, schemas, validators, routers, hooks, tools, commands,
 scripts, or persistent artifacts that an agent must read, populate, follow, or
 call.
