@@ -18,6 +18,7 @@ Primary source surfaces:
 - `skills/**/examples/*.md`
 - `skills/**/scripts/*`
 - `skills-claude/**` (same shapes, Claude-only skills)
+- `plugins/<name>/**` (canonical dual-runtime plugin sources)
 - `plugins/marketplace.json`
 
 Treat `.plugin-eval/`, `.DS_Store`, bytecode, and virtual environments as local
@@ -58,6 +59,43 @@ or generated artifacts unless the user explicitly asks to inspect them.
 - In skill text, name invocation tokens for both runtimes (`/skill-name` or
   `$skill-name`), name instruction files jointly (`AGENTS.md` or `CLAUDE.md`),
   and phrase routing to single-runtime skills availability-conditionally.
+
+## Plugin Layout And Delivery
+
+- `plugins/<name>/` holds the canonical dual-runtime plugin sources (currently
+  `handoff`, `review-family`) in Claude format: `.claude-plugin/plugin.json`
+  plus `skills/`. One source serves both runtimes; never create per-runtime
+  copies. The retired per-runtime trees (`claude-code-tool-dev/packages/plugins`,
+  `~/.codex/plugins/{handoff,review-family}`) must not come back.
+- Claude Code delivery: each plugin dir is symlinked into `~/.claude/skills` by
+  `scripts/claude-skills-sync.sh` and loads in place as a skills-directory
+  plugin (`<name>@skills-dir`) — no marketplace, no install, no cache.
+  `SKILL.md` edits are live for the next session; hook/MCP/agent component
+  changes need `/reload-plugins`. Symlinked plugin-dir discovery is
+  undocumented behavior (forward-tested 2026-06-09), canary-guarded like the
+  skills farm.
+- Codex delivery: Codex discovers `plugins/marketplace.json` implicitly as the
+  personal `turbo-mode` marketplace, but serves installed plugins from the
+  versioned cache (`~/.codex/plugins/cache/turbo-mode/<name>/<version>`), not
+  from source. After editing plugin source, republish with
+  `scripts/codex-plugins-sync.sh --publish <name>`; `--check` reports
+  source-vs-cache drift and runs in the SessionStart canary.
+- External contracts (verified 2026-06-09 on Codex 0.137): marketplace plugin
+  source paths must be relative (`./.agents/plugins/<name>`) because the
+  implicit marketplace root is `$HOME` and absolute paths are silently
+  skipped; Codex reads `.claude-plugin/plugin.json` natively; the manifest
+  `interface` block and `skills` field are Codex-facing and ignored by Claude
+  Code (documented unknown-field tolerance).
+- Bump the manifest `version` on behavior changes: the Codex cache is
+  version-keyed, and `codex plugin add` refreshes even an unchanged version,
+  but version history is the only release signal the mirror and caches carry.
+- Handoff storage contract: handoff skills write `<project_root>/.agents/handoffs/`
+  (shared by both runtimes) and read legacy `.claude/handoffs/` and
+  `.codex/handoffs/` as read-only fallbacks.
+- The GitHub release mirror in `codex-tool-dev/plugins/turbo-mode/` is updated
+  only at explicit publish time by copying from this repo's sources.
+- Bootstrap and recovery live in the headers of `scripts/claude-skills-sync.sh`
+  and `scripts/codex-plugins-sync.sh`.
 
 ## Agent skills
 
@@ -174,8 +212,10 @@ runtime as a marketplace manifest; invalid entries are skipped silently. It is
 not proof of installation, activation, or runtime plugin state.
 
 - Edit it when the task asks for personal marketplace metadata changes.
-- When editing local `source.path` entries, verify each referenced path exists
-  or explicitly report it as unresolved.
+- Keep `source.path` entries relative (`./.agents/plugins/<name>`): the
+  implicit personal marketplace root is `$HOME`, and Codex (0.137) silently
+  skips absolute paths. Verify each referenced path exists, and confirm
+  resolution with `codex plugin list` after edits.
 - Do not claim installation, activation, loaded skill state, hook behavior, or
   runtime plugin behavior from this file alone.
 - Before making runtime claims, verify through the relevant Codex or plugin
