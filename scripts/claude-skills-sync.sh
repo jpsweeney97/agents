@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 # Guards the managed-skill invariant for the dual-runtime skill source.
 #
-# Every directory in skills/ (dual-runtime) and skills-claude/ (Claude-only)
-# must exist in ~/.claude/skills as a symlink to its repo source. Anything
-# else under ~/.claude/skills must be listed in EXEMPT. Codex needs no
-# delivery: it scans $HOME/.agents/skills in place.
+# Every directory in skills/ (dual-runtime), skills-claude/ (Claude-only),
+# and plugins/ (dual-runtime plugins) must exist in ~/.claude/skills as a
+# symlink to its repo source. Anything else under ~/.claude/skills must be
+# listed in EXEMPT. Codex needs no delivery here: it scans
+# $HOME/.agents/skills in place and installs plugins from the implicit
+# personal marketplace at ~/.agents/plugins/marketplace.json (see
+# scripts/codex-plugins-sync.sh for that delivery path).
+#
+# plugins/ entries are skills-directory plugins: each contains
+# .claude-plugin/plugin.json, so Claude Code loads it in place as
+# <name>@skills-dir with no marketplace or install step. Symlinked
+# plugin-dir discovery is an undocumented behavior (forward-tested
+# 2026-06-09); this check is its canary.
 #
 # Usage:
 #   claude-skills-sync.sh [--check]   report violations; exit 1 if any (default)
@@ -34,7 +43,7 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEST="$HOME/.claude/skills"
-SOURCES=("$REPO/skills" "$REPO/skills-claude")
+SOURCES=("$REPO/skills" "$REPO/skills-claude" "$REPO/plugins")
 EXEMPT=()
 
 is_exempt() {
@@ -49,7 +58,7 @@ source_dir_for() {
   local name="$1" src hit=""
   for src in "${SOURCES[@]}"; do
     if [ -d "$src/$name" ]; then
-      [ -n "$hit" ] && { echo "COLLISION: $name exists in both skills/ and skills-claude/" >&2; return 2; }
+      [ -n "$hit" ] && { echo "COLLISION: $name exists in more than one source root" >&2; return 2; }
       hit="$src/$name"
     fi
   done
@@ -63,6 +72,7 @@ check() {
   for src in "${SOURCES[@]}"; do
     [ -d "$src" ] || { echo "MISSING-SOURCE-DIR: $src"; fail=1; continue; }
     for dir in "$src"/*/; do
+      [ -d "$dir" ] || continue
       name="$(basename "$dir")"
       expected="${dir%/}"
       target="$DEST/$name"
@@ -83,11 +93,12 @@ check() {
     done
   done
 
-  if [ -d "$REPO/skills" ] && [ -d "$REPO/skills-claude" ]; then
-    while IFS= read -r name; do
-      [ -n "$name" ] && { echo "COLLISION: $name exists in both skills/ and skills-claude/"; fail=1; }
-    done < <(comm -12 <(ls "$REPO/skills" | sort) <(ls "$REPO/skills-claude" | sort))
-  fi
+  while IFS= read -r name; do
+    [ -n "$name" ] && { echo "COLLISION: $name exists in more than one source root"; fail=1; }
+  done < <(for src in "${SOURCES[@]}"; do
+      [ -d "$src" ] || continue
+      for dir in "$src"/*/; do [ -d "$dir" ] && basename "$dir"; done
+    done | sort | uniq -d)
 
   for entry in "$DEST"/*; do
     [ -e "$entry" ] || [ -L "$entry" ] || continue
@@ -99,7 +110,7 @@ check() {
       continue
     fi
     if ! source_dir_for "$name" >/dev/null && ! is_exempt "$name"; then
-      echo "UNMANAGED: $entry (not in skills/ or skills-claude/; add to EXEMPT or remove with trash)"
+      echo "UNMANAGED: $entry (not in skills/, skills-claude/, or plugins/; add to EXEMPT or remove with trash)"
       fail=1
     fi
   done
@@ -113,6 +124,7 @@ link_all() {
   for src in "${SOURCES[@]}"; do
     [ -d "$src" ] || { echo "MISSING-SOURCE-DIR: $src"; fail=1; continue; }
     for dir in "$src"/*/; do
+      [ -d "$dir" ] || continue
       name="$(basename "$dir")"
       expected="${dir%/}"
       target="$DEST/$name"
@@ -137,7 +149,7 @@ link_all() {
 link_skill() {
   local name="$1" src
   src="$(source_dir_for "$name")" || {
-    echo "link failed: no source dir for '$name' in skills/ or skills-claude/" >&2
+    echo "link failed: no source dir for '$name' in skills/, skills-claude/, or plugins/" >&2
     exit 1
   }
   if [ -e "$DEST/$name" ] || [ -L "$DEST/$name" ]; then
