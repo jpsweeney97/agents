@@ -1,6 +1,6 @@
 ---
 name: behavior-smoke-test
-description: "Design and run the smallest realistic scenario that exercises a changed behavior claim. Use when the user asks for a behavior smoke test, forward test, realistic dry run, future-agent proxy check, or proof that a skill, prompt, rule, workflow, or agent-facing contract will be followed. For skill behavior-contract changes, uses a context-isolated subagent proxy by default when available and safe. Do not use for structural validation alone, broad review, CI/test triage, implementation, or final closeout."
+description: "Design and run the smallest realistic scenario that exercises a changed behavior claim. Use when the user asks for a behavior smoke test, forward test, realistic dry run, future-agent proxy check, or proof that a skill, prompt, rule, workflow, or agent-facing contract will be followed. For skill behavior-contract changes, prefer a context-isolated subagent proxy when current tool policy permits it and the harness is safe. Do not use for structural validation alone, broad review, CI/test triage, implementation, or final closeout."
 ---
 
 # Behavior Smoke Test
@@ -15,8 +15,9 @@ Use this skill for behavior smoke tests, forward tests, future-agent proxy check
 realistic dry runs, or proof that a changed skill, prompt, rule, workflow, or
 agent-facing contract will be followed.
 
-Invoking this skill authorizes use of a non-mutating, context-isolated subagent
-proxy for the behavior smoke test when the harness is available and safe.
+This skill may prefer a non-mutating, context-isolated subagent proxy for agent
+behavior claims, but it does not override the active subagent tool's
+authorization rules.
 
 Do not use it for structural validation alone, broad review, generic test execution,
 CI triage, implementation, debugging, baseline resolution, acceptance mapping, or
@@ -27,14 +28,19 @@ final closeout. Name the owning workflow instead.
 1. Identify a concrete behavior claim.
 2. Inspect the controlling authority: changed contract, local instructions,
    source artifact, existing smoke artifact, or relevant files.
-3. Prefer an existing smoke artifact only when it actually exercises the claim;
+3. Discover the available harness and its permission constraints before choosing
+   a proxy, direct test, dry run, or existing artifact.
+4. Prefer an existing smoke artifact only when it actually exercises the claim;
    otherwise design the smallest temporary scenario that does.
-4. For skill behavior-contract changes, run a context-isolated subagent proxy by
-   default when available and safe.
-5. Compare observed behavior to the claim. The proxy or test subject does not
+5. For skill, prompt, rule, workflow, or agent-contract behavior claims, prefer
+   an authorized context-isolated subagent proxy when current tool policy permits
+   it and the harness can stay safe.
+6. For non-agent behavior claims, use direct tests, fixture runs, or realistic
+   dry runs when they actually exercise the changed behavior.
+7. Compare observed behavior to the claim. The proxy or test subject does not
    grade itself.
-6. Report the result, observed behavior, structural checks, proof boundary, and
-   durable artifact status.
+8. Report the result, harness source, observed behavior, structural checks, proof
+   boundary, and durable artifact status.
 
 If the claim is too vague to test, narrow it first. If it cannot be narrowed,
 report `not run` and name the missing claim.
@@ -52,28 +58,55 @@ or the user asks for a durable example.
 A scenario that only rereads the contract, summarizes expected behavior, or
 checks files is not behavior evidence. Classify that as `not strong enough`.
 
+## Harness Discovery
+
+Before declaring a proxy available or unavailable, inspect the harness options
+for the current session and claim type.
+
+- For subagent or proxy checks, inspect the active tool metadata. If `tool_search`
+  is available and a subagent tool is not already exposed, use it to search for
+  subagent or proxy tooling, then read the discovered tool's authorization, role,
+  context, mutation, and waiting constraints.
+- The active tool contract wins over this skill. This skill may prefer a proxy;
+  it never authorizes a tool action that current tool policy or user permissions
+  do not allow.
+- Do not infer proxy availability from source files, prior sessions, memory, or
+  marketplace/cache metadata alone.
+- In the report's `Harness` field, name the harness source: active tool metadata,
+  `tool_search` discovery, explicit user-provided harness, direct local
+  test/dry run, existing smoke artifact, or unavailable/unverified.
+
 ## Subagent Proxy Harness
 
 For skill behavior-contract changes, use a context-isolated subagent proxy by
-default when available and safe. Use `fork_context: false` when supported.
+default only when current tool policy permits it and the harness is safe. Use
+`fork_context: false` when supported.
 
 ### Subagent Availability And Authorization
 
-Explicit user invocation of this skill is authorization to use a non-mutating
-subagent proxy for the smoke test when the current Codex session exposes a safe
-subagent harness. Implicit skill selection is not enough to silently spawn a
-subagent; if the skill was selected implicitly and the user did not explicitly
-ask for a subagent, proxy, forward test, or behavior smoke test, ask before
-spawning or run a non-subagent harness and report that boundary.
+Explicit user invocation of this skill is not by itself authorization to spawn a
+subagent. Spawn only when the current subagent tool's policy permits the action.
+If authorization is unclear and a proxy is the right harness, ask one permission
+question before spawning.
 
-When spawning, use `fork_context: false`. Use the `behavior-proxy` custom agent
-when it is available. Otherwise use the built-in `default` agent. Do not use a
-worker or explorer agent for behavior proof unless the user explicitly asks for
-that role and the role itself is part of the behavior being tested.
+If the skill was selected implicitly and the user did not explicitly request a
+subagent, proxy, or delegated agent, do not spawn silently. For skill, prompt,
+rule, workflow, or agent-contract behavior claims, ask one permission question
+when authorization is the only missing piece; otherwise report `not run`. For
+non-agent behavior claims, a direct test, fixture run, existing smoke artifact,
+or realistic dry run can still count when it actually exercises the changed
+behavior.
 
-If no safe subagent harness is available, or if the harness cannot keep the
-proxy context isolated and non-mutating, report `not run`. Do not emulate a
-clean-context proxy inside the parent thread.
+When spawning, use `fork_context: false` when supported. Use a `behavior-proxy`
+custom agent only when current tool metadata exposes that role. Otherwise use
+the safest allowed default role. Do not make a proxy search for a custom role,
+and do not use a worker or explorer agent for behavior proof unless the user
+explicitly asks for that role and the role itself is part of the behavior being
+tested.
+
+If no authorized, safe subagent harness is available, or if the harness cannot
+keep the proxy context isolated and non-mutating, report `not run` for agent
+behavior claims. Do not emulate a clean-context proxy inside the parent thread.
 
 Keep the proxy non-mutating unless the disposable harness or a separate explicit
 user instruction authorizes mutation.
@@ -92,9 +125,10 @@ Under the provided local instructions, skill contract, and scenario, act as you
 normally would.
 
 Do not edit files, stage changes, commit, push, delete, install dependencies,
-publish, sync, call external services, or otherwise mutate files, runtime state,
-remote state, or user data. For first-move checks, do not call tools; state only
-the next tool/action you would request or take, if applicable.
+publish, sync, call external services, read broad repository or session context,
+or otherwise mutate files, runtime state, remote state, or user data. For
+first-move checks, do not call tools; state only the next tool/action you would
+request or take, if applicable.
 
 Do not explain the contract, identify the test purpose, infer the expected
 answer, or grade the scenario. Return only:
@@ -116,9 +150,13 @@ For multi-step claims, build a staged non-mutating harness:
 2. Send the proxy one stage at a time with only the context it would naturally
    have at that point.
 3. Record each proxy response and intended next action.
-4. Stop before any real mutation; replace tool calls or edits with stated
+4. Apply the same safety envelope at every stage: no edits, staging, commits,
+   pushes, deletes, dependency installs, publishing, sync, external service
+   calls, broad context reads, or tool calls unless a disposable harness or
+   explicit user authorization permits that specific action class.
+5. Stop before any real mutation; replace tool calls or edits with stated
    intended actions unless a disposable harness explicitly allows them.
-5. Grade the collected observations in the parent run against the original
+6. Grade the collected observations in the parent run against the original
    behavior claim.
 
 If the staged harness only proves the first move, leaks the grading claim, or

@@ -1,4 +1,4 @@
 interface:
   display_name: "Behavior Smoke Test"
   short_description: "Exercise changed behavior with a realistic scenario"
-  default_prompt: "Use $behavior-smoke-test to design and run the smallest realistic scenario that exercises the changed behavior claim. For skill behavior changes, treat invocation as authorization to use a non-mutating context-isolated subagent proxy when available and safe."
+  default_prompt: "Use $behavior-smoke-test to design and run the smallest realistic scenario that exercises the changed behavior claim. For skill behavior changes, prefer a non-mutating context-isolated subagent proxy only when current tool policy authorizes it and the harness is safe."
