@@ -29,9 +29,13 @@
 #   2. Recreate the SessionStart canary in the repo's untracked
 #      .claude/settings.local.json (untracked by design: .gitignore ignores
 #      .claude/):
-#        {"hooks": {"SessionStart": [{"hooks": [{"type": "command",
-#          "command": "/Users/jp/.agents/scripts/claude-skills-sync.sh --check || true",
-#          "timeout": 15, "statusMessage": "Checking managed-skill invariant"}]}]}}
+#        {"hooks": {"SessionStart": [{"hooks": [
+#          {"type": "command",
+#           "command": "/Users/jp/.agents/scripts/claude-skills-sync.sh --check || true",
+#           "timeout": 15, "statusMessage": "Checking managed-skill invariant"},
+#          {"type": "command",
+#           "command": "/Users/jp/.agents/scripts/codex-plugins-sync.sh --check || true",
+#           "timeout": 15, "statusMessage": "Checking Codex plugin cache drift"}]}]}}
 #   3. The pre-migration backup of ~/.claude/skills (including the retired
 #      exiting-worktrees eval artifacts, which exist nowhere else) lives at
 #      ~/.claude/skills-backup-20260609.tar.gz.
