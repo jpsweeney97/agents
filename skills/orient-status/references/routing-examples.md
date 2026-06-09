@@ -22,6 +22,10 @@ when the right lane is unclear from the trigger text alone.
 - User: "Show current blockers, then clean up stale branches."
   Behavior: Give a compact status brief, then switch to git hygiene only if its
   preview, approval, and destructive-action gates are satisfied.
+- User: "Where does this branch stand, and is it safe to hand off?"
+  Behavior: Give a compact status brief for the branch state, then switch to
+  `closeout-check` for the handoff-readiness proof gap because completion truth
+  was explicitly requested.
 
 ## Do Not Use Orient Status As The Primary Lane
 
@@ -29,8 +33,25 @@ when the right lane is unclear from the trigger text alone.
   Better lane: `baseline`.
 - User: "Review this implementation against the plan."
   Better lane: implementation review or the explicitly invoked review skill.
+- User: "Is this done?", "Is this ready?", or "Close this out."
+  Better lane: `closeout-check`.
+- User: "What's the status of PR #42?"
+  Better lane: `github` or a GitHub specialist skill. Use orient-status only if
+  the PR is evidence for a broader local repo status brief.
+- User: "What are the unresolved review threads on this PR?" or "Why is CI
+  failing?"
+  Better lane: GitHub review-follow-up or CI-debugging specialist skill.
+- User: "Triage issue #42" or "Show repository issues that need attention."
+  Better lane: `github`, `triage`, or the repo's issue-tracker workflow.
 - User: "List open tickets" or "triage the backlog."
   Better lane: ticket listing, search, review, or update skills.
 - User: "Show me open tickets."
   Better lane: ticket listing or search. If that lane is unavailable, say so
   and do not substitute a broad status orientation.
+- User: "/load", "Continue from the latest handoff", or "Search handoffs for
+  the deployment decision."
+  Better lane: `handoff:load-handoff` or `handoff:search-handoffs`.
+- User: "What did we decide about authentication?"
+  Better lane: handoff search when the question is about prior handoff context;
+  use orient-status only when the user asks how that decision compares with
+  current project state.

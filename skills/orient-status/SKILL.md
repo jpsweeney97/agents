@@ -1,6 +1,6 @@
 ---
 name: orient-status
-description: "Run a read-only orientation of a project, codebase, repository, plugin, skill, or local work area to determine current status, in-flight work, source conflicts, and freshness limits. Use when the user asks where things stand, what happened recently, what is in flight, what is blocked, where the target sits against status or roadmap context, or how live state compares with named docs, tickets, issues, PRs, roadmaps, specs, or status docs. Do not use for explicit source-of-truth, baseline, or baseline-vs-live authority questions, code review, cleanup, branch landing, implementation/debugging, next-step planning, backlog prioritization, or ticket listing/search/triage unless the user also asks for broader status orientation."
+description: "Run a read-only orientation of a project, codebase, repository, plugin, skill, or local work area to determine current status, in-flight work, source conflicts, and freshness limits. Use when the user asks where things stand, what happened recently, what is in flight, what is blocked, where the target sits against status or roadmap context, or how live state compares with named docs, tickets, issues, PRs, roadmaps, specs, or status docs. Do not use for explicit source-of-truth, baseline, or baseline-vs-live authority questions, code review, completion/readiness/closeout truth, GitHub-focused PR/issue/repo triage, handoff load/save/search/resume/list/update, cleanup, branch landing, implementation/debugging, next-step planning, backlog prioritization, or ticket listing/search/triage unless the user also asks for broader status orientation."
 ---
 
 # Orient Status
@@ -30,26 +30,38 @@ Do not use this skill as the primary lane for:
 - Explicit source-of-truth, baseline, or baseline-vs-live authority questions;
   use the baseline skill instead.
 - Code review, implementation review, plan scrutiny, or security review.
+- Completion truth, readiness, or proof-gap closeout questions such as "is this
+  done?", "is this ready?", "is this verified?", "safe to hand off?", or "close
+  this out"; use `closeout-check`.
+- GitHub-focused repository, PR, or issue summaries; review-thread status; CI
+  status; labels, comments, or reactions; and repository triage. Use `github` or
+  its specialist skills unless GitHub state is only evidence for a broader local
+  status brief.
+- Handoff load, save, search, resume, list, or update operations, including
+  `/load`, `/save`, "continue from handoff", "search handoffs", and "what did
+  we decide"; use the handoff skills.
 - Branch cleanup, branch landing, repo hygiene, staging, committing, pushing, or publishing.
 - Implementation, debugging, test fixing, verification runs, or dependency work.
 - Next-step planning, backlog prioritization, or "what should I work on next" analysis.
 - Ticket listing, ticket search, ticket lookup, close-readiness checks, ticket backlog triage, or ticket create/update/close/reopen operations.
 
-Use tickets and named status/source documents as evidence only when the user is
-asking for a broader project, repo, or work-area status brief. If the user's
-primary object is the ticket system, backlog, or triage queue itself, name the
-narrower lane and do not run orient-status as the primary skill.
+Use tickets, issues, PRs, handoffs, and named status/source documents as
+evidence only when the user is asking for a broader project, repo, or work-area
+status brief. If the user's primary object is the ticket system, issue tracker,
+PR, review thread, CI check, handoff archive, backlog, or triage queue itself,
+name the narrower lane and do not run orient-status as the primary skill.
 
 For mixed requests, use orient-status only for the orientation part. If the same
 user message explicitly asks for a second deliverable, such as a recommendation,
-plan, cleanup, ticket operation, implementation, verification run, or other
-non-status action, first give a compact status brief, then switch to the named
-adjacent lane only if that lane's rules and mutation gates allow it. If the
-adjacent work was not explicitly requested, name the lane and stop.
+plan, cleanup, closeout/readiness check, GitHub operation, handoff operation,
+ticket operation, implementation, verification run, or other non-status action,
+first give a compact status brief, then switch to the named adjacent lane only
+if that lane's rules and mutation gates allow it. If the adjacent work was not
+explicitly requested, name the lane and stop.
 
 If a narrower lane is unavailable, name that limit and keep the answer inside
-orient-status. Do not approximate ticket, cleanup, review, audit, or
-planning workflows under a status-orientation label.
+orient-status. Do not approximate ticket, GitHub, handoff, closeout, cleanup,
+review, audit, or planning workflows under a status-orientation label.
 
 ## Discovery Ladder
 
@@ -59,7 +71,7 @@ Adapt this ladder to the target. Say when a source class is unavailable, skipped
 2. Read local instructions and metadata: `AGENTS.md`, README, manifests, package metadata, plugin metadata, skill metadata, and repo-specific status entry points.
 3. Inspect live state: current directory, branch, worktree status, upstream/remotes if present, local diffs, branch-vs-base diffs, and recent local commits. On a non-main branch, inspect changed file names and recent branch commits before trusting older status docs.
 4. Read current-status and open-work docs: files named like `current-state`, `status`, `reconciliation`, `tickets`, `roadmap`, `plans`, `todo`, `backlog`, or repo-specific equivalents.
-5. Inspect ticket, issue, and PR systems only when they are evidence for the broader status question. Prefer read-only local files first. Use read-only connector/API queries when the user names a remote PR, issue, branch, or publication state, or when the status conclusion materially depends on remote truth. Do not refresh local git state unless asked.
+5. Inspect ticket, issue, handoff, and PR systems only when they are evidence for the broader status question. If the primary target is a GitHub repo, PR, issue, review thread, or CI state, route to `github` or its specialist skills before running this ladder. Prefer read-only local files first. Use read-only connector/API queries when the user names a remote PR, issue, branch, or publication state, or when the status conclusion materially depends on remote truth. Do not refresh local git state unless asked.
 6. Read roadmap, spec, design, and plan docs to understand intended sequencing and acceptance boundaries.
 7. Read older notes and status summaries as context, not authority. Re-anchor any stale claim against live state before presenting it as current.
 8. Summarize source conflicts, evidence gaps, and the strongest supported status conclusion.
@@ -146,9 +158,10 @@ conflicts, and evidence gaps.
 
 If a full-packet section has no evidence, write `None found` or `Not enough
 evidence`; do not omit it in broad orientation mode. If the user asks for
-implementation, cleanup, verification, planning, prioritization, ticket
-operations, or other non-status actions, apply the mixed-request rule above
-instead of letting the status brief expand into that work by implication.
+implementation, cleanup, closeout/readiness, verification, planning,
+prioritization, GitHub operations, handoff operations, ticket operations, or
+other non-status actions, apply the mixed-request rule above instead of letting
+the status brief expand into that work by implication.
 
 ## Operating Notes
 
