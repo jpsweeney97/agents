@@ -16,6 +16,7 @@ Primary source surfaces:
 - `skills/**/agents/openai.yaml`
 - `skills/**/references/*.md`
 - `skills/**/examples/*.md`
+- `skills/**/scripts/*`
 - `plugins/marketplace.json`
 
 Treat `.plugin-eval/`, `.DS_Store`, bytecode, and virtual environments as local
@@ -39,15 +40,15 @@ This repo uses a single-context domain-doc layout. See `docs/agents/domain.md`.
 
 - Start file-changing work with `git status --short --branch`.
 - Read the live target files before editing. Match the existing skill shape.
-- Keep edits scoped to the requested skill, metadata file, reference, or
+- Keep edits scoped to the requested skill, metadata file, reference, script, or
   marketplace entry.
 - If the user asks for review, analysis, planning, or a grill-me session, stay
   read-only until they explicitly ask for edits.
-- For behavior changes, inspect `SKILL.md`, `agents/openai.yaml`, and referenced
-  files together before patching.
-- A minimal local skill can be only `SKILL.md` plus `agents/openai.yaml` when
-  the value is the behavior contract itself. Add references, examples, or
-  scripts only when they reduce real load in the main skill file.
+- For behavior changes, inspect `SKILL.md`, companion metadata when present,
+  referenced files, and related scripts together before patching.
+- A minimal local skill can be only `SKILL.md` when the value is the behavior
+  contract itself. Add metadata, references, examples, or scripts only when they
+  reduce real load in the main skill file or support a concrete integration.
 
 ## Skill Editing
 
@@ -63,6 +64,7 @@ This repo uses a single-context domain-doc layout. See `docs/agents/domain.md`.
 `agents/openai.yaml`:
 
 - Treat this as companion metadata, not a substitute for the skill contract.
+- It may be absent for local skills that do not need companion metadata.
 - Keep the display name, short description, and default prompt aligned with the
   current `SKILL.md`.
 - Minimal metadata is acceptable for local skills.
@@ -74,19 +76,31 @@ References and examples:
 - Do not move behavior-critical instructions into a reference unless
   `SKILL.md` clearly says when to load it.
 
+Scripts:
+
+- Treat scripts as behavior surfaces when a skill invokes or references them.
+- When editing a script, inspect its callers or references and run a targeted
+  script check, behavior check, or dry run when practical.
+
 ## Validation Ladder
 
 Validate the exact surfaces you edited.
 
-1. Parse edited `SKILL.md` frontmatter and edited YAML metadata.
-2. Inspect every referenced path from the edited surfaces; each path must exist
+1. For standalone instruction Markdown such as `AGENTS.md` or support docs,
+   inspect the final diff, check added or changed referenced paths, and run
+   whitespace checks such as `git diff --check` on the edited files.
+2. Parse edited `SKILL.md` frontmatter and edited YAML metadata when present.
+3. Inspect every referenced path from the edited surfaces; each path must exist
    and match the role claimed by the instruction.
-3. For metadata-only changes, parsing plus shape/alignment checks can be enough.
-4. For skill behavior changes, run the available local validator when one exists.
-   If no validator is available, state that and name the checks that replaced it.
-5. For material behavior changes, add one live invocation, forward-test, or
+4. For metadata-only changes, parsing plus shape/alignment checks can be enough.
+5. For script changes, run a focused script check or explain why no practical
+   check exists.
+6. For skill behavior changes, run the available local validator when one exists.
+   Treat `quick_validate.py` as structural frontmatter validation only. If no
+   validator is available, state that and name the checks that replaced it.
+7. For material behavior changes, add one live invocation, forward-test, or
    realistic dry run where practical.
-6. If validation fails or is blocked, do not claim the change works and do not
+8. If validation fails or is blocked, do not claim the change works and do not
    create the automatic local commit.
 
 `plugin-eval` was intentionally uninstalled for this repo and should not be
@@ -98,6 +112,7 @@ this repo.
 Useful checks:
 
 ```bash
+# When skills/<skill>/agents/openai.yaml exists:
 ruby -ryaml -e 'YAML.load_file(ARGV[0])' skills/<skill>/agents/openai.yaml
 python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/<skill>
 git diff --check -- skills/<skill>
@@ -120,6 +135,8 @@ only relevant for plugin-distributed skills or other copied runtime surfaces.
 `plugins/marketplace.json` is editable local metadata. It is not runtime proof.
 
 - Edit it when the task asks for personal marketplace metadata changes.
+- When editing local `source.path` entries, verify each referenced path exists
+  or explicitly report it as unresolved.
 - Do not claim installation, activation, loaded skill state, hook behavior, or
   runtime plugin behavior from this file alone.
 - Before making runtime claims, verify through the relevant Codex or plugin
@@ -146,13 +163,8 @@ than lighter context would.
 
 ## Communication
 
-- In chat, lead with the user-visible behavior, experience, or decision, then
-  map to technical choices.
-- Match the user's register. If they ask in technical terms, answer in technical
-  terms.
-- Use plain language for explanations. Save formal structure for artifacts that
-  need it, such as tickets, specs, handoffs, commit messages, and review reports.
-- These communication rules apply to conversation, not to authored artifacts.
+- Follow the global communication rules. In this repo, remember those rules
+  apply to chat, not to authored skill or instruction artifacts.
 
 ## Git And Cleanup
 
