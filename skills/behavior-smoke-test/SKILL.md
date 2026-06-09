@@ -15,6 +15,9 @@ Use this skill for behavior smoke tests, forward tests, future-agent proxy check
 realistic dry runs, or proof that a changed skill, prompt, rule, workflow, or
 agent-facing contract will be followed.
 
+Invoking this skill authorizes use of a non-mutating, context-isolated subagent
+proxy for the behavior smoke test when the harness is available and safe.
+
 Do not use it for structural validation alone, broad review, generic test execution,
 CI triage, implementation, debugging, baseline resolution, acceptance mapping, or
 final closeout. Name the owning workflow instead.
@@ -54,9 +57,15 @@ checks files is not behavior evidence. Classify that as `not strong enough`.
 For skill behavior-contract changes, use a context-isolated subagent proxy by
 default when available and safe. Use `fork_context: false` when supported.
 
+The user's invocation of this skill is authorization to use that proxy for the
+smoke test. Keep the proxy non-mutating unless the disposable harness or a
+separate explicit user instruction authorizes mutation.
+
 Give the proxy the relevant skill contract, local authority, and miniature
-scenario. Do not tell it the expected behavior or behavior claim. Ask it to act,
-not explain.
+scenario. The controlling contract may contain the rule being tested; that is
+allowed context. Do not tell the proxy the external grading claim, expected
+answer, old-vs-new behavior label, or "the behavior should be X" conclusion. Ask
+it to act, not explain.
 
 Default proxy prompt:
 
@@ -70,12 +79,31 @@ Local instructions and skill contract: <excerpt>
 User request and scenario: <scenario>
 ```
 
-Keep proxy tests non-mutating by default: the proxy may state the next action it
-would take, but must not edit real files unless the harness is disposable or the
-user explicitly authorizes mutation.
+Use the default proxy prompt only for first-move claims. It can prove the next
+response or next action, but not a multi-step workflow, validation path, stop
+condition, durable-artifact decision, or report shape. For those claims, build a
+multi-step non-mutating harness that lets the proxy act through the relevant
+decision points without editing real files.
 
 If a proxy is unavailable, unsafe, or cannot honestly exercise the claim, report
 that explicitly. Do not call the smoke test passed from structural checks alone.
+
+## Structural Checks
+
+Structural checks show whether the controlling files are loadable and coherent.
+They do not prove that the changed behavior was followed.
+
+For local skills, the minimum structural checks are:
+
+- parse `SKILL.md` frontmatter
+- parse `agents/openai.yaml` when present
+- inspect referenced paths and confirm each exists
+- run the available local skill validator when present
+- run a diff whitespace check when files were edited or are under review
+
+Report structural checks separately from behavior proof. If a structural check
+was not applicable or was not run, say that directly in the `Structural checks`
+field.
 
 ## Results
 
@@ -86,9 +114,10 @@ that explicitly. Do not call the smoke test passed from structural checks alone.
 - `not strong enough`: something was attempted, but it did not actually force
   or observe the behavior claim.
 
-If the proxy prompt reveals the expected behavior, the scenario does not force
-the claim, or the proxy only explains the contract, the result is `not strong
-enough`, not `passed`.
+If the proxy prompt reveals the external grading claim or expected answer, the
+scenario does not force the claim, the harness is only a first-action check for
+a multi-step claim, or the proxy only explains the contract, classify it as
+`not strong enough`, not `passed`.
 
 ## Output
 
