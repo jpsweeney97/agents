@@ -1,11 +1,11 @@
 ---
 name: skill-ux-design
-description: "Use when the user asks to design, audit, improve, or apply UX improvements to a Codex skill, SKILL.md, agents/openai.yaml, skill reference, or skill example. Trigger only for explicit UX language or clear user-facing synonyms such as usability, friction, user journey, discovery/invocation, steering, output experience, edit control, validation trust, recovery, durable aftermath, or skill-use experience. Do not trigger for general skill improvement, plain instruction-doc prose quality, rigor, validation, correctness, or safety work unless the user explicitly frames it as UX. Improves the user's journey through invoking and using a skill, with audit as a supported read-only exhaustive mode."
+description: "Use when the user asks to design, audit, improve, or apply UX improvements to a Claude or Codex skill, SKILL.md, agents/openai.yaml, skill reference, or skill example. Trigger only for explicit UX language or clear user-facing synonyms such as usability, friction, user journey, discovery/invocation, steering, output experience, edit control, validation trust, recovery, durable aftermath, or skill-use experience. Do not trigger for general skill improvement, plain instruction-doc prose quality, rigor, validation, correctness, or safety work unless the user explicitly frames it as UX. Improves the user's journey through invoking and using a skill, with audit as a supported read-only exhaustive mode."
 ---
 
 # Skill UX Design
 
-Improve the user's journey through invoking and using a Codex skill. Treat
+Improve the user's journey through invoking and using a Claude or Codex skill. Treat
 instruction quality and agent execution as supporting causes, not the goal.
 
 Read [ux-rubric.md](references/ux-rubric.md) before any substantive design,
@@ -30,7 +30,7 @@ unclear. Do not load examples for every routine run.
 
 ## Neighboring Skills
 
-This skill owns the user experience of using a Codex skill. It does not own all
+This skill owns the user experience of using a Claude or Codex skill. It does not own all
 instruction quality, skill correctness, adversarial review, or agent-facing
 design decisions.
 
@@ -89,7 +89,7 @@ Use these six phases as the internal UX lens, not as required output sections:
    surfaces when applicable.
 5. **Durable aftermath**: saved artifacts, tickets, handoffs, commits, pushes,
    installs, refreshes, uncommitted outputs, and next lifecycle step.
-6. **Agent support**: whether the skill gives Codex enough context, examples,
+6. **Agent support**: whether the skill gives the agent enough context, examples,
    defaults, and stop conditions to reliably produce the intended user
    experience.
 
@@ -220,7 +220,7 @@ patch-shaped proposal requiring explicit approval.
 
 ## Progress Visibility
 
-Inherit normal Codex progress-update behavior; do not invent a special progress
+Inherit the host agent's normal progress-update behavior; do not invent a special progress
 protocol.
 
 Give a short update when inspection is broad, validation is running, or edits

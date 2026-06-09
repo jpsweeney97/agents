@@ -1,7 +1,7 @@
 # Skill UX Design Rubric
 
 Use this rubric to find friction in the user's journey through invoking and
-using a Codex skill. The goal is better skill UX without weakening the skill's
+using a Claude or Codex skill. The goal is better skill UX without weakening the skill's
 behavior contract.
 
 ## Priority Order
@@ -14,7 +14,7 @@ behavior contract.
 4. Make the user's assumptions visible and cheap to correct.
 5. Let the user steer scope, depth, edit behavior, proof level, and artifacts in
    ordinary language.
-6. Give Codex enough context, examples, defaults, and stop conditions to produce
+6. Give the agent enough context, examples, defaults, and stop conditions to produce
    the intended user experience reliably.
 
 ## Six-Phase Lens
@@ -34,7 +34,7 @@ finding, score, field, or recommendation per phase unless the user asks for
    surfaces when applicable.
 5. **Durable aftermath**: saved artifacts, tickets, handoffs, commits, pushes,
    installs, refreshes, uncommitted outputs, and next lifecycle step.
-6. **Agent support**: whether the skill gives Codex enough context, examples,
+6. **Agent support**: whether the skill gives the agent enough context, examples,
    defaults, and stop conditions to reliably produce the intended user
    experience.
 
@@ -157,7 +157,7 @@ patch-shaped proposal.
 Agent support is an explicit secondary surface. It matters even when user impact
 is indirect or speculative.
 
-Check whether another Codex instance can execute the intended UX reliably:
+Check whether another agent instance can execute the intended UX reliably:
 
 - trigger and non-trigger boundaries are clear in frontmatter
 - defaults cover omitted target, scope, proof, artifact, edit, and persistence
