@@ -180,9 +180,9 @@ Treat these as proposal-first protected surfaces:
 - external access, privacy, connector, web, GitHub, Gmail, or remote-state
   behavior
 - persistence, saved artifacts, handoffs, tickets, commits, pushes, installs,
-  refreshes, or runtime activation
-- runtime/source coherence claims, including installed-cache, marketplace,
-  metadata, and loaded-behavior distinctions
+  refreshes, plugin activation, or live runtime behavior
+- source/lifecycle coherence claims, including plugin cache, marketplace,
+  metadata, distributed-copy, hook, and live-runtime distinctions
 - adding, removing, or changing stop conditions
 
 If an edit is wrong, ask whether it would merely make the skill less clear, or
@@ -213,8 +213,9 @@ patch-shaped proposal requiring explicit approval.
    validation path. At minimum, parse changed YAML/frontmatter, check referenced
    paths, run the available skill validator when present, run whitespace checks,
    and do a realistic dry run when practical.
-8. Label the proof boundary honestly: structural validation is not runtime
-   proof.
+8. Label the proof boundary honestly: structural validation is not behavior
+   proof. For local skills, do not invent a separate installed-runtime layer;
+   name plugin/cache/marketplace/runtime checks only when those surfaces matter.
 
 ## Progress Visibility
 
@@ -269,7 +270,7 @@ For direct `Safe UX` edits, close with:
 Changed: <files/sections>
 Safe UX because <one sentence explaining why this clarified existing behavior without changing protected surfaces>
 Verified: <frontmatter/YAML/quick_validate/diff check/etc.>
-Proof boundary: source validation only; installed/cache/marketplace/runtime-loaded behavior was not verified.
+Proof boundary: structural/source validation only; no realistic behavior smoke test was run.
 Not touched: <protected surfaces intentionally left alone>
 ```
 
@@ -288,7 +289,7 @@ Changed: <files/sections>
 Approved change: <named user-approved proposal-first/protected change>
 Lifecycle/protected-surface rationale: <what expectation, authority, proof, mutation, persistence, runtime/source, or lifecycle surface changed>
 Verified: <frontmatter/YAML/quick_validate/diff check/etc.>
-Proof boundary: source validation only; installed/cache/marketplace/runtime-loaded behavior was not verified.
+Proof boundary: structural/source validation only; no realistic behavior smoke test was run. Plugin/cache/marketplace/runtime surfaces were not checked unless named above.
 Not touched: <protected surfaces intentionally left alone>
 ```
 
@@ -296,14 +297,14 @@ For mixed edits, split the closeout: use `Safe UX because...` only for the
 separable safe portion, and use the approval/lifecycle rationale for the
 approved proposal-first or protected portion.
 
-Always include a source-vs-runtime proof boundary after edits, including
-low-risk text changes. Keep it one line by default. Expand it when the edit
-touches skill identity, metadata, default prompts, marketplace entries,
-installed caches, plugin copies, validation trust, or runtime behavior.
+Always include a proof boundary after edits, including low-risk text changes.
+Keep it one line by default. Expand it when the edit touches skill identity,
+metadata, default prompts, marketplace entries, plugin caches or copies,
+validation trust, hook behavior, remote state, or live runtime behavior.
 
 For edits involving skill identity, metadata, default prompts, marketplace
-entries, installed caches, plugin copies, or runtime behavior, the closeout must
-explicitly name each touched and untouched lifecycle layer.
+entries, plugin caches or copies, hooks, remote state, or live runtime behavior,
+the closeout must explicitly name each touched and untouched lifecycle layer.
 
 ## Examples And Calibration
 
@@ -327,6 +328,7 @@ Validate the exact surfaces edited.
   narrow-scope or report-first terms, and review any hits instead of assuming
   zero hits is required.
 
-Do not claim installed, marketplace, cached, or runtime-loaded behavior changed
-unless that path was verified. If runtime activation matters and was not
-checked, name it as the next lifecycle step.
+Do not claim plugin install, marketplace, cache, distributed-copy, hook, remote,
+or live runtime behavior changed unless that path was verified. For local skills
+edited directly in `skills/`, treat the edited file as the live local source and
+separate structural validation from behavior smoke testing instead.

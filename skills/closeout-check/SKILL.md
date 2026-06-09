@@ -95,7 +95,8 @@ or mutate caches unless the user explicitly asks or the repo-standard check
 requires it and the action is safe.
 
 If no meaningful focused verification or quick check exists, say so plainly.
-Do not convert structural validation into runtime proof.
+Do not convert structural validation into behavior proof, plugin proof, or live
+runtime proof.
 
 ## Proof Boundary
 
@@ -104,14 +105,20 @@ Label what was actually proven:
 - `source inspected`: live files, diffs, or commit history support the claim
 - `structurally validated`: parsing, schema, frontmatter, formatting, or static
   checks passed
-- `behavior checked`: focused tests, dry runs, or smoke checks ran
-- `runtime verified`: the installed or live runtime surface was inspected
+- `behavior checked`: focused tests, dry runs, or smoke checks exercised the
+  changed behavior
+- `runtime verified`: a live app, plugin, service, hook, or other runtime
+  surface was inspected
 - `remote verified`: remote PR, issue, CI, or service state was refreshed
 - `not verified`: a claim would require evidence not gathered in this pass
 
 Use these as honest boundaries, not as ceremony. A source or structural check
-does not prove loaded runtime behavior, remote state, installation state, or
-end-to-end behavior unless that path was actually inspected.
+does not prove behavior, remote state, plugin installation state, or end-to-end
+behavior unless that path was actually exercised. For local skills in `skills/`,
+the edited file is the live local source for future invocations; do not require
+or report a separate installed-runtime check unless the claim involves a plugin
+copy, cache, marketplace entry, hook, service, or other distributed runtime
+surface.
 
 ## Blocking Failures
 

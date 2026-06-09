@@ -108,8 +108,11 @@ Use the examples for judgment, not checklist compliance.
 
 For implementation work, apply the smaller clearer design directly only when the
 owning edit path is already clear. After direct edits, validate through that
-owning workflow and state the proof boundary; source checks do not prove loaded
-or runtime behavior.
+owning workflow and state the proof boundary. Structural source checks prove
+parsing and shape, not that a realistic invocation followed the behavior. For
+local skills, do not invent a separate installed-runtime layer; plugin caches,
+marketplace metadata, and distributed copies need their own checks only when
+that surface is part of the claim.
 
 For obvious gate decisions, a single crisp sentence is enough. For review or
 design discussion where the reasoning matters, answer briefly:

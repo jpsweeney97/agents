@@ -108,6 +108,13 @@ forward test when practical. Do not waive loader errors, invalid YAML, missing
 referenced files, test failures, script/runtime errors, or behavior-contract
 failures.
 
+For local skills in `skills/`, the edited source is the live local skill source
+for future Codex invocations. Do not invent a separate installed-runtime proof
+layer for those files. Keep the proof boundary narrower: structural checks show
+the files parse, while a realistic invocation, forward test, or dry run shows
+whether the changed behavior is followed. Installed/cache/marketplace proof is
+only relevant for plugin-distributed skills or other copied runtime surfaces.
+
 ## Marketplace Metadata
 
 `plugins/marketplace.json` is editable local metadata. It is not runtime proof.

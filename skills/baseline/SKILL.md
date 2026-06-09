@@ -63,8 +63,9 @@ Use the strongest current-facing source available for the claim:
    contracts, ADRs, specs, manifests, release docs, precedence sections, or
    decision records.
 4. Source files for source-behavior claims.
-5. Live runtime or installed-state inspection for runtime claims, only when the
-   user requested or authorized that verification.
+5. Live runtime inspection for runtime claims, only when the user requested or
+   authorized that verification. Use installed-state inspection only for plugin,
+   cache, marketplace, distributed-copy, or other install-surface claims.
 6. Tests when they are contract-backed and current; otherwise tests are evidence
    surfaces that may themselves need a baseline.
 7. README, public docs, and examples, below canonical contracts when precedence

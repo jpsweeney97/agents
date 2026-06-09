@@ -116,9 +116,10 @@ stricter `agent-facing-design` test.
 
 Editing false-proof wording in an existing instruction doc stays in this skill
 when the user is asking for obligation or prose tightening, such as preventing a
-structural check from implying runtime, install, sync, certification, or loaded
-behavior proof. Route to review-family when the user asks whether a proof gate,
-execution-readiness claim, certification, release claim, or proof chain is valid.
+structural check from implying behavior, certification, sync, plugin install,
+cache, marketplace, or distributed-copy proof. Route to review-family when the
+user asks whether a proof gate, execution-readiness claim, certification,
+release claim, or proof chain is valid.
 
 Challenge before clarifying:
 
@@ -151,8 +152,8 @@ Use this order as a fast scan, not a report template:
 5. **Unbounded**: scope, time, lifecycle, ownership, or downstream responsibility
    spreads farther than the user asked.
 6. **False-proof**: the required evidence does not support the claim, or
-   structural checks are allowed to imply behavior, runtime, install, sync, or
-   activation proof.
+   structural checks are allowed to imply behavior, sync, certification, plugin
+   install, cache, marketplace, hook, or distributed-copy proof.
 7. **Conflicting**: another authority, skill, workflow, or user request can beat
    it, but the text does not say how to resolve the conflict.
 
@@ -184,9 +185,12 @@ After direct edits, report briefly:
 After review-only work, report findings first, include the target/scope
 inspected, state `No edits made`, name the proof boundary, and wait.
 
-Always separate proof classes. Source validation does not prove installed,
-cached, marketplace, runtime-loaded, hook, sync, or behavior state unless that
-surface was actually checked.
+Always separate proof classes. Structural source validation proves parsing,
+shape, references, or static checks only; it does not prove that a realistic
+invocation followed the behavior unless one was run. For local skills in
+`skills/`, do not invent a separate installed-runtime layer. Plugin install,
+cache, marketplace, distributed-copy, hook, sync, remote, or live runtime claims
+need their own checks only when that surface is part of the claim.
 
 ## Validation
 
