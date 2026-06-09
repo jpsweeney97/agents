@@ -1,12 +1,12 @@
 ---
 name: next-steps
-description: Use when the user explicitly invokes `$next-steps` to turn existing findings into a strategic action plan with dependencies, gates, and critical path.
+description: Use when the user explicitly invokes `/next-steps` or `$next-steps` to turn existing findings into a strategic action plan with dependencies, gates, and critical path.
 ---
 
 # Action Plan
 
 Turn existing findings into a small dependency-aware strategic plan. This skill
-is explicit-only; use it only when the user selects `$next-steps`.
+is explicit-only; use it only when the user selects `/next-steps` or `$next-steps`.
 
 Read [references/example.md](references/example.md) only when the user asks for an example or needs output or edge-case calibration.
 

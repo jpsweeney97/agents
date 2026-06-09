@@ -4,7 +4,7 @@ Use only for output-shape and edge-case calibration.
 
 ## Standard Case
 
-**User:** "$next-steps Findings: F1 weak service-to-service trust boundaries; F2 incomplete rollback procedures, marked high likelihood and high impact by the audit; F3 unclear recovery ownership, which the audit says depends on the rollback strategy; F4 decide rollout readiness after F1 and F2 are settled; non-critical cosmetic docs cleanup can wait until rollout readiness is decided. What should we tackle first?"
+**User invokes `next-steps`:** "Findings: F1 weak service-to-service trust boundaries; F2 incomplete rollback procedures, marked high likelihood and high impact by the audit; F3 unclear recovery ownership, which the audit says depends on the rollback strategy; F4 decide rollout readiness after F1 and F2 are settled; non-critical cosmetic docs cleanup can wait until rollout readiness is decided. What should we tackle first?"
 
 ### 1. Current State
 
@@ -49,7 +49,7 @@ I can save this plan to a file if useful; tell me the path.
 
 ## Edge Case: Ambiguous Source
 
-**User:** "$next-steps Use the findings above."
+**User invokes `next-steps`:** "Use the findings above."
 
 **Context:** The prior conversation includes one review finding set and one later audit finding set, and the user did not name a target artifact.
 
