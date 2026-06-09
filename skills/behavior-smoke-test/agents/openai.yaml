@@ -1,0 +1,4 @@
+interface:
+  display_name: "Behavior Smoke Test"
+  short_description: "Exercise changed behavior with a realistic scenario"
+  default_prompt: "Use $behavior-smoke-test to design and run the smallest realistic scenario that exercises the changed behavior claim, using a context-isolated subagent proxy for skill behavior changes when available and safe."
