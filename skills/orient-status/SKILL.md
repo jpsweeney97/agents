@@ -69,7 +69,7 @@ Adapt this ladder to the target. Say when a source class is unavailable, skipped
 
 1. Identify the target type and boundary: repo, codebase, plugin, skill, package, docs tree, or other work area.
 2. Read local instructions and metadata: `AGENTS.md`, README, manifests, package metadata, plugin metadata, skill metadata, and repo-specific status entry points.
-3. Inspect live state: current directory, branch, worktree status, upstream/remotes if present, local diffs, branch-vs-base diffs, and recent local commits. On a non-main branch, inspect changed file names and recent branch commits before trusting older status docs.
+3. Inspect live state: current directory, branch, worktree status, upstream/remotes if present, local diffs, branch-vs-base diffs, and recent local commits. Identify the default/base branch from explicit user direction, repo instructions, existing local remote-HEAD metadata, or a single obvious local default branch; do not fetch solely to identify it unless the user authorizes refresh. On a branch other than the verified default/base branch, inspect changed file names and recent branch commits before trusting older status docs. If the default/base branch cannot be identified locally and branch context matters, say so as an evidence gap.
 4. Read current-status and open-work docs: files named like `current-state`, `status`, `reconciliation`, `tickets`, `roadmap`, `plans`, `todo`, `backlog`, or repo-specific equivalents.
 5. Inspect ticket, issue, handoff, and PR systems only when they are evidence for the broader status question. If the primary target is a GitHub repo, PR, issue, review thread, or CI state, route to `github` or its specialist skills before running this ladder. Prefer read-only local files first. Use read-only connector/API queries when the user names a remote PR, issue, branch, or publication state, or when the status conclusion materially depends on remote truth. Do not refresh local git state unless asked.
 6. Read roadmap, spec, design, and plan docs to understand intended sequencing and acceptance boundaries.
@@ -178,4 +178,6 @@ Use this mode only when the user explicitly requests it:
   producing the evidence-grounded packet. If the user asks for an artifact but
   gives no destination and no repo convention resolves it, ask one path question
   before writing. Do not update source code, tickets, indexes, or
-  generated reports as a side effect.
+  generated reports as a side effect. After writing or updating the artifact,
+  report the absolute path and proof boundary; do not broaden into source edits,
+  commits, normal verification, or other workflow actions.

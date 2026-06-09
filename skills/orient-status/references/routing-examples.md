@@ -17,8 +17,10 @@ when the right lane is unclear from the trigger text alone.
 ## Orient First, Then Switch Only If Explicit
 
 - User: "Where do things stand, and what should I do next?"
-  Behavior: Give a compact status brief, then switch to the appropriate planning
-  or recommendation lane because the second deliverable was explicit.
+  Behavior: Give a compact status brief. If the user is asking you to choose or
+  rank options, switch to `making-recommendations`; if they explicitly asked for
+  an implementation plan, switch to the relevant implementation-planning lane.
+  Use `next-steps` only when `$next-steps` was explicitly invoked.
 - User: "Show current blockers, then clean up stale branches."
   Behavior: Give a compact status brief, then switch to git hygiene only if its
   preview, approval, and destructive-action gates are satisfied.
