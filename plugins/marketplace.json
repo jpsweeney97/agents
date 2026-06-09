@@ -8,7 +8,7 @@
       "name": "handoff",
       "source": {
         "source": "local",
-        "path": "/Users/jp/.codex/plugins/handoff"
+        "path": "./.codex/plugins/handoff"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -20,7 +20,7 @@
       "name": "review-family",
       "source": {
         "source": "local",
-        "path": "/Users/jp/.codex/plugins/review-family"
+        "path": "./.codex/plugins/review-family"
       },
       "policy": {
         "installation": "AVAILABLE",
