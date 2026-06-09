@@ -37,6 +37,22 @@ or generated artifacts unless the user explicitly asks to inspect them.
   `scripts/claude-skills-sync.sh --link <name>`. Run
   `scripts/claude-skills-sync.sh --check` to verify delivery; it never deletes.
   Remove stale `~/.claude/skills` entries with `trash`.
+- Bootstrap and recovery are documented in the `scripts/claude-skills-sync.sh`
+  header; `--link-all` rebuilds the `~/.claude/skills` symlink farm.
+- The checked-out working tree is the live skill source. Branch switches,
+  rebase, stash, and bisect here mutate the skills served to both runtimes
+  immediately; edits made in an isolated worktree do not go live until they
+  land on the checked-out branch.
+- External contracts: Codex (>=0.137) scans `~/.agents/skills` natively with a
+  ~2% skills context budget and truncates the skill list silently when over
+  it, so keep skill count and description growth in mind. Claude Code symlink
+  discovery in `~/.claude/skills` and within-session live reload through
+  symlinks are undocumented behaviors, proven session-to-session only.
+- When naming a new skill, avoid names already used by Codex-bundled skills
+  (`~/.codex/skills/`, including `.system/`: `openai-docs`, `skill-creator`,
+  `skill-installer`, `plugin-creator`, `imagegen`, `pdf`, `doc`,
+  `codex-primary-runtime`) or Claude Code bundled skills (`code-review`,
+  `debug`, `loop`, `claude-api`, `run`, `verify`, and similar).
 - Do not edit files under `~/.claude/skills`; entries there are symlinks into
   this repo, so edit the repo source.
 - In skill text, name invocation tokens for both runtimes (`/skill-name` or
@@ -153,7 +169,9 @@ only relevant for plugin-distributed skills or other copied runtime surfaces.
 
 ## Marketplace Metadata
 
-`plugins/marketplace.json` is editable local metadata. It is not runtime proof.
+`plugins/marketplace.json` is editable local metadata that Codex parses at
+runtime as a marketplace manifest; invalid entries are skipped silently. It is
+not proof of installation, activation, or runtime plugin state.
 
 - Edit it when the task asks for personal marketplace metadata changes.
 - When editing local `source.path` entries, verify each referenced path exists
