@@ -1,11 +1,11 @@
 ---
 name: writing-principles
-description: "Use when the user asks for obligation-only instruction edits or obligation-focused review of existing or pasted Codex-facing instruction docs such as AGENTS.md, SKILL.md, skill support docs, agents/*.md, or agents/*.yaml. Handles tightening, simplifying, rewriting, editing, or drafting obligation text inside an already-owned instruction surface by challenging what the text makes future agents do, decide, avoid, verify, remember, or maintain; remove or lighten obligations that do not protect meaningful user work; clarify obligations that earn their place. Do not use for constructing new skill bundles, changing skill capabilities or bundle structure, user-facing docs, ordinary Markdown formatting, creative writing, code comments, completed-code review, broad adversarial skill review, composability/overlap review owned by scrutinize-skill, UX review, full proof-gate review, or material agent-facing design decisions owned by agent-facing-design."
+description: "Use when the user asks for obligation-only instruction edits or obligation-focused review of existing or pasted agent-facing instruction docs such as AGENTS.md, CLAUDE.md, SKILL.md, skill support docs, agents/*.md, or agents/*.yaml. Handles tightening, simplifying, rewriting, editing, or drafting obligation text inside an already-owned instruction surface by challenging what the text makes future agents do, decide, avoid, verify, remember, or maintain; remove or lighten obligations that do not protect meaningful user work; clarify obligations that earn their place. Do not use for constructing new skill bundles, changing skill capabilities or bundle structure, user-facing docs, ordinary Markdown formatting, creative writing, code comments, completed-code review, broad adversarial skill review, composability/overlap review owned by scrutinize-skill, UX review, full proof-gate review, or material agent-facing design decisions owned by agent-facing-design."
 ---
 
 # Writing Principles
 
-Reflexive edit gate for Codex-facing instruction documents.
+Reflexive edit gate for agent-facing instruction documents.
 
 This skill is not a prose-polish checklist. Treat instruction text as a set of
 obligations future agents must carry.
@@ -27,9 +27,9 @@ not original wording or assumed intent.
 
 ## Scope
 
-Use for existing or pasted Codex-facing instruction docs:
+Use for existing or pasted agent-facing instruction docs:
 
-- `AGENTS.md`
+- `AGENTS.md` and `CLAUDE.md`
 - `SKILL.md`
 - skill references, examples, or support Markdown when they shape agent behavior
 - `agents/*.md` and `agents/*.yaml`
@@ -73,7 +73,7 @@ define new agent-facing capabilities here; route those to `skill-creator`,
 `write-a-skill`, or `agent-facing-design` as appropriate.
 
 This skill wins for obligation-only prose edits inside an existing `SKILL.md`,
-`AGENTS.md`, support doc, `agents/*.md`, or `agents/*.yaml` when the requested
+`AGENTS.md`, `CLAUDE.md`, support doc, `agents/*.md`, or `agents/*.yaml` when the requested
 change removes, lightens, narrows, or clarifies what future agents must do.
 Neighboring skill-authoring workflows win when the change alters the capability,
 bundle shape, resources, scripts, generated metadata, or install/runtime
@@ -86,8 +86,8 @@ requested instruction surface.
 
 Use this authority map:
 
-- `AGENTS.md`: read applicable higher-priority and repo-local instruction files
-  plus linked references that control the requested edit.
+- `AGENTS.md` or `CLAUDE.md`: read applicable higher-priority and repo-local
+  instruction files plus linked references that control the requested edit.
 - Skill bundles: read `SKILL.md`, `agents/openai.yaml`, and behavior-shaping
   references or examples that define triggers, instructions, evidence, output,
   validation, or handoff behavior.
@@ -196,7 +196,7 @@ need their own checks only when that surface is part of the claim.
 
 Validate the exact surfaces edited:
 
-1. **Standalone instruction Markdown such as `AGENTS.md` or support docs**:
+1. **Standalone instruction Markdown such as `AGENTS.md`, `CLAUDE.md`, or support docs**:
    inspect the final diff, check referenced paths that were added or changed,
    and run whitespace checks such as `git diff --check` on the edited files.
 2. **Skill bundle behavior or trigger changes**: parse edited `SKILL.md`
