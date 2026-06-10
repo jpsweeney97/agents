@@ -213,7 +213,11 @@ Matching the plugin's explicit-don'ts style:
   boundary lines that currently disclaim "durable learning extraction" and
   retire `/summary` and `/distill` — state explicitly that `throughline` is a
   new derived-arc contract (rolling, regenerable, never mutating handoffs),
-  not a revival of the retired entry points, which stay retired.
+  not a revival of the retired entry points, which stay retired. Also update
+  the README Boundaries list so the write boundary stays true: `/save` is no
+  longer the only write-oriented skill — `/throughline` writes only the
+  derived `THROUGHLINE.md`, never session handoffs; `/load` and `/search`
+  stay read-only.
 - Claude Code delivery is live via the skills-dir symlink
   (`scripts/claude-skills-sync.sh --check` to verify).
 - Codex delivery requires an explicit
