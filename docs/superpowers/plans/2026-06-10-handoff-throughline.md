@@ -16,7 +16,8 @@
 - **Branch:** all work on `feature/handoff-throughline`. A user-level hook blocks Edit/Write on `main` in this repo. Before Task 1, run `git status --short --branch` and confirm the branch and a clean tree.
 - **TDD adaptation:** these are prose contracts; there is no meaningful "red" test run before the contract file exists. Per the repo Validation Ladder (which governs here), each task is: write the surface → structural validation → fixture forward test (where the spec demands one) → commit. Forward tests are context-isolated subagent proxies (Agent tool, `general-purpose`), which is this repo's standard behavior-proof for skill contracts.
 - **One derived clarification** (consequence of spec arithmetic, not a new decision — flag it in the commit message for Task 3): a bounded-batch partial fold must take the **oldest unfolded sources first**. The drift check compares "count of files at or below `covers_through`" to `sources_folded`; a non-prefix batch (e.g. newest-first) makes that comparison false immediately. The SKILL.md text states this in one sentence.
-- **Do not publish:** no `scripts/codex-plugins-sync.sh --publish`, no GitHub mirror update, no push. Claude Code delivery is automatic via the existing plugin-dir symlink.
+- **Do not publish:** no `scripts/codex-plugins-sync.sh --publish`, no GitHub mirror update, no push. Claude Code delivery is automatic via the existing plugin-dir symlink. Known consequence: after the 3.1.0 bump the Codex cache (currently `handoff/3.0.0`) lags source by design, so `codex-plugins-sync.sh --check` and the SessionStart canary will report `NOT-INSTALLED: handoff@3.1.0` until the user requests publish — expected state, not accidental drift.
+- **Execution runtime:** this plan is a Claude Code execution artifact — the required sub-skills, the Agent tool, and the `general-purpose` subagent type are Claude Code surfaces; it is not written for Codex execution. Dual-runtime obligations apply to the authored plugin sources (which name both `/throughline` and `$throughline`), not to this plan document.
 - **Deletion:** `trash <path>` only, never `rm`.
 - **Commits:** end every commit message with the trailer line `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>` (shown in each commit step).
 - **Subagent prompts:** forward-test subagents must Read the SKILL.md file and follow it as a contract. They must NOT use the Skill tool (the new skill is not registered in the running session) and must NOT read the other handoff skills unless the test says so.
@@ -847,7 +848,7 @@ Report inspection: mode is full rebuild because `sources_folded` was missing; al
 Agent prompt: identical to 4.1 but with project root `/tmp/throughline-fixtures/proj-partial` and this extra constraint appended as item 5:
 
 ```text
-5. Hard constraint for this run: you may read at most 4 source handoffs in full. Treat all other source files as unreadable this run. The skill contract tells you what an honest partial fold looks like.
+5. Hard constraint for this run: you may read at most 4 source handoffs in full. Treat all other source files as unreadable this run. The contract permits either a bounded-batch fold or stopping to report a blocked rebuild; for this test, take the bounded-batch option — it is the behavior under test. The skill contract tells you what an honest partial fold looks like.
 ```
 
 Verification:
@@ -1291,10 +1292,10 @@ In `/Users/jp/.agents/plugins/handoff/.claude-plugin/plugin.json`, make exactly 
 ```bash
 python3 -m json.tool /Users/jp/.agents/plugins/handoff/.claude-plugin/plugin.json > /dev/null && echo "JSON OK"
 git -C /Users/jp/.agents diff --check -- plugins/handoff/README.md plugins/handoff/.claude-plugin/plugin.json
-grep -c "write-oriented skill" /Users/jp/.agents/plugins/handoff/README.md
+if grep -q "write-oriented skill" /Users/jp/.agents/plugins/handoff/README.md; then echo "STALE WRITE-BOUNDARY CLAIM STILL PRESENT"; exit 1; else echo "BOUNDARY OK"; fi
 ```
 
-Expected: `JSON OK`, no whitespace errors, and the `grep -c` returns `0` (exit 1) — no stale "only write-oriented skill" claim survives.
+Expected: `JSON OK`, no whitespace errors, `BOUNDARY OK`.
 
 - [ ] **Step 7: Commit**
 
@@ -1342,7 +1343,7 @@ Run: `trash /tmp/throughline-fixtures`
 
 - [ ] **Step 5: Report**
 
-State plainly: which forward tests passed, any contract fixes made in Task 4, and that Codex publish (`scripts/codex-plugins-sync.sh --publish handoff`) and the GitHub mirror were deliberately NOT run (explicit-publish-only per repo rules). Do not merge to main; that is a separate user decision.
+State plainly: which forward tests passed, any contract fixes made in Task 4, and that Codex publish (`scripts/codex-plugins-sync.sh --publish handoff`) and the GitHub mirror were deliberately NOT run (explicit-publish-only per repo rules). Include this boundary line verbatim in the report so a later session does not mistake it for accidental drift: "Codex cache deliberately not refreshed; `codex-plugins-sync.sh --check` (including the SessionStart canary) is expected to report `NOT-INSTALLED: handoff@3.1.0` until publish is explicitly requested." Do not run `--check` to verify this and do not publish to make it green. Do not merge to main; that is a separate user decision.
 
 ---
 
