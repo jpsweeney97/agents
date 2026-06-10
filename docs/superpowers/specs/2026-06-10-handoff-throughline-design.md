@@ -154,7 +154,9 @@ throughline must not ingest its own derived content.
 Throughline updated: <absolute path> (folded N handoffs, covers through <newest folded handoff>)
 ```
 
-No full document reproduced in chat.
+No full document reproduced in chat. A failed write — directory creation or
+the `THROUGHLINE.md` write itself — stops with a plain failure report; neither
+updated reply is used for a write that did not complete.
 
 ## 4. Light Nudges in Existing Skills
 
@@ -168,10 +170,13 @@ No full document reproduced in chat.
      framing to it.
   3. When the document exists, read it as background arc context and add a
      labeled `Throughline:` line to the response shape (as-of date, plus a
-     stale note when `covers_through` is behind the newest handoff filename
-     timestamp). A full read is intended — the document's size discipline
-     keeps that cheap. Arc context only: never the basis for "Recommended
-     next move" unless corroborated by the selected handoff or live files.
+     stale note when `covers_through` is behind the newest source handoff
+     filename timestamp, compared across the throughline's source set —
+     top-level files plus `archive/` in the primary and legacy directories,
+     never `THROUGHLINE.md` itself). A full read is intended — the document's
+     size discipline keeps that cheap. Arc context only: never the basis for
+     "Recommended next move" unless corroborated by the selected handoff or
+     live files.
 - **`save-handoff`** (two edits):
   1. Amend the "Reply only with" response contract to allow one optional
      second line after `Handoff saved: <path>` — when the throughline is
