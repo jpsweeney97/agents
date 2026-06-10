@@ -2,7 +2,7 @@
 
 Date: 2026-06-10
 Status: approved (brainstorming session, 2026-06-10); revised after review
-adjudications (2026-06-10, rounds 1-2)
+adjudications (2026-06-10, rounds 1-3)
 Target: `plugins/handoff/` (canonical dual-runtime plugin source)
 
 ## Problem
@@ -26,9 +26,10 @@ during design:
   `load-handoff` and `save-handoff` get one-line awareness.
 - **Content covers all four axes**: decision arc, abandoned paths, project
   narrative, and current frontier (frontier framed as "as of last refresh").
-- **Rewrite + coverage marker mechanics**: each refresh rewrites the whole
-  document; a `covers_through` frontmatter marker makes refreshes incremental;
-  full-pile rebuild is the recovery path.
+- **Rewrite + coverage-marker mechanics**: each refresh rewrites the whole
+  document; a `covers_through` basename marker plus `sources_folded` count
+  make refreshes incremental and drift-detecting; full rebuild is the
+  recovery path.
 
 ## 1. Identity and Invocation
 
@@ -65,11 +66,23 @@ Frontmatter:
 type: throughline
 updated_at: "2026-06-10T14:30:00Z"
 project: <project name>
-covers_through: "2026-06-10_01-19-11"
+covers_through: "2026-06-10_01-19-11_plan-patched-inline-execution-ready.md"
+sources_folded: 47
 ---
 ```
 
-`covers_through` holds the filename timestamp of the newest handoff folded in.
+`covers_through` holds the basename of the newest source handoff folded in.
+It is a high-water mark of what was folded, not proof of complete coverage.
+`sources_folded` holds the total count of source files folded; together the
+pair lets a refresh detect drift below the water line.
+
+Ordering semantics: compare by the parsed timestamp portion of the basename,
+never by raw string order — `-` and `_` sort differently at the precision
+boundary, so lexicographic basename comparison misorders mixed-precision
+names. Treat minute-precision legacy names conservatively; when two names tie
+at the available precision — including `save-handoff`'s `-2`/`-3` collision
+suffixes — include the file for reading and break remaining ties by full
+basename. Skipping is the dangerous direction; re-reading one file is cheap.
 
 Body sections are prompts, not a schema (same spirit as
 `references/handoff-format.md`):
@@ -85,6 +98,10 @@ Synthesis preserves branch and project qualifiers from handoff frontmatter: a
 decision made on a side branch is recorded as branch-scoped unless it
 demonstrably governs the project. Only truly project-level settled choices
 belong under "Decisions That Hold".
+
+When deciding what holds, weigh concrete session and evidence sections over
+broad "Project Arc" restatements: handoffs saved after the throughline exists
+may echo the throughline itself, and an echo is not independent confirmation.
 
 Size discipline is prose guidance, not a validator: short enough to load
 alongside a handoff without dominating context. The capital filename signals
@@ -104,22 +121,28 @@ throughline must not ingest its own derived content.
 
 - **First run** (no `THROUGHLINE.md`): read the full source set, synthesize,
   write the document.
-- **Subsequent runs**: read the existing document, read only source handoffs
-  newer than `covers_through` (by filename timestamp), then rewrite the whole
+- **Subsequent runs**: read the existing document, then list the full source
+  set — listing is cheap; reading is the cost — and check for drift: if the
+  count of source files at or below `covers_through` does not match
+  `sources_folded`, older files have appeared or vanished below the water
+  line (restored archive, copied legacy handoffs, branch switch) — fall back
+  to a full rebuild. Otherwise read only source handoffs newer than
+  `covers_through` (per the ordering semantics above), then rewrite the whole
   document, folding in new material and compressing older material as needed.
   Rewrite, not append — that is what keeps the document concise forever.
-- **Recovery**: marker missing, document inconsistent with reality, or user
-  asks for a rebuild → re-read the full source set and regenerate. The marker
-  is an optimization hint, never truth.
-- **Coverage honesty**: advance `covers_through` only over handoffs actually
-  read in full. If the source set cannot be fully read (size, unreadable
-  files), either fold a bounded batch and set `covers_through` to the newest
-  handoff in that batch, or stop and report the blocked rebuild. Never claim
-  coverage past what was read.
+- **Recovery**: coverage frontmatter missing, document inconsistent with
+  reality, or user asks for a rebuild → re-read the full source set and
+  regenerate. The coverage pair is never truth: when it conflicts with the
+  listed source set or live reality, rebuild rather than trust it.
+- **Coverage honesty**: advance `covers_through` and `sources_folded` only
+  over handoffs actually read in full. If the source set cannot be fully read
+  (size, unreadable files), either fold a bounded batch and set both fields
+  to reflect only that batch, or stop and report the blocked rebuild. Never
+  claim coverage past what was read.
 - **Reply shape**:
 
 ```text
-Throughline updated: <absolute path> (folded N handoffs, covers through <timestamp>)
+Throughline updated: <absolute path> (folded N handoffs, covers through <newest folded handoff>)
 ```
 
 No full document reproduced in chat.
@@ -137,13 +160,19 @@ No full document reproduced in chat.
   3. When the document exists, read it as background arc context and add a
      labeled `Throughline:` line to the response shape (as-of date, plus a
      stale note when `covers_through` is behind the newest handoff filename
-     timestamp). Arc context only: never the basis for "Recommended next
-     move" unless corroborated by the selected handoff or live files.
-- **`save-handoff`** (one edit): amend the "Reply only with" response
-  contract to allow one optional second line after `Handoff saved: <path>` —
-  when the throughline is missing or several handoffs behind, suggest
-  `/throughline`. Judgment phrasing, no numeric threshold; when in doubt,
-  omit the nudge.
+     timestamp). A full read is intended — the document's size discipline
+     keeps that cheap. Arc context only: never the basis for "Recommended
+     next move" unless corroborated by the selected handoff or live files.
+- **`save-handoff`** (two edits):
+  1. Amend the "Reply only with" response contract to allow one optional
+     second line after `Handoff saved: <path>` — when the throughline is
+     missing or several handoffs behind, suggest `/throughline`. Judgment
+     phrasing, no numeric threshold; when in doubt, omit the nudge.
+  2. Revise the project-arc capture guidance: record the session's arc delta
+     — what this session changed about the project arc — not a restatement
+     of the known arc or of the throughline. This keeps future handoffs
+     independent evidence rather than echoes the throughline would
+     re-ingest.
 - **`search-handoffs`** (one sentence): in the Results guidance, note that
   matches in `THROUGHLINE.md` are the derived arc document, not a session
   handoff — do not suggest `/load <path>` for them.
@@ -186,13 +215,17 @@ Matching the plugin's explicit-don'ts style:
 
 ## Agent-Facing-Design Audit
 
-The only machinery is the `covers_through` marker: a deterministic pointer
-that keeps refresh cost from growing with the pile, fully recoverable (rebuild
-path), living in the derived document rather than on the handoffs. The
-source-set definition and the partial-read stop condition are preconditions
-and failure behavior — context, not validators. Everything else — content
-sections, size, nudge timing, staleness judgment — stays prose-and-judgment.
-No validators, thresholds, statuses, or scoring.
+The only machinery is the coverage pair `covers_through` + `sources_folded`.
+These are load-bearing coverage semantics, not a cost optimization: future
+agents will trust the marker as a coverage claim, and a silently false claim
+is a stale-authority failure — the damage class that justifies narrow
+machinery. The guard stays minimal: one basename and one integer in the
+derived document (not a content hash, not an index, no per-handoff state),
+a deterministic drift check, and full rebuild as the recovery path. The
+source-set definition, ordering semantics, and partial-read stop condition
+are preconditions and failure behavior — context, not validators. Everything
+else — content sections, size, nudge timing, staleness judgment — stays
+prose-and-judgment. No validators, thresholds, statuses, or scoring.
 
 ## Validation
 
@@ -207,8 +240,16 @@ fixture piles for:
   response, not resume-pointer framing
 - mixed filename precision: `covers_through` comparisons stay honest across
   legacy `YYYY-MM-DD_HH-MM_*` and current `YYYY-MM-DD_HH-MM-SS_*` names
-- malformed or missing `covers_through`: refresh falls back to a full rebuild
-  instead of guessing
+- collision suffixes: same-second `-2`/`-3` names order and fold correctly
+- late-arriving older handoffs: files appearing below `covers_through`
+  (restored archive, copied legacy handoffs, branch switch) trigger a full
+  rebuild via the `sources_folded` drift check
+- save recursion: a handoff that restates old throughline content does not
+  make a stale claim "hold" without independent session evidence
+- `/load` corroboration: throughline context alone cannot drive the
+  recommended next move without selected-handoff or live-file corroboration
+- malformed or missing coverage frontmatter (`covers_through`,
+  `sources_folded`): refresh falls back to a full rebuild instead of guessing
 - partial-read honesty: a blocked full read does not advance `covers_through`
   past what was actually read
 - `/load` staleness notice: a throughline behind the newest handoff is
