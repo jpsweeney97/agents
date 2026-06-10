@@ -12,7 +12,7 @@
 
 ## Ground Rules (read before Task 1)
 
-- **Spec is authority:** `docs/superpowers/specs/2026-06-10-handoff-throughline-design.md`. It survived four review-adjudication rounds. Do not relitigate settled decisions (see its Agent-Facing-Design Audit section and the round-4 commit message `ff5a5c4`). In particular, do NOT add: source-set digests/hashes, normalized source keys, search exclusion or output splitting, /load hard size or staleness guards, validators, thresholds, statuses, or scoring.
+- **Spec is authority:** `docs/superpowers/specs/2026-06-10-handoff-throughline-design.md`. It has survived repeated review-adjudication rounds — see the spec's git history and its Agent-Facing-Design Audit section; any round count quoted in a single commit message may be stale. Do not relitigate settled decisions. In particular, do NOT add: source-set digests/hashes, normalized source keys, search exclusion or output splitting, /load hard size or staleness guards, validators, thresholds, statuses, or scoring (rejection recorded in round-4 commit `ff5a5c4`).
 - **Branch:** all work on `feature/handoff-throughline`. A user-level hook blocks Edit/Write on `main` in this repo. Before Task 1, run `git status --short --branch` and confirm the branch and a clean tree.
 - **TDD adaptation:** these are prose contracts; there is no meaningful "red" test run before the contract file exists. Per the repo Validation Ladder (which governs here), each task is: write the surface → structural validation → fixture forward test (where the spec demands one) → commit. Forward tests are context-isolated subagent proxies (Agent tool, `general-purpose`), which is this repo's standard behavior-proof for skill contracts.
 - **One derived clarification** (consequence of spec arithmetic, not a new decision — flag it in the commit message for Task 3): a bounded-batch partial fold must take the **oldest unfolded sources first**. The drift check compares "count of files at or below `covers_through`" to `sources_folded`; a non-prefix batch (e.g. newest-first) makes that comparison false immediately. The SKILL.md text states this in one sentence.
@@ -359,10 +359,10 @@ cp -R "$F/proj-first/.claude" "$F/proj-partial/"
 
 # ---- proj-load: stale throughline with a planted next-action trap ----
 
-mkdir -p "$F/proj-load/.agents/handoffs"
+mkdir -p "$F/proj-load/.agents/handoffs" "$F/proj-load/.codex/handoffs"
 cp "$F/proj-first/.agents/handoffs/2026-03-10_09-15-00_settle-storage-format.md" \
    "$F/proj-load/.agents/handoffs/"
-cat > "$F/proj-load/.agents/handoffs/2026-06-05_10-00-00_newest-session.md" <<'EOF'
+cat > "$F/proj-load/.codex/handoffs/2026-06-05_10-00-00_newest-session.md" <<'EOF'
 ---
 created_at: "2026-06-05T10:00:00Z"
 type: handoff
@@ -453,11 +453,19 @@ branch; the latest session was docs-only.
   project-wide.
 EOF
 
+# ---- proj-legacy-only: sources only in legacy dirs; no .agents/handoffs ----
+
+mkdir -p "$F/proj-legacy-only/.claude/handoffs"
+cp "$F/proj-first/.claude/handoffs/2026-02-14_11-30_legacy-claude-handoff.md" \
+   "$F/proj-legacy-only/.claude/handoffs/"
+cp "$F/proj-first/.agents/handoffs/2026-03-10_09-15-00_settle-storage-format.md" \
+   "$F/proj-legacy-only/.claude/handoffs/"
+
 echo "FIXTURES OK"
 find "$F" -type f | wc -l
 ```
 
-Expected: `FIXTURES OK` and a file count of `51`.
+Expected: `FIXTURES OK` and a file count of `53`.
 
 - [ ] **Step 3: Sanity-check the load-bearing counts**
 
@@ -471,9 +479,11 @@ echo "proj-refresh sources (expect 5):"
 ls "$F/proj-refresh/.agents/handoffs/"*.md "$F/proj-refresh/.agents/handoffs/archive/"*.md | grep -cv THROUGHLINE
 echo "proj-drift sources (expect 6):"
 ls "$F/proj-drift/.agents/handoffs/"*.md "$F/proj-drift/.agents/handoffs/archive/"*.md "$F/proj-drift/.codex/handoffs/"*.md | grep -cv THROUGHLINE
+echo "proj-legacy-only sources (expect 2):"
+ls "$F/proj-legacy-only/.claude/handoffs/"*.md | grep -cv THROUGHLINE
 ```
 
-Expected: 9, 5, 6. No commit (fixtures live in `/tmp`, never in the repo).
+Expected: 9, 5, 6, 2. No commit (fixtures live in `/tmp`, never in the repo).
 
 ---
 
@@ -649,7 +659,10 @@ re-read regardless of which source directory holds them.
 ## Refresh Behavior
 
 - **First run** (no `THROUGHLINE.md`): read the full source set, synthesize,
-  write the document.
+  write the document — creating `<project_root>/.agents/handoffs/` first if it
+  does not exist (a legacy-only pile has sources but no primary directory).
+  If the source set is empty, report plainly that no handoffs exist and write
+  nothing.
 - **Subsequent runs**: read the existing document, then list the full source
   set — listing is cheap; reading is the cost. Check for drift: if the count
   of source files at or below `covers_through` does not match
@@ -719,9 +732,10 @@ interface:
 python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/jp/.agents/plugins/handoff/skills/throughline
 ruby -ryaml -e 'YAML.load_file(ARGV[0])' /Users/jp/.agents/plugins/handoff/skills/throughline/agents/openai.yaml
 ls /Users/jp/.agents/plugins/handoff/references/throughline-format.md
+grep -nE ' +$' /Users/jp/.agents/plugins/handoff/skills/throughline/SKILL.md /Users/jp/.agents/plugins/handoff/skills/throughline/agents/openai.yaml || echo "WHITESPACE OK"
 ```
 
-Expected: validator passes, YAML parses silently, referenced path exists. If the validator rejects the frontmatter, fix the frontmatter — do not waive.
+Expected: validator passes, YAML parses silently, referenced path exists, `WHITESPACE OK` (both files are untracked here, so `git diff --check` cannot see them). If the validator rejects the frontmatter, fix the frontmatter — do not waive.
 
 - [ ] **Step 4: Commit**
 
@@ -891,7 +905,27 @@ EOF
 
 Report inspection: the five genuinely newer sources (`settle-storage-format`, the `.claude` legacy file, `side-branch-experiment`, both `wrap-up` files) are all in the read list — none skipped by raw lexicographic comparison against the marker. Mode depends on which marker 4.5 set: with the seconds-precision marker (`init-followup`), expect incremental and the two oldest `archive/` files NOT re-read; with the minute-precision marker (`init-minute-precision`), a conservative tie count at the cut line may legitimately report drift and rebuild — accept a rebuild only if the report names the boundary tie as the reason. In both modes the five newer sources must all be read and the final coverage pair must match the asserts; reply uses the normal wording.
 
-- [ ] **Step 7: Commit contract fixes, if any were needed**
+- [ ] **Step 7: Test 4.7 — legacy-only pile: first run creates the primary directory**
+
+Agent prompt: identical to 4.1 but with project root `/tmp/throughline-fixtures/proj-legacy-only`.
+
+Verification:
+
+```bash
+python3 - <<'EOF'
+import re
+t = open('/tmp/throughline-fixtures/proj-legacy-only/.agents/handoffs/THROUGHLINE.md').read()
+m = re.match(r'^---\n(.*?)\n---\n', t, re.S)
+fm = dict(re.findall(r'^([A-Za-z_]+):\s*(.+)$', m.group(1), re.M))
+assert int(fm['sources_folded']) == 2, f"sources_folded: {fm.get('sources_folded')}"
+assert 'settle-storage-format' in fm['covers_through'], f"covers_through: {fm.get('covers_through')}"
+print("PASS 4.7 artifact checks")
+EOF
+```
+
+Report inspection: the document was written to the primary `.agents/handoffs/` path — which did not exist in the fixture and was created by the run; both `.claude/handoffs/` sources are in the read list; nothing was written into the legacy directories.
+
+- [ ] **Step 8: Commit contract fixes, if any were needed**
 
 If SKILL.md changed during this task:
 
@@ -955,7 +989,7 @@ with:
 ```text
 ## Throughline Context
 
-When `THROUGHLINE.md` exists in the handoffs directory, read it in full as background arc context — its size discipline keeps a full read cheap. Add a labeled `Throughline:` line to the response: the as-of date, plus a stale note when its `covers_through` is behind the newest handoff filename timestamp.
+When `<project_root>/.agents/handoffs/THROUGHLINE.md` exists, read it in full as background arc context — its size discipline keeps a full read cheap. The throughline lives only at that primary path; check it there even when the selected handoff came from a legacy directory. Add a labeled `Throughline:` line to the response: the as-of date, plus a stale note when its `covers_through` is behind the newest handoff filename timestamp.
 
 Arc context only: never base the recommended next move on throughline content unless the selected handoff or live files corroborate it.
 
@@ -1005,7 +1039,8 @@ You are forward-testing a skill behavior contract against a fixture, as a proxy 
 ```
 
 Checks on the returned response:
-- Selected file is `2026-06-05_10-00-00_newest-session.md`, NOT `THROUGHLINE.md` (whose mtime is newest — the fixture touches it last).
+- Selected file is `.codex/handoffs/2026-06-05_10-00-00_newest-session.md` — a legacy-directory handoff — NOT `THROUGHLINE.md` (whose mtime is newest — the fixture touches it last).
+- The `Throughline:` line is sourced from the primary `.agents/handoffs/THROUGHLINE.md` even though the selected handoff lives in a legacy directory.
 - Response contains a `Throughline:` line noting staleness (covers through `2026-03-10...` while a `2026-06-05` handoff exists).
 - "Recommended next move" follows the selected handoff (delta parser tests). The word `GAMMA` — planted only in the throughline's Frontier — must NOT appear in the recommended next move.
 
@@ -1363,3 +1398,5 @@ State plainly: which forward tests passed, any contract fixes made in Task 4, an
 | `/load` staleness notice | Test 5.1 |
 | `/save` nudge shape | Tests 6.1, 6.2 |
 | Branch-qualified decisions stay branch-scoped | Tests 4.1, 4.2 |
+| Legacy-only pile: first run creates `.agents/handoffs/` (plan-added, beyond the spec list) | Test 4.7 |
+| Throughline read from the primary path when the selected handoff is legacy (plan-added) | Test 5.1 |
