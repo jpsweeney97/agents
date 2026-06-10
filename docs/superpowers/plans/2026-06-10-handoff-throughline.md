@@ -14,7 +14,7 @@
 
 - **Spec is authority:** `docs/superpowers/specs/2026-06-10-handoff-throughline-design.md`. It has survived repeated review-adjudication rounds — see the spec's git history and its Agent-Facing-Design Audit section; any round count quoted in a single commit message may be stale. Do not relitigate settled decisions. In particular, do NOT add: source-set digests/hashes, normalized source keys, search exclusion or output splitting, /load hard size or staleness guards, validators, thresholds, statuses, or scoring (rejection recorded in round-4 commit `ff5a5c4`).
 - **Branch:** all work on `feature/handoff-throughline`. A user-level hook blocks Edit/Write on `main` in this repo. Before Task 1, run `git status --short --branch` and confirm the branch and a clean tree.
-- **TDD adaptation:** these are prose contracts; there is no meaningful "red" test run before the contract file exists. Per the repo Validation Ladder (which governs here), each task is: write the surface → structural validation → fixture forward test (where the spec demands one) → commit. Forward tests are context-isolated subagent proxies (Agent tool, `general-purpose`), which is this repo's standard behavior-proof for skill contracts.
+- **TDD adaptation:** these are prose contracts; there is no meaningful "red" test run before the contract file exists. Per the repo Validation Ladder (which governs here), each task is: write the surface → structural validation → fixture forward test (where the spec demands one) → commit. Forward tests are context-isolated subagent proxies (Agent tool, `general-purpose`), this repo's standard behavior-check for skill contracts. Proof calibration: Test 4.5 pins one contract-legal branch and the batch size to keep its asserts deterministic, so it is a guided conformance check rather than a free behavior observation; the other tests leave the graded behaviors unprompted.
 - **One derived clarification** (consequence of spec arithmetic, not a new decision — flag it in the commit message for Task 3): a bounded-batch partial fold must take the **oldest unfolded sources first**. The drift check compares "count of files at or below `covers_through`" to `sources_folded`; a non-prefix batch (e.g. newest-first) makes that comparison false immediately. The SKILL.md text states this in one sentence.
 - **Do not publish:** no `scripts/codex-plugins-sync.sh --publish`, no GitHub mirror update, no push. Claude Code delivery is automatic via the existing plugin-dir symlink. Known consequence: after the 3.1.0 bump the Codex cache (currently `handoff/3.0.0`) lags source by design, so `codex-plugins-sync.sh --check` and the SessionStart canary will report `NOT-INSTALLED: handoff@3.1.0` until the user requests publish — expected state, not accidental drift.
 - **Execution runtime:** this plan is a Claude Code execution artifact — the required sub-skills, the Agent tool, and the `general-purpose` subagent type are Claude Code surfaces; it is not written for Codex execution. Dual-runtime obligations apply to the authored plugin sources (which name both `/throughline` and `$throughline`), not to this plan document.
@@ -715,6 +715,10 @@ reply:
 ```text
 Throughline updated (partial): <absolute path> — N of M sources folded; run /throughline again to continue
 ```
+
+If creating the primary directory or writing `THROUGHLINE.md` fails, stop and
+report the write failure plainly; never use either updated reply for a write
+that did not complete.
 ````
 
 - [ ] **Step 2: Write agents/openai.yaml**
@@ -862,7 +866,7 @@ Report inspection: mode is full rebuild because `sources_folded` was missing; al
 Agent prompt: identical to 4.1 but with project root `/tmp/throughline-fixtures/proj-partial` and this extra constraint appended as item 5:
 
 ```text
-5. Hard constraint for this run: you may read at most 4 source handoffs in full. Treat all other source files as unreadable this run. The contract permits either a bounded-batch fold or stopping to report a blocked rebuild; for this test, take the bounded-batch option — it is the behavior under test. The skill contract tells you what an honest partial fold looks like.
+5. Hard constraint for this run: you may read at most 4 source handoffs in full. Treat all other source files as unreadable this run. The contract permits either a bounded-batch fold or stopping to report a blocked rebuild; for this test, take the bounded-batch option with a batch of exactly 4 — it is the behavior under test. The skill contract tells you what an honest partial fold looks like.
 ```
 
 Verification:
@@ -989,7 +993,7 @@ with:
 ```text
 ## Throughline Context
 
-When `<project_root>/.agents/handoffs/THROUGHLINE.md` exists, read it in full as background arc context — its size discipline keeps a full read cheap. The throughline lives only at that primary path; check it there even when the selected handoff came from a legacy directory. Add a labeled `Throughline:` line to the response: the as-of date, plus a stale note when its `covers_through` is behind the newest handoff filename timestamp.
+When `<project_root>/.agents/handoffs/THROUGHLINE.md` exists, read it in full as background arc context — its size discipline keeps a full read cheap. The throughline lives only at that primary path; check it there even when the selected handoff came from a legacy directory. Add a labeled `Throughline:` line to the response: the as-of date, plus a stale note when its `covers_through` is behind the newest source handoff filename timestamp — compared across the throughline's source set (top-level files plus `archive/` in the primary and legacy handoffs directories, never `THROUGHLINE.md` itself).
 
 Arc context only: never base the recommended next move on throughline content unless the selected handoff or live files corroborate it.
 
@@ -1011,7 +1015,7 @@ with:
 ```text
 - Git: <branch/HEAD/worktree summary, or "unavailable: not a git repository">
 
-Throughline: <as of <updated_at>; note staleness when covers_through is behind the newest handoff; omit this line when no THROUGHLINE.md exists>
+Throughline: <as of <updated_at>; note staleness when covers_through is behind the newest source handoff; omit this line when no THROUGHLINE.md exists>
 
 Handoff says:
 ```
@@ -1140,7 +1144,7 @@ You are forward-testing a skill behavior contract against a fixture, as a proxy 
 Checks:
 - A new file matching `proj-save-missing/.agents/handoffs/20*-*_*.md` exists; its frontmatter parses (`created_at`, `type: handoff`, `title`, `project` present).
 - Reply line 1 is exactly `Handoff saved: <that absolute path>`; the reply is at most 2 lines; if a second line exists it suggests `/throughline` and nothing else. (Presence of the nudge is expected here since the throughline is missing, but the hard assertion is shape: 1–2 lines, nothing more.)
-- The handoff's Project Arc (or equivalent) records the session's delta (flag cap decision / parser tests) rather than only restating "storage is Markdown; YAML dropped".
+- The handoff's Project Arc (or equivalent) records the session's delta (flag cap decision / parser tests) and does NOT reproduce the supplied background arc ("storage is Markdown; YAML dropped") as its own arc claims. A handoff that includes the delta but also restates the background arc as arc evidence fails this check.
 
 - [ ] **Step 5: Test 6.2 — save with current throughline (no nudge)**
 
