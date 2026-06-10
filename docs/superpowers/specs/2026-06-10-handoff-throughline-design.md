@@ -2,7 +2,7 @@
 
 Date: 2026-06-10
 Status: approved (brainstorming session, 2026-06-10); revised after review
-adjudications (2026-06-10, rounds 1-3)
+adjudications (2026-06-10, rounds 1-4)
 Target: `plugins/handoff/` (canonical dual-runtime plugin source)
 
 ## Problem
@@ -74,7 +74,10 @@ sources_folded: 47
 `covers_through` holds the basename of the newest source handoff folded in.
 It is a high-water mark of what was folded, not proof of complete coverage.
 `sources_folded` holds the total count of source files folded; together the
-pair lets a refresh detect drift below the water line.
+pair lets a refresh detect drift below the water line. The detection class is
+count drift — files appearing or vanishing — not in-place content edits of
+same-named files: handoffs are write-once by contract, and content-edit
+staleness is handled by the rebuild recovery path, not by detection.
 
 Ordering semantics: compare by the parsed timestamp portion of the basename,
 never by raw string order — `-` and `_` sort differently at the precision
@@ -83,6 +86,8 @@ names. Treat minute-precision legacy names conservatively; when two names tie
 at the available precision — including `save-handoff`'s `-2`/`-3` collision
 suffixes — include the file for reading and break remaining ties by full
 basename. Skipping is the dangerous direction; re-reading one file is cheap.
+The marker defines a cut line, not a file identity: basenames equal to the
+marker are re-read regardless of which source directory holds them.
 
 Body sections are prompts, not a schema (same spirit as
 `references/handoff-format.md`):
@@ -138,7 +143,9 @@ throughline must not ingest its own derived content.
   over handoffs actually read in full. If the source set cannot be fully read
   (size, unreadable files), either fold a bounded batch and set both fields
   to reflect only that batch, or stop and report the blocked rebuild. Never
-  claim coverage past what was read.
+  claim coverage past what was read. A bounded-batch fold must say so in the
+  reply — `Throughline updated (partial): <path> — N of M sources folded;
+  run /throughline again to continue` — never the normal updated reply.
 - **Reply shape**:
 
 ```text
@@ -175,7 +182,8 @@ No full document reproduced in chat.
      re-ingest.
 - **`search-handoffs`** (one sentence): in the Results guidance, note that
   matches in `THROUGHLINE.md` are the derived arc document, not a session
-  handoff — do not suggest `/load <path>` for them.
+  handoff — do not suggest `/load <path>` for them, and treat them as derived
+  pointers to verify in source handoffs before treating a claim as decided.
 
 ## 5. Boundaries
 
@@ -251,7 +259,8 @@ fixture piles for:
 - malformed or missing coverage frontmatter (`covers_through`,
   `sources_folded`): refresh falls back to a full rebuild instead of guessing
 - partial-read honesty: a blocked full read does not advance `covers_through`
-  past what was actually read
+  past what was actually read, and a bounded-batch fold uses the explicit
+  partial reply wording
 - `/load` staleness notice: a throughline behind the newest handoff is
   reported
 - `/save` nudge shape: the reply stays `Handoff saved: <path>` plus at most
