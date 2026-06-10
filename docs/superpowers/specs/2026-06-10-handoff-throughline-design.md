@@ -2,7 +2,7 @@
 
 Date: 2026-06-10
 Status: approved (brainstorming session, 2026-06-10); revised after review
-adjudication (2026-06-10)
+adjudications (2026-06-10, rounds 1-2)
 Target: `plugins/handoff/` (canonical dual-runtime plugin source)
 
 ## Problem
@@ -92,11 +92,15 @@ alongside a handoff without dominating context. The capital filename signals
 
 ## 3. Refresh Behavior
 
-The source set is: top-level timestamped session handoffs (`*.md` with the
+The source set is: timestamped session handoffs (`*.md` with the
 `YYYY-MM-DD_*` filename shape) in `.agents/handoffs/` plus legacy
-`.claude/handoffs/` and `.codex/handoffs/`, read-only. `THROUGHLINE.md`
-itself, subdirectories such as `archive/`, and non-handoff files are never
-source material — the throughline must not ingest its own derived content.
+`.claude/handoffs/` and `.codex/handoffs/`, read-only — top-level files plus
+files in each directory's `archive/` subdirectory, one named level only.
+Archived handoffs are often most of a project's history (a sampled live
+project had 69 archived vs 2 top-level), and `search-handoffs` already
+reaches them through recursive `rg`. `THROUGHLINE.md` itself, other
+subdirectories, and non-handoff files are never source material — the
+throughline must not ingest its own derived content.
 
 - **First run** (no `THROUGHLINE.md`): read the full source set, synthesize,
   write the document.
@@ -122,16 +126,24 @@ No full document reproduced in chat.
 
 ## 4. Light Nudges in Existing Skills
 
-- **`load-handoff`** (two small edits):
-  1. Exclude `THROUGHLINE.md` from handoff selection. Needed regardless of
-     nudges: the mtime fallback could otherwise pick it as "newest handoff".
-  2. When the document exists, read it as background arc context and add one
-     line to the response shape, noting when it is behind the newest handoff
-     (compare `covers_through` to the newest handoff filename timestamp).
+- **`load-handoff`** (three small edits):
+  1. Exclude `THROUGHLINE.md` from implicit handoff selection. Needed
+     regardless of nudges: the mtime fallback could otherwise pick it as
+     "newest handoff".
+  2. Special-case explicit `/load` of `THROUGHLINE.md`: reply briefly that it
+     is derived arc context, not a session handoff — read it directly or
+     refresh it with `/throughline` — instead of applying resume-pointer
+     framing to it.
+  3. When the document exists, read it as background arc context and add a
+     labeled `Throughline:` line to the response shape (as-of date, plus a
+     stale note when `covers_through` is behind the newest handoff filename
+     timestamp). Arc context only: never the basis for "Recommended next
+     move" unless corroborated by the selected handoff or live files.
 - **`save-handoff`** (one edit): amend the "Reply only with" response
   contract to allow one optional second line after `Handoff saved: <path>` —
   when the throughline is missing or several handoffs behind, suggest
-  `/throughline`. Judgment phrasing, no numeric threshold.
+  `/throughline`. Judgment phrasing, no numeric threshold; when in doubt,
+  omit the nudge.
 - **`search-handoffs`** (one sentence): in the Results guidance, note that
   matches in `THROUGHLINE.md` are the derived arc document, not a session
   handoff — do not suggest `/load <path>` for them.
@@ -189,8 +201,12 @@ Beyond the repo Validation Ladder's structural checks (parse the new
 implementation plan must include realistic dry runs or forward tests against
 fixture piles for:
 
-- source-set exclusion: `THROUGHLINE.md`, an `archive/` subdirectory, and a
-  non-handoff file present in `.agents/handoffs/` are not ingested on rebuild
+- source-set boundaries: on rebuild, handoffs inside `archive/` are ingested,
+  while `THROUGHLINE.md`, other subdirectories, and non-handoff files are not
+- explicit `/load` of `THROUGHLINE.md`: returns the derived-arc redirect
+  response, not resume-pointer framing
+- mixed filename precision: `covers_through` comparisons stay honest across
+  legacy `YYYY-MM-DD_HH-MM_*` and current `YYYY-MM-DD_HH-MM-SS_*` names
 - malformed or missing `covers_through`: refresh falls back to a full rebuild
   instead of guessing
 - partial-read honesty: a blocked full read does not advance `covers_through`
