@@ -799,6 +799,7 @@ EOF
 Report inspection:
 - Mode reported: incremental refresh (count at/below marker is 3, matching `sources_folded: 3` — the minute-precision archive file `2025-12-01_09-00_drop-yaml-config.md` must be counted as below the seconds-precision marker).
 - Read-in-full list contains `2026-06-01_12-00-00_side-branch-experiment.md` and `2026-06-02_08-30-00_wrap-up.md`; it must NOT contain the two `archive/` files. The marker file itself (`2026-03-10_09-15-00_settle-storage-format.md`) may appear (basename-equal re-read is allowed).
+- `THROUGHLINE.md` is treated only as the existing derived document — read and rewritten, never listed as a source handoff in the read/fold list. (The `sources_folded == 5` assert already fails arithmetically if it were counted as a source.)
 - Echo check: "Decisions That Hold" in the rewritten document still does NOT claim project-wide caching; the cache stays branch-scoped or frontier material.
 
 - [ ] **Step 3: Test 4.3 — drift below the water line forces full rebuild**
@@ -819,7 +820,7 @@ print("PASS 4.3 artifact checks")
 EOF
 ```
 
-Report inspection: mode reported is full rebuild, reason names the count mismatch (4 files at/below the marker vs `sources_folded: 3`); read-in-full list has all 6 sources including `.codex/handoffs/2026-01-15_08-00-00_late-arrival.md` and both `archive/` files.
+Report inspection: mode reported is full rebuild, reason names the count mismatch (4 files at/below the marker vs `sources_folded: 3`); read-in-full list has all 6 sources including `.codex/handoffs/2026-01-15_08-00-00_late-arrival.md` and both `archive/` files; `THROUGHLINE.md` is not among the listed sources — its prior content is replaced, not folded as a source (the `== 6` assert fails if it is counted).
 
 - [ ] **Step 4: Test 4.4 — malformed coverage frontmatter forces full rebuild**
 
@@ -887,7 +888,7 @@ print("PASS 4.6 artifact checks")
 EOF
 ```
 
-Report inspection: the five genuinely newer sources (`settle-storage-format`, the `.claude` legacy file, `side-branch-experiment`, both `wrap-up` files) are all in the read list — none skipped by raw lexicographic comparison against the minute-precision marker; the two oldest `archive/` files are NOT re-read (incremental, not rebuild); reply uses the normal wording.
+Report inspection: the five genuinely newer sources (`settle-storage-format`, the `.claude` legacy file, `side-branch-experiment`, both `wrap-up` files) are all in the read list — none skipped by raw lexicographic comparison against the marker. Mode depends on which marker 4.5 set: with the seconds-precision marker (`init-followup`), expect incremental and the two oldest `archive/` files NOT re-read; with the minute-precision marker (`init-minute-precision`), a conservative tie count at the cut line may legitimately report drift and rebuild — accept a rebuild only if the report names the boundary tie as the reason. In both modes the five newer sources must all be read and the final coverage pair must match the asserts; reply uses the normal wording.
 
 - [ ] **Step 7: Commit contract fixes, if any were needed**
 
@@ -1224,7 +1225,23 @@ with:
 `/quicksave`, `/summary`, and `/distill` are retired behavior. They are not wrappers, aliases, or compatibility entry points in this source bundle, and `/throughline` is not a revival of them — it is a new derived-arc contract.
 ```
 
-- [ ] **Step 4: plugin.json — version, descriptions, defaultPrompt**
+- [ ] **Step 4: README — keep the Boundaries write-line true**
+
+`/throughline` writes a file, so the Boundaries section's write-boundary statement must change. Replace:
+
+```text
+- `/save` is the only write-oriented skill.
+- `/load` and `/search` are read-only.
+```
+
+with:
+
+```text
+- `/save` is the only skill that writes session handoffs. `/throughline` writes only the derived `THROUGHLINE.md` and never mutates handoffs.
+- `/load` and `/search` are read-only.
+```
+
+- [ ] **Step 5: plugin.json — version, descriptions, defaultPrompt**
 
 In `/Users/jp/.agents/plugins/handoff/.claude-plugin/plugin.json`, make exactly these replacements:
 
@@ -1269,16 +1286,17 @@ In `/Users/jp/.agents/plugins/handoff/.claude-plugin/plugin.json`, make exactly 
     ],
 ```
 
-- [ ] **Step 5: Validate**
+- [ ] **Step 6: Validate**
 
 ```bash
 python3 -m json.tool /Users/jp/.agents/plugins/handoff/.claude-plugin/plugin.json > /dev/null && echo "JSON OK"
 git -C /Users/jp/.agents diff --check -- plugins/handoff/README.md plugins/handoff/.claude-plugin/plugin.json
+grep -c "write-oriented skill" /Users/jp/.agents/plugins/handoff/README.md
 ```
 
-Expected: `JSON OK`, no whitespace errors.
+Expected: `JSON OK`, no whitespace errors, and the `grep -c` returns `0` (exit 1) — no stale "only write-oriented skill" claim survives.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git -C /Users/jp/.agents add plugins/handoff/README.md plugins/handoff/.claude-plugin/plugin.json
@@ -1332,7 +1350,7 @@ State plainly: which forward tests passed, any contract fixes made in Task 4, an
 
 | Spec validation item | Covered by |
 | --- | --- |
-| Source-set boundaries (archive in; THROUGHLINE/other-subdir/non-handoff out) | Test 4.1 |
+| Source-set boundaries (archive in; THROUGHLINE/other-subdir/non-handoff out) | Test 4.1 (archive in; `deep/` and non-handoff out — no pre-existing THROUGHLINE there), Tests 4.2/4.3 (pre-existing `THROUGHLINE.md` not listed or counted as a source) |
 | Explicit `/load THROUGHLINE.md` redirect | Test 5.2 |
 | Mixed filename precision honesty | Tests 4.2 (minute file counted below seconds marker), 4.5/4.6 (minute-precision `covers_through` cut line) |
 | Collision suffixes (`-2`) order and fold | Test 4.1 (both wrap-up files folded; tolerant covers_through assert) |
