@@ -1,8 +1,8 @@
 # Design: `throughline` Skill for the Handoff Plugin
 
 Date: 2026-06-10
-Status: approved (brainstorming session, 2026-06-10); revised after review
-adjudications (2026-06-10, rounds 1-4)
+Status: approved (brainstorming session, 2026-06-10); revised across multiple
+same-day review-adjudication rounds (see git history for the current count)
 Target: `plugins/handoff/` (canonical dual-runtime plugin source)
 
 ## Problem
@@ -125,7 +125,9 @@ subdirectories, and non-handoff files are never source material — the
 throughline must not ingest its own derived content.
 
 - **First run** (no `THROUGHLINE.md`): read the full source set, synthesize,
-  write the document.
+  write the document, creating `.agents/handoffs/` first when only legacy
+  directories exist. If the source set is empty, report that plainly and
+  write nothing.
 - **Subsequent runs**: read the existing document, then list the full source
   set — listing is cheap; reading is the cost — and check for drift: if the
   count of source files at or below `covers_through` does not match
