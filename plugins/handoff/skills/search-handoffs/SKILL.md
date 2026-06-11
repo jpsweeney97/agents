@@ -1,6 +1,6 @@
 ---
 name: search-handoffs
-description: Search across Markdown handoffs for decisions and context. Use when user says "search handoffs", "find in handoffs", "what did we decide about", or runs `/search <query>`.
+description: Search across Markdown handoffs for decisions and context. Use when user says "search handoffs", "find in handoffs", "what did we decide about", or gives `/search` a query.
 ---
 
 # Search Handoffs

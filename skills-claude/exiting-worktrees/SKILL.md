@@ -1,6 +1,6 @@
 ---
 name: exiting-worktrees
-description: "Safe worktree exit with pre-flight checks and cleanup. Use proactively whenever a worktree's work is complete — after merging a PR, landing changes on main, or when the user says 'clean up the worktree', 'exit worktree', 'done with this worktree', 'land changes and clean up', or similar. Also trigger when you detect a PR merge or branch merge that implies the worktree is no longer needed. Covers the full exit sequence: verify changes landed, sync local main, confirm with user, call ExitWorktree. Never use manual git worktree remove — it breaks in predictable, hard-to-recover-from ways."
+description: "Use when a Claude Code user explicitly asks to exit or clean up a worktree after work has landed, or confirms cleanup after a detected merged PR or branch. Requires verifying landed work and user confirmation before removal. Do not use for ordinary git hygiene, branch cleanup alone, or manual worktree experiments."
 ---
 
 # Exiting Worktrees
