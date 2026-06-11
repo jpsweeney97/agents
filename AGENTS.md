@@ -131,6 +131,17 @@ This repo uses a single-context domain-doc layout. See `docs/agents/domain.md`.
 
 - Keep YAML frontmatter parseable. Quote descriptions that contain colons or
   other punctuation likely to confuse YAML.
+- Treat `description` as loader-facing routing text, not a compressed skill
+  body. It should answer: "Should I read this skill now?"
+- Prefer `Use when...` phrasing. Describe user intent, target scope, concrete
+  symptoms or phrases, and nearest routing boundaries.
+- Do not summarize workflow steps, validation ladders, output formats, internal
+  phases, or rationale in frontmatter. Put those in the skill body.
+- Include selection-critical constraints when they affect routing, such as
+  read-only, repo-wide, PR-scoped, Claude-only, technology-specific, or
+  external-service-specific behavior.
+- Use a soft 25-60 word budget. Descriptions over about 90 words should prevent
+  a specific likely misroute.
 - Make the trigger and non-trigger boundaries explicit.
 - State the expected behavior, defaults, stop conditions, and output shape.
 - Keep long rubrics, examples, and rationale in `references/` or `examples/`

@@ -39,7 +39,7 @@ skill-name/
 ```md
 ---
 name: skill-name
-description: Brief description of capability. Use when [specific triggers].
+description: "Use when <user intent/situation> for <target/scope>."
 ---
 
 # Skill Name
@@ -59,33 +59,53 @@ description: Brief description of capability. Use when [specific triggers].
 
 ## Description Requirements
 
-The description is **the only thing your agent sees** when deciding which skill to load. It's surfaced in the system prompt alongside all other installed skills. Your agent reads these descriptions and picks the relevant skill based on the user's request.
+The `description` is loader-facing routing text. It helps the next agent decide
+whether to read this skill now.
 
-**Goal**: Give your agent just enough info to know:
+Start with `Use when...`.
 
-1. What capability this skill provides
-2. When/why to trigger it (specific keywords, contexts, file types)
+Include:
 
-**Format**:
+- the user intent or situation that should trigger the skill
+- the target scope when it matters
+- concrete user-facing phrases, symptoms, tools, or file types when they improve
+  discovery
+- nearest non-trigger boundaries when overlap is likely
+- selection-critical constraints such as read-only, repo-wide, PR-scoped,
+  technology-specific, or external-service-specific behavior
 
-- Max 1024 chars
-- Write in third person
-- First sentence: what it does
-- Second sentence: "Use when [specific triggers]"
+Do not include:
 
-**Good example**:
+- workflow steps
+- validation ladders
+- output formats
+- internal phases
+- implementation details
+- rationale for why the skill exists
 
+Use this skeleton:
+
+```yaml
+description: "Use when <user intent/situation> for <target/scope>. Trigger on <short natural phrases/symptoms> when helpful. Do not use for <nearest collision>; use <neighbor skill> for <neighbor intent>."
 ```
-Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when user mentions PDFs, forms, or document extraction.
+
+Default to 25-60 words. Use more only when the extra words prevent a specific
+likely misroute; descriptions over about 90 words should be rare.
+
+Good:
+
+```yaml
+description: "Use when tests have race conditions, timing dependencies, hangs, or inconsistent pass/fail behavior. Use for test behavior diagnosis across frameworks; do not use for ordinary test writing or broad CI triage."
 ```
 
-**Bad example**:
+Bad:
 
-```
-Helps with documents.
+```yaml
+description: "Use when tests are flaky; first reproduce the failure, inspect async timing, replace sleeps with deterministic waits, add regression tests, and then refactor the helper."
 ```
 
-The bad example gives your agent no way to distinguish this from other document skills.
+The bad example summarizes workflow. That can tempt the next agent to execute
+from the description instead of reading the full skill.
 
 ## When to Add Scripts
 
@@ -109,7 +129,8 @@ Split into separate files when:
 
 After drafting, verify:
 
-- [ ] Description includes triggers ("Use when...")
+- [ ] Description is routing text that starts with `Use when...`
+- [ ] Description omits workflow steps and output formats
 - [ ] SKILL.md under 100 lines
 - [ ] No time-sensitive info
 - [ ] Consistent terminology
