@@ -1,6 +1,6 @@
 ---
 name: tech-debt-scan
-description: "Use when the user asks for a technical debt scan, debt audit, cleanup backlog, or debt-prioritization pass over a repo, service, package, subsystem, or interface. Do not use for implementation, PR/file review, incident debugging, security vulnerability discovery, git cleanup, architecture-only deepening, recommendations between already-supplied options, or dependency-aware next-step planning."
+description: "Use when the user asks for a technical debt scan, debt audit, cleanup backlog, or debt-prioritization pass over a repo, service, package, subsystem, or interface, normally producing a saved evidence-led audit artifact. Do not use for implementation, PR/file review, incident debugging, security vulnerability discovery, git cleanup, architecture-only deepening, recommendations between already-supplied options, or dependency-aware next-step planning."
 ---
 
 # Tech Debt Scan

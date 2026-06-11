@@ -17,7 +17,7 @@ Primary source surfaces:
 - `skills/**/references/*.md`
 - `skills/**/examples/*.md`
 - `skills/**/scripts/*`
-- `skills-claude/**` (same shapes, Claude-only skills)
+- `skills-claude/**` (same shapes, Claude-only or Codex-excluded skills)
 - `plugins/<name>/**` (canonical dual-runtime plugin sources)
 - `plugins/marketplace.json`
 
@@ -30,10 +30,11 @@ or generated artifacts unless the user explicitly asks to inspect them.
   `$HOME/.agents/skills`; Claude Code serves each skill through a symlink in
   `~/.claude/skills`. Editing source here edits the live skill for both
   runtimes.
-- `skills-claude/` holds Claude-only skills. They depend on Claude-specific
-  tooling, and `openai-docs` would collide with Codex's bundled skill, so Codex
-  must never scan them; they reach Claude through the same `~/.claude/skills`
-  symlinks.
+- `skills-claude/` holds Claude-only or Codex-excluded skills. Some depend on
+  Claude-specific tooling, and some intentionally stay out of Codex's native
+  scan, such as bootstrap helpers or names that would collide with Codex-bundled
+  skills. Codex must never scan them; they reach Claude through the same
+  `~/.claude/skills` symlinks.
 - After adding or renaming a skill, run
   `scripts/claude-skills-sync.sh --link <name>`. Run
   `scripts/claude-skills-sync.sh --check` to verify delivery; it never deletes.
@@ -124,6 +125,23 @@ This repo uses a single-context domain-doc layout. See `docs/agents/domain.md`.
 - A minimal local skill can be only `SKILL.md` when the value is the behavior
   contract itself. Add metadata, references, examples, or scripts only when they
   reduce real load in the main skill file or support a concrete integration.
+
+### Routine Existing Skill Edits
+
+For accepted edits to existing skills, use this repo's normal file-changing
+defaults instead of inventing a separate skill-construction workflow.
+
+- Use `writing-principles` for obligation-only prose edits inside an existing
+  skill, support doc, `AGENTS.md`, `CLAUDE.md`, or `agents/*.yaml`.
+- Use `agent-facing-design` before adding or materially expanding agent-facing
+  obligations, proof standards, authority rules, lifecycle behavior, mutation
+  boundaries, persistence, routing, or machinery.
+- Use `scrutinize-skill` for review-only skill-contract critique. After the
+  review is accepted, patch the owning skill surfaces directly.
+- Use `write-a-skill` or `skill-creator` for new skill bundles, generated
+  metadata, bundle-shape changes, or new helper resources and scripts.
+- When changing trigger, side-effect, proof, authority, or lifecycle behavior,
+  update companion metadata when present and validate the touched surfaces.
 
 ## Skill Editing
 

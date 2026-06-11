@@ -1,6 +1,6 @@
 ---
 name: improve-codebase-architecture
-description: "Use when the user wants to find architecture-deepening opportunities in a codebase, such as improving module seams, reducing shallow pass-through abstractions, consolidating tightly coupled code, or making behavior easier to test. Do not use for implementation, bug diagnosis, code review, tech-debt backlog scans, or broad refactor planning without an architecture focus."
+description: "Use when the user wants to find architecture-deepening opportunities in a codebase, such as improving module seams, reducing shallow pass-through abstractions, consolidating tightly coupled code, or making behavior easier to test, with a throwaway HTML report opened from the temp directory. Do not use for implementation, bug diagnosis, code review, tech-debt backlog scans, or broad refactor planning without an architecture focus."
 ---
 
 # Improve Codebase Architecture

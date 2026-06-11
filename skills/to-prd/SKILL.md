@@ -1,11 +1,26 @@
 ---
 name: to-prd
-description: "Use when the user wants to turn the current conversation and repo context into a PRD and publish it to the project issue tracker. Do not use for outcome interviews, standalone Markdown synthesis, implementation, implementation issue slicing, triage, or ordinary planning without PRD publication."
+description: "Use when the user wants to turn the current conversation and repo context into a PRD and publish it to the project issue tracker as a side effect. Do not use for outcome interviews, standalone Markdown synthesis, implementation, implementation issue slicing, triage, or ordinary planning without PRD publication."
 ---
+
+# To PRD
 
 This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT interview the user — just synthesize what you already know.
 
-The issue tracker and triage label vocabulary should have been provided to you — run `/setup-matt-pocock-skills` if not.
+The issue tracker and triage label vocabulary should have been provided to you.
+If they are missing, use `/setup-matt-pocock-skills` when that skill is
+available; otherwise ask the smallest setup question needed before publishing.
+
+## Side Effects And Proof Boundary
+
+This skill publishes to the configured issue tracker. Treat publication as a
+remote or tracker mutation, not as ordinary planning.
+
+Before publishing, identify the issue tracker, label mapping, and source context
+used for the PRD. After publishing, report the issue identifier or URL, labels
+applied, source context inspected, and proof boundary. Publishing proves the PRD
+artifact exists in the tracker; it does not prove implementation readiness,
+runtime behavior, or issue-tracker state beyond the actions performed.
 
 ## Process
 

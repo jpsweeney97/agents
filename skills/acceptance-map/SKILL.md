@@ -1,6 +1,6 @@
 ---
 name: acceptance-map
-description: "Use when the user wants to turn an already-settled PRD, plan, issue, design, or concrete review finding into a durable map of observable acceptance checks before implementation. Do not use for implementation, issue/PRD creation, broad review/status, test execution, or final closeout."
+description: "Use when the user wants to turn an already-settled PRD, plan, issue, design, or concrete review finding into a durable map of observable acceptance checks before implementation, with a default local artifact and commit lifecycle. Do not use for implementation, issue/PRD creation, broad review/status, test execution, or final closeout."
 ---
 
 # Acceptance Map

@@ -1,13 +1,26 @@
 ---
 name: to-issues
-description: "Use when the user wants to convert an existing plan, spec, PRD, or approved design into independently grabbable implementation issues on the project issue tracker. Do not use for creating the PRD/spec, implementation, issue triage, status orientation, recommendations, or next-step planning without issue publication."
+description: "Use when the user wants to convert an existing plan, spec, PRD, or approved design into independently grabbable implementation issues and publish them to the project issue tracker. Do not use for creating the PRD/spec, implementation, issue triage, status orientation, recommendations, or next-step planning without issue publication."
 ---
 
 # To Issues
 
 Break a plan into independently-grabbable issues using vertical slices (tracer bullets).
 
-The issue tracker and triage label vocabulary should have been provided to you — run `/setup-matt-pocock-skills` if not.
+The issue tracker and triage label vocabulary should have been provided to you.
+If they are missing, use `/setup-matt-pocock-skills` when that skill is
+available; otherwise ask the smallest setup question needed before publishing.
+
+## Side Effects And Proof Boundary
+
+This skill publishes approved slices to the configured issue tracker. Do not
+publish until the user has approved the slice breakdown or explicitly asked to
+use an already-approved breakdown.
+
+After publishing, report the created issue identifiers or URLs, parent links,
+labels applied, source artifact used, and proof boundary. Issue publication
+proves the tracker artifacts were created; it does not prove implementation,
+acceptance satisfaction, or tracker state beyond the actions performed.
 
 ## Process
 
