@@ -1,0 +1,22 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jp/.agents/scripts/claude-skills-sync.sh --check || true",
+            "timeout": 15,
+            "statusMessage": "Checking managed-skill invariant"
+          },
+          {
+            "type": "command",
+            "command": "/Users/jp/.agents/scripts/codex-plugins-sync.sh --check || true",
+            "timeout": 15,
+            "statusMessage": "Checking Codex plugin cache drift"
+          }
+        ]
+      }
+    ]
+  }
+}
