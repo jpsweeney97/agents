@@ -1,6 +1,6 @@
 ---
 name: orient-status
-description: "Run a read-only orientation of a project, codebase, repository, plugin, skill, or local work area to determine current status, in-flight work, source conflicts, and freshness limits. Use when the user asks where things stand, what happened recently, what is in flight, what is blocked, where the target sits against status or roadmap context, or how live state compares with named docs, tickets, issues, PRs, roadmaps, specs, or status docs. Do not use for explicit source-of-truth, baseline, or baseline-vs-live authority questions, code review, completion/readiness/closeout truth, GitHub-focused PR/issue/repo triage, handoff load/save/search/resume/list/update, cleanup, branch landing, implementation/debugging, next-step planning, backlog prioritization, or ticket listing/search/triage unless the user also asks for broader status orientation."
+description: "Use when the user asks for read-only orientation on where a project, repo, plugin, skill, or work area stands: current state, recent activity, in-flight work, blockers, freshness limits, or live-vs-status-doc differences. Do not use for source-of-truth authority questions, reviews, closeout/readiness, GitHub/handoff/ticket operations, cleanup, branch landing, implementation/debugging, next-step planning, backlog prioritization, or verification runs unless broader status orientation is also requested."
 ---
 
 # Orient Status

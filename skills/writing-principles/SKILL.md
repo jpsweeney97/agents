@@ -1,6 +1,6 @@
 ---
 name: writing-principles
-description: "Use when the user asks for obligation-only instruction edits or obligation-focused review of existing or pasted agent-facing instruction docs such as AGENTS.md, CLAUDE.md, SKILL.md, skill support docs, agents/*.md, or agents/*.yaml. Handles tightening, simplifying, rewriting, editing, or drafting obligation text inside an already-owned instruction surface by challenging what the text makes future agents do, decide, avoid, verify, remember, or maintain; remove or lighten obligations that do not protect meaningful user work; clarify obligations that earn their place. Do not use for constructing new skill bundles, changing skill capabilities or bundle structure, user-facing docs, ordinary Markdown formatting, creative writing, code comments, completed-code review, broad adversarial skill review, composability/overlap review owned by scrutinize-skill, UX review, full proof-gate review, or material agent-facing design decisions owned by agent-facing-design."
+description: "Use when the user asks for obligation-only edits, tightening, rewriting, or obligation-focused review of existing or pasted agent-facing instruction docs such as AGENTS.md, CLAUDE.md, SKILL.md, skill support docs, or agents/*.yaml. Do not use for new skill construction, capability or bundle changes, UX/routing audits, broad adversarial review, user-facing docs, Markdown formatting, code comments, or material agent-facing design decisions."
 ---
 
 # Writing Principles

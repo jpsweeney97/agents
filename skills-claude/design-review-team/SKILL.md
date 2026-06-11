@@ -1,6 +1,6 @@
 ---
 name: design-review-team
-description: Use when a Claude Code user asks for a thorough, team-based architecture review or maximum-coverage system design analysis of a complex or high-stakes architecture, especially "deep architecture review", "team review", or "comprehensive design analysis". Requires agent teams. Do not use for quick single-pass reviews; use `system-design-review` instead.
+description: "Use when the user asks for a thorough, team-based architecture review or maximum-coverage system design analysis of a complex or high-stakes architecture, especially `deep architecture review`, `team review`, or `comprehensive design analysis`. Requires Claude Code agent teams. Do not use for quick single-pass architecture reviews; use `system-design-review` instead."
 allowed-tools:
   - Read
   - Write

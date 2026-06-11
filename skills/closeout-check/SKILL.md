@@ -1,6 +1,6 @@
 ---
 name: closeout-check
-description: "Check whether local work can be honestly called done, and close it out when authorized. Use when the user asks if work is done, ready, verified, safe to hand off, or says to close out, finish the local work, verify and commit, or create the final local commit. In closeout mode, may run focused verification, run repo-standard quick checks, fix narrow blocking issues, and create local commit(s) when all gates pass. Do not use for ordinary status orientation, broad review, git cleanup, PR review loops, merge/push/publish workflows, branch deletion, remote mutation, or generic session wrap-up/handoff requests."
+description: "Use when the user asks whether local work is done, ready, verified, or asks to close out local work with a final local commit. Do not use for ordinary status orientation, broad review, git cleanup, PR review loops, merge/push/publish workflows, branch deletion, remote mutation, or generic session wrap-up/handoff requests."
 ---
 
 # Closeout Check

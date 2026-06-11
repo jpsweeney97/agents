@@ -1,6 +1,6 @@
 ---
 name: agent-facing-design
-description: Keep agent-facing systems judgment-supporting instead of overbuilt. Use when creating or materially changing prompts, skills, agent rules, workflows, schemas, validators, routers, hooks, tools, commands, scripts, or persistent artifacts that an agent must read, populate, follow, or call. Especially use before adding required fields, statuses, workflow stages, validators, classifiers, scoring, confidence, hard rules, or semantic decision scripts. Do not use for ordinary product code or user-facing docs unless they create obligations for agents.
+description: "Use when creating or materially changing agent-facing prompts, skills, rules, workflows, tools, command interfaces, schemas, validators, or persistent artifacts that agents must read, follow, populate, invoke, or maintain, especially before adding required fields, statuses, stages, classifiers, scoring, hard rules, or semantic decision logic. Do not use for ordinary product code, internal helper scripts, or user-facing docs unless they create agent obligations."
 ---
 
 # Agent-Facing Design

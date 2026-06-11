@@ -1,6 +1,6 @@
 ---
 name: save-handoff
-description: Use when user says "/save", "wrap this up", "new session", "almost out of context", "save", "next session", or "handoff"; use when stopping work with context to preserve.
+description: "Use when the user runs `/save` or asks to preserve useful session context for a future session, such as `wrap this up`, `new session`, `almost out of context`, `next session`, or `handoff`. Do not use for loading/resuming handoffs, ordinary file saves, final closeout/commits, publishing, or generic status summaries."
 ---
 
 # Save Handoff

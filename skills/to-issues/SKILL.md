@@ -1,6 +1,6 @@
 ---
 name: to-issues
-description: Break a plan, spec, or PRD into independently-grabbable issues on the project issue tracker using tracer-bullet vertical slices. Use when user wants to convert a plan into issues, create implementation tickets, or break down work into issues.
+description: "Use when the user wants to convert an existing plan, spec, PRD, or approved design into independently grabbable implementation issues on the project issue tracker. Do not use for creating the PRD/spec, implementation, issue triage, status orientation, recommendations, or next-step planning without issue publication."
 ---
 
 # To Issues

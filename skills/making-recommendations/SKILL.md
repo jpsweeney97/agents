@@ -1,6 +1,6 @@
 ---
 name: making-recommendations
-description: Use when the user explicitly asks for a recommendation, comparison, trade-off analysis, or decision between viable options. Trigger on "recommend", "which is better", "help me decide", or "should I choose X or Y" when the ask is about choosing among serious options, including low-stakes but real trade-offs. Do not use for factual questions, trivial preferences, or broad "best way to build/design/fix" requests where the real work is still clarification, brainstorming, or implementation design.
+description: "Use when the user explicitly asks for a recommendation, comparison, trade-off analysis, ranking, or decision between serious viable options. Trigger on phrases like `recommend`, `which is better`, `help me decide`, or `should I choose X or Y`. Do not use for factual questions, trivial preferences, or broad `best way to build/design/fix` requests where clarification, brainstorming, debugging, or implementation is the real work."
 ---
 
 # Structured Recommendations

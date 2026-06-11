@@ -1,6 +1,6 @@
 ---
 name: exiting-worktrees
-description: "Use when a Claude Code user explicitly asks to exit or clean up a worktree after work has landed, or confirms cleanup after a detected merged PR or branch. Requires verifying landed work and user confirmation before removal. Do not use for ordinary git hygiene, branch cleanup alone, or manual worktree experiments."
+description: "Use when the user explicitly asks to exit, remove, or clean up a worktree after work has landed, or confirms cleanup after a merged PR or branch. Requires Claude Code worktree cleanup tooling, landed-work verification, and user confirmation before removal. Do not use for ordinary git hygiene, branch cleanup alone, manual worktree experiments, or unlanded work."
 ---
 
 # Exiting Worktrees

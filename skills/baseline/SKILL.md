@@ -1,6 +1,6 @@
 ---
 name: baseline
-description: "Resolve source-of-truth and baseline questions. Use when the user asks what to trust, what the baseline is, what source of truth controls a claim, which doc/spec/test/source/runtime state is authoritative, whether something is still authoritative, or how to establish a baseline decision when authority is missing or competing. Also use for baseline-vs-live contradiction questions when the main need is authority resolution. Do not use for ordinary code review, status orientation, tech-debt scans, doc cleanup, implementation, or broad audits where source-of-truth authority is not the central question."
+description: "Use when the user asks what source of truth or baseline controls a claim, what to trust, whether an authority is still current, or how to resolve competing/missing authority. Also use for baseline-vs-live contradictions when authority resolution is the main need. Do not use for ordinary status orientation, code review, implementation, tech-debt scans, doc cleanup, or broad audits where authority is not central."
 ---
 
 # Baseline

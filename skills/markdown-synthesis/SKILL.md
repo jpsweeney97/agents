@@ -1,6 +1,6 @@
 ---
 name: markdown-synthesis
-description: "Use when the user asks to synthesize, consolidate, combine, distill, or rewrite multiple Markdown sources into one stronger standalone Markdown document on disk. Supports exact files, folders, globs, broad relevant-docs inputs, clean prose documents, and structure-rich Markdown when source structure carries meaning. Do not use for structure-only Markdown cleanup, preserving original wording/order, simple summaries, or non-Markdown outputs."
+description: "Use when the user asks to synthesize, consolidate, combine, distill, or rewrite multiple Markdown sources into one stronger standalone Markdown document on disk. Do not use for structure-only Markdown cleanup, preserving original wording/order, simple summaries, single-source formatting, or non-Markdown outputs."
 ---
 
 # Markdown Synthesis

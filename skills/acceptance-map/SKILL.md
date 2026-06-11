@@ -1,6 +1,6 @@
 ---
 name: acceptance-map
-description: "Turn a PRD, plan, issue, design, or concrete review finding into a durable acceptance map before implementation. Use when the user asks to define acceptance checks, map outcomes to proof, make a plan verifiable, create acceptance criteria, or bridge a source artifact into checks for implementation and closeout. Writes a Markdown companion artifact by default, back-links local Markdown sources when safe, validates the artifact, and creates a local commit. Do not use for implementation, test execution, issue creation, broad review, status orientation, or final closeout."
+description: "Use when the user wants to turn an already-settled PRD, plan, issue, design, or concrete review finding into a durable map of observable acceptance checks before implementation. Do not use for implementation, issue/PRD creation, broad review/status, test execution, or final closeout."
 ---
 
 # Acceptance Map

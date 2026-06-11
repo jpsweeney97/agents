@@ -1,6 +1,6 @@
 ---
 name: write-a-skill
-description: Use when the user wants to design or draft a custom agent skill bundle and needs guidance on SKILL.md structure, frontmatter, references, examples, or scripts. Do not use for editing existing skills, UX/routing audits, obligation-only instruction edits, or agent-facing machinery decisions; use the owning skill for those lanes.
+description: "Use when the user wants to design or draft a new custom agent skill bundle and needs guidance on SKILL.md structure, frontmatter, references, examples, or helper scripts. Do not use for editing existing skills, UX/routing audits, obligation-only instruction edits, or agent-facing machinery decisions; use the owning skill for those lanes."
 ---
 
 # Writing Skills

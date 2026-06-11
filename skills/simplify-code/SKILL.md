@@ -1,10 +1,6 @@
 ---
 name: simplify-code
-description: >-
-  Use when user asks to simplify, clean up, tidy, or refactor-for-clarity code
-  through an actual behavior-preserving edit. Do not use for cleanup planning,
-  backlog creation, implementation, fixes, reviews, format-only, vague
-  maintainability, or redesigns.
+description: "Use when the user asks to simplify, tidy, clean up, or refactor code for clarity through a scoped behavior-preserving edit to a concrete target. Do not use for cleanup planning, backlog creation, new implementation, bug fixes, reviews, format-only changes, vague maintainability work, or redesigns."
 ---
 
 # Simplify Code

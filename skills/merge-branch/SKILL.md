@@ -1,6 +1,6 @@
 ---
 name: merge-branch
-description: "Use when the user explicitly asks to locally land a completed non-protected git branch by committing relevant work, merging into the verified base/default branch, and optionally deleting the source branch after explicit cleanup approval. Do not use for PRs, pushes, status checks, branch cleanup alone, ambiguous done phrasing, or merges where the target branch is unclear."
+description: "Use when the user explicitly asks to locally land or merge a completed non-protected git branch into a verified base/default branch. Do not use for PRs, pushes, remote merges, status checks, branch cleanup alone, ambiguous done phrasing, protected branches, active git operations, or unclear merge targets."
 ---
 
 # Merge Branch

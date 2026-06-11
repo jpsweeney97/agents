@@ -1,6 +1,6 @@
 ---
 name: tech-debt-audit
-description: Use when a Claude Code user asks for a thorough, team-based technical debt audit of a repo, service, or package, especially "deep tech debt audit", "cleanup sprint", or "worst debt" requests. Requires agent teams. Do not use for ordinary single-agent debt scans when `tech-debt-scan` is available, PR/file review, incident debugging, or greenfield design.
+description: "Use when the user asks for a thorough, team-based technical debt audit of a repo, service, package, or broad codebase area, especially `deep tech debt audit`, `cleanup sprint`, `refactoring backlog`, or `worst debt` requests. Requires Claude Code agent teams. Do not use for ordinary single-agent debt scans, PR/file review, incident debugging, greenfield design, or implementation."
 allowed-tools:
   - Read
   - Write

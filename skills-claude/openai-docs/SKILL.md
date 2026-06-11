@@ -1,6 +1,6 @@
 ---
 name: openai-docs
-description: Use this skill when working with the OpenAI API, OpenAI SDKs (Python or TypeScript), ChatGPT Codex, Realtime API, Assistants API, or any OpenAI product with a developer API. Invoke it to look up exact API parameters, request/response schemas, code examples, SDK usage patterns, or to verify current behavior. Always use this skill when code imports `openai` or `@openai`, when discussing OpenAI models (GPT-5, o4-mini, gpt-image), or when working with OpenAI API features (Responses API, function calling, structured outputs, web search, file search, embeddings, fine-tuning, batch API, vector stores, images, audio, video, moderation). Never answer OpenAI API questions from training memory alone — OpenAI's APIs evolve rapidly and documentation is authoritative. Not for Claude/Anthropic API usage, Claude Code extensions, or general AI/ML concepts.
+description: "Use whenever working with OpenAI APIs, SDKs, models, developer tools, or code that imports `openai` or `@openai`, so answers are grounded in current official OpenAI documentation. Do not use for Claude/Anthropic API usage, Claude Code extensions, general programming, or general AI/ML concepts unrelated to OpenAI developer products."
 allowed-tools:
   - mcp__openaiDeveloperDocs__search_openai_docs
   - mcp__openaiDeveloperDocs__list_openai_docs

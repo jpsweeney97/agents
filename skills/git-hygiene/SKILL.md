@@ -1,6 +1,6 @@
 ---
 name: git-hygiene
-description: "Use when the user asks to audit or clean a git repository: untracked files, mixed changes, commit shaping, stale branch pruning, or lane-based cleanup. Exclude active rebase/merge/cherry-pick/bisect, submodule edits, pushes, and PRs."
+description: "Use when the user asks to audit or clean local git repository state, including untracked files, mixed changes, commit shaping, stale branch pruning, or lane-based cleanup. Do not use during active rebase/merge/cherry-pick/bisect, for submodule edits, pushes, PR workflows, implementation, or ordinary status orientation."
 ---
 
 # Git Hygiene

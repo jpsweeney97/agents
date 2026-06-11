@@ -1,14 +1,6 @@
 ---
 name: gh-pr-review-loop
-description: >
-  Use when the user invokes `$gh-pr-review-loop` or clearly asks for the full
-  GitHub PR review-response loop: discover unresolved PR review threads,
-  independently verify each comment, fix all real actionable issues, run focused
-  verification, create one coherent commit when code changes are needed, push
-  once, reply to and resolve appropriate threads, then request another
-  `@codex review`. Do not use for ordinary "address comments" requests,
-  first-pass PR reviews, CI debugging, issue triage, or GitHub comment summaries
-  that do not authorize push, thread resolution, and re-review.
+description: "Use only when the user explicitly invokes `$gh-pr-review-loop` or clearly asks for the full GitHub PR review-response lifecycle, including fixing real review-thread issues and publishing the result with commit, push, thread replies/resolution, and re-review request. Do not use for ordinary comment addressing, first-pass PR reviews, CI debugging, issue triage, or comment summaries without that full-loop authorization."
 ---
 
 # GH PR Review Loop

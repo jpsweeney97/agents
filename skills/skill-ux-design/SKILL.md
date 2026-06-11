@@ -1,6 +1,6 @@
 ---
 name: skill-ux-design
-description: "Use when the user asks to design, audit, improve, or apply UX improvements to a Claude or Codex skill, SKILL.md, agents/openai.yaml, skill reference, or skill example. Trigger only for explicit UX language or clear user-facing synonyms such as usability, friction, user journey, discovery/invocation, steering, output experience, edit control, validation trust, recovery, durable aftermath, or skill-use experience. Do not trigger for general skill improvement, plain instruction-doc prose quality, rigor, validation, correctness, or safety work unless the user explicitly frames it as UX. Improves the user's journey through invoking and using a skill, with audit as a supported read-only exhaustive mode."
+description: "Use when the user explicitly asks to design, audit, improve, or apply UX improvements to a Claude or Codex skill or skill support surface, including invocation, steering, output experience, validation trust, recovery, or durable aftermath. Do not use for general skill improvement, instruction prose quality, rigor, validation, correctness, safety, routing cleanup, or adversarial review unless the user frames it as skill UX."
 ---
 
 # Skill UX Design

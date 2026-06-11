@@ -1,6 +1,6 @@
 ---
 name: markdown-reformat
-description: Use when the user asks to format rough text, plaintext notes, hard-wrapped prose, outlines, or messy Markdown into Markdown while preserving wording, order, and voice. Do not use for summarization, substantive rewriting, proofreading, or non-Markdown output.
+description: "Use when the user asks to format rough text, plaintext notes, hard-wrapped prose, outlines, or messy Markdown into Markdown while preserving wording, order, and voice. Do not use for summarization, substantive rewriting, proofreading, non-Markdown output, or synthesis across multiple sources; use `markdown-synthesis` for that."
 ---
 
 # Markdown Reformat

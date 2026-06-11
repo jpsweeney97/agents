@@ -1,6 +1,6 @@
 ---
 name: behavior-smoke-test
-description: "Design and run the smallest realistic scenario that exercises a changed behavior claim. Use when the user asks for a behavior smoke test, forward test, realistic dry run, future-agent proxy check, or proof that a skill, prompt, rule, workflow, or agent-facing contract will be followed. For skill behavior-contract changes, prefer a context-isolated subagent proxy when current tool policy permits it and the harness is safe. Do not use for structural validation alone, broad review, CI/test triage, implementation, or final closeout."
+description: "Use when the user asks for a behavior smoke test, forward test, realistic dry run, future-agent proxy check, or proof that a changed skill, prompt, rule, workflow, or agent-facing contract is actually followed. Do not use for structural validation alone, broad review, CI/test triage, implementation, debugging, or final closeout."
 ---
 
 # Behavior Smoke Test

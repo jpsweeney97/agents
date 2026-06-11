@@ -1,6 +1,6 @@
 ---
 name: claude-code-docs
-description: "Search and cite official Claude Code documentation through the claude-code-docs MCP server. Use for Claude Code setup, commands, hooks, agents, plugins, MCP, settings, IDE/CI, troubleshooting, and changelog questions, including asks like PreToolUse schema, plugin marketplace install, /mcp settings, or Claude Code changelog. Do not use for Claude API, Anthropic SDK, general programming, or non-Claude-Code product questions."
+description: "Use whenever working on Claude Code-specific setup, commands, hooks, agents, plugins, MCP, settings, IDE/CI, troubleshooting, changelog behavior, or other Claude Code features. Searches and cites official Claude Code docs through the claude-code-docs MCP server. Do not use for Claude API, Anthropic SDK, general programming, or non-Claude-Code product questions."
 ---
 
 # Claude Code Docs

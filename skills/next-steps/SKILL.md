@@ -1,6 +1,6 @@
 ---
 name: next-steps
-description: Use when the user explicitly invokes `/next-steps` or `$next-steps` to turn existing findings into a strategic action plan with dependencies, gates, and critical path.
+description: "Use only when the user explicitly invokes `/next-steps` or `$next-steps` to turn existing findings into a dependency-aware strategic action plan with gates and critical path. Do not use for ordinary next-step suggestions, recommendations between options, implementation plans, issue creation, or direct execution."
 ---
 
 # Action Plan
