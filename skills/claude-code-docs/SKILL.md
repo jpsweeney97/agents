@@ -41,13 +41,14 @@ Non-trigger examples:
    - If it is a single focused Claude Code docs question, answer inline.
    - If it spans multiple documentation areas or will likely require 3 or more searches, use the inline broad-query path below by default.
 2. Confirm the tool surface.
-   - In Codex, the expected MCP namespace is `mcp__claude_code_docs`, with `search_docs`, `reload_docs`, and `get_status`.
-   - If `mcp__claude_code_docs.search_docs` is not visible, use `tool_search` for `claude-code-docs search_docs`.
+   - In Codex, the expected MCP namespace is `mcp__claude_code_docs`, with `search_docs`, `reload_docs`, and `get_status`; if `search_docs` is not visible, use `tool_search` for `claude-code-docs search_docs`.
+   - In Claude Code, the same server is namespaced `mcp__claude-code-docs__*` with the same three tools; if they are deferred, load them with `ToolSearch`.
+   - Tool names below are runtime-neutral; use them through the active runtime's namespace.
    - If discovery still does not expose a search tool, say that authoritative Claude Code documentation lookup is unavailable in the current tool surface.
-3. Run `mcp__claude_code_docs.get_status` first when the user asks for latest/current behavior, trust-sensitive authority, stale results, changelog freshness, or server warnings.
+3. Run `get_status` first when the user asks for latest/current behavior, trust-sensitive authority, stale results, changelog freshness, or server warnings.
    - Use the status result to disclose `source_kind`, relevant warning codes, and any active load error when they affect confidence.
    - If `get_status` is unavailable but search is available, continue with search and say that server status was not inspectable.
-4. Run `mcp__claude_code_docs.search_docs` with a concrete query that names the feature, command, or concept.
+4. Run `search_docs` with a concrete query that names the feature, command, or concept.
 5. If the first result set is weak or ambiguous, retry in this order:
    - canonical feature name
    - joined or split variant, such as `PreToolUse` and `pre tool use`
@@ -118,22 +119,22 @@ If results are broad but relevant:
 If the question spans multiple documentation areas or needs 3 or more searches:
 
 1. Break the question into 2-6 focused sub-queries.
-2. Run 3-8 searches inline through `mcp__claude_code_docs.search_docs`.
+2. Run 3-8 searches inline through `search_docs`.
 3. Keep single-lookups inline. Do not broaden a question that one or two searches can answer directly.
 
 If the MCP server appears unavailable:
 
-1. Check whether `mcp__claude_code_docs.search_docs` is visible.
-2. If it is not visible, use `tool_search` for `claude-code-docs search_docs`.
-3. If `mcp__claude_code_docs.get_status` is visible, run it and inspect load errors, warnings, and source state.
-4. Run `mcp__claude_code_docs.reload_docs` only if that tool is visible.
+1. Check whether `search_docs` is visible.
+2. If it is not visible, use the runtime's discovery tool (`tool_search` in Codex, `ToolSearch` in Claude Code) for `claude-code-docs search_docs`.
+3. If `get_status` is visible, run it and inspect load errors, warnings, and source state.
+4. Run `reload_docs` only if that tool is visible.
 5. Retry the search only after discovery or reload succeeds.
 6. If search is still unavailable, say: `I cannot provide authoritative Claude Code documentation right now because the claude-code-docs MCP search tool is inaccessible in this session.`
 
 If results appear stale:
 
-1. Run `mcp__claude_code_docs.get_status` if available.
-2. Run `mcp__claude_code_docs.reload_docs` only if reload is visible.
+1. Run `get_status` if available.
+2. Run `reload_docs` only if reload is visible.
 3. Re-run the search before answering.
 4. If status or reload is unavailable, say which freshness check could not run.
 

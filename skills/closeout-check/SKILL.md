@@ -48,7 +48,7 @@ Do not use this skill as the primary lane for:
   decisions; use `git-hygiene`
 - local branch landing or merging; use `merge-branch`
 - GitHub PR review response, thread replies, pushes, or re-review requests; use
-  the GitHub review workflow
+  `gh-pr-review-loop` when it is available
 - debugging or implementation before the work has reached a finish line
 
 If the request mixes closeout with another lifecycle action, complete only the

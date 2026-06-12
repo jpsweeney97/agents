@@ -201,8 +201,12 @@ Validate the exact surfaces you edited.
 5. For script changes, run a focused script check or explain why no practical
    check exists.
 6. For skill behavior changes, run the available local validator when one exists.
-   Treat `quick_validate.py` as structural frontmatter validation only. If no
-   validator is available, state that and name the checks that replaced it.
+   Treat `quick_validate.py` as structural frontmatter validation only. Its
+   schema lacks some documented-valid Claude Code frontmatter fields (such as
+   `argument-hint` and `disable-model-invocation`), so treat that specific
+   "unexpected key" complaint as accepted and never resolve it by deleting the
+   field; treat any other failure as real. If no validator is available, state
+   that and name the checks that replaced it.
 7. For material behavior changes, add one live invocation, forward-test, or
    realistic dry run where practical.
 8. If validation fails or is blocked, do not claim the change works and do not

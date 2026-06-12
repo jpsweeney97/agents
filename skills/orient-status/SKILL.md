@@ -34,9 +34,9 @@ Do not use this skill as the primary lane for:
   done?", "is this ready?", "is this verified?", "safe to hand off?", or "close
   this out"; use `closeout-check`.
 - GitHub-focused repository, PR, or issue summaries; review-thread status; CI
-  status; labels, comments, or reactions; and repository triage. Use `github` or
-  its specialist skills unless GitHub state is only evidence for a broader local
-  status brief.
+  status; labels, comments, or reactions; and repository triage. Use a
+  GitHub-focused skill when one is available unless GitHub state is only
+  evidence for a broader local status brief.
 - Handoff load, save, search, resume, list, or update operations, including
   `/load`, `/save`, "continue from handoff", "search handoffs", and "what did
   we decide"; use the handoff skills.
@@ -71,7 +71,7 @@ Adapt this ladder to the target. Say when a source class is unavailable, skipped
 2. Read local instructions and metadata: `AGENTS.md` or `CLAUDE.md`, README, manifests, package metadata, plugin metadata, skill metadata, and repo-specific status entry points.
 3. Inspect live state: current directory, branch, worktree status, upstream/remotes if present, local diffs, branch-vs-base diffs, and recent local commits. Identify the default/base branch from explicit user direction, repo instructions, existing local remote-HEAD metadata, or a single obvious local default branch; do not fetch solely to identify it unless the user authorizes refresh. On a branch other than the verified default/base branch, inspect changed file names and recent branch commits before trusting older status docs. If the default/base branch cannot be identified locally and branch context matters, say so as an evidence gap.
 4. Read current-status and open-work docs: files named like `current-state`, `status`, `reconciliation`, `tickets`, `roadmap`, `plans`, `todo`, `backlog`, or repo-specific equivalents.
-5. Inspect ticket, issue, handoff, and PR systems only when they are evidence for the broader status question. If the primary target is a GitHub repo, PR, issue, review thread, or CI state, route to `github` or its specialist skills before running this ladder. Prefer read-only local files first. Use read-only connector/API queries when the user names a remote PR, issue, branch, or publication state, or when the status conclusion materially depends on remote truth. Do not refresh local git state unless asked.
+5. Inspect ticket, issue, handoff, and PR systems only when they are evidence for the broader status question. If the primary target is a GitHub repo, PR, issue, review thread, or CI state, route to a GitHub-focused skill when one is available before running this ladder. Prefer read-only local files first. Use read-only connector/API queries when the user names a remote PR, issue, branch, or publication state, or when the status conclusion materially depends on remote truth. Do not refresh local git state unless asked.
 6. Read roadmap, spec, design, and plan docs to understand intended sequencing and acceptance boundaries.
 7. Read older notes and status summaries as context, not authority. Re-anchor any stale claim against live state before presenting it as current.
 8. Summarize source conflicts, evidence gaps, and the strongest supported status conclusion.

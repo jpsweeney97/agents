@@ -1,6 +1,7 @@
 ---
 name: review-reviewer
 description: "Use only when the user explicitly invokes `/review-reviewer` or `$review-reviewer` to adjudicate a supplied review or check pasted review claims against current evidence before acting. Do not use for first-pass artifact reviews, generic scrutiny, implementation reviews, basic claim extraction without evidence checking, natural-language review requests, or follow-up fixes."
+disable-model-invocation: true
 ---
 
 # Review Reviewer
