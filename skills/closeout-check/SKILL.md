@@ -98,6 +98,12 @@ If no meaningful focused verification or quick check exists, say so plainly.
 Do not convert structural validation into behavior proof, plugin proof, or live
 runtime proof.
 
+A passing check suite is not a review. When the work is substantial, risky, or
+outward-facing and no review pass has happened, list the missing review as a
+remaining gap and name the owning review lane. Do not run the review inside
+closeout, and do not let its absence block an otherwise-passing closeout unless
+the user's definition of done includes review.
+
 ## Proof Boundary
 
 Label what was actually proven:
