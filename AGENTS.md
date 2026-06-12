@@ -86,36 +86,25 @@ manifest. Primary work is day-to-day skill editing.
   from a runtime inspection path: installed cache, app-server `plugin/read`,
   `plugin/list`, `skills/list`, or `hooks/list`.
 
-## Agent skills
+## Repo Docs
 
-### Contracts charter
-
-Admission, extraction, and retirement of behavior contracts are governed by the
-contracts charter. Consult it before authoring a new skill or adopting
-third-party contract material. See `docs/agents/charter.md`.
-
-### Issue tracker
-
-Issues are tracked in GitHub Issues for `jpsweeney97/agents`. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Use the default five-label triage vocabulary. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-This repo uses a single-context domain-doc layout. See `docs/agents/domain.md`.
+- `docs/agents/charter.md` — contracts charter governing admission,
+  extraction, and retirement of behavior contracts. Consult it before
+  authoring a new skill or adopting third-party contract material.
+- `docs/agents/issue-tracker.md` — issues are tracked in GitHub Issues for
+  `jpsweeney97/agents`.
+- `docs/agents/triage-labels.md` — the default five-label triage vocabulary.
+- `docs/agents/domain.md` — the single-context domain-doc layout.
 
 ## Working Defaults
 
 - Start file-changing work with `git status --short --branch`.
-- Read the live target files before editing; match the existing skill shape.
+- Read the live targets before editing and match the existing skill shape. For
+  behavior changes, inspect `SKILL.md`, companion metadata, referenced files,
+  and related scripts together; when trigger, side-effect, proof, authority,
+  or lifecycle behavior changes, update companion metadata too.
 - Keep edits scoped to the requested skill, metadata file, reference, script,
   or marketplace entry.
-- For behavior changes, inspect `SKILL.md`, companion metadata when present,
-  referenced files, and related scripts together before patching. When
-  trigger, side-effect, proof, authority, or lifecycle behavior changes,
-  update companion metadata too.
 - A minimal local skill can be only `SKILL.md`. Add metadata, references,
   examples, or scripts only when they reduce real load in the main skill file
   or support a concrete integration.
