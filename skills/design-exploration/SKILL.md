@@ -32,7 +32,10 @@ takes over.
 ## Core Workflow
 
 1. Explore project context first: relevant files, docs, ADRs, the domain
-   glossary, recent commits. Ground the design in code reality.
+   glossary, recent commits. Ground the design in code reality. When
+   exploration is delegated to subagents, have each return the most
+   load-bearing files and read those files yourself before designing; do
+   not design from subagent summaries alone.
 2. Scope check before detail: if the request spans multiple independent
    subsystems, say so and decompose into sub-projects before refining
    anything. Design the first sub-project; each gets its own design cycle.
