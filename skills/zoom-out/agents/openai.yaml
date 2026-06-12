@@ -1,0 +1,7 @@
+interface:
+  display_name: "Zoom Out"
+  short_description: "Map an unfamiliar code area"
+  default_prompt: "Use $zoom-out to map this code area's relevant modules and callers and how it fits the broader system."
+
+policy:
+  allow_implicit_invocation: false

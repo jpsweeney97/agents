@@ -249,7 +249,7 @@ when no downstream workflow is needed.
 
 | The interview has done its job when…                                          | Hand off to                         |
 | ----------------------------------------------------------------------------- | ----------------------------------- |
-| The outcome is clear and the user wants to turn it into a design or spec      | `superpowers:brainstorming`         |
+| The outcome is clear and the user wants to turn it into a design or spec      | a design-exploration lane such as `superpowers:brainstorming` when available; otherwise explore the design conversationally |
 | Decision criteria and two or more serious options are clear enough to compare | `making-recommendations`            |
 | The user asks to be pressure-tested, challenged, or drilled on weak answers   | `grill-me`                          |
 | The user asks for a complete critique, report, review, or audit               | the relevant review skill           |

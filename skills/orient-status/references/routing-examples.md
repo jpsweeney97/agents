@@ -38,15 +38,17 @@ when the right lane is unclear from the trigger text alone.
 - User: "Is this done?", "Is this ready?", or "Close this out."
   Better lane: `closeout-check`.
 - User: "What's the status of PR #42?"
-  Better lane: `github` or a GitHub specialist skill. Use orient-status only if
-  the PR is evidence for a broader local repo status brief.
+  Better lane: a GitHub-focused skill, if one is available; otherwise note the
+  limit. Use orient-status only if the PR is evidence for a broader local repo
+  status brief.
 - User: "What are the unresolved review threads on this PR?" or "Why is CI
   failing?"
-  Better lane: GitHub review-follow-up or CI-debugging specialist skill.
+  Better lane: a GitHub review-follow-up or CI-debugging skill, if one is
+  available; otherwise note the limit.
 - User: "Triage issue #42" or "Show repository issues that need attention."
-  Better lane: `github`, `triage`, or the repo's issue-tracker workflow.
+  Better lane: `triage` or the repo's issue-tracker workflow.
 - User: "List open tickets" or "triage the backlog."
-  Better lane: ticket listing, search, review, or update skills.
+  Better lane: ticket listing, search, review, or update skills, if available.
 - User: "Show me open tickets."
   Better lane: ticket listing or search. If that lane is unavailable, say so
   and do not substitute a broad status orientation.

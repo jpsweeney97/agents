@@ -41,9 +41,10 @@ failure modes, and stakes are clear enough to compare.
   message explicitly asks for that workflow.
 - If the ask needs clarification rather than choice, name `outcome-interviewer`
   as the better lane, say why, and ask before switching.
-- If the ask needs design exploration before a choice can exist, name
-  `superpowers:brainstorming` as the better lane, say why, and ask before
-  switching.
+- If the ask needs design exploration before a choice can exist, name a
+  design-exploration lane (`superpowers:brainstorming` when available;
+  otherwise conversational exploration) as the better path, say why, and ask
+  before switching.
 - If enough is clear to proceed, state any assumptions before evaluating.
 - Do not generate a full ranking from a muddy prompt.
 
@@ -78,8 +79,9 @@ Handoffs are permissioned and non-silent.
   is still muddy.
 - Use `grill-me` when the user wants an interactive pressure test of a decision,
   not a one-shot recommendation.
-- Use `superpowers:brainstorming` when the user needs design exploration before
-  serious options exist.
+- Use a design-exploration lane (`superpowers:brainstorming` when available;
+  otherwise explore the design conversationally) when the user needs design
+  exploration before serious options exist.
 - Use the relevant review, status, baseline, debugging, planning, or
   implementation skill when the request is not primarily a choice.
 

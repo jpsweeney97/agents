@@ -85,4 +85,8 @@ Only offer to create an ADR when all three are true:
 
 If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).
 
+Note: `CONTEXT-FORMAT.md` and `ADR-FORMAT.md` are also consumed by
+`improve-codebase-architecture`. If this skill or its format files are renamed,
+moved, or archived, update that skill's references.
+
 </supporting-info>

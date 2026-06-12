@@ -53,7 +53,7 @@ Read-only boundary: do not edit files, stage changes, commit, push, delete, migr
 
 Verification boundary: run only safe, relevant commands. If a useful command may mutate state outside normal test/build artifacts, ask first and list the claim that remains unverified if skipped.
 
-Higher-priority safety, destructive-action, and `.agents/AGENTS.md` root-cause-analysis checkpoints still apply; if a checkpoint blocks deeper investigation, mark the affected claim `unverified` and state which checkpoint blocked it.
+Higher-priority safety, destructive-action, and repo-instruction checkpoints still apply; if a checkpoint blocks deeper investigation, mark the affected claim `unverified` and state which checkpoint blocked it.
 
 ## Stance
 
