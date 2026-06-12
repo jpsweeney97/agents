@@ -86,7 +86,7 @@ workflow that owns the requested work.
 Examples:
 
 - use `writing-principles` for instruction-doc writing or editing
-- use `skill-creator` or `write-a-skill` for skill construction
+- use `skill-creator` for skill construction
 - use the relevant review-family skill for critique or review
 - use the domain or implementation skill that owns the product change
 

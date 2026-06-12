@@ -46,7 +46,7 @@ Use the neighboring lane when it owns the work:
   it before adding fields, statuses, workflow stages, validators, routers,
   classifiers, scoring, confidence fields, hard rules, or semantic decision
   scripts
-- `skill-creator` or `write-a-skill`: constructing a new skill bundle, defining
+- `skill-creator`: constructing a new skill bundle, defining
   or changing an agent-facing capability, changing bundle structure, adding or
   changing resources or scripts, or generating metadata
 - `scrutinize-skill` or another review-family skill: behavior-contract review,
@@ -69,8 +69,8 @@ rewrite, refactor, or edit instruction docs, after any needed
 Use this skill to draft or create instruction prose only inside an already-owned
 target: a named existing file, a pasted instruction text target, or an existing
 document the user already asked to edit. Do not construct new skill bundles or
-define new agent-facing capabilities here; route those to `skill-creator`,
-`write-a-skill`, or `agent-facing-design` as appropriate.
+define new agent-facing capabilities here; route those to `skill-creator` or
+`agent-facing-design` as appropriate.
 
 This skill wins for obligation-only prose edits inside an existing `SKILL.md`,
 `AGENTS.md`, `CLAUDE.md`, support doc, `agents/*.md`, or `agents/*.yaml` when the requested

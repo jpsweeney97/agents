@@ -138,8 +138,8 @@ defaults instead of inventing a separate skill-construction workflow.
   boundaries, persistence, routing, or machinery.
 - Use `scrutinize-skill` for review-only skill-contract critique. After the
   review is accepted, patch the owning skill surfaces directly.
-- Use `write-a-skill` or `skill-creator` for new skill bundles, generated
-  metadata, bundle-shape changes, or new helper resources and scripts.
+- Use `skill-creator` for new skill bundles, generated metadata, bundle-shape
+  changes, or new helper resources and scripts.
 - When changing trigger, side-effect, proof, authority, or lifecycle behavior,
   update companion metadata when present and validate the touched surfaces.
 
