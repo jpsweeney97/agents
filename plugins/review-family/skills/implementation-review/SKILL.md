@@ -99,7 +99,7 @@ Do not treat passing tests, naming, comments, or apparent intent as enough to ma
 
 ### 3. Attack Changed Areas
 
-For each changed area, check relevant failure modes: input validation, control flow, state/concurrency, trust boundaries, operational behavior, and consistency with existing patterns.
+For each changed area, check relevant failure modes: input validation, control flow, state/concurrency, trust boundaries, operational behavior, and consistency with existing patterns. Check error handling for suppression: empty or overly broad catches, errors logged then swallowed, and defaults or fallbacks that mask the underlying failure. Where tests changed or new behavior needs them, check test adequacy: missing negative cases and tests coupled to implementation details rather than behavior.
 
 Record the strongest failure story checked for each area, even when it does not produce a finding.
 

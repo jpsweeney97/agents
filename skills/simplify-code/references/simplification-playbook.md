@@ -220,7 +220,10 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` or `CLAUDE.md
    sequential verified slices. Internal signatures may change only when all
    callers are scoped and planned verification is strong; external contracts need
    opt-in. Add abstractions only for meaningful duplication or an existing stable
-   domain concept; keep them small/local. Avoid restatement comments. Run
+   domain concept; keep them small/local. Avoid restatement comments. Choose
+   clarity over brevity: do not compress logic into dense one-liners or nested
+   conditionals, and do not remove abstractions that carry real organizational
+   weight; a smaller diff that raises cognitive load is not a simplification. Run
    formatter/linter only on touched files; stop if it expands scope.
 
 10. Failure/closeout: if verification fails, do root-cause analysis first. Use
