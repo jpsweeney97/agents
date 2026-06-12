@@ -100,6 +100,12 @@ or generated artifacts unless the user explicitly asks to inspect them.
 
 ## Agent skills
 
+### Contracts charter
+
+Admission, extraction, and retirement of behavior contracts are governed by the
+contracts charter. Consult it before authoring a new skill or adopting
+third-party contract material. See `docs/agents/charter.md`.
+
 ### Issue tracker
 
 Issues are tracked in GitHub Issues for `jpsweeney97/agents`. See `docs/agents/issue-tracker.md`.
