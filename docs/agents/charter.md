@@ -40,9 +40,10 @@ wherever it was found. Before admitting a new contract — authored or extracted
   contract and why this work is not its job.
 - What misroute or failure does it prevent that lighter context — an AGENTS.md
   line, a reference file in an existing skill — would not?
-- Does it meet house standards: Use-when/Do-not-use boundaries, proof-class
-  discipline, availability-conditioned routing, dual-runtime phrasing where it
-  applies?
+- Can it be authored to house standards — Use-when/Do-not-use boundaries,
+  proof-class discipline, availability-conditioned routing, dual-runtime
+  phrasing where it applies? The test applies to the contract as it will land
+  here, not the source's current form.
 
 Run the test on observed work, not the routing graph. A genuine gap and a
 non-job both show zero inbound routes, so "nothing routes to that lane" never
