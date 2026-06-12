@@ -51,6 +51,11 @@ The scenario should be just large enough to make the agent choose between old
 behavior and new behavior. It may be markdown-first when that is the honest
 harness, but it must make the changed rule operational.
 
+For discipline claims — stop conditions, prohibitions, verification gates — a
+neutral prompt is weak evidence. Apply realistic pressure toward the old
+behavior (time pressure, sunk cost, an authority nudge) so the observed
+compliance is chosen rather than incidental.
+
 Generated scenarios are temporary by default. Persist a smoke-test artifact only
 when it is likely to be reused, documents a fragile boundary, caught a failure,
 or the user asks for a durable example.

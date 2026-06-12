@@ -57,3 +57,17 @@ The SDK approach means:
 - No conditional logic in test setup
 - Easier to see which endpoints a test exercises
 - Type safety per endpoint
+
+## Mocking Pitfalls
+
+- Mock the complete data structure as it exists in reality, not just the
+  fields your test reads. Partial mocks hide structural assumptions and fail
+  silently when downstream code depends on an omitted field.
+- Never add test-only methods to production classes. Cleanup and inspection
+  helpers belong in test utilities.
+- Before mocking a method, know its side effects and whether the test depends
+  on them. Mock the slow or external operation underneath, not the high-level
+  method whose behavior the test needs. If unsure, run the test against the
+  real implementation first and observe what it actually requires.
+- If an assertion checks that a mock exists or was rendered, the test verifies
+  the mock, not the code. Assert on real behavior or remove the mock.

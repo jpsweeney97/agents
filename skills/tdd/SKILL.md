@@ -82,7 +82,12 @@ GREEN: Minimal code to pass → passes
 Rules:
 
 - One test at a time
+- Run the new test and watch it fail before implementing. A test that passes
+  immediately is testing existing behavior; a test that errors for an unrelated
+  reason needs fixing first. A test you never saw fail proves nothing.
 - Only enough code to pass current test
+- After implementing, run the tests and watch them pass with clean output
+  before starting the next cycle
 - Don't anticipate future tests
 - Keep tests focused on observable behavior
 
@@ -102,6 +107,7 @@ After all tests pass, look for [refactor candidates](refactoring.md):
 
 ```
 [ ] Test describes behavior, not implementation
+[ ] Watched the test fail for the expected reason before implementing
 [ ] Test uses public interface only
 [ ] Test would survive internal refactor
 [ ] Code is minimal for this test

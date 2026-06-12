@@ -96,12 +96,12 @@ Expected behavior:
 - Name why `making-recommendations` cannot proceed yet: the prompt asks for
   design exploration before serious options exist.
 - Name `outcome-interviewer` if the user's desired outcome is unclear.
-- Name `superpowers:brainstorming` if the outcome is clear enough but approaches
-  still need design exploration.
+- Name a design-exploration lane (or offer conversational design exploration)
+  if the outcome is clear enough but approaches still need design exploration.
 - Ask before switching lanes, then stop. For example: "This is not ready for a
   recommendation yet because there are not comparable approaches on the table.
-  `superpowers:brainstorming` is the better lane to shape those approaches. Do
-  you want me to switch into that?"
+  Design exploration is the better next step to shape those approaches. Do you
+  want me to switch into that?"
 - Use `making-recommendations` only after there are serious approaches to
   compare, such as server-rendered dashboard, client-heavy dashboard, or embedded
   analytics surface.
