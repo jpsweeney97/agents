@@ -44,6 +44,14 @@ wherever it was found. Before admitting a new contract — authored or extracted
   discipline, availability-conditioned routing, dual-runtime phrasing where it
   applies?
 
+Run the test on observed work, not the routing graph. A genuine gap and a
+non-job both show zero inbound routes, so "nothing routes to that lane" never
+decides a rejection. Rejecting a candidate takes the same evidence discipline
+as admitting one: name the demonstrated friction you looked for and did not
+find — misroutes, repeated corrections, work handled badly ad hoc. Rejections
+are cheap and admissions are paid for; do not let that asymmetry stand in for
+the merit call.
+
 Slots are paid for. Codex truncates the skill list silently over its budget,
 and every contract adds routing surface in both runtimes. A contract that
 cannot name the work it owns does not get a slot.
