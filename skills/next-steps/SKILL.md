@@ -20,8 +20,8 @@ Read [references/example.md](references/example.md) only when the user asks for 
 - These are early exits that do not need the full output packet:
   - No findings: ask what artifact or discussion to plan from.
   - One obvious next step: say so instead of fabricating phases.
-  - Implementation-ready work: say this is ready for an explicit
-    implementation-planning lane, then stop.
+  - Implementation-ready work: say this is ready for
+    `implementation-planning`, then stop.
 
 ## Build
 

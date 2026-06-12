@@ -249,7 +249,7 @@ when no downstream workflow is needed.
 
 | The interview has done its job when…                                          | Hand off to                         |
 | ----------------------------------------------------------------------------- | ----------------------------------- |
-| The outcome is clear and the user wants to turn it into a design or spec      | a design-exploration lane when one is available; otherwise explore the design conversationally |
+| The outcome is clear and the user wants to turn it into a design or spec      | `design-exploration`                |
 | Decision criteria and two or more serious options are clear enough to compare | `making-recommendations`            |
 | The user asks to be pressure-tested, challenged, or drilled on weak answers   | `grill-me`                          |
 | The user asks for a complete critique, report, review, or audit               | the relevant review skill           |
