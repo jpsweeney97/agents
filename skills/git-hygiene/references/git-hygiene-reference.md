@@ -25,8 +25,15 @@ Branch checks:
 git symbolic-ref --quiet --short refs/remotes/origin/HEAD
 git branch --merged <default-branch>
 git branch --no-merged <default-branch>
+git branch -vv
 git worktree list --porcelain
 ```
+
+A `[gone]` upstream in `git branch -vv` marks a branch whose remote was
+deleted — a deletion candidate for the `local-branch-delete` lane, never merge
+proof. The marker surfaces only after remote-tracking refs are pruned; in
+audit, pair it with the `remote prune --dry-run` preview to catch candidates
+the marker has not reached yet.
 
 Safe execution:
 
@@ -46,7 +53,7 @@ trash <approved-file>
 git branch -d <approved-branch>
 ```
 
-Use `git branch -d`, not `-D`, unless the user separately requests force deletion and the safety case is clear.
+Use `git branch -d`, not `-D`, unless the user separately requests force deletion and the safety case is clear. One exception is provable: after a squash merge, `-d` fails even though the work landed. `-D` is then acceptable only after confirming the landed work — a merged PR via `gh pr list --head <branch> --state merged`, or the equivalent commits on the default branch. The confirmation makes `-D` safe, never the `-d` failure alone.
 
 ## Preview Template
 
@@ -77,7 +84,8 @@ Lane: branch-pruning
   Remote tracking to prune:
     - origin/feature/deleted-upstream
   Local branches to delete:
-    - feature/old-experiment
+    - feature/old-experiment (merged)
+    - fix/login-timeout ([gone], squash-merged PR #41 - `-D` only after the PR check)
 
 Lane: config-learning
   Proposed saved patterns:
@@ -134,3 +142,4 @@ Example flow: audit, present lanes, collect approvals, execute `apply-safe`, pau
 | Treating "quickly" as consent | Shorten preview; do not skip it. |
 | Mixing `.gitignore` with code changes | Commit ignore rules separately and first. |
 | Branch deletion without worktree checks | Check worktrees first. |
+| Treating `[gone]` as merge proof | Confirm landed work (merged PR) before `-D`. |

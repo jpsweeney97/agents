@@ -38,7 +38,7 @@ Before audit or execution, confirm repo root, branch, default branch, remotes, a
 
 - `untracked-and-ignore`: classify untracked files as `ignore candidate`, `track candidate`, `ask`, or `protected`.
 - `commit-shaping`: group staged and unstaged changes by concern with Conventional Commits messages.
-- `branch-pruning`: keep `remote-prune` separate from destructive `local-branch-delete`.
+- `branch-pruning`: keep `remote-prune` separate from destructive `local-branch-delete`; a `[gone]` upstream marks a deletion candidate, never merge proof.
 - `config-learning`: propose `.git-hygiene.json` updates only after the user approves the pattern.
 
 Collect approvals lane by lane. `ask` files require `track`, `ignore`, `delete`, or `leave`. Protected deletion requires explicit per-file confirmation naming the protection reason. If a decision changes a lane materially, regenerate that preview and reconfirm.
@@ -46,7 +46,7 @@ Collect approvals lane by lane. `ask` files require `track`, `ignore`, `delete`,
 ## Execution and Report
 
 - `apply-safe`: resolve dependencies, branch only for worktree edits or commits, commit `.gitignore` first, then approved groups, remote prune, and config.
-- `apply-destructive`: require final confirmation, `trash` approved files, delete only merged, unprotected, unused approved branches; do not stage or commit deletions.
+- `apply-destructive`: require final confirmation, `trash` approved files, delete only unprotected, unused approved branches that are merged or `[gone]` with confirmed landed proof (see the reference's `-D` rule); do not stage or commit deletions.
 - `commit-only`: confirm file decisions are settled, branch if isolation is needed, then stage and commit approved groups.
 
 Verify only executed lanes: `git status` after worktree or commit changes, `git log <original>..HEAD` after commits, and ref checks after pruning or branch deletion.
