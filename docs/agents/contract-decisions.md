@@ -67,6 +67,33 @@ entries; do not rewrite settled ones.
   memory or handoffs; static Claude Code facts it carries are owned live by
   `claude-code-docs`. Plugin removed; source recoverable in the
   claude-plugins-official marketplace catalog.
+- 2026-06-12 — skill-creator (pass 8): keep-with-cleanup. Bundle construction
+  stays owned on Codex by the bundled copy (`~/.codex/skills/.system/`, fixed
+  terrain); its do-work scripts are charter-exempt and the `quick_validate.py`
+  the Validation Ladder cites resolves there. The removable third-party Claude
+  plugin install (`skill-creator@claude-plugins-official`) — an eval/benchmark
+  build (`run_loop`/`run_eval`/`aggregate_benchmark`/`improve_description`/
+  `generate_review`; ships its own `quick_validate.py` but no `init_skill.py`/
+  `generate_openai_yaml.py`) — removed under Extraction. Its authoring doctrine
+  overlaps and folds into `agent-facing-design`/`writing-principles`/
+  `skill-ux-design`/`behavior-smoke-test`/`scrutinize-skill` and persists in the
+  Codex bundle. Its eval/benchmark capability re-authored to house standards as
+  `skill-benchmark` (admitted, Claude-only in `skills-claude/`): owns
+  quantitative skill benchmarking and trigger/description optimization, a job no
+  local lane held (`behavior-smoke-test` is single-shot qualitative; never
+  co-loads with the Codex-bundled `skill-creator`). Four inbound routes
+  (`AGENTS.md` routing lane; `writing-principles` ×2; `agent-facing-design`)
+  re-pointed availability-conditionally: Codex construction → bundled
+  `skill-creator`; Claude construction → hand-author against the folded doctrine
+  plus the Codex-bundled `quick_validate.py` via Bash (no invocable Claude-side
+  constructor remains, by design). Reconciles pass-7 above: "skill authoring"
+  still decomposes into an owned/fixed surface. Friction looked for and not
+  found: zero failed or misrouted constructions, and the install's eval
+  machinery never exercised, across two 2026-06-12 main-thread invocations that
+  produced four now-live skills by hand-authoring + manual construction. Plugin
+  uninstalled (`claude plugin uninstall`); source recoverable in the
+  claude-plugins-official marketplace catalog. Evidence: commits `a5e6642`,
+  `966f903`.
 
 ## Parks
 
@@ -85,10 +112,9 @@ entries; do not rewrite settled ones.
 Unmined contract-shipping surfaces, on amended charter terms (rejection
 evidence named per discard):
 
-1. skill-creator (next)
-2. code-review (ships `commands/`; in active use)
-3. security-guidance (hook-injected instruction text)
-4. explanatory-output-style (hook-injected instruction text)
+1. code-review (next; ships `commands/`; in active use)
+2. security-guidance (hook-injected instruction text)
+3. explanatory-output-style (hook-injected instruction text)
 
 Unassessed: the `github` plugin — verify whether it ships contract text beyond
 MCP tooling before queueing or exempting it.

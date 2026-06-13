@@ -86,7 +86,11 @@ workflow that owns the requested work.
 Examples:
 
 - use `writing-principles` for instruction-doc writing or editing
-- use `skill-creator` for skill construction
+- for skill construction, use the bundled `skill-creator` on Codex; on Claude,
+  hand-author against this gate and `skill-ux-design` (no Claude-side
+  constructor skill, by design)
+- for quantitative skill benchmarking or trigger optimization, use
+  `skill-benchmark` (Claude-only)
 - use the relevant review-family skill for critique or review
 - use the domain or implementation skill that owns the product change
 

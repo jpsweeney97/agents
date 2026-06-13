@@ -120,8 +120,15 @@ workflow:
   `skills/agent-facing-design/SKILL.md`; do not duplicate it here.
 - `scrutinize-skill` — review-only skill-contract critique. After the review
   is accepted, patch the owning skill surfaces directly.
-- `skill-creator` — new skill bundles, generated metadata, bundle-shape
-  changes, or new helper resources and scripts.
+- New skill bundles, bundle-shape changes, generated metadata, and helper
+  scripts — on Codex, the bundled `skill-creator`; on Claude, hand-author
+  against `agent-facing-design` and `skill-ux-design`, validating with the
+  Codex-bundled `quick_validate.py` (see Validation Ladder) via Bash. There is
+  no Claude-side constructor skill, by design.
+- `skill-benchmark` (Claude-only) — quantitative skill benchmarking and
+  trigger/description optimization: with/without-skill eval runs and
+  pass-rate, token, and time deltas with variance. On Codex, the bundled
+  `skill-creator` owns this work.
 
 ## Skill Editing
 
