@@ -17,7 +17,7 @@ Safe worktree exit with verification. Prevents data loss from manual cleanup.
 
 **Key behavior:** On completion, `ExitWorktree` returns the session to the original working directory (the directory before `EnterWorktree` was called). This means after exiting, you're back in the main repo — not stranded in a deleted path.
 
-**Scope:** Always try `ExitWorktree` first, regardless of how the worktree was created. It may work on worktrees from previous sessions or those created via `claude --worktree`. If it reports "no worktree session is active" (a true no-op), fall back to manual cleanup from the **main repo directory** (not from inside the worktree):
+**Scope:** `ExitWorktree` only operates on a worktree that `EnterWorktree` created in the *current* session. For a worktree created manually (`git worktree add`), in a previous session, or via `claude --worktree`, it is a guaranteed **no-op** — it reports "no worktree session is active" and changes nothing on disk. Calling it first is still safe (the no-op is harmless), but for those cases expect to fall back to manual cleanup, run from the **main repo directory** (not from inside the worktree):
 
 ```bash
 # 1. Run from main repo to avoid CWD breakage
@@ -61,9 +61,18 @@ Do NOT proceed until the user decides. Commit if requested, or note they'll be d
 
 ### 3. Check for unpushed commits
 
+First check whether the branch has an upstream. Without one, `@{upstream}` is undefined and `git log @{upstream}..` errors out to *empty* — which looks identical to "nothing unpushed" and would wrongly suggest the work is safely pushed:
+
 ```bash
-git log @{upstream}.. --oneline 2>/dev/null
+git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null
 ```
+
+- **Nothing printed (no upstream):** the branch was never pushed. Do NOT read this as "all pushed" — treat every commit as unpushed. List them against the base branch (e.g. `git log main.. --oneline`) and handle as the "If no PR" case below.
+- **An upstream printed:** list commits not yet on it:
+
+  ```bash
+  git log @{upstream}.. --oneline
+  ```
 
 If unpushed commits exist:
 - **If a PR was squash-merged:** Unpushed commits are expected — the squash commit on main contains the work. Confirm with the user: "The PR was squash-merged, so these local commits are already represented on main. OK to proceed?"
@@ -183,18 +192,14 @@ Do NOT use `-D` without first confirming the merge via `gh pr list`. The PR conf
 | Multiple worktrees exist | Only exit the one being discussed. Don't touch others. |
 | User wants to keep the worktree | `ExitWorktree(action: "keep")` — directory and branch remain. |
 | Remote branch already deleted by PR merge | Normal — GitHub deletes the remote branch on merge. Local branch cleanup still needed. |
-| Worktree created in a previous session or manually | Try `ExitWorktree` first — it may still work. If it reports "no worktree session is active," use `git -C <main-repo> worktree remove` fallback (see tool section). |
+| Worktree created in a previous session or manually | `ExitWorktree` is a no-op here — it only removes current-session `EnterWorktree` worktrees. Safe to call (it reports "no worktree session is active"); then use the `git -C <main-repo> worktree remove` fallback (see tool section). |
 | Work needs merging but main is checked out elsewhere | Cannot `git checkout main` from inside the worktree. Use `git -C <main-repo-path> merge <branch>` to merge from the main repo, then `ExitWorktree(action: "remove", discard_changes: true)`. |
 | Branch survives after `ExitWorktree` | Common with `discard_changes: true`. Verify with `git branch --list`, then `git branch -d <branch>`. |
 
 ## Integration
 
-**Complements:**
-- `using-git-worktrees` — creates worktrees; this skill exits them
-- `finishing-a-development-branch` — decides merge/PR/keep/discard; this skill supersedes its Step 5 (worktree cleanup) which uses raw `git worktree remove`
+This skill only *exits* worktrees; it does not create them. Worktrees are created by the `EnterWorktree` tool (see "The ExitWorktree Tool" above). Whether the work is landed — merged locally or via a merged PR — is decided by the landing flow you used (for a local fast-forward landing, `merge-branch`); this skill runs only afterward, to verify and remove.
 
 **Typical sequence:**
-1. `finishing-a-development-branch` → user picks "Create PR" (Option 2)
-2. PR review cycle happens
-3. PR merged on GitHub
-4. **This skill activates** → sync main, confirm, ExitWorktree, verify
+1. Land the branch — a local fast-forward (`merge-branch`), or a PR that gets merged.
+2. **This skill activates** → sync main, confirm, ExitWorktree, verify.
