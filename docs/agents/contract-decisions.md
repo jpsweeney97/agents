@@ -41,6 +41,15 @@ entries; do not rewrite settled ones.
 - 2026-06-12 — gh-address-comments: admitted (owns PR-comment addressing
   without publish authority); authoring deferred, tracked as
   jpsweeney97/agents#2.
+- 2026-06-12 — frontend-design (pass 6): zero folds — the sole contract
+  surface (a 41-line web-frontend aesthetics SKILL.md) parked rather than
+  admitted. No local lane owns web-frontend aesthetic guidance, but the job
+  has no observed work: installed since 2025-12-17 with zero invocations
+  across all session transcripts (search pattern control-verified against
+  known-invoked skills), no web-frontend stack in any project directory
+  (lyrics-software is native SwiftUI), and zero inbound routes from curated
+  contracts. Plugin removed; source recoverable in the claude-plugins-official
+  marketplace catalog.
 
 ## Parks
 
@@ -50,18 +59,20 @@ entries; do not rewrite settled ones.
   (2026-06-12); reopen only on JP's ask.
 - code-comprehension lane — parked (2026-06-12); reopen on an observed
   comprehension failure in real work.
+- frontend-design web-aesthetics guidance — parked (2026-06-12); reopen on the
+  first real web-frontend build task in observed work; on reopen, re-author to
+  house standards from the marketplace catalog source, do not reinstall.
 
 ## Mining Queue
 
 Unmined contract-shipping surfaces, on amended charter terms (rejection
 evidence named per discard):
 
-1. frontend-design (next)
-2. claude-code-setup
-3. skill-creator
-4. code-review (ships `commands/`; in active use)
-5. security-guidance (hook-injected instruction text)
-6. explanatory-output-style (hook-injected instruction text)
+1. claude-code-setup (next)
+2. skill-creator
+3. code-review (ships `commands/`; in active use)
+4. security-guidance (hook-injected instruction text)
+5. explanatory-output-style (hook-injected instruction text)
 
 Unassessed: the `github` plugin — verify whether it ships contract text beyond
 MCP tooling before queueing or exempting it.
