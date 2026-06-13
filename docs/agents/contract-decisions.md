@@ -205,6 +205,26 @@ entries; do not rewrite settled ones.
   plugin uninstall`); source recoverable in the claude-plugins-official
   marketplace catalog. Evidence: charter pass-11 route-inventory +
   merit-adjudication workflows (this session).
+- 2026-06-13 — github plugin (assessment, not a mining pass): exempt — pure
+  capability tooling, no contract text; stays installed and enabled. Full file
+  inventory of the installed + enabled `github@claude-plugins-official` cache
+  (`find -type f` over the plugin dir) shows only `.mcp.json` (one HTTP MCP
+  server → `api.githubcopilot.com/mcp/`, `GITHUB_PERSONAL_ACCESS_TOKEN`-authed),
+  a name/description/author `plugin.json` with no component declarations, and
+  `.in_use/` PID lockfiles; `commands/`, `skills/`, `agents/`, `hooks/`, and
+  `output-styles/` all absent. No slash command, SKILL.md, agent definition,
+  hook-injected `additionalContext`, or output-style register — the plugin.json
+  `description` is marketplace catalog metadata, not injected instruction the
+  agent must follow (all `mcp__plugin_github_github__*` tools come from the
+  hosted MCP server, not bundled prose). Per the capability-tooling exemption
+  (charter ll.22-24, "MCP servers ... out of scope. Tools are tools"), a
+  standalone exempt tool with no accompanying contract is out of scope: no
+  mining, and — unlike the fused-engine cases (pass 5 hookify, pass 10
+  security-guidance, where an exempt engine departs as packaging for in-scope
+  injected contract) — there is no in-scope contract to extract, so nothing is
+  removed and the plugin stays installed. First pure-exemption outcome. Closes
+  the mining program: the queue's last residual surface is resolved. Evidence:
+  plugin-cache file inventory (this session).
 
 ## Parks
 
@@ -235,5 +255,7 @@ evidence named per discard):
 
 (empty — all ten queued surfaces mined through pass 11.)
 
-Unassessed: the `github` plugin — verify whether it ships contract text beyond
-MCP tooling before queueing or exempting it.
+Assessed and exempt (2026-06-13): the `github` plugin — pure MCP capability
+tooling, no contract text (see Decisions). Out of scope; nothing to extract;
+stays installed. The mining program is fully closed — no queued or unassessed
+contract surfaces remain.
