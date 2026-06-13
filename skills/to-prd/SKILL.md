@@ -14,7 +14,8 @@ available; otherwise ask the smallest setup question needed before publishing.
 ## Side Effects And Proof Boundary
 
 This skill publishes to the configured issue tracker. Treat publication as a
-remote or tracker mutation, not as ordinary planning.
+remote or tracker mutation, not as ordinary planning. Do not publish until the
+user has approved publishing the PRD.
 
 Before publishing, identify the issue tracker, label mapping, and source context
 used for the PRD. After publishing, report the issue identifier or URL, labels
@@ -30,7 +31,7 @@ runtime behavior, or issue-tracker state beyond the actions performed.
 
 Check with the user that these seams match their expectations.
 
-3. Write the PRD using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
+3. Write the PRD using the template below. Once the user has approved publishing it (see Side Effects And Proof Boundary), publish it to the project issue tracker and apply the `needs-triage` label. A PRD is a source artifact still to be sliced into implementation issues, not work that is ready for an autonomous agent — do not apply `ready-for-agent`, and do not skip triage.
 
 <prd-template>
 
