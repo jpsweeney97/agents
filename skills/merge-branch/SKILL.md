@@ -88,6 +88,12 @@ Before merging, verify the target branch exists locally. If it does not, stop
 and report the missing branch rather than fetching or creating it unless the
 user explicitly asked for that.
 
+Also confirm the target branch is not checked out in another worktree (inspect
+the `git worktree list --porcelain` output from preflight). If it is,
+`git switch <target-branch>` in Step 4 will fail — stop now and report that the
+target is checked out elsewhere. Checking this before Step 3 means you do not
+commit work to the source branch only to discover you cannot land it.
+
 For this fast path, require the target to be an ancestor of the source branch:
 
 ```bash
@@ -129,9 +135,15 @@ git switch <target-branch>
 git merge --ff-only <source-branch>
 ```
 
+If `git switch <target-branch>` fails (for example, the target is checked out in
+another worktree), stop before merging: any commit you made in Step 3 is safe and
+intact on the source branch — it is simply not yet landed. Report that and the
+unblock needed.
+
 If the fast-forward merge fails, stop. Report that the branch was not merged and
 name the next decision: rebase the source, perform an explicit merge commit, or
-abort the local landing.
+abort the local landing. As above, the Step 3 commit remains intact on the source
+branch; nothing is lost.
 
 ### 5. Clean Up Source Branch
 
