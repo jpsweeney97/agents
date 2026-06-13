@@ -94,6 +94,36 @@ entries; do not rewrite settled ones.
   uninstalled (`claude plugin uninstall`); source recoverable in the
   claude-plugins-official marketplace catalog. Evidence: commits `a5e6642`,
   `966f903`.
+- 2026-06-13 — code-review (pass 9): fold-then-remove. The removable third-party
+  Claude plugin `code-review@claude-plugins-official` — one command
+  (`commands/code-review.md`): a fixed GitHub-PR pipeline (5 Sonnet lenses + a
+  Haiku 0-100 confidence scorer, `<80` filter, `gh pr comment` post-back) —
+  removed under Extraction. Three genuinely-novel false-positive exclusions
+  folded into `implementation-review` (review-family 0.3.4), framed as the
+  symmetric evidence burden on findings: correct code that resembles a bug;
+  linter/typechecker/compiler/CI-catchable issues; and repo-instruction
+  violations explicitly silenced in code (verified absent from the lane — zero
+  matches across its skill dir). The 0-100 rubric + `<80` gate **not** folded.
+  Scoring ruling (JP): the no-numeric-confidence precedent **bites** this
+  internal, never-exposed gate, **scoped** to confidence/criticality scoring used
+  as a judgment substitute, not all internal numbers; reached on inspectability
+  grounds (a hidden gate is worse than an exposed one — "Found 0 issues" cannot
+  be told from suppressed), reinforced by a verified miscalibration (the rubric's
+  own 75 "important real issue" anchor sits below the `<80` cut; the same defect
+  rode in the pass-3/pass-4 rejected artifacts). Everything else owned or banned:
+  gh-PR-comment channel by fixed-terrain bundled `/code-review`+`/review`; 5-lens
+  substance already folded passes 3 and 0.3.3; CLAUDE.md-adherence lens rejected
+  pass 3 (foreign-CLAUDE.md leakage). Friction basis corrected: the queue's "in
+  active use" is **refuted** — zero genuine invocations of the plugin or bare
+  `/code-review` in this repo (triangulated; the apparent hits are this pass's
+  own grep echoes). Per Admission this cannot decide removal but forecloses a
+  relied-upon retention defense; removal stands on the same-runtime collision with
+  the two Claude builtins. Correction for future passes: `codex-review` is itself
+  an installed third-party plugin (codex-collaboration cache), unmined source
+  material subject to Extraction — not a curated owner to lean on. Plugin
+  uninstalled (`claude plugin uninstall`); source recoverable in the
+  claude-plugins-official marketplace catalog. Evidence: charter pass-9
+  route-inventory + merit-adjudication workflows (this session).
 
 ## Parks
 
@@ -112,9 +142,8 @@ entries; do not rewrite settled ones.
 Unmined contract-shipping surfaces, on amended charter terms (rejection
 evidence named per discard):
 
-1. code-review (next; ships `commands/`; in active use)
-2. security-guidance (hook-injected instruction text)
-3. explanatory-output-style (hook-injected instruction text)
+1. security-guidance (next; hook-injected instruction text)
+2. explanatory-output-style (hook-injected instruction text)
 
 Unassessed: the `github` plugin — verify whether it ships contract text beyond
 MCP tooling before queueing or exempting it.

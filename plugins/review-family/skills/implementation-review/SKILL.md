@@ -103,6 +103,12 @@ For each changed area, check relevant failure modes: input validation, control f
 
 Record the strongest failure story checked for each area, even when it does not produce a finding.
 
+Apply the evidence burden to findings, not only to compliance: raise a finding only when code evidence shows the failure is real. Do not raise findings for:
+
+- Code that superficially resembles a bug but is correct on inspection — confirm the failure actually occurs before flagging it.
+- Issues a linter, typechecker, compiler, or CI run would catch — missing or wrong imports, type errors, formatting — unless a requirement explicitly demands them. Assume those checks run separately; do not reproduce them here.
+- Repo-instruction violations explicitly silenced in the code, such as a lint-ignore comment that names the rule.
+
 ### 4. Challenge The Plan
 
 Check whether the plan/spec is ambiguous, unsafe, or incomplete. Record plan findings separately from implementation findings. If the spec is ambiguous, use the most conservative reasonable interpretation and state it.
