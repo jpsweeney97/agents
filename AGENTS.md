@@ -35,11 +35,15 @@ manifest. Primary work is day-to-day skill editing.
   list when over it: keep skill count and description growth in mind.
   Claude-side symlink discovery and live reload are undocumented behavior,
   canary-guarded at session start.
-- Name new skills to avoid Codex-bundled names (`~/.codex/skills/`, including
-  `.system/`: `openai-docs`, `skill-creator`, `skill-installer`,
-  `plugin-creator`, `imagegen`, `pdf`, `doc`, `codex-primary-runtime`) and
-  Claude Code bundled names (`code-review`, `debug`, `loop`, `claude-api`,
-  `run`, `verify`, and similar).
+- A `skills/` skill is dual-runtime, so name it to avoid both Codex-bundled
+  names (`~/.codex/skills/`, including `.system/`: `openai-docs`,
+  `skill-creator`, `skill-installer`, `plugin-creator`, `imagegen`, `pdf`,
+  `doc`, `codex-primary-runtime`) and Claude Code bundled names (`code-review`,
+  `debug`, `loop`, `claude-api`, `run`, `verify`, and similar). A
+  `skills-claude/` skill is Claude-only: it must still avoid the Claude bundled
+  names, but may intentionally reuse a Codex-bundled name (e.g. `openai-docs`)
+  to re-author that capability for Claude, since Codex never scans
+  `skills-claude/`.
 - In skill text, name invocation tokens for both runtimes (`/skill-name` or
   `$skill-name`), name instruction files jointly (`AGENTS.md` or `CLAUDE.md`),
   and phrase routing to single-runtime skills availability-conditionally.
@@ -68,7 +72,12 @@ manifest. Primary work is day-to-day skill editing.
 - Handoff storage contract: handoff skills write
   `<project_root>/.agents/handoffs/` (shared by both runtimes) and read legacy
   `.claude/handoffs/` and `.codex/handoffs/` as read-only fallbacks.
-- The GitHub release mirror in `codex-tool-dev/plugins/turbo-mode/` is updated
+- The GitHub release mirror is a separate repo (`jpsweeney97/codex-tool-dev`),
+  not a path under this one: its live checkout is
+  `/Users/jp/Projects/active/codex-tool-dev` and the mirror tree is that
+  checkout's `plugins/turbo-mode/`. Stale clones of the same repo exist on disk
+  (e.g. under `scratch-workspace/deprecated-claude-skills/`) and share the same
+  `origin`, so identify the mirror by this path, not by remote. It is updated
   only at explicit publish time by copying from this repo's sources.
 
 ## Marketplace Metadata
@@ -91,6 +100,10 @@ manifest. Primary work is day-to-day skill editing.
 - `docs/agents/charter.md` — contracts charter governing admission,
   extraction, and retirement of behavior contracts. Consult it before
   authoring a new skill or adopting third-party contract material.
+- `docs/agents/contract-decisions.md` — the append-only decision ledger the
+  charter requires: one entry per charter decision (admission, fold, rejection,
+  park, retirement) with an evidence pointer. The durable, runtime-neutral
+  record; append, never rewrite settled entries.
 - `docs/agents/issue-tracker.md` — issues are tracked in GitHub Issues for
   `jpsweeney97/agents`.
 - `docs/agents/triage-labels.md` — the default five-label triage vocabulary.
@@ -119,7 +132,11 @@ workflow:
   boundaries, persistence, routing, or machinery. The canonical gate is
   `skills/agent-facing-design/SKILL.md`; do not duplicate it here.
 - `scrutinize-skill` — review-only skill-contract critique. After the review
-  is accepted, patch the owning skill surfaces directly.
+  is accepted, patch the owning skill surfaces directly — but when the patched
+  skill is plugin-distributed (`scrutinize-skill` itself and the rest of
+  `review-family` live in `plugins/review-family/`), the edit follows the
+  Plugin Layout publish path (version bump, Codex republish, mirror), not the
+  local-skill flow.
 - New skill bundles, bundle-shape changes, generated metadata, and helper
   scripts — on Codex, the bundled `skill-creator`; on Claude, hand-author
   against `agent-facing-design` and `skill-ux-design`, validating with the
