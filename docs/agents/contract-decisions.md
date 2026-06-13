@@ -124,6 +124,43 @@ entries; do not rewrite settled ones.
   uninstalled (`claude plugin uninstall`); source recoverable in the
   claude-plugins-official marketplace catalog. Evidence: charter pass-9
   route-inventory + merit-adjudication workflows (this session).
+- 2026-06-13 — security-guidance (pass 10): fold-then-remove. The installed +
+  enabled third-party plugin `security-guidance@claude-plugins-official`
+  (v2.0.6) — a hooks bundle with no invocation token that auto-fires on
+  UserPromptSubmit/PostToolUse/Stop, injecting 25 regex pattern warnings on
+  edits, a single-shot LLM diff review on Stop, and an agentic cross-file
+  investigate→self-refute reviewer on commit/push — removed under Extraction.
+  Scope ruling (JP-ratified): the hooks engine is charter-exempt capability
+  tooling (ll.22-24), but the injected instruction text is in-scope contract
+  (l.24; l.14 names "instruction text delivered by hooks"), and the fused engine
+  departs with the contract as packaging. Removal is value-independent
+  (Extraction ll.87-90) — the engine was demonstrably used (80 review fires over
+  16 days; one fully-closed fire-and-mattered loop where a commit-review finding
+  changed committed `settings.json`), so pass 5's "removed as unused" is a
+  distinguishable, not controlling, prior. One-Owner: the Stop/commit/push
+  LLM-review jobs claim the same work as the fixed-terrain bundled
+  `/security-review` (ll.16-20, 37); the collision resolves on the local side —
+  delivery-mode differences (auto-fire vs invoke; recall vs precision; turn/commit
+  vs branch) do not save job identity (pass-9 precedent). Two genuinely-novel
+  disciplines folded into `implementation-review` (review-family 0.3.5), both
+  verified zero-match in the lane: (1) resource-cap-defeat DoS — report
+  exhaustion only when a change defeats an existing cap, not volumetric load
+  (sits in the gap `/security-review` explicitly excludes); (2) attacker/victim +
+  privilege-boundary + off-diff adversarial-refute discipline, including the
+  agent-capability-gate carve-out (the model is the attacker, the user is the
+  victim). Confidence-precedent (pass 9) does NOT trip — scoped to
+  confidence-as-judgment-substitute: the plugin gates on an ordinal severity enum
+  + qualitative cited-evidence self-refutation; its numeric `confidence` field is
+  schema-optional and no code path filters on it (the exposed, inspectable kind
+  the precedent prefers). Jobs rejected: inline 25-pattern edit warnings
+  (lighter-alternative beats a paid slot, ll.53-55); Stop/commit/push LLM review
+  (collision). Two lower-confidence folds (additive-only embedded-guidance
+  guardrail; over-broad-grant sharpening) declined by JP. No inbound curated
+  routes to repair (`tech-debt-scan`'s hand-off targets a hypothetical Codex
+  `codex-security:security-scan`, availability-conditioned with a clean
+  fallback). Plugin uninstalled (`claude plugin uninstall`); source recoverable
+  in the claude-plugins-official marketplace catalog. Evidence: charter pass-10
+  route-inventory + merit-adjudication workflows (this session).
 
 ## Parks
 
@@ -136,14 +173,23 @@ entries; do not rewrite settled ones.
 - frontend-design web-aesthetics guidance — parked (2026-06-12); reopen on the
   first real web-frontend build task in observed work; on reopen, re-author to
   house standards from the marketplace catalog source, do not reinstall.
+- security-guidance Codex-runtime security review — parked (2026-06-13, pass 10);
+  reopen on the first observed Codex-side security-review need or a genuine
+  `codex-security:security-scan` fire. On reopen, author to house standards; do
+  not reinstall the plugin.
+- security-guidance on-disk/at-rest secret detection — parked (2026-06-13,
+  pass 10); reopen on the first observed at-rest-secret miss in real work (the
+  gap bundled `/security-review` explicitly disclaims).
+- security-guidance whole-repo / pre-existing-code security scanning — parked
+  (2026-06-13, pass 10); reopen on the first observed pre-existing-code
+  vulnerability that a diff-scoped review missed.
 
 ## Mining Queue
 
 Unmined contract-shipping surfaces, on amended charter terms (rejection
 evidence named per discard):
 
-1. security-guidance (next; hook-injected instruction text)
-2. explanatory-output-style (hook-injected instruction text)
+1. explanatory-output-style (next; hook-injected instruction text)
 
 Unassessed: the `github` plugin — verify whether it ships contract text beyond
 MCP tooling before queueing or exempting it.
