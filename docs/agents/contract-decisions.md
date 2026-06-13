@@ -161,6 +161,50 @@ entries; do not rewrite settled ones.
   fallback). Plugin uninstalled (`claude plugin uninstall`); source recoverable
   in the claude-plugins-official marketplace catalog. Evidence: charter pass-10
   route-inventory + merit-adjudication workflows (this session).
+- 2026-06-13 — explanatory-output-style (pass 11): reject (zero-fold removal).
+  The installed-but-disabled third-party plugin
+  `explanatory-output-style@claude-plugins-official` (v1.0.0) — a single
+  SessionStart hook (`session-start.sh`, a heredoc `cat` of a static
+  `additionalContext` blob: an always-on "explanatory output style" teaching
+  register emitting `★ Insight` boxes before/after writing code,
+  codebase-specific, "may exceed typical length constraints") — removed under
+  Extraction; the contract IS the deliverable and the engine does no work, so the
+  pass-10 packaging-departure + value-independent removal (ll.87-93) apply a
+  fortiori (pass 10 had a real engine to exempt; here a trivial `cat`). One-Owner:
+  doubly owned. (1) The fixed-terrain built-in "Explanatory" output style is
+  live/un-deprecated (changelog "Un-deprecate output styles"; `outputStyle:
+  "Explanatory"` documented; only the `/output-style` command was removed) and
+  does the exact job; the plugin's "deprecated" self-label is factually stale;
+  same-runtime (Claude-only — no Codex output-style/SessionStart-`additionalContext`
+  analogue), co-loadable, resolves local-side (ll.16-20, 36-44). (2) Global
+  `~/.claude/CLAUDE.md` Communication defaults own the chat register; the contract
+  inverts them on three axes (always-on insights vs task-focus; "may exceed length
+  constraints" vs brevity/outcome-first; `★`-box scaffold in chat vs "save formal
+  structure for artifacts"). Zero folds: the lone substantive discipline
+  (codebase-specific-not-generic insights) fails Extraction step-1 — inseparable
+  from the always-on packaging and already owned by `scrutinize-skill`
+  (SKILL.md:137,155), `writing-principles` (SKILL.md:172), the built-in's
+  description, and CLAUDE.md. Rejection evidence (ll.60-66): usage was
+  demonstrably PRESENT (715 fires, ~1380 obeyed codebase-specific boxes,
+  2026-05-14 → eve of mining, concentrated in codex-collaboration), so
+  usage-absence is barred as a rationale; the reject rests instead on a
+  positive-control friction search (memory + handoffs + AGENTS.md + CLAUDE.md +
+  ripgrep for teach/educational/insight/pedagog/verbose/output-style) that
+  returned ZERO teaching-register friction while the same instrument fired on the
+  opposite-vector brevity/compression family (caveman; pass-3 clarity-over-brevity
+  guardrail) — that asymmetry is the finding. Lighter-alternative (ll.53-55):
+  README concedes CLAUDE.md-equivalence and `outputStyle` is a one-line setting,
+  both beating a paid slot. No park (the need is owned now by the live built-in,
+  one `/config` flip away); keep-with-cleanup foreclosed (no Codex co-load,
+  unlike pass 8). First-of-its-kind communication/output-style precedent — no
+  prior chat-verbosity contract; this reject sets it. JP steer honored as
+  reinforcing, not load-bearing: Ruling A (disable ruled "incidental") treated as
+  neutral — the reject never rests on the toggle; Ruling B ("built-in is enough;
+  no standing register") converges with the independently-reached verdict and
+  forecloses any register-reinstating fold/park. Plugin uninstalled (`claude
+  plugin uninstall`); source recoverable in the claude-plugins-official
+  marketplace catalog. Evidence: charter pass-11 route-inventory +
+  merit-adjudication workflows (this session).
 
 ## Parks
 
@@ -189,7 +233,7 @@ entries; do not rewrite settled ones.
 Unmined contract-shipping surfaces, on amended charter terms (rejection
 evidence named per discard):
 
-1. explanatory-output-style (next; hook-injected instruction text)
+(empty — all ten queued surfaces mined through pass 11.)
 
 Unassessed: the `github` plugin — verify whether it ships contract text beyond
 MCP tooling before queueing or exempting it.
