@@ -50,6 +50,23 @@ entries; do not rewrite settled ones.
   (lyrics-software is native SwiftUI), and zero inbound routes from curated
   contracts. Plugin removed; source recoverable in the claude-plugins-official
   marketplace catalog.
+- 2026-06-12 — claude-code-setup (pass 7): zero folds — the sole skill
+  (`claude-automation-recommender` + five reference files) rejected. The job
+  decomposes entirely into owned lanes: feature/setup questions →
+  runtime-bundled `claude-code-guide` + local `claude-code-docs`; hook and
+  settings implementation → runtime-bundled `update-config` (settled pass 5);
+  permission allowlists → runtime-bundled `fewer-permission-prompts`;
+  automation-worthiness → the charter's admission test + `friction-to-guards`;
+  skill authoring → `skill-creator`. Its speculative codebase-signal
+  recommendation method contradicts the observed-friction admission standard,
+  and its tables recommend reinstalling plugins this ledger already removed
+  (frontend-design, hookify, commit-commands, feature-dev, pr-review-toolkit,
+  code-simplifier) — running it as-is recreates resolved collisions. Friction
+  looked for and not found: zero invocations since 2026-01-21 install
+  (control-verified transcript search), no setup-recommendation requests in
+  memory or handoffs; static Claude Code facts it carries are owned live by
+  `claude-code-docs`. Plugin removed; source recoverable in the
+  claude-plugins-official marketplace catalog.
 
 ## Parks
 
@@ -68,11 +85,10 @@ entries; do not rewrite settled ones.
 Unmined contract-shipping surfaces, on amended charter terms (rejection
 evidence named per discard):
 
-1. claude-code-setup (next)
-2. skill-creator
-3. code-review (ships `commands/`; in active use)
-4. security-guidance (hook-injected instruction text)
-5. explanatory-output-style (hook-injected instruction text)
+1. skill-creator (next)
+2. code-review (ships `commands/`; in active use)
+3. security-guidance (hook-injected instruction text)
+4. explanatory-output-style (hook-injected instruction text)
 
 Unassessed: the `github` plugin — verify whether it ships contract text beyond
 MCP tooling before queueing or exempting it.
