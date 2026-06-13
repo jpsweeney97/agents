@@ -225,6 +225,24 @@ entries; do not rewrite settled ones.
   removed and the plugin stays installed. First pure-exemption outcome. Closes
   the mining program: the queue's last residual surface is resolved. Evidence:
   plugin-cache file inventory (this session).
+- 2026-06-13 — gh-address-comments (build of the 2026-06-12 admission):
+  authored as a dual-runtime skill in `skills/` (`SKILL.md` +
+  `agents/openai.yaml`); owns PR review-comment addressing without publish
+  authority — verify each thread against evidence, classify (5 dispositions),
+  fix locally, draft replies, stop at one local commit; never push/resolve/
+  re-review. Folds the superpowers `receiving-code-review` reception discipline
+  (pushback with technical reasoning; no performative agreement; Pasted-Content
+  reconciliation) per #2's addendum. `gh-pr-review-loop` refactored to
+  one-owner-per-job: it now runs the gh-address-comments inner loop and
+  contributes only the publish layer, with all publish-side obligations
+  preserved (human-reviewer caution, resolve eligibility, `@codex` trigger,
+  no-code-change path, empty-threads guard, publish checkpoints, final-response
+  fields). Validated (frontmatter parse, `quick_validate.py`, `openai.yaml`
+  parse, whitespace) and three context-isolated behavior-proxy smoke tests
+  pass: stop-line holds under deadline + authority pressure, routing-in selects
+  the skill, publish authorization escalates to `gh-pr-review-loop`. Closes the
+  authoring-deferred state. Evidence: commit `993cd93`; issue
+  jpsweeney97/agents#2.
 
 ## Parks
 
