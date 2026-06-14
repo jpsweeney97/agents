@@ -4,6 +4,11 @@ Use this rubric to find friction in the user's journey through invoking and
 using a Claude or Codex skill. The goal is better skill UX without weakening the skill's
 behavior contract.
 
+This rubric is the diagnostic method. The binding contract it diagnoses against —
+triggers, mode semantics, the `Safe UX`/protected-surface boundaries, and the
+output and closeout templates — is defined in `SKILL.md`; this rubric references
+those surfaces rather than restating them, so when they differ, `SKILL.md` wins.
+
 ## Priority Order
 
 1. Preserve rigor, safety, evidence, authority, validation, permission,
@@ -23,30 +28,11 @@ Use the phase names to notice where friction can appear. Do not require one
 finding, score, field, or recommendation per phase unless the user asks for
 `audit`, `exhaustive`, full coverage, or a surface-by-surface pass.
 
-1. **Before use**: discovery, name, trigger wording, neighboring-skill routing,
-   and default prompt.
-2. **Starting state**: inferred target, mode, authority, mutation boundary,
-   skipped context, and correction path.
-3. **During use**: interaction rhythm, progress visibility, steering depth/cost,
-   context acquisition, and handoffs.
-4. **Proof and safety**: validation language, evidence standards, approval gates,
-   external access, privacy, behavior-smoke boundaries, and plugin/runtime
-   surfaces when applicable.
-5. **Durable aftermath**: saved artifacts, tickets, handoffs, commits, pushes,
-   installs, refreshes, uncommitted outputs, and next lifecycle step.
-6. **Agent support**: whether the skill gives the agent enough context, examples,
-   defaults, and stop conditions to reliably produce the intended user
-   experience.
-
-Default mode should scan across these phases only far enough to find the top 1-3
-likely frictions. `Audit` and `exhaustive` modes should inspect or explicitly
-exclude each phase and the material sub-surfaces within it.
-
-A phase is not covered by naming it. In audit/exhaustive mode, inspect the
-phase's material sub-surfaces that plausibly apply to the target skill, such as
-external access, persistence, behavior-smoke proof, or plugin/runtime surfaces
-when they could affect the user's experience. If a sub-surface does not apply,
-mark it out of scope instead of silently skipping it.
+Use the six UX phases defined in `SKILL.md` — Before use, Starting state, During
+use, Proof and safety, Durable aftermath, Agent support — as the coverage lens.
+Default mode scans only far enough to find the top 1-3 frictions; `audit` and
+`exhaustive` must inspect-or-exclude every phase and its material sub-surfaces
+per `SKILL.md` (a phase is not covered by naming it).
 
 ## Friction Translation
 
@@ -90,20 +76,8 @@ as `inferred`, `user-supplied`, `unresolved`, and `not inspected`.
 ## User Control
 
 Check whether the user can steer the skill in ordinary language without learning
-a private command language.
-
-Useful steering phrases include:
-
-- `quick`
-- `read-only`
-- `audit`
-- `exhaustive`
-- `targeted: <surface>`
-- `apply` or `apply accepted plan`
-- `with verification`
-- `save report`
-- plain language such as "look at recovery", "just output", "do the full path",
-  "audit only", "do not edit", or "check validation trust"
+a private command language. The steerable modes and their semantics are defined
+in `SKILL.md`; diagnose against that contract rather than restating them.
 
 Steering must not bypass proposal-first protected surfaces, evidence standards,
 approval gates, external-access boundaries, behavior-smoke boundaries, or
@@ -111,18 +85,11 @@ plugin/runtime proof boundaries.
 
 ## Interaction Fit
 
-Check whether the skill's rhythm matches the user's intent:
-
-- Default UX design should be a bounded whole-journey scan with 1-3 top
-  frictions, not a full ledger.
-- `read-only` should disable edits without implying exhaustive coverage.
-- Plain `audit` should be read-only and exhaustive across material sub-surfaces
-  unless narrowed by `quick`, `targeted`, or explicit ordinary-language scope.
-- Targeted requests should stay focused and label their boundary.
-- Long audit/exhaustive runs should show progress only when it helps the user
-  understand scope, cost, confidence, or remaining uncertainty.
-- Editing runs should distinguish direct `Safe UX` changes from proposal-first
-  protected changes.
+Check whether the skill's rhythm matches the user's intent. The mode rhythms
+(default bounded scan, `read-only`, `audit`, `targeted`), progress timing, and
+the rule that editing runs distinguish direct `Safe UX` changes from
+proposal-first protected changes are defined in `SKILL.md`; check that the chosen
+rhythm fits the user's intent.
 
 Avoid adding ceremony when the task is small. A concise one-line result can be
 enough for low-risk edits.
@@ -131,26 +98,11 @@ enough for low-risk edits.
 
 For each direct edit, verify that it only clarifies already-existing behavior.
 
-Usually `Safe UX`:
-
-- clearer output order or first-screen summary
-- less abstract wording
-- visible inferred setup language
-- correction paths
-- compact steering phrases
-- examples and smoke prompts
-- default prompt or metadata alignment that does not change trigger scope
-- wording that makes already-existing behavior easier to understand
-
-Proposal-first protected surfaces include routing, triggers, non-triggers,
-handoffs, promises, lifecycle guarantees, validation/proof/evidence standards,
-authority/source-of-truth rules, mutation/edit/approval boundaries, external
-access, privacy, persistence, behavior-smoke claims, plugin/runtime claims,
-live runtime activation, and stop condition changes.
-
-When a fix mixes `Safe UX` and protected behavior, split it. Apply only the
-separable safe portion directly and present the protected portion as a named
-patch-shaped proposal.
+The `Safe UX` whitelist (what may be edited directly), the proposal-first
+protected-surface list (what may not), the wrong-edit test that separates them,
+and the rule that a mixed fix must be split — apply the separable safe portion,
+propose the protected portion as a named patch-shaped change — are all defined in
+`SKILL.md`. Verify each edit against that contract.
 
 ## Agent Support
 
@@ -175,19 +127,10 @@ boundaries, and recoverable state.
 
 ## Fix Format
 
-Default no-edit proposals should stay compact:
-
-```markdown
-Bottom line: <main user friction>
-Coverage: bounded whole-journey scan, not exhaustive surface-by-surface coverage.
-
-Suggested fixes:
-1. <fix>
-   Safe UX | Proposal-first
-   Why it matters: <user-visible effect>
-   Change shape: <concrete patch direction>
-   Approval needed: <only if proposal-first>
-```
+Default no-edit proposals stay compact. Use the no-edit output template defined
+in `SKILL.md` (`Bottom line` / `Coverage` / numbered `Suggested fixes`, each
+tagged `Safe UX | Proposal-first` with `Why it matters`, `Change shape`, and
+`Approval needed` when proposal-first).
 
 Mention the UX phase only when it clarifies the issue, skipped scope, or fix.
 For audit/exhaustive mode, include enough coverage detail to show which phases

@@ -307,12 +307,6 @@ For edits involving skill identity, metadata, default prompts, marketplace
 entries, plugin caches or copies, hooks, remote state, or live runtime behavior,
 the closeout must explicitly name each touched and untouched lifecycle layer.
 
-## Examples And Calibration
-
-Use [examples/calibration.md](examples/calibration.md) when routing, edit
-safety, audit depth, targeted scope, or split `Safe UX`/proposal-first behavior
-is unclear. Do not load examples for every routine run.
-
 ## Validation And Lifecycle Boundary
 
 Validate the exact surfaces edited.
