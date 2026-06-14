@@ -17,10 +17,11 @@ explicit behavior-preserving refactor. Target: paths/files, subsystem,
 current/staged diff, commit, or range. Diff, commit, and range targets are
 discovery inputs; expand them to explicit editable paths before patching.
 
-Clarify plain `refactor`, vague maintainability, or missing target. Do not use
-for implementation, fixes, reviews, formatting-only work, redesigns, routine
-self-review, cleanup planning, refactoring backlogs, or candidate
-prioritization. For planning/backlog requests, route to `tech-debt-scan`; use
+Ask once to clarify a plain `refactor`, vague maintainability, or missing
+target. Do not use for implementation, fixes, reviews, formatting-only work,
+redesigns, routine self-review, cleanup planning, refactoring backlogs, or
+candidate prioritization. For planning/backlog requests, route to
+`tech-debt-scan`; use
 `simplify-code` after the user chooses a scoped behavior-preserving edit.
 
 If a narrower platform, framework, or refactor skill owns the target, use that
@@ -43,12 +44,13 @@ secret-safe, restorable pre-edit backup artifact before editing.
 
 Read-only unless explicitly opted in after the exact risk property is named:
 migrations,
-schemas/persistence, security/auth/billing/permissions/data-loss, concurrency,
-generated/vendor, dependency, package, plugin, app, project, or release
-manifests, external contracts, release/packaging, and binaries. Naming one of
-these paths as the target is not enough opt-in by itself. Behavior change is not
-simplification; stop and label it
-`not a simplification: behavior change required`.
+schemas/persistence, security/auth/billing/permissions/data-loss,
+concurrency/locking, generated/vendor, dependency, package, plugin, app, project,
+or release manifests, external/public contracts, release/packaging, and binaries.
+Naming one of these paths as the target is not enough opt-in by itself. Behavior
+change is not simplification; stop and label it
+`not a simplification: behavior change required`, explain the benefit and
+consequence, and ask whether to switch tasks.
 
 Broad scopes need reconnaissance first: patch and verify one high-value coherent
 slice, then report remaining candidates.
@@ -70,5 +72,7 @@ closeout adds a compact review hook with absolute paths, behavior-preservation
 claim, command/result, and why fast-lane eligibility held. Full-safety closeout
 keeps the copy-ready read-only same-machine Codex/Claude prompt under `Review
 Packet`, with absolute paths/files, claim, evidence, commands/results, planned
-verification strength, observed evidence label, backup path, retention/cleanup
-expectation, risks/exclusions, and blockers-first review. No rollback command.
+verification strength, observed evidence label, backup helper command/result,
+backup path, retention/cleanup expectation, risks/exclusions, call-site
+inspection, evidence challenge, backup-adequacy check, and blockers-first review.
+No rollback command.

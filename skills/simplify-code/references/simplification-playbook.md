@@ -4,28 +4,18 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` or `CLAUDE.md
 
 ## Checklist
 
-1. Scope, routing, and target: require cleanup intent plus target for an actual
-   behavior-preserving edit. Ask once for plain `refactor`, vague
-   maintainability, or missing target. Do not use this workflow for
-   implementation, fixes, reviews, formatting-only work, redesigns, routine
-   self-review, cleanup planning, refactoring backlogs, or candidate
-   prioritization. For planning/backlog requests, route to `tech-debt-scan`; use
-   this workflow after the user chooses a scoped behavior-preserving edit. If the
-   useful change intentionally changes behavior, stop: `not a simplification:
-   behavior change required`; explain benefit and consequence and ask whether to
-   switch tasks.
+1. Scope, routing, and target: the trigger conditions, the non-use list, the
+   `tech-debt-scan` handoff, the behavior-change stop-label
+   (`not a simplification: behavior change required`), and the narrower-skill
+   ownership gate are defined in SKILL.md `## Use`; follow them.
 
-   Treat current/staged diff, commit, and range targets as discovery inputs only.
-   Before editing, expand them to explicit editable paths and report the
+   Treat current/staged diff, commit, and range targets as discovery inputs
+   only; before editing, expand them to explicit editable paths and report the
    expansion. For current or unstaged diff targets, separate simplification hunks
    from incidental dirty hunks before editing. For staged-diff targets, record
    pre-edit index state and leave new edits unstaged unless the user explicitly
    asks to stage or restage them; never rewrite existing staged hunks without
    approval.
-
-   If a narrower platform, framework, or refactor skill owns the target, use that
-   skill unless the user explicitly invokes `simplify-code` or asks for generic
-   behavior-preserving cleanup outside the narrower skill's contract.
 
 2. Roots/instructions/status: run status first. From the target directory, or the
    parent directory for a file target, run `git rev-parse --show-toplevel`; if it
@@ -105,14 +95,12 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` or `CLAUDE.md
    available, and redacted reason text. For symlinks, report the link target and
    do not follow it.
 
-4. Boundaries and opt-in: read-only unless explicitly opted in for migrations,
-   schemas, persistence, auth/security, billing, permissions, data-loss,
-   concurrency/locking, generated/vendor, dependency, package, plugin, app,
-   project, or release manifests, external/public contracts, release/packaging,
-   and binaries. State the exact protected risk property before asking for
-   opt-in, such as auth behavior, package resolution, persistence shape, external
-   contract, release metadata, or generated-source overwrite. Merely naming a
-   protected path as the target is not enough.
+4. Boundaries and opt-in: the read-only-by-default protected list and the rule
+   that merely naming a protected path as the target is not enough opt-in are
+   defined in SKILL.md `## Use`; follow them. State the exact protected risk
+   property before asking for opt-in, such as auth behavior, package resolution,
+   persistence shape, external contract, release metadata, or generated-source
+   overwrite.
 
    Sensitive paths also require a strong verification plan, baseline
    verification, and narrow scope. Generated/vendor edits need confirmation,
@@ -232,20 +220,12 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` or `CLAUDE.md
     stage only scoped files after successful verification; otherwise leave changes
     unstaged unless asked.
 
-    Closeout starts with `Simplification Result`, `Behavior Claim`,
-    `Verification`, `Commit Readiness`, and `Review Packet`. Keep the first four
-    labels concise: user-visible result, behavior-preservation evidence,
-    commands/results, and readiness/blocker. `Review Packet` is the details
-    section: include files changed, remaining risks, exclusions, and
-    lane-specific evidence. Fast-lane closeout adds a compact review hook with
-    absolute paths, behavior-preservation claim, command/result, and one sentence
-    naming why fast-lane eligibility held. Full-safety closeout puts the
-    copy-ready read-only same-machine Codex/Claude review prompt under `Review
-    Packet`, with absolute paths, changed files, backup helper command/result,
-    backup path, backup retention/cleanup expectation, commands/results,
-    behavior claim, planned verification strength, observed evidence label,
-    risks, exclusions, call-site inspection, evidence challenge,
-    backup-adequacy check, and blockers-first reporting. No rollback command.
+    Closeout: report per SKILL.md `## Closeout` — the five ordered labels
+    (`Simplification Result`, `Behavior Claim`, `Verification`, `Commit
+    Readiness`, `Review Packet`), the first four concise, `Review Packet` as the
+    details section, the fast-lane compact review hook, and the full-safety
+    copy-ready read-only same-machine review prompt with all its listed items. No
+    rollback command.
 
 ## Script Maintenance
 
