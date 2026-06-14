@@ -4,10 +4,10 @@ Load this only for high-stakes decisions: hard-to-reverse choices, broad blast r
 
 ## Extra Checks
 
-- Include explicit `Commitment Point`, `Rollback / Blast Radius`, and
-  `Gaps / What Could Flip` sections unless the user asks for a very short
-  answer. In a very short answer, compress these risk dimensions into prose
-  instead of silently dropping them.
+- For the high-stakes risk sections (`Commitment Point`, `Rollback / Blast
+  Radius`, `Gaps / What Could Flip`) and the rule to compress them into prose
+  rather than silently dropping them in a very short answer, follow the Output
+  section in `SKILL.md`.
 - Define the commitment point: when the decision becomes costly to reverse.
 - Name owners, affected systems or people, and rollback options.
 - Separate must-have constraints from preferences.

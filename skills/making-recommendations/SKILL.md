@@ -153,4 +153,5 @@ For high-stakes decisions, also include:
 - `Rollback / Blast Radius`
 
 If the user explicitly asks for a very short high-stakes answer, compress these
-risk dimensions instead of silently dropping them.
+risk dimensions — `Commitment Point`, `Rollback / Blast Radius`, and
+`Gaps / What Could Flip` — into prose instead of silently dropping them.
