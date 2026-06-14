@@ -4,6 +4,22 @@ All notable changes to the Review Family plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.3.8 - 2026-06-14
+
+### Changed
+
+- `scrutinize-skill`: de-Codex the `agents/openai.yaml` companion. Its
+  short_description and default_prompt named "Codex skills" / "a Codex behavior
+  contract" while the runtime-neutral `SKILL.md` (and every sibling companion)
+  reviews an "agent skill"; the companion now reads "agent skills" / "an agent
+  behavior contract" to match.
+- `review-reviewer`: de-duplicate the disposition list. The five dispositions
+  (`act`/`narrow`/`reject`/`verify-first`/`defer`) were defined near-verbatim in
+  both the Current Claim Check section and `Verdicts And Dispositions`, a drift
+  hazard. The Current Claim Check section now references the single canonical
+  definition in `Verdicts And Dispositions`; both modes and both output packets
+  are otherwise unchanged.
+
 ## 0.3.7 - 2026-06-13
 
 ### Fixed
