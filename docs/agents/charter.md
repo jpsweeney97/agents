@@ -22,6 +22,9 @@ and a collision with one is always resolved on the local side.
 Capability tooling — MCP servers, hook executables, scripts that do work rather
 than instruct — is out of scope. Tools are tools. Contracts that ship alongside
 a tool (a plugin's skills or commands) are in scope like any other contract.
+When contract text is fused to an exempt engine rather than merely shipped
+beside it, the engine departs with the contract as packaging; a standalone tool
+that ships no contract stays.
 
 ## Thesis
 
@@ -40,7 +43,11 @@ a Codex-bundled skill. Collisions are resolved by curation — one contract
 keeps the job; the other is narrowed, absorbed, or removed — never by
 precedence rules or runtime routing adjudication. An installed third-party
 contract that overlaps a local one is a defect to resolve, not a coexistence
-to manage.
+to manage. Whether two contracts claim the same work turns on the work itself,
+not on how it is delivered: differences in delivery mode (auto-fire versus
+invoke, recall versus precision, per-turn versus per-branch), and the coverage,
+timing, or unprompted action that follow from them, do not by themselves make it
+a different job.
 
 ## Admission
 
@@ -103,8 +110,11 @@ routes to it.
 
 ## Decision Record
 
-Every admission, fold, rejection, park, and retirement gets a one-line entry
+Every admission, fold, rejection, park, and retirement gets one entry
 in `contract-decisions.md` (this directory): date, surface, outcome, evidence
-pointer, and — for parks — the reopen trigger. That ledger is the
-runtime-neutral record; session memory and handoffs may point at it, never
-replace it.
+pointer, and — for parks — the reopen trigger. The evidence pointer must be
+durable and replayable — a commit, a tracked file, or a named, persistent
+artifact reachable outside the session — not a bare session reference; when
+recovery depends on an external source that can change, pin a version or
+snapshot. That ledger is the runtime-neutral record; session memory
+and handoffs may point at it, never replace it.

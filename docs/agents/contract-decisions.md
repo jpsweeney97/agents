@@ -31,7 +31,9 @@ entries; do not rewrite settled ones.
 - 2026-06-12 — hookify (pass 5): zero folds — engine adjudicated capability
   tooling (charter-exempt as a category) but removed as unused; all six
   contract surfaces rejected (runtime-bundled `update-config` owns hook-backed
-  automation). Plugin removed. Evidence: handoff
+  automation). Plugin removed. Evidence: commits `ad9c0cc` (ledger entry) +
+  `6f7833d` (route-absence amendment from the same session); fuller detail in
+  the untracked handoff
   `2026-06-12_18-35-34_feature-dev-hookify-mined-charter-amended-audit-reopens.md`.
 - 2026-06-12 — discard audit (after the route-absence amendment, `6f7833d`):
   reopened two prior rejections — comment-accuracy lens folded into
@@ -49,7 +51,7 @@ entries; do not rewrite settled ones.
   known-invoked skills), no web-frontend stack in any project directory
   (lyrics-software is native SwiftUI), and zero inbound routes from curated
   contracts. Plugin removed; source recoverable in the claude-plugins-official
-  marketplace catalog.
+  marketplace catalog. Evidence: commit `45c8a5a`.
 - 2026-06-12 — claude-code-setup (pass 7): zero folds — the sole skill
   (`claude-automation-recommender` + five reference files) rejected. The job
   decomposes entirely into owned lanes: feature/setup questions →
@@ -66,7 +68,7 @@ entries; do not rewrite settled ones.
   (control-verified transcript search), no setup-recommendation requests in
   memory or handoffs; static Claude Code facts it carries are owned live by
   `claude-code-docs`. Plugin removed; source recoverable in the
-  claude-plugins-official marketplace catalog.
+  claude-plugins-official marketplace catalog. Evidence: commit `ae12dc3`.
 - 2026-06-12 — skill-creator (pass 8): keep-with-cleanup. Bundle construction
   stays owned on Codex by the bundled copy (`~/.codex/skills/.system/`, fixed
   terrain); its do-work scripts are charter-exempt and the `quick_validate.py`
@@ -122,8 +124,8 @@ entries; do not rewrite settled ones.
   an installed third-party plugin (codex-collaboration cache), unmined source
   material subject to Extraction — not a curated owner to lean on. Plugin
   uninstalled (`claude plugin uninstall`); source recoverable in the
-  claude-plugins-official marketplace catalog. Evidence: charter pass-9
-  route-inventory + merit-adjudication workflows (this session).
+  claude-plugins-official marketplace catalog. Evidence: commit `3691ca0`
+  (pass-9 route-inventory + merit-adjudication).
 - 2026-06-13 — security-guidance (pass 10): fold-then-remove. The installed +
   enabled third-party plugin `security-guidance@claude-plugins-official`
   (v2.0.6) — a hooks bundle with no invocation token that auto-fires on
@@ -159,8 +161,8 @@ entries; do not rewrite settled ones.
   routes to repair (`tech-debt-scan`'s hand-off targets a hypothetical Codex
   `codex-security:security-scan`, availability-conditioned with a clean
   fallback). Plugin uninstalled (`claude plugin uninstall`); source recoverable
-  in the claude-plugins-official marketplace catalog. Evidence: charter pass-10
-  route-inventory + merit-adjudication workflows (this session).
+  in the claude-plugins-official marketplace catalog. Evidence: commit `63daf9f`
+  (pass-10 route-inventory + merit-adjudication).
 - 2026-06-13 — explanatory-output-style (pass 11): reject (zero-fold removal).
   The installed-but-disabled third-party plugin
   `explanatory-output-style@claude-plugins-official` (v1.0.0) — a single
@@ -203,8 +205,8 @@ entries; do not rewrite settled ones.
   no standing register") converges with the independently-reached verdict and
   forecloses any register-reinstating fold/park. Plugin uninstalled (`claude
   plugin uninstall`); source recoverable in the claude-plugins-official
-  marketplace catalog. Evidence: charter pass-11 route-inventory +
-  merit-adjudication workflows (this session).
+  marketplace catalog. Evidence: commit `094ad22`
+  (pass-11 route-inventory + merit-adjudication).
 - 2026-06-13 — github plugin (assessment, not a mining pass): exempt — pure
   capability tooling, no contract text; stays installed and enabled. Full file
   inventory of the installed + enabled `github@claude-plugins-official` cache
@@ -224,7 +226,7 @@ entries; do not rewrite settled ones.
   injected contract) — there is no in-scope contract to extract, so nothing is
   removed and the plugin stays installed. First pure-exemption outcome. Closes
   the mining program: the queue's last residual surface is resolved. Evidence:
-  plugin-cache file inventory (this session).
+  commit `71ce1ca` (plugin-cache file inventory).
 - 2026-06-13 — gh-address-comments (build of the 2026-06-12 admission):
   authored as a dual-runtime skill in `skills/` (`SKILL.md` +
   `agents/openai.yaml`); owns PR review-comment addressing without publish
@@ -246,14 +248,16 @@ entries; do not rewrite settled ones.
 
 ## Parks
 
-- type-design invariant lens — parked by JP's explicit choice (2026-06-12);
-  reopen only on JP's ask.
+- type-design invariant lens — parked by JP's explicit choice (2026-06-12;
+  recorded in `ad9c0cc`); reopen only on JP's ask.
 - feature-dev approach-triad example — parked by JP's explicit choice
-  (2026-06-12); reopen only on JP's ask.
-- code-comprehension lane — parked (2026-06-12); reopen on an observed
-  comprehension failure in real work.
-- frontend-design web-aesthetics guidance — parked (2026-06-12); reopen on the
-  first real web-frontend build task in observed work; on reopen, re-author to
+  (2026-06-12; recorded in `ad9c0cc`, from the feature-dev pass `2dc1b95`);
+  reopen only on JP's ask.
+- code-comprehension lane — parked (2026-06-12; recorded in `ad9c0cc`); reopen
+  on an observed comprehension failure in real work.
+- frontend-design web-aesthetics guidance — parked (2026-06-12; recorded in
+  `45c8a5a`); reopen on the first real web-frontend build task in observed work;
+  on reopen, re-author to
   house standards from the marketplace catalog source, do not reinstall.
 - security-guidance Codex-runtime security review — parked (2026-06-13, pass 10);
   reopen on the first observed Codex-side security-review need or a genuine
@@ -276,4 +280,8 @@ evidence named per discard):
 Assessed and exempt (2026-06-13): the `github` plugin — pure MCP capability
 tooling, no contract text (see Decisions). Out of scope; nothing to extract;
 stays installed. The mining program is fully closed — no queued or unassessed
-contract surfaces remain.
+contract surfaces remain. Fully closed means the discovery sweep is complete —
+the queue is empty and every discovered surface has a recorded disposition — not
+that every job is final: parked surfaces stay open until their trigger fires.
+Installing or reinstalling any running contract, or a park trigger firing,
+reopens the program.
