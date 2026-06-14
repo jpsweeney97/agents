@@ -26,6 +26,27 @@ independently) and, for description optimization, the `claude -p` CLI. Where
 both are unavailable, say so and fall back to a single qualitative
 `behavior-smoke-test` rather than reporting a benchmark you could not run.
 
+## Isolation and authorization
+
+Spawning the trial runs and the `claude -p` runs costs tokens and can touch the
+filesystem, so gate them the way `behavior-smoke-test` gates its proxy:
+
+- **Authorization.** Invoking this skill is not by itself authorization to spawn
+  the trials. Spawn only when the current subagent and CLI tool policy permits;
+  when authorization is unclear, ask one permission question before launching the
+  repeated trial set or any `claude -p` run, since both are repeated and
+  potentially costly.
+- **Isolation.** Keep each run non-mutating with respect to the tree you are
+  benchmarking from. A with-skill run that exercises a file-mutating target must
+  execute against a disposable workspace or worktree copy — never the live tree,
+  especially where that tree is itself the served skill source. If the target is
+  inherently mutating and no isolated, non-mutating harness is available, report
+  `not run` rather than benchmarking against live files.
+- **Applying a winning description** is a separate, normal edit made after the
+  run through your repo's usual change control — never an in-place edit of the
+  skill under test mid-benchmark, which corrupts both the measurement and the
+  source.
+
 ## Performance benchmark
 
 Measure the skill's effect on task outcomes.
