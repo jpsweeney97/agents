@@ -193,8 +193,8 @@ Do NOT use `-D` without first confirming the merge via `gh pr list`. The PR conf
 | User wants to keep the worktree | `ExitWorktree(action: "keep")` — directory and branch remain. |
 | Remote branch already deleted by PR merge | Normal — GitHub deletes the remote branch on merge. Local branch cleanup still needed. |
 | Worktree created in a previous session or manually | `ExitWorktree` is a no-op here — it only removes current-session `EnterWorktree` worktrees. Safe to call (it reports "no worktree session is active"); then use the `git -C <main-repo> worktree remove` fallback (see tool section). |
-| Work needs merging but main is checked out elsewhere | Cannot `git checkout main` from inside the worktree. Use `git -C <main-repo-path> merge <branch>` to merge from the main repo, then `ExitWorktree(action: "remove", discard_changes: true)`. |
-| Branch survives after `ExitWorktree` | Common with `discard_changes: true`. Verify with `git branch --list`, then `git branch -d <branch>`. |
+| Work needs merging but main is checked out elsewhere | See Pre-Exit Checklist step 4 (work needs merging now): merge with `git -C <main-repo-path> merge <branch>` from the main repo — never resolve merge conflicts inside the worktree — then `ExitWorktree(action: "remove", discard_changes: true)`. |
+| Branch survives after `ExitWorktree` | Common with `discard_changes: true`. Follow Exit Procedure step 3: verify with `git branch --list`, then `git branch -d <branch>` (after a squash merge, use the `-D` rule in "Branch Deletion After Squash Merge"). |
 
 ## Integration
 
