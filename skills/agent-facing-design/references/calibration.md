@@ -5,23 +5,9 @@ are not required checks.
 
 ## Quick Distinction
 
-Context helps an agent make a contextual call:
-
-- examples and counterexamples
-- ownership boundaries
-- recoverable state
-- evidence the agent can inspect
-- clear preconditions and failure behavior
-
-Machinery makes the call for the agent or forces a path:
-
-- required fields and schema shape
-- status enums and workflow stages
-- validators that judge meaning
-- routers and classifiers
-- scoring and confidence fields
-- semantic decision scripts
-- hard rules such as "always" or "never" outside a real safety boundary
+Apply the context-vs-machinery distinction from the gate definition in `SKILL.md`
+("Context supports judgment..." / "Machinery removes or narrows judgment...");
+these examples calibrate that distinction, they do not restate or override it.
 
 Length is not the test. A long page of examples can be context. A one-line hard
 rule can be machinery.
