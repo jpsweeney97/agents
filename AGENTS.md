@@ -98,8 +98,10 @@ manifest. Primary work is day-to-day skill editing.
 ## Repo Docs
 
 - `docs/agents/charter.md` — contracts charter governing admission,
-  extraction, and retirement of behavior contracts. Consult it before
-  authoring a new skill or adopting third-party contract material.
+  extraction, and retirement of behavior contracts. Consult it before any of
+  the four events it names: authoring a contract (skill, command, or rule),
+  installing contract-shipping material, retiring a contract, or deciding the
+  fate of third-party material.
 - `docs/agents/contract-decisions.md` — the append-only decision ledger the
   charter requires: one entry per charter decision (admission, fold, rejection,
   park, retirement) with an evidence pointer. The durable, runtime-neutral

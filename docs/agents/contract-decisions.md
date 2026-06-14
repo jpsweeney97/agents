@@ -32,16 +32,18 @@ entries; do not rewrite settled ones.
   tooling (charter-exempt as a category) but removed as unused; all six
   contract surfaces rejected (runtime-bundled `update-config` owns hook-backed
   automation). Plugin removed. Evidence: commits `ad9c0cc` (ledger entry) +
-  `6f7833d` (route-absence amendment from the same session); fuller detail in
-  the untracked handoff
-  `2026-06-12_18-35-34_feature-dev-hookify-mined-charter-amended-audit-reopens.md`.
+  `6f7833d` (route-absence amendment from the same session). Fuller detail is in
+  the untracked local handoff
+  `2026-06-12_18-35-34_feature-dev-hookify-mined-charter-amended-audit-reopens.md`
+  — not a durable pointer, not part of the durable record.
 - 2026-06-12 — discard audit (after the route-absence amendment, `6f7833d`):
   reopened two prior rejections — comment-accuracy lens folded into
   `implementation-review` (review-family 0.3.3, commit `1d0091a`);
   `friction-to-guards` admitted Claude-only in `skills-claude/` (commit
   `a5e6642`). All other prior discards held.
 - 2026-06-12 — gh-address-comments: admitted (owns PR-comment addressing
-  without publish authority); authoring deferred, tracked as
+  without publish authority); authoring deferred. Evidence: commit `ad9c0cc`
+  (admission recorded); built in commit `993cd93`. Tracking: issue
   jpsweeney97/agents#2.
 - 2026-06-12 — frontend-design (pass 6): zero folds — the sole contract
   surface (a 41-line web-frontend aesthetics SKILL.md) parked rather than

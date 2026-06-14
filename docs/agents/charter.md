@@ -3,7 +3,9 @@
 What earns a place in this environment, and on what terms. Consult this before
 authoring a new contract — skill, command, or rule — installing anything that
 ships contract text, retiring a contract, or deciding the fate of third-party
-contract material.
+contract material. These four events are the charter's triggers: every surface
+that routes here must name all four, and a pointer that names fewer
+under-triggers the charter.
 
 ## Scope
 
@@ -24,7 +26,15 @@ than instruct — is out of scope. Tools are tools. Contracts that ship alongsid
 a tool (a plugin's skills or commands) are in scope like any other contract.
 When contract text is fused to an exempt engine rather than merely shipped
 beside it, the engine departs with the contract as packaging; a standalone tool
-that ships no contract stays.
+that ships no contract stays. An engine is fused when delivering contract text
+is its only function — a hook whose sole output is injected instructions; it is
+a standalone tool when it does work beyond delivering any contract — an MCP
+server answering tool calls.
+
+This charter and its decision ledger are the curation machinery itself; the
+other governance docs in `docs/agents/` support it. None is a contract admitted
+under the charter: they are maintained by direct editing and take no admission,
+retirement, or decision-ledger entry of their own.
 
 ## Thesis
 
@@ -33,7 +43,8 @@ authored and stewarded by the user, whether in this repo, in another
 first-party source, or hand-authored at the user level — or deliberately
 adopted and re-authored here. Third-party contract material is source
 material, not infrastructure: mine it on merit, tailor what survives, discard
-the rest. Nothing third-party runs as-is.
+the rest. Nothing third-party runs as-is, except the runtime-bundled contracts
+Scope exempts as fixed terrain.
 
 ## One Owner Per Job
 
@@ -43,11 +54,15 @@ a Codex-bundled skill. Collisions are resolved by curation — one contract
 keeps the job; the other is narrowed, absorbed, or removed — never by
 precedence rules or runtime routing adjudication. An installed third-party
 contract that overlaps a local one is a defect to resolve, not a coexistence
-to manage. Whether two contracts claim the same work turns on the work itself,
-not on how it is delivered: differences in delivery mode (auto-fire versus
-invoke, recall versus precision, per-turn versus per-branch), and the coverage,
-timing, or unprompted action that follow from them, do not by themselves make it
-a different job.
+to manage. Whether two contracts claim the same work turns on the work itself —
+the question a contract answers and the work product it returns — not on how it
+is delivered. Two contracts do different jobs when those differ in kind, such as
+a qualitative pass/fail judgment versus a measured benchmark; they do the same
+job when one merely fires differently, goes deeper, or recalls more over the
+same work product. Differences in delivery mode (auto-fire versus invoke, recall
+versus precision, per-turn versus per-branch), and the coverage, timing, or
+unprompted action that follow from them, do not by themselves make it a
+different job.
 
 ## Admission
 
@@ -92,9 +107,14 @@ When mining third-party contract material:
    that owns that work, or fold the idea into the existing contract that
    already owns it.
 3. Remove the original from the environment whether or not anything survived —
-   a zero-fold pass still ends in removal. Update or remove every contract
-   that routes to the removed surface. Leaving it installed for reference
-   recreates the collision this charter exists to prevent.
+   a zero-fold pass still ends in removal. When the original is a separable
+   contract bundled in the same uninstall unit as a standalone exempt tool,
+   removal still binds the contract but must spare the tool: quarantine the
+   contract — fold its merit, then stop the bundled copy loading or routing —
+   instead of uninstalling; if no quarantine is possible, resolve the One-Owner
+   collision explicitly and record which side kept the job. Update or remove
+   every contract that routes to the removed surface. Leaving it installed for
+   reference recreates the collision this charter exists to prevent.
 
 Installed third-party contracts are subject to this rule retroactively:
 curation passes mine them and remove them on the same terms.
@@ -102,8 +122,10 @@ curation passes mine them and remove them on the same terms.
 ## Retirement
 
 A repo contract that loses its job — absorbed, superseded, or no longer worth
-its slot — moves to `skills-archive/`; an installed contract that loses its
-job is removed under Extraction's terms. "No longer worth its slot" takes the
+its slot — retires: a skill moves to `skills-archive/`; a non-skill contract
+(a rule, a command, an instruction line with no archive home) is deleted from
+its surface. An installed contract that loses its job is removed under
+Extraction's terms. "No longer worth its slot" takes the
 same evidence discipline as rejecting a candidate: name the observed-work
 evidence, never route-absence alone. Update or remove every contract that
 routes to it.
