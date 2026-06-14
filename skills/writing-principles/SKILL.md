@@ -41,11 +41,10 @@ UX review, full proof-gate review, or completed-code review.
 Use the neighboring lane when it owns the work:
 
 - `agent-facing-design`: deciding whether to add net-new or materially expanded
-  agent-facing obligations, proof standards, authority rules, lifecycle
-  behavior, mutation boundaries, persistence, routing, or machinery; always use
-  it before adding fields, statuses, workflow stages, validators, routers,
-  classifiers, scoring, confidence fields, hard rules, or semantic decision
-  scripts
+  agent-facing obligations. Always route a machinery addition, or a net-new or
+  materially expanded obligation, through this lane before making it; the
+  expansion categories and the machinery list that trip the lane are defined
+  under the Edit Gate
 - skill construction — a new skill bundle, bundle structure, resources,
   scripts, or generated metadata: the bundled `skill-creator` on Codex, or
   hand-authoring against `agent-facing-design` and `skill-ux-design` on Claude
@@ -73,16 +72,15 @@ rewrite, refactor, or edit instruction docs, after any needed
 Use this skill to draft or create instruction prose only inside an already-owned
 target: a named existing file, a pasted instruction text target, or an existing
 document the user already asked to edit. Do not construct new skill bundles or
-define new agent-facing capabilities here; route construction to the bundled
-`skill-creator` on Codex or hand-author against `agent-facing-design` and
-`skill-ux-design` on Claude, and capability decisions to `agent-facing-design`.
+define new agent-facing capabilities here; route construction and capability
+decisions to the skill-construction and `agent-facing-design` lanes named under
+Scope.
 
 This skill wins for obligation-only prose edits inside an existing `SKILL.md`,
-`AGENTS.md`, `CLAUDE.md`, support doc, `agents/*.md`, or `agents/*.yaml` when the requested
-change removes, lightens, narrows, or clarifies what future agents must do.
-Neighboring skill-authoring workflows win when the change alters the capability,
-bundle shape, resources, scripts, generated metadata, or install/runtime
-surface.
+`AGENTS.md`, `CLAUDE.md`, support doc, `agents/*.md`, or `agents/*.yaml` that
+make one of the stay-in edits defined below. Neighboring skill-authoring
+workflows win when the change alters the capability, bundle shape, resources,
+scripts, generated metadata, or install/runtime surface.
 
 Before editing, read the live target and nearby authority needed to understand
 what controls the obligation: repo instructions, companion metadata, referenced
@@ -109,10 +107,11 @@ state that no source file was edited unless the user also asks to patch a file.
 Stay in this skill for edits that remove, lighten, narrow, clarify, or make
 explicit an existing obligation when the edit does not expand future agent
 duties, proof standards, authority, lifecycle behavior, mutation, persistence,
-routing, or external-surface expectations. If the edit would add a net-new
-obligation or materially expand what a future agent must do, decide, avoid,
-verify, remember, or maintain, use `agent-facing-design` first, even when the
-proposed change is prose, context, an example, a boundary, or failure behavior.
+routing, machinery, or external-surface expectations. If the edit would add a
+net-new obligation or materially expand what a future agent must do, decide,
+avoid, verify, remember, or maintain, use `agent-facing-design` first, even when
+the proposed change is prose, context, an example, a boundary, or failure
+behavior.
 Then return to this edit path only if the pre-gate says the obligation earns its
 place. If the edit would add or materially change fields, statuses, workflow
 stages, validators, routers, classifiers, scoring, confidence fields, hard
@@ -121,10 +120,9 @@ stricter `agent-facing-design` test.
 
 Editing false-proof wording in an existing instruction doc stays in this skill
 when the user is asking for obligation or prose tightening, such as preventing a
-structural check from implying behavior, certification, sync, plugin install,
-cache, marketplace, or distributed-copy proof. Route to review-family when the
-user asks whether a proof gate, execution-readiness claim, certification,
-release claim, or proof chain is valid.
+structural check from implying any of the proof classes separated under Output.
+Route to review-family when the user asks whether a proof gate,
+execution-readiness claim, certification, release claim, or proof chain is valid.
 
 Challenge before clarifying:
 
@@ -157,8 +155,8 @@ Use this order as a fast scan, not a report template:
 5. **Unbounded**: scope, time, lifecycle, ownership, or downstream responsibility
    spreads farther than the user asked.
 6. **False-proof**: the required evidence does not support the claim, or
-   structural checks are allowed to imply behavior, sync, certification, plugin
-   install, cache, marketplace, hook, or distributed-copy proof.
+   structural checks are allowed to imply any of the proof classes separated
+   under Output.
 7. **Conflicting**: another authority, skill, workflow, or user request can beat
    it, but the text does not say how to resolve the conflict.
 
@@ -191,11 +189,12 @@ After review-only work, report findings first, include the target/scope
 inspected, state `No edits made`, name the proof boundary, and wait.
 
 Always separate proof classes. Structural source validation proves parsing,
-shape, references, or static checks only; it does not prove that a realistic
-invocation followed the behavior unless one was run. For local skills in
-`skills/`, do not invent a separate installed-runtime layer. Plugin install,
-cache, marketplace, distributed-copy, hook, sync, remote, or live runtime claims
-need their own checks only when that surface is part of the claim.
+shape, references, or static checks only; it does not prove behavior,
+certification, sync, plugin install, cache, marketplace, hook, distributed-copy,
+remote, or live runtime, and does not show that a realistic invocation followed
+the behavior unless one was run. For local skills in `skills/`, do not invent a
+separate installed-runtime layer. Those claims need their own checks only when
+that surface is part of the claim.
 
 ## Validation
 
