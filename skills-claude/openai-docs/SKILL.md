@@ -112,7 +112,7 @@ When you need something specific within a broad topic, combine terms:
 
 Search results often include anchored URLs (e.g., `#enable-streaming`, `#function-tool-example`). Pass these anchors to `fetch_openai_doc` to get just that section instead of the entire page. This saves significant context.
 
-If a search result URL contains an anchor, always use it when fetching.
+See Context Efficiency → "Always use anchors when available" for the binding rule (and how to derive an anchor from `hierarchy.lvl2` when a URL has none).
 
 ### Know the documentation domains
 
@@ -228,7 +228,7 @@ When the user's code uses `client.responses.create()`, search for Responses API 
 The openaiDeveloperDocs MCP server isn't running. Check `/mcp` to verify server status.
 
 **Search returns few/no results for a known feature:**
-The query terms don't match the documentation vocabulary. Try the canonical feature name (e.g., "Responses API" not "response endpoint"), try with and without specificity qualifiers, or broaden to just the product name. If search consistently fails, use `list_api_endpoints` to confirm the endpoint exists, then `get_openapi_spec` to get details directly.
+The query terms don't match the documentation vocabulary. Work through the "When results are sparse or irrelevant" recipe under Multi-Search Strategies, and try the query both with and without specificity qualifiers. If search consistently fails, use `list_api_endpoints` to confirm the endpoint exists, then `get_openapi_spec` to get details directly.
 
 **`fetch_openai_doc` returns empty or minimal content:**
 The URL may be stale, or the page may have been reorganized. Re-search to find the current URL. Some pages (especially `platform.openai.com` settings pages) have minimal indexable content — these are dashboard links, not documentation. Filter them out and focus on `developers.openai.com` results.
