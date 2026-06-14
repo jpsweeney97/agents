@@ -26,8 +26,9 @@ Use the lightest mode that matches the user's request.
   blocking failures, and local commit creation when all gates pass.
 
 Closeout mode does not authorize pushing, merging, opening or updating PRs,
-resolving review threads, deleting files or branches, syncing plugins, mutating
-remote state, installing dependencies, or writing durable artifacts.
+resolving review threads, deleting files or branches, syncing plugins or
+marketplace state, mutating remote state, installing dependencies, publishing,
+or writing durable artifacts.
 
 ## Trigger Boundaries
 
@@ -207,8 +208,8 @@ Do not write handoffs, status docs, summaries, tickets, issue comments, PR
 comments, or other durable artifacts unless the user explicitly asks for that
 artifact or the owning workflow requires it after separate authorization.
 
-Do not push, merge, publish, sync, resolve remote threads, delete branches, or
-delete files. Name the appropriate next workflow instead.
+Closeout mode also performs none of the other actions excluded under Modes.
+Name the appropriate next workflow instead.
 
 ## Output
 
