@@ -66,7 +66,11 @@ When all publish preconditions hold:
 
 1. Review `git diff --stat` and the relevant diff for the inner-loop commit.
 2. Push the inner-loop commit once to the PR head branch. On the no-code-change
-   path there is no commit — skip to replies.
+   path there is no commit — skip to replies. If the push is rejected here
+   (non-fast-forward, protected branch, required-PR rule, or denied permission),
+   stop before steps 3-5 and report the exact rejection and next move: replying,
+   resolving threads, or requesting re-review now would publish review state for
+   a commit that never reached the remote.
 3. Reply to every reviewed thread with its disposition and concise evidence.
 4. Resolve appropriate threads:
    - Resolve bot/Codex threads classified as `fixed`, `incorrect`,
