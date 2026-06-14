@@ -47,6 +47,11 @@ it, create the parent directory before writing the artifact. If parent-directory
 creation or artifact writing fails, fall back to `chat-only`, label the missing
 artifact as a proof limit, and do not claim the saved audit exists.
 
+The audit artifact is a durable repo write. Before writing, run `git status` and,
+if the artifact path or its parent carries unrelated dirty state, surface that
+instead of writing over it. Leave the written artifact uncommitted for the user
+to review; do not stage or commit it as part of the scan.
+
 Also pick scan depth before recording findings:
 
 - `low`: narrow target or quick pass; cap findings at 4-8 and name omitted

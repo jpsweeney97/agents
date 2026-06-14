@@ -100,9 +100,12 @@ runtime proof.
 
 A passing check suite is not a review. When the work is substantial, risky, or
 outward-facing and no review pass has happened, list the missing review as a
-remaining gap and name the owning review lane. Do not run the review inside
-closeout, and do not let its absence block an otherwise-passing closeout unless
-the user's definition of done includes review.
+remaining gap and name the owning review lane — `review-family:implementation-review`
+for code against a plan or spec, when it is available. If an acceptance map was
+produced for this work and never verified against the result, list that unverified
+map as a remaining gap too. Do not run the review inside closeout, and do not let
+its absence block an otherwise-passing closeout unless the user's definition of
+done includes review.
 
 ## Proof Boundary
 

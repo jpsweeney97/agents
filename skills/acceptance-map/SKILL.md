@@ -280,8 +280,9 @@ Report:
 - source basis summary, including any `decision needed` checks
 - artifact checks run
 - proof boundary: artifact lifecycle verified, implementation not verified
-- next useful workflow, usually `to-issues`, `tdd`, implementation planning, or
-  `closeout-check` later
+- next useful workflow: `to-issues`, `tdd`, or implementation planning to build
+  against the map, then `review-family:implementation-review` (when available) to
+  verify the result against it; `closeout-check` later for done-ness
 
 If the skill stops before writing or committing, report the exact ambiguity,
 dirty-path conflict, artifact-check failure, or path decision needed.

@@ -43,7 +43,8 @@ repo convention; never start on a protected branch without explicit consent.
   context, a smaller task, a more capable model — or stop and ask. Never
   re-dispatch unchanged and hope.
 - After all tasks, run one final review of the whole implementation against
-  the plan.
+  the plan — `review-family:implementation-review` when it is available,
+  otherwise the same inline spec-then-quality review.
 
 ## Inline Mode
 
