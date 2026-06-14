@@ -57,6 +57,10 @@ Before writing any code:
 
 Ask: "What should the public interface look like? Which behaviors are most important to test?"
 
+If running unattended with no user to confirm, do not stall: record the interface
+and behavior assumptions you are making explicitly, proceed on them, and surface
+them for review rather than treating the plan as approved silently.
+
 **You can't test everything.** Confirm with the user exactly which behaviors matter most. Focus testing effort on critical paths and complex logic, not every possible edge case.
 
 ### 2. Tracer Bullet
