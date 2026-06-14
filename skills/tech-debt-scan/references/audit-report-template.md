@@ -2,9 +2,9 @@
 
 Use this reference when writing the saved `tech-debt-scan` artifact.
 
-The report is the durable evidence and ranked debt backlog. It is not a handoff,
-ticket, implementation plan, dependency-aware roadmap, security report, or owner
-assignment document.
+The report is the durable evidence and ranked debt backlog. For what
+`tech-debt-scan` is and is not (an audit-and-backlog skill, not implementation,
+handoff, ticket, or planning), follow the scope rule in SKILL.md.
 
 ## Default Path
 
@@ -19,10 +19,9 @@ use `docs/audits/`; this skill owns that convention. If repo instructions forbid
 or redirect audit artifacts, follow the repo instruction or ask one path question
 when the conflict cannot be resolved safely.
 
-If the default parent directory is missing and repo instructions do not forbid
-it, create the parent directory before writing the artifact. If parent-directory
-creation or artifact writing fails, return a chat-only summary, label the missing
-artifact as a proof limit, and do not claim the saved audit exists.
+For parent-directory creation and the write-failure fallback (fall back to
+chat-only, label the missing artifact a proof limit, and do not claim the saved
+audit exists), follow the Output section in SKILL.md.
 
 ## Status Lifecycle
 
@@ -32,23 +31,21 @@ Start the artifact with:
 Status: draft - incomplete
 ```
 
-Keep that status while gathering and recording evidence. Change it to:
+and flip it to:
 
 ```markdown
 Status: complete
 ```
 
-only after synthesis, finding caps, metrics, coverage limits, and fidelity checks
-are complete. If interrupted or blocked before those checks, leave the status as
-`draft - incomplete` and record the blocker or next evidence slice in
-`Coverage Gaps / Next Probes`.
+only per the lifecycle rule in SKILL.md (Output) — after synthesis, caps,
+metrics, coverage limits, and fidelity checks pass. If interrupted or blocked
+before those checks, leave the status as `draft - incomplete` and record the
+blocker or next evidence slice in `Coverage Gaps / Next Probes`.
 
 ## Authority Order
 
-1. `Evidence Trail`: anchors, corroboration, present cost, and source notes.
-2. `Ranked Backlog`: synthesis of the evidence trail.
-3. `Coverage Gaps / Next Probes`: trust boundaries for uninspected or weakly
-   supported areas.
+The artifact's authority order (`Evidence Trail` > `Ranked Backlog` > `Coverage
+Gaps / Next Probes`) is governed by SKILL.md (Output); follow it.
 
 Do not let a ranked finding, top call, or chat summary contradict the evidence
 trail. If a synthesis sentence drifts, fix the synthesis or lower confidence.
@@ -56,14 +53,11 @@ trail. If a synthesis sentence drifts, fix the synthesis or lower confidence.
 ## Hard Exclusions
 
 Do not include owners, dependency chains, decision gates, ticket mutations,
-implementation steps, or security vulnerability claims. If the user wants
-dependency-aware sequencing, owners, gates, or continuation planning after the
-audit, name `/next-steps` or `$next-steps` as the right lane and stop; do not
-execute it unless the user clearly asks for that planning work. If dependency
-review surfaces CVEs, GHSAs, exploitability, package-audit output, or
-vulnerability claims, stop that branch and route to a security-scan skill when
-one is available (such as `codex-security:security-scan`); otherwise name it as
-out of scope for this audit. Do not use the security signal as debt evidence.
+implementation steps, or security vulnerability claims. For continuation,
+sequencing, owners, or gates after the audit (route to `/next-steps` or
+`$next-steps`, do not execute unless the user clearly asks) and for the security
+boundary (route CVE/GHSA/exploitability/package-audit/vulnerability findings to a
+security-scan skill, never use them as debt evidence), follow SKILL.md.
 
 ## Report Template
 

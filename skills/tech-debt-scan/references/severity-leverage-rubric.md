@@ -12,22 +12,22 @@ Buckets: `quick-wins` = `P0`/`P1` + `small`; `high-leverage` = `high` +
 `P3`. Drop non-debt observations.
 
 Use `audit-report-template.md` for the artifact status lifecycle, section order,
-finding field template, metrics packet, and fidelity check. Result Brief contains
-`Top Debt Calls`, `Do First`, `Why It Matters`, `Audit Path`, and
-`Coverage Limits`.
+finding field template, metrics packet, and fidelity check. For the Result Brief
+roster and per-field descriptions, follow SKILL.md (Output).
 
 Chat summary order: Result Brief only, plus the artifact path. Do not reproduce
 the full backlog in chat unless the user explicitly asks.
 
 Finding id prefixes: `CH`, `AD`, `DP`, `TD`, `OP`, `KN`, `SY`.
 
-Top-call gate: each `Top Debt Calls` entry needs `evidence_corroborated`, at
-least two evidence sources or independently observed signals, and a present-tense
-cost. Singleton evidence may be a finding, watch item, coverage gap, or next
-probe, but not a top call.
+Top-call gate: see SKILL.md (Synthesize) — a `Top Debt Calls` entry needs
+`evidence_corroborated`, two distinct source classes or independently observed
+signals, and a present-tense cost; singleton evidence may be a finding, watch
+item, coverage gap, or next probe, but not a top call.
 
-Caps: low 4-8/10; medium 8-15/18; high 12-20/24. If capped with material
-findings left, label truncated and name the next evidence slice.
+Caps: base depth caps and the truncation rule are in SKILL.md (Output); the
+raw-vs-canonical ceiling before canonicalization is low /10, medium /18, high
+/24.
 
 Metrics: raw/canonical findings, merged clusters, corroborated count,
 contradictions, skipped categories, singleton count, quick wins, strategic

@@ -26,8 +26,9 @@ scan, write only the audit artifact. Do not edit source files, tests, manifests,
 lock files, dependency files, docs outside the audit artifact, `.gitignore`, or
 cleanup artifacts. `Do First` is a recommendation, not permission to start the
 work. If the user wants dependency-aware sequencing, owners, gates, or
-continuation planning after the audit, name `$next-steps` as the right lane and
-stop. Do not execute it unless the user clearly asks for that planning work.
+continuation planning after the audit, name `/next-steps` or `$next-steps` as the
+right lane and stop. Do not execute it unless the user clearly asks for that
+planning work.
 
 ## Output
 
