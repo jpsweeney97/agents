@@ -17,8 +17,9 @@ executor.
   equivalent decision. If the design is still open, name `design-exploration`
   and ask before switching.
 - Tracker issue slicing is `to-issues`; observable acceptance checks are
-  `acceptance-map`; dependency-aware sequencing of findings is `next-steps`.
-  This lane owns the executable plan document.
+  `acceptance-map`; dependency-aware sequencing of findings is `/next-steps` or
+  `$next-steps`, which the user must invoke explicitly. This lane owns the
+  executable plan document.
 - Writing the plan grants no execution authority. Do not start implementing.
 
 ## Plan Standards

@@ -13,6 +13,11 @@ Read [`references/git-hygiene-reference.md`](references/git-hygiene-reference.md
 
 - One repository at a time; submodules are read-only.
 - If scope, file classification, or branch safety is ambiguous, no-op and ask.
+- Never commit onto the default or a protected branch. Before any `commit-shaping`
+  or `commit-only` commit, create a working branch (`chore/`, `fix/`, or
+  `feature/`) when the checked-out branch is the default branch or matches a
+  `branchProtection` glob; reuse the branch and default branch already captured in
+  preflight.
 - Never skip preview, even when the user says "just do it."
 - Never use `rm` or `git clean -fd`; use `trash` only after explicit approval.
 - Never delete protected files from batch approval alone.
@@ -47,7 +52,7 @@ Collect approvals lane by lane. `ask` files require `track`, `ignore`, `delete`,
 
 - `apply-safe`: resolve dependencies, branch only for worktree edits or commits, commit `.gitignore` first, then approved groups, remote prune, and config.
 - `apply-destructive`: require final confirmation, `trash` approved files, delete only unprotected, unused approved branches that are merged or `[gone]` with confirmed landed proof (see the reference's `-D` rule); do not stage or commit deletions.
-- `commit-only`: confirm file decisions are settled, branch if isolation is needed, then stage and commit approved groups.
+- `commit-only`: confirm file decisions are settled, branch first when on the default/protected branch or when isolation is needed, then stage and commit approved groups.
 
 Verify only executed lanes: `git status` after worktree or commit changes, `git log <original>..HEAD` after commits, and ref checks after pruning or branch deletion.
 

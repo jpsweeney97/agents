@@ -99,8 +99,8 @@ Surface the URL (and the `?variant=` keys). The user will flip through whenever 
 
 Once a variant has won, write down which one and why (commit message, ADR, issue, or a `NOTES.md` next to the prototype if running AFK and the user hasn't responded yet). Then:
 
-- **Sub-shape A** — delete the losing variants and the switcher; fold the winner into the existing page.
-- **Sub-shape B** — promote the winning variant to a real route, delete the throwaway route and the switcher.
+- **Sub-shape A** — `trash` the losing variant files and the switcher; fold the winner into the existing page.
+- **Sub-shape B** — promote the winning variant to a real route, then `trash` the throwaway route and the switcher.
 
 Don't leave variant components or the switcher lying around. They rot fast and confuse the next reader.
 

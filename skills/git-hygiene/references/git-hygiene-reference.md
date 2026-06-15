@@ -38,7 +38,7 @@ the marker has not reached yet.
 Safe execution:
 
 ```bash
-git switch -c codex/cleanup/YYYY-MM-DD-HHMMSS
+git switch -c chore/cleanup/YYYY-MM-DD-HHMMSS
 git add .gitignore
 git commit -m "chore: update ignore rules"
 git add <approved-paths>
@@ -100,7 +100,7 @@ approvals lane by lane.
 
 ```text
 Mode completed: apply-safe
-Cleanup branch: codex/cleanup/2026-03-20-143052
+Cleanup branch: chore/cleanup/2026-03-20-143052
 Decision Summary:
   Safe to apply now: none
   Needs explicit choice: none

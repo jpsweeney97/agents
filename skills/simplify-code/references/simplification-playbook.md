@@ -204,6 +204,13 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` or `CLAUDE.md
    explicitly excluded with a reason, restore limit, and user approval. Stop if no
    adequate backup works.
 
+   To recover before the simplification is accepted, restore each edited file from
+   its pre-edit copy at `<artifact>/files/<relative-path>` (the location the
+   manifest records under `copied_to`), then confirm the restored content matches
+   the manifest `sha256`. Files marked excluded are not restorable from the
+   artifact. This recovery path is for the executing agent; keep it out of the
+   reviewer-facing Review Packet, which carries no rollback command (step 10).
+
 9. Patch/verify: keep tightly coupled files in one coherent patch; otherwise use
    sequential verified slices. Internal signatures may change only when all
    callers are scoped and planned verification is strong; external contracts need

@@ -46,7 +46,8 @@ Do not use this skill for:
 
 - creating PRDs; use `to-prd`
 - creating implementation issues; use `to-issues`
-- sequencing existing findings into a strategic plan; use `next-steps`
+- sequencing existing findings into a strategic plan; suggest the user run
+  `/next-steps` or `$next-steps` (explicit-invoke only)
 - implementation, tests-first development, or debugging
 - final verification or commit closeout after implementation; use
   `closeout-check`
@@ -219,6 +220,13 @@ Before writing, confirm the output path and any source-backlink path belong to
 one Git worktree where a local commit can be created. If no Git repository is
 available, or if the commit lifecycle is not safe for the target path, stop and
 ask before creating an uncommitted artifact.
+
+Also confirm the worktree is on a non-protected working branch before writing.
+Treat repo-defined protected branches first; if the repo defines none, treat
+`main`, `master`, `develop`, and `release/*` as protected. If the checked-out
+branch is protected or the repo's default branch, stop and ask whether to branch
+first (or hand off to `git-hygiene` or `merge-branch`) — do not write an artifact
+that the default commit lifecycle cannot then commit.
 
 A dirty worktree does not automatically block the skill. Proceed only when:
 

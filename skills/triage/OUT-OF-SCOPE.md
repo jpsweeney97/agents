@@ -96,6 +96,6 @@ Only when an **enhancement** (not a bug) is rejected as `wontfix`. The flow:
 
 If the maintainer changes their mind about a previously rejected concept:
 
-- Delete the `.out-of-scope/` file
+- Remove the `.out-of-scope/` file with `trash` (never `rm`)
 - The skill does not need to reopen old issues — they're historical records
 - The new issue that triggered the reconsideration proceeds through normal triage

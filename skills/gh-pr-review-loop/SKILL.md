@@ -1,6 +1,6 @@
 ---
 name: gh-pr-review-loop
-description: "Use only when the user explicitly invokes `$gh-pr-review-loop` or clearly asks for the full GitHub PR review-response lifecycle, including fixing real review-thread issues and publishing the result with commit, push, thread replies/resolution, and re-review request. Do not use for ordinary comment addressing (use gh-address-comments), first-pass PR reviews, CI debugging, issue triage, or comment summaries without that full-loop authorization."
+description: "Use only when the user explicitly invokes `/gh-pr-review-loop` or `$gh-pr-review-loop`, or clearly asks for the full GitHub PR review-response lifecycle, including fixing real review-thread issues and publishing the result with commit, push, thread replies/resolution, and re-review request. Do not use for ordinary comment addressing (use gh-address-comments), first-pass PR reviews, CI debugging, issue triage, or comment summaries without that full-loop authorization."
 disable-model-invocation: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: zoom-out
-description: "Use only when explicitly invoked to get a higher-level map of an unfamiliar code area, including relevant modules, callers, and how the area fits the broader system. Do not use for implementation, debugging, code review, status orientation, or architecture improvement recommendations."
+description: "Use only when the user explicitly invokes `/zoom-out` or `$zoom-out` to get a higher-level map of an unfamiliar code area, including relevant modules, callers, and how the area fits the broader system. Do not use for implementation, debugging, code review, status orientation, or architecture improvement recommendations."
 disable-model-invocation: true
 ---
 
