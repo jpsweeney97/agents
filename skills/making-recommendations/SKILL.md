@@ -1,6 +1,6 @@
 ---
 name: making-recommendations
-description: "Use when the user explicitly asks for a recommendation, comparison, trade-off analysis, ranking, or decision between serious viable options. Trigger on phrases like `recommend`, `which is better`, `help me decide`, or `should I choose X or Y`. Do not use for factual questions, trivial preferences, or broad `best way to build/design/fix` requests where clarification, brainstorming, debugging, or implementation is the real work."
+description: "Use when the user asks for a recommendation, comparison, trade-off, ranking, or decision between two or more serious options already on the table (`which is better`, `help me decide`, `should I choose X or Y`). Do not use for factual questions or trivial preferences; when no concrete options are named yet, clarifying a muddy goal is `outcome-interviewer` and shaping a design is `design-exploration`."
 ---
 
 # Structured Recommendations

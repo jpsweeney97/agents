@@ -1,6 +1,6 @@
 ---
 name: outcome-interviewer
-description: "Use when the user explicitly wants an interview to clarify, unpack, or talk through a muddy idea, artifact, plan, workflow, strategy, design, or decision before choosing the next move. Do not use for ordinary one-off clarification, implementation, reviews, audits, complete critiques, recommendations, brainstorming, or pressure tests."
+description: "Use when the user wants a one-question-at-a-time interview to clarify a still-muddy idea, plan, design, or decision before choosing the next move. Do not use for one-off clarification, implementation, reviews, audits, or critiques; once the goal is clear, shaping a design is `design-exploration`, choosing among options already on the table is `making-recommendations`, and stress-testing a settled plan is the grilling lane (`grill-me`/`grill-with-docs`)."
 ---
 
 # Outcome Interviewer

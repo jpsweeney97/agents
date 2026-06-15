@@ -1,6 +1,6 @@
 ---
 name: design-exploration
-description: "Use when the user wants to explore and settle a design before implementation: shaping a clarified idea into compared approaches and an approved design or spec, including requests to design a feature, explore approaches, or shape a solution. Do not use for clarifying a muddy outcome, choosing between already-comparable options, pressure-testing an existing plan or design, implementation, prototyping, or PRD/issue publication."
+description: "Use when the user wants to explore and settle a design before implementation: shaping a clear-enough outcome into compared approaches and an approved design or spec. Do not use for clarifying a still-muddy outcome (`outcome-interviewer`), choosing between already-comparable options (`making-recommendations`), pressure-testing an existing plan or design (`grill-me`), implementation, prototyping, or PRD/issue publication."
 ---
 
 # Design Exploration
