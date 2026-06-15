@@ -96,34 +96,48 @@ Verify the merge commit or the branch's commits appear on main.
 
 **If work needs to be merged now (no PR, not yet on main):**
 
-You cannot `git checkout main` from inside a worktree — main is already checked out in the main worktree. Git prevents two worktrees from having the same branch checked out. Use `git -C` to merge from the main repo:
+You cannot `git checkout main` from inside a worktree — main is already checked out in the main worktree. Git prevents two worktrees from having the same branch checked out. This is also why you cannot hand this case to `merge-branch`: it lands by switching to the target, and it deliberately refuses when the target is checked out in another worktree (which it always is here). So carry its guards inline — verify the target, require fast-forward ancestry — and merge from the main repo with `git -C`:
 
 ```bash
-# Merge the worktree branch into main from the main repo
-git -C <main-repo-path> merge <branch-name>
-# Verify
+# 1. Confirm the main repo has the INTENDED target checked out.
+#    `git -C <path> merge` merges into whatever is checked out THERE — not
+#    necessarily main — so verify before trusting the "already on main" claim.
+git -C <main-repo-path> rev-parse --abbrev-ref HEAD   # must be the target (e.g. main)
+# 2. Fast-forward-only merge of the worktree branch into that verified target.
+git -C <main-repo-path> merge --ff-only <branch-name>
+# 3. Verify
 git -C <main-repo-path> log --oneline -3
 ```
 
-After this merge succeeds, `ExitWorktree(action: "remove", discard_changes: true)` is safe — the "discarded" commit is already on main. The tool reports discarding because the worktree branch's commit is no longer exclusive to it, not because work is lost.
+If step 1 does not show the intended target, stop: the main repo has a different branch checked out, so this merge would silently land on the wrong branch. Settle which branch should receive the work before merging.
 
-If the merge fails (e.g., conflicts), resolve from the main repo (`git -C <main-repo-path> merge --abort` to cancel, or resolve conflicts there). Do NOT attempt to resolve merge conflicts from inside the worktree — you cannot checkout main there.
+If the `--ff-only` merge fails (the branch is not a fast-forward of the target), stop and report — do NOT retry with a plain `git -C <main-repo-path> merge`. A failed `--ff-only` changes nothing (clean tree, no merge in progress), so there is nothing to abort; decide the next step from the main repo — rebase the branch onto the target, or make an explicit merge there. Never do this from inside the worktree — you cannot check out the target branch there.
+
+After this `--ff-only` merge succeeds into the verified target, `ExitWorktree(action: "remove", discard_changes: true)` is safe — the "discarded" commit is already on the target. The tool reports discarding because the worktree branch's commit is no longer exclusive to it, not because work is lost.
 
 **If neither merged nor mergeable:** Warn the user that exiting will lose work unless they choose to keep the worktree.
 
 ### 5. Ensure local main has the changes
 
+First check whether the repo has an `origin` remote. On the no-PR / local-only path (the natural habitat of this flow) there may be none, and an unconditional `git fetch origin` aborts fatally (exit 128, "'origin' does not appear to be a git repository"):
+
 ```bash
-# Check if local main matches origin/main
-git fetch origin
-git log main..origin/main --oneline
-git log origin/main..main --oneline
+git remote get-url origin 2>/dev/null
 ```
 
-Three cases:
-- **Local main behind origin:** Pull needed. Run from the main repo (not the worktree): `git -C <main-repo-path> pull origin main`
-- **Local main ahead of origin:** Local commits exist that aren't pushed. This is fine — just note it.
-- **Diverged:** Local main has commits not on origin AND origin has commits not on local. Use `git -C <main-repo-path> pull --rebase origin main` to replay local commits on top of origin.
+- **Nothing printed (no `origin`):** there is no remote to sync against — local main is authoritative for this landing. Skip the fetch and the `origin/main` comparisons, and continue to the Exit Procedure.
+- **A URL printed:** compare local main against the remote:
+
+  ```bash
+  git fetch origin
+  git log main..origin/main --oneline
+  git log origin/main..main --oneline
+  ```
+
+  Three cases:
+  - **Local main behind origin:** Pull needed. Run from the main repo (not the worktree): `git -C <main-repo-path> pull origin main`
+  - **Local main ahead of origin:** Local commits exist that aren't pushed. This is fine — just note it.
+  - **Diverged:** Local main has commits not on origin AND origin has commits not on local. Use `git -C <main-repo-path> pull --rebase origin main` to replay local commits on top of origin.
 
 After syncing, verify:
 ```bash
@@ -174,13 +188,16 @@ Confirm the worktree is gone and main shows the expected history. If the branch 
 
 `ExitWorktree` handles branch deletion automatically. But if branch cleanup falls through (e.g., `ExitWorktree` was a no-op for a manually-created worktree, or `action: "keep"` was used), you may need to delete the branch manually.
 
+**First, make sure the worktree is already removed.** A branch checked out in a live worktree cannot be deleted — both `git branch -d` and `-D` fail with "cannot delete branch '<x>' used by worktree at '<path>'". When `ExitWorktree` was a no-op (manual worktree), the worktree and its checked-out branch are still in place, so remove the worktree first via the fallback in "The ExitWorktree Tool" (`git -C <main-repo-path> worktree remove <worktree-path>`), *then* delete the branch.
+
 After a squash merge, `git branch -d` fails because git doesn't recognize the squash commit as merging the branch (the SHAs differ). This is the one case where `-D` is acceptable:
 
-1. First, confirm the PR was merged: `gh pr list --head <branch> --state merged`
-2. Try safe delete: `git branch -d <branch>`
-3. If `-d` fails with "not fully merged" AND step 1 confirmed the PR is merged: `git branch -D <branch>` is safe — the PR merge serves as proof the work landed.
+1. Confirm the PR was merged: `gh pr list --head <branch> --state merged`
+2. Confirm the worktree holding the branch is already removed (above).
+3. Try safe delete: `git branch -d <branch>`
+4. If `-d` fails with "not fully merged" AND step 1 confirmed the PR is merged: `git branch -D <branch>` is safe — the PR merge serves as proof the work landed.
 
-Do NOT use `-D` without first confirming the merge via `gh pr list`. The PR confirmation is what makes `-D` safe, not the failure of `-d`.
+Do NOT use `-D` without first confirming the merge via `gh pr list`. The PR confirmation is what makes `-D` safe, not the failure of `-d`. A `-d`/`-D` failure that says "used by worktree" is not a merge-proof problem — the worktree still exists; remove it first.
 
 ## Edge Cases
 
@@ -193,12 +210,12 @@ Do NOT use `-D` without first confirming the merge via `gh pr list`. The PR conf
 | User wants to keep the worktree | `ExitWorktree(action: "keep")` — directory and branch remain. |
 | Remote branch already deleted by PR merge | Normal — GitHub deletes the remote branch on merge. Local branch cleanup still needed. |
 | Worktree created in a previous session or manually | `ExitWorktree` is a no-op here — it only removes current-session `EnterWorktree` worktrees. Safe to call (it reports "no worktree session is active"); then use the `git -C <main-repo> worktree remove` fallback (see tool section). |
-| Work needs merging but main is checked out elsewhere | See Pre-Exit Checklist step 4 (work needs merging now): merge with `git -C <main-repo-path> merge <branch>` from the main repo — never resolve merge conflicts inside the worktree — then `ExitWorktree(action: "remove", discard_changes: true)`. |
+| Work needs merging but main is checked out elsewhere | Follow Pre-Exit Checklist step 4 ("work needs merging now") — it verifies the target and merges `--ff-only` from the main repo (never resolve merge conflicts inside the worktree) — then `ExitWorktree(action: "remove", discard_changes: true)`. |
 | Branch survives after `ExitWorktree` | Common with `discard_changes: true`. Follow Exit Procedure step 3: verify with `git branch --list`, then `git branch -d <branch>` (after a squash merge, use the `-D` rule in "Branch Deletion After Squash Merge"). |
 
 ## Integration
 
-This skill only *exits* worktrees; it does not create them. Worktrees are created by the `EnterWorktree` tool (see "The ExitWorktree Tool" above). Whether the work is landed — merged locally or via a merged PR — is decided by the landing flow you used (for a local fast-forward landing, `merge-branch`); this skill runs only afterward, to verify and remove.
+This skill only *exits* worktrees; it does not create them. Worktrees are created by the `EnterWorktree` tool (see "The ExitWorktree Tool" above). Landing the work is normally decided by the flow you used before exiting — a local fast-forward via `merge-branch`, or a merged PR — and this skill then runs afterward to verify and remove. The exception is the not-yet-landed case (Pre-Exit Checklist step 4): there this skill carries the local merge inline with `merge-branch`'s guards (verified target, fast-forward only), because `merge-branch` cannot run against a target checked out in another worktree.
 
 **Typical sequence:**
 1. Land the branch — a local fast-forward (`merge-branch`), or a PR that gets merged.
