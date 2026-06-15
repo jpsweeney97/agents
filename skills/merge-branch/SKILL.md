@@ -122,13 +122,32 @@ work in commits, continue to merge.
 
 ### 4. Merge
 
-Before switching branches, confirm the worktree is clean:
+Now that Step 3 has committed the branch work, require the source to be strictly
+ahead of the target — at least one commit to land:
 
 ```bash
-git status --short --branch --untracked-files=all
+git rev-list --count <target-branch>..<source-branch>
 ```
 
-Then switch to the verified target branch and fast-forward merge the source:
+If the count is `0`, the source has no commits the target lacks (identical refs,
+or work already landed). Stop with "Nothing to merge: `<source>` has no commits
+ahead of `<target>`." Do not switch, merge, report success, or delete the
+branch: a `git merge --ff-only` here prints "Already up to date" and exits 0,
+which would otherwise read as a successful landing.
+
+Then confirm the worktree is clean — no staged or unstaged tracked changes:
+
+```bash
+git status --porcelain
+```
+
+If this shows any staged or unstaged tracked entry (any line not prefixed `??`),
+stop and report the dirty tree rather than switching: `git switch` does not fail
+on a dirty tree and silently carries staged changes onto the target branch.
+Untracked files (`??`) that Step 3 already classified as approved generated
+artifacts are acceptable and may remain; any other dirty state is a stop.
+
+Switch to the verified target branch and fast-forward merge the source:
 
 ```bash
 git switch <target-branch>
@@ -145,6 +164,17 @@ name the next decision: rebase the source, perform an explicit merge commit, or
 abort the local landing. As above, the Step 3 commit remains intact on the source
 branch; nothing is lost.
 
+Once the merge succeeds, confirm the source's commits actually landed on the
+target — while the source ref still exists, before any cleanup:
+
+```bash
+git merge-base --is-ancestor <source-branch> <target-branch>
+```
+
+This must pass (exit 0): the source is now contained in the target. If it does
+not, the landing did not happen — stop and report that instead of proceeding to
+cleanup or a success line.
+
 ### 5. Clean Up Source Branch
 
 Delete the source branch only when cleanup approval exists from the original
@@ -159,7 +189,7 @@ the exact failure. Do not force-delete.
 
 ### 6. Confirm Result
 
-Show the resulting state:
+Show the resulting state (the landing itself was verified at the end of Step 4):
 
 ```bash
 git status --short --branch
@@ -168,7 +198,9 @@ git log --oneline --decorate -3
 
 Report one concise result line:
 
-- If cleanup was approved: "Merged `<source>` into `<target>` and deleted the
-  source branch."
+- If the source branch was deleted (cleanup approved and `git branch -d`
+  succeeded): "Merged `<source>` into `<target>` and deleted the source branch."
+- If cleanup was approved but deletion failed: "Merged `<source>` into
+  `<target>`; could not delete the source branch — <exact failure>."
 - If cleanup was not approved: "Merged `<source>` into `<target>` and kept the
   source branch."
