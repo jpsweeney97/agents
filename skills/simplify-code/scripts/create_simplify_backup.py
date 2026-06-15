@@ -142,7 +142,7 @@ def ensure_backup_root(root: Path, state: GitState, backup_root: Path | None) ->
     if target is None and state == "git":
         target = root / ".backup"
     if target is None:
-        target = Path("/Users/jp/backup") / slugify(root.name, default="non-git-root")
+        target = Path.home() / "backup" / slugify(root.name, default="non-git-root")
 
     try:
         target.mkdir(parents=True, exist_ok=True)

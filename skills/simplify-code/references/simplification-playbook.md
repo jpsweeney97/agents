@@ -45,7 +45,7 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` or `CLAUDE.md
    ```
 
    Resolve the script path relative to this skill directory when used outside
-   `/Users/jp/.agents`. Use the production default `max_bytes` of `1048576`
+   `$HOME/.agents`. Use the production default `max_bytes` of `1048576`
    (`1 MiB`) for real simplify-code eligibility. Use `--max-bytes` only for tests
    or when the user explicitly approves a different threshold after the risk is
    named.
@@ -165,10 +165,10 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` or `CLAUDE.md
    ```
 
    Resolve the script path relative to this skill directory when used outside
-   `/Users/jp/.agents`. In git repos the helper creates the artifact under
+   `$HOME/.agents`. In git repos the helper creates the artifact under
    `<repo-root>/.backup/`, writes git evidence, and adds `.backup/` to the
    repo-local exclude file from `git rev-parse --git-path info/exclude` when
-   missing. Outside git it uses `/Users/jp/backup/<repo-or-dir-slug>/` by default;
+   missing. Outside git it uses `~/backup/<repo-or-dir-slug>/` by default;
    if that root is unavailable or outside the writable sandbox, ask for approval
    of a writable `--backup-root` or stop before editing.
 
@@ -191,7 +191,7 @@ Follow after `simplify-code` triggers. Higher-priority `AGENTS.md` or `CLAUDE.md
    scanner result for that file is `clean` and no secret risk is otherwise
    apparent. For `positive` or `uncertain` scanner results, possible secret
    content, credentials, tokens, private keys, binary/large files, or similarly
-   sensitive content, do not copy content into `.backup/` or `/Users/jp/backup` by
+   sensitive content, do not copy content into `.backup/` or `~/backup` by
    default. Use hash-only/redacted manifest, a user-approved secure backup
    location, or explicit exclusion with acknowledgement that the file will not be
    restorable from the artifact.

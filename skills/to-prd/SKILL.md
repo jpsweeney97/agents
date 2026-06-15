@@ -8,8 +8,9 @@ description: "Use when the user wants to turn the current conversation and repo 
 This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT interview the user — just synthesize what you already know.
 
 The issue tracker and triage label vocabulary should have been provided to you.
-If they are missing, use `/setup-matt-pocock-skills` when that skill is
-available; otherwise ask the smallest setup question needed before publishing.
+If they are missing, use `/setup-matt-pocock-skills` or
+`$setup-matt-pocock-skills` when that skill is available; otherwise ask the
+smallest setup question needed before publishing.
 
 ## Side Effects And Proof Boundary
 

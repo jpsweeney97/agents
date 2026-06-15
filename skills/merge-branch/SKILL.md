@@ -75,7 +75,7 @@ Stop if any precondition fails:
 Use this authority order:
 
 1. Explicit target branch named by the user.
-2. Repo instructions or branch policy in `AGENTS.md`.
+2. Repo instructions or branch policy in `AGENTS.md` or `CLAUDE.md`.
 3. Default branch from `refs/remotes/origin/HEAD`, stripping the remote prefix.
 4. A single obvious local default branch: `main`, `master`, or `develop`.
 

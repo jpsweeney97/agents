@@ -8,8 +8,9 @@ description: "Use when the user wants to convert an existing plan, spec, PRD, or
 Break a plan into independently-grabbable issues using vertical slices (tracer bullets).
 
 The issue tracker and triage label vocabulary should have been provided to you.
-If they are missing, use `/setup-matt-pocock-skills` when that skill is
-available; otherwise ask the smallest setup question needed before publishing.
+If they are missing, use `/setup-matt-pocock-skills` or
+`$setup-matt-pocock-skills` when that skill is available; otherwise ask the
+smallest setup question needed before publishing.
 
 ## Side Effects And Proof Boundary
 
