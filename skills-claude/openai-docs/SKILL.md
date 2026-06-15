@@ -64,7 +64,7 @@ For exact schemas, parameters, and request/response formats:
 
 ```
 list_api_endpoints()
-  → browse 161 endpoints to find the right path (e.g., /responses)
+  → browse the full endpoint list to find the right path (e.g., /responses)
 get_openapi_spec(url="https://api.openai.com/v1/responses", languages=["python"])
   → returns full schema + Python code examples
 ```

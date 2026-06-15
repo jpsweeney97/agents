@@ -41,8 +41,8 @@ Non-trigger examples:
    - If it is a single focused Claude Code docs question, answer inline.
    - If it spans multiple documentation areas or will likely require 3 or more searches, use the inline broad-query path below by default.
 2. Confirm the tool surface.
-   - In Codex, the expected MCP namespace is `mcp__claude_code_docs`, with `search_docs`, `reload_docs`, and `get_status`; if `search_docs` is not visible, use `tool_search` for `claude-code-docs search_docs`.
-   - In Claude Code, the same server is namespaced `mcp__claude-code-docs__*` with the same three tools; if they are deferred, load them with `ToolSearch`.
+   - In Codex, the expected MCP namespace is `mcp__claude_code_docs`, providing at least `search_docs`, `reload_docs`, and `get_status`; if `search_docs` is not visible, use `tool_search` for `claude-code-docs search_docs`.
+   - In Claude Code, the same server is namespaced `mcp__claude-code-docs__*` with the same tools; if they are deferred, load them with `ToolSearch`.
    - Tool names below are runtime-neutral; use them through the active runtime's namespace.
    - If discovery still does not expose a search tool, say that authoritative Claude Code documentation lookup is unavailable in the current tool surface.
 3. Run `get_status` first when the user asks for latest/current behavior, trust-sensitive authority, stale results, changelog freshness, or server warnings.
