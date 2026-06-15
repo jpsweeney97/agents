@@ -148,8 +148,9 @@ true:
 - the repair touches no file already changed by the original work
 - the repair can be staged separately from the original work
 
-Commit a qualifying unrelated repair as a separate preliminary local commit,
-then rerun verification before committing the original work.
+Commit a qualifying unrelated repair as a separate preliminary local commit —
+subject to the same protected-branch gate as the final commit (see Commit
+Policy) — then rerun verification before committing the original work.
 
 If an unrelated repair would touch any file already changed by the original
 work, stop and ask. Do not split hunks or attempt partial staging to separate
@@ -163,6 +164,16 @@ expanding scope.
 
 In closeout mode, "close this out" authorizes local commit creation when every
 gate passes.
+
+Before staging, confirm the commit will land on a non-protected work branch. The
+branch is already surfaced at workflow step 2 (`git status --short --branch`) —
+gate on it; do not re-inspect. Treat repo-defined protected branches first; if
+the repo defines none, treat `main`, `master`, `develop`, and `release/*` as
+protected. If the checked-out branch is protected or the repo's default branch,
+stop with `decision needed` and ask whether to branch first (or hand off to
+`git-hygiene` or `merge-branch`) — do not commit. A skill whose job is to protect
+completion claims must not itself land an illegitimate or hook-rejected commit on
+a protected branch.
 
 Create at most one final commit for the original work. Before committing:
 
@@ -187,6 +198,9 @@ Stop and ask instead of committing when:
 
 - the target work or completion claim is unclear
 - unrelated or unclear dirty files make safe staging ambiguous
+- the closeout commit (including a preliminary repair commit) would land on a
+  protected or default branch (see the Commit Policy protected-branch gate) —
+  branch first
 - focused verification or repo-standard quick checks fail and cannot be safely
   fixed within closeout mode
 - a pre-existing repair would touch a file changed by the original work
