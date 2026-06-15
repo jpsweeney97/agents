@@ -247,6 +247,35 @@ entries; do not rewrite settled ones.
   the skill, publish authorization escalates to `gh-pr-review-loop`. Closes the
   authoring-deferred state. Evidence: commit `993cd93`; issue
   jpsweeney97/agents#2.
+- 2026-06-15 — jp-writing-style: admitted (first-party authored, not a mining
+  pass). Owns generation and rewriting of prose in JP's personal voice —
+  reflective essays, personal statements, application responses, analytical/
+  professional narratives, memos, recommendations, explanations — grounded in a
+  real two-piece corpus (`references/corpus.md`, lightly redacted: school names,
+  grades, and clinical labels replaced with neutral stand-ins) plus a
+  deduplicated move/diction/genre pattern bank (`references/patterns.md`). No
+  local or bundled lane held voice-grounded prose generation. One Owner Per Job
+  (checked in both runtimes, since dual-runtime): distinct in kind from
+  `writing-principles` (obligation-only edits to agent-instruction docs),
+  `markdown-synthesis`/`markdown-reformat` (structural Markdown consolidation/
+  formatting, not voice), and from every Codex- and Claude-bundled skill (none
+  does prose-voice work) — all co-loadable without collision. Lighter context
+  rejected: an `AGENTS.md`/`CLAUDE.md` line cannot carry the corpus, the
+  integrity gate, the elicitation step, or the per-genre pattern bank, and the
+  skill's first draft proved voice-by-assertion (no corpus) collapses into
+  generic AI-formal. Houses standards: Use-when/Do-not-use boundary; one
+  justified hard rule (the integrity gate, surviving the agent-facing-design
+  machinery test — fabrication in personal statements/applications is fraud)
+  that is also the first blocking quality-check item; runtime-neutral phrasing
+  (joint `AGENTS.md`/`CLAUDE.md` naming, no Claude-only tokens). Placement
+  `skills/` (dual-runtime), not `skills-claude/`: observed-work call — JP
+  confirms he regularly drafts this writing from Codex too, so the skill earns
+  its Codex skill-list slot rather than being demoted Claude-only. Validated:
+  frontmatter parse, `quick_validate.py`, whitespace, references resolve; two
+  context-isolated adversarial forward tests pass (thin personal-statement
+  prompt → elicits real facts and refuses to invent a backstory; bare-notes
+  rewrite → withholds unsupported causes/lessons and asks). Evidence: commit
+  `6239f9c` (skill build, rewritten from review) + this ledger entry.
 
 ## Parks
 
