@@ -141,19 +141,37 @@ improve it separately from task performance.
    served skill set (the normal user/project/local scope, e.g.
    `--setting-sources user,project,local`), never a renamed `--plugin-dir` copy.
    Confirm from `init.skills` that the bare-named target loaded, count a fire
-   with the fire signal (see Measurement harness), and run each query several
-   times to get a stable rate (a skill fires probabilistically, and Claude skips
-   skills for tasks it can handle directly, so single runs mislead). The
+   with the fire signal (see Measurement harness), and run each query `t` times —
+   `t` = 5 is a reasonable default here, above the performance arm's 3 because a
+   fire is a single binary event noisier than a graded output — to get a stable
+   rate (a skill fires probabilistically, and Claude skips skills for tasks it can
+   handle directly, so single runs mislead). The
    should-not-trigger queries are the negative control — each passes only at a
    near-zero fire rate across its runs, not on a single non-fire. Pin `--model`
    to the model under test so the rate reflects it.
-3. **Iterate on a held-out split.** Split the eval set, propose revisions
-   against the train queries, and re-score on the held-out queries; select by
-   held-out score, not train score, so you do not overfit the wording. Load
-   competing variants the same way so the comparison is matched, then re-confirm
-   the chosen winner against the served skill before applying. With ~20 queries
-   the held-out side is small and noisy — treat close held-out scores as ties,
-   and widen the set or add trials before trusting a narrow win.
+3. **Select by a paired noise margin on the full set — don't split ~20 queries.**
+   Score every candidate on the **full** set (a split strands the scarce negatives
+   on a noisy half); guard wording-overfit by protocol — freeze at most 3 candidate
+   descriptions before scoring, never tune-then-rescore within a round, and split
+   only above ~40 queries. Score the incumbent and each candidate on the same
+   queries at the same `t` trials (step 2), then, inline or with a throwaway script:
+   - Per query, form `d = score_candidate - score_incumbent` (should-trigger: fire
+     rate; should-not-trigger near-miss: `1 - fire rate`).
+   - Take `mean(d)`, sample `stdev(d)` (n-1 form), `SE = stdev(d) / sqrt(N)`.
+     **Select only if `mean(d) - 2*SE > 0`** — a two-SE noise margin, not a raw
+     score gap; the `2` rounds the ~2.1-2.2 these N really warrant, so bias close
+     calls to a tie.
+   - **Re-confirm the lone winner on fresh runs** against the served skill, again
+     requiring `mean(d) - 2*SE > 0` (an independent re-score strips the
+     winner's-curse inflation from trying several candidates). If `stdev(d)` rounds
+     to 0 (`SE < 1/t`), require the gain to exceed one fire-step (`1/t`) there, else
+     `insufficient signal`.
+
+   **Below 12 usable queries, with one class only, or when nothing clears the margin
+   -> `insufficient signal`:** keep the served description, and widen the set or
+   raise `t`. At ~20 queries this test is deliberately low-power — a real but
+   moderate win often reads as `insufficient signal`, the cue to widen or raise `t`,
+   not proof the candidate is no better. Never ship the highest point score.
 4. **Apply and report.** Show the before/after description and the score change.
 
 ## Proof discipline
@@ -170,7 +188,8 @@ supports.
 Report: the eval set and trial count; per-configuration pass rate, tokens, and
 time as mean ± stddev with the delta; the qualitative read; and a recommendation
 (ship, iterate, or insufficient signal). Name the baseline's built-in floor and
-any capability overlap with the target. For description work, report
-before/after and held-out trigger rates. Recommend another iteration when the
-signal says the skill is not yet pulling its weight, and do not overfit to the
-eval set.
+any capability overlap with the target. For description work, report the
+before/after trigger rates on the full set and the paired margin
+(`mean(d) - 2*SE`) behind the ship / tie / `insufficient signal` call. Recommend
+another iteration when the signal says the skill is not yet pulling its weight,
+and do not overfit to the eval set.
