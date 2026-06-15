@@ -7,6 +7,8 @@ description: "Use when the user wants to find architecture-deepening opportuniti
 
 Surface architectural friction and propose **deepening opportunities** — refactors that turn shallow modules into deep ones. The aim is testability and AI-navigability.
 
+This skill only surveys and reports (a throwaway HTML report); it does not edit code. For a scoped behavior-preserving cleanup of a known target rather than surfacing architecture opportunities, use `simplify-code`.
+
 ## Glossary
 
 Use these terms exactly in every suggestion. Consistent language is the point — don't drift into "component," "service," "API," or "boundary." Full definitions in [LANGUAGE.md](LANGUAGE.md).

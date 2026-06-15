@@ -1,6 +1,6 @@
 ---
 name: simplify-code
-description: "Use when the user asks to simplify, tidy, clean up, or refactor code for clarity through a scoped behavior-preserving edit to a concrete target. Do not use for cleanup planning, backlog creation, new implementation, bug fixes, reviews, format-only changes, vague maintainability work, or redesigns."
+description: "Use when the user asks to simplify, tidy, clean up, or refactor code for clarity through a scoped behavior-preserving edit to a concrete target. Do not use for cleanup planning, backlog creation, new implementation, bug fixes, reviews, format-only changes, vague maintainability work, redesigns, or architecture-deepening surveys (`improve-codebase-architecture`)."
 ---
 
 # Simplify Code
@@ -21,7 +21,8 @@ Ask once to clarify a plain `refactor`, vague maintainability, or missing
 target. Do not use for implementation, fixes, reviews, formatting-only work,
 redesigns, routine self-review, cleanup planning, refactoring backlogs, or
 candidate prioritization. For planning/backlog requests, route to
-`tech-debt-scan`; use
+`tech-debt-scan`; for architecture-deepening surveys rather than a scoped edit,
+route to `improve-codebase-architecture`; use
 `simplify-code` after the user chooses a scoped behavior-preserving edit.
 
 If a narrower platform, framework, or refactor skill owns the target, use that

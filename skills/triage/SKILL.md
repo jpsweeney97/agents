@@ -1,6 +1,6 @@
 ---
 name: triage
-description: "Use when the user wants to create, classify, update, or move issues through the project issue-tracker triage workflow, including labels, comments, ready-for-agent briefs, ready-for-human work, or wontfix handling. Do not use for general backlog prioritization, tech-debt scans, implementation, debugging outside issue triage, PR review, or status orientation."
+description: "Use when the user wants to create, classify, update, or move issues through the project issue-tracker triage workflow, including labels, comments, ready-for-agent briefs, ready-for-human work, or wontfix handling. Do not use for general backlog prioritization, tech-debt scans, implementation, debugging outside issue triage, PR review, or status orientation. PRD issues are `to-prd`; slicing a plan/PRD into implementation issues is `to-issues`."
 ---
 
 # Triage

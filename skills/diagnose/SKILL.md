@@ -1,6 +1,6 @@
 ---
 name: diagnose
-description: "Use when the user asks to diagnose/debug a bug whose cause is unclear, hard to reproduce, intermittent, spans multiple components, or involves a performance regression. Do not use for straightforward implementation, known fixes, obvious single-test failures, code review, or post-fix architecture improvement."
+description: "Use when the user asks to diagnose/debug a bug whose cause is unclear, hard to reproduce, intermittent, spans multiple components, or involves a performance regression. Do not use for straightforward implementation, known fixes, obvious single-test failures, code review, or post-fix architecture improvement; once the cause is known, locking the fix in test-first belongs to `tdd`."
 ---
 
 # Diagnose

@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: "Use when the user wants to build a feature or fix a bug through test-driven development, red-green-refactor, tracer-bullet slices, or explicit test-first work. Do not use for adding tests after implementation, ordinary verification, test failure triage, broad test strategy, or requests that merely mention integration tests."
+description: "Use when the user wants to build a feature or fix a bug through test-driven development, red-green-refactor, tracer-bullet slices, or explicit test-first work. Do not use for adding tests after implementation, ordinary verification, test failure triage, broad test strategy, requests that merely mention integration tests, or fixing a bug whose cause is unclear, intermittent, or cross-component (`diagnose` finds the cause first)."
 ---
 
 # Test-Driven Development
