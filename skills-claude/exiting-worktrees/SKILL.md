@@ -20,13 +20,17 @@ Safe worktree exit with verification. Prevents data loss from manual cleanup.
 **Scope:** `ExitWorktree` only operates on a worktree that `EnterWorktree` created in the *current* session. For a worktree created manually (`git worktree add`), in a previous session, or via `claude --worktree`, it is a guaranteed **no-op** — it reports "no worktree session is active" and changes nothing on disk. Calling it first is still safe (the no-op is harmless), but for those cases expect to fall back to manual cleanup, run from the **main repo directory** (not from inside the worktree):
 
 ```bash
+# 0. Resolve <main-repo-path>. From inside a worktree, `git rev-parse
+#    --show-toplevel` returns the WORKTREE path, not main; the first `worktree`
+#    entry of the porcelain list is always the main checkout:
+git worktree list --porcelain | awk '/^worktree /{print $2; exit}'
 # 1. Run from main repo to avoid CWD breakage
 git -C <main-repo-path> worktree remove <worktree-path>
 # 2. Delete the branch
 git -C <main-repo-path> branch -d <branch-name>
 ```
 
-The `-C` flag runs git from the main repo without changing your shell CWD, avoiding the "Path does not exist" failure. This is the ONLY acceptable fallback — never `cd` into the worktree and then try to remove it.
+The `-C` flag runs git from the main repo without changing your shell CWD, avoiding the "Path does not exist" failure. This is the ONLY acceptable fallback — never `cd` into the worktree and then try to remove it. `<main-repo-path>` is the path resolved in step 0; reuse that same value for every `git -C <main-repo-path>` command in this skill.
 
 **Why not `git worktree remove` from inside the worktree:** Running it from inside the worktree breaks the shell CWD — every subsequent Bash command fails with "Path does not exist." `ExitWorktree` avoids this entirely by restoring CWD before removing the directory. The `-C` fallback above also avoids it by never entering the worktree.
 

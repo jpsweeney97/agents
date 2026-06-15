@@ -24,11 +24,19 @@ executor.
 
 ## Plan Standards
 
+- Ground the plan first: read the settled source design, spec, or PRD in full,
+  and inspect the actual repo — existing file layout, conventions, and the
+  build/test commands — so every path, pattern, and command the plan names is
+  one you verified, not one you assumed.
 - If the source design covers multiple independent subsystems, flag it and
   split into one plan per subsystem; each plan should yield working,
   verifiable software on its own.
 - Map the file structure before tasks: which files are created or modified
   and each one's single responsibility. Follow existing repo patterns.
+- Number the tasks and order them so each is buildable and verifiable given
+  only the tasks before it; when a task depends on earlier work, an
+  earlier-numbered task must satisfy that dependency. The executor runs them in
+  document order.
 - Decompose into tasks that produce self-contained, verifiable changes.
   Within tasks, bite-sized steps — one action each: write the failing test,
   run it and watch it fail, implement minimally, run and watch it pass,

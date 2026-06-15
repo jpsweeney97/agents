@@ -14,22 +14,22 @@ Before spawning sub-agents, write a user-facing explanation of the problem space
 - The dependencies it would rely on, and which category they fall into (see [DEEPENING.md](DEEPENING.md))
 - A rough illustrative code sketch to ground the constraints — not a proposal, just a way to make the constraints concrete
 
-Show this to the user, then immediately proceed to Step 2. The user reads and thinks while the sub-agents work in parallel.
+Show this to the user, then immediately proceed to Step 2. When the runtime spawns sub-agents in parallel (Step 2), the user reads and thinks while they work; on the sequential fallback, the user reads the problem space while you design the alternatives in turn.
 
 ### 2. Spawn sub-agents
 
-Spawn 3+ sub-agents in parallel using the Agent tool. Each must produce a **radically different** interface for the deepened module.
+Produce 3+ **radically different** interfaces for the deepened module, one per design constraint below. Use parallel sub-agents when the runtime offers them (in Claude Code, the Agent tool); otherwise design them yourself, sequentially, one constraint at a time. Either way the goal is 3+ genuinely contrasting designs, not variations on one.
 
-Prompt each sub-agent with a separate technical brief (file paths, coupling details, dependency category from [DEEPENING.md](DEEPENING.md), what sits behind the seam). The brief is independent of the user-facing problem-space explanation in Step 1. Give each agent a different design constraint:
+Give each design its own technical brief (file paths, coupling details, dependency category from [DEEPENING.md](DEEPENING.md), what sits behind the seam) — as a sub-agent prompt in parallel, or as the framing you design under on the sequential path. The brief is independent of the user-facing problem-space explanation in Step 1. Give each a different design constraint:
 
 - Agent 1: "Minimize the interface — aim for 1–3 entry points max. Maximise leverage per entry point."
 - Agent 2: "Maximise flexibility — support many use cases and extension."
 - Agent 3: "Optimise for the most common caller — make the default case trivial."
 - Agent 4 (if applicable): "Design around ports & adapters for cross-seam dependencies."
 
-Include both [LANGUAGE.md](LANGUAGE.md) vocabulary and CONTEXT.md vocabulary in the brief so each sub-agent names things consistently with the architecture language and the project's domain language.
+Include both [LANGUAGE.md](LANGUAGE.md) vocabulary and CONTEXT.md vocabulary in the brief so each design names things consistently with the architecture language and the project's domain language.
 
-Each sub-agent outputs:
+Each design produces:
 
 1. Interface (types, methods, params — plus invariants, ordering, error modes)
 2. Usage example showing how callers use it

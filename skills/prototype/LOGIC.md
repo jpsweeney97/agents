@@ -56,6 +56,8 @@ Behaviour:
 
 The whole frame should fit on one screen.
 
+**If the user is away (AFK path):** an interactive TUI has no one to drive it, so it answers nothing unattended. Build a non-interactive scenario driver instead — a small script that imports the same pure logic module (Step 3) and runs it through the hard cases as a fixed sequence of actions, printing the full state after each step. It is a second thin shell over the one pure module, so it costs almost nothing extra, and it leaves a readable transcript of how the model behaves through the edge cases. Keep the interactive TUI for when the user is present; the scenario driver is its unattended equivalent.
+
 ### 5. Make it runnable in one command
 
 Add a script to the project's existing task runner (`package.json` scripts, `Makefile`, `justfile`, `pyproject.toml`). The user should run `pnpm run <prototype-name>` or equivalent — never need to remember a path.
@@ -64,7 +66,7 @@ If the host project has no task runner, just put the command at the top of the p
 
 ### 6. Hand it over
 
-Give the user the run command. They'll drive it themselves; the interesting moments are when they say "wait, that shouldn't be possible" or "huh, I assumed X would be different" — those are the bugs in the _idea_, which is the whole point. If they want new actions added, add them. Prototypes evolve.
+Give the user the run command. They'll drive it themselves; the interesting moments are when they say "wait, that shouldn't be possible" or "huh, I assumed X would be different" — those are the bugs in the _idea_, which is the whole point. If they want new actions added, add them. Prototypes evolve. On the AFK path, run the scenario driver yourself first and leave its printed transcript next to the run command, so the user returns to actual state output rather than an app no one started.
 
 ### 7. Capture the answer
 

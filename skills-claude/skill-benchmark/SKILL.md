@@ -64,7 +64,11 @@ above are authoritative.
 - **Isolation signal.** The `system/init` event carries a `skills` array of
   everything loaded. Confirm the target is **absent** from the baseline run's
   `skills` and **present** in the with-skill run's by parsing that array on both
-  arms, every run. A baseline you did not parse is a baseline you cannot trust.
+  arms, every run. Match the present-check to how that arm loaded the target: a
+  `--plugin-dir` performance arm registers it **namespaced** as
+  `<plugin-name>:<skill-name>`, so match by skill-name suffix, not bare-exact;
+  the trigger arm over the served skill set loads it under its bare name. A
+  baseline you did not parse is a baseline you cannot trust.
 - **Grading signal.** The parent run grades each output against the assertions.
   The trial never grades itself and is never told the assertions, the expected
   answer, or whether it is the with-skill or the baseline arm.
@@ -89,16 +93,21 @@ arms, not by trusting flags; `claude --help` lists flag names, not these
 behaviors):
 
 ```text
-with-skill: claude -p --setting-sources project,local --plugin-dir <dir-with-only-the-target> \
+with-skill: claude -p --setting-sources project,local --plugin-dir <plugin-dir-with-only-the-target> \
               --model <session-model> --output-format stream-json --max-budget-usd <cap>
 baseline:   claude -p --setting-sources project,local \
               --model <session-model> --output-format stream-json --max-budget-usd <cap>
 ```
 
 Both arms hold the built-ins constant; only `--plugin-dir` toggles the target.
-`--disable-slash-commands` and `--safe-mode` look like baselines but suppress
-`--plugin-dir` too, so they cannot form a matched pair. Pin `--model` to the
-model under test and confirm it from `init.model`.
+`--plugin-dir` needs an actual plugin directory, not a bare skill folder: the
+path must contain `.claude-plugin/plugin.json` with the skill under
+`skills/<name>/SKILL.md`. A lone `<name>/SKILL.md` loads nothing — the
+with-skill arm then comes back identical to the baseline and the isolation
+signal correctly reports the target absent, so confirm the layout before
+trusting a null result. `--disable-slash-commands` and `--safe-mode` look like
+baselines but suppress `--plugin-dir` too, so they cannot form a matched pair.
+Pin `--model` to the model under test and confirm it from `init.model`.
 
 ## Performance benchmark
 
