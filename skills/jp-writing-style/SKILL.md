@@ -1,6 +1,6 @@
 ---
 name: jp-writing-style
-description: "Use when writing or rewriting prose in JP's voice: reflective essays, personal statements, application responses, analytical or professional narratives, memos, recommendations, and explanations where voice and rhetorical movement matter. Do not use for casual, humor-first, or marketing copy, minimalist technical instructions, obligation-only edits to agent-instruction docs (use writing-principles), or prose that would require inventing facts the user has not supplied."
+description: "Use when writing or rewriting first-person self-presentation prose in JP's voice — writing where JP narrates his own experience or makes his own case: personal and reflective essays, personal statements, cover letters, autobiographical narratives, and application or interview responses. Do not use for workplace or third-party writing (memos, recommendation letters for others, professional or analytical narratives, case write-ups), general explanatory prose, casual, humor-first, or marketing copy, minimalist technical instructions, obligation-only edits to agent-instruction docs (use writing-principles), or prose that would require inventing facts the user has not supplied."
 ---
 
 # JP Writing Style
@@ -15,7 +15,7 @@ shape wording, structure, tone, and rhetorical movement, never the facts.
 ## Integrity gate — read first
 
 This is the one hard rule. The skill's named use cases (personal statements,
-application responses, recommendations) are high-stakes: an invented detail
+cover letters, application responses) are high-stakes: an invented detail
 there is fraud.
 
 Every fact, credential, experience, emotion, outcome, and causal claim in the
@@ -43,12 +43,19 @@ personal statement. The arc reads as honest because the facts are real.
 
 ## When to use
 
-Use this skill to write or rewrite in JP's voice: reflective essays, personal
-statements, application or interview responses, analytical case write-ups,
-professional narratives, memos, recommendations, and explanations — anywhere
-tone, structure, and rhetorical movement matter.
+Use this skill for first-person self-presentation in JP's voice — writing where
+JP narrates his own experience or makes his own case: personal and reflective
+essays, personal statements, cover letters, autobiographical narratives, and
+application or interview responses, anywhere tone, structure, and rhetorical
+movement matter.
 
-Do not use it for casual texting, humor-first writing, punchy marketing copy,
+Do not use it for workplace or third-party writing — memos, recommendation
+letters for someone else, professional or analytical narratives, case write-ups,
+or general explanatory prose — even when those would read better in a formal
+register; this voice is tuned for self-presentation, not neutral exposition. The
+analytical case write-up in the corpus stays as voice grounding (its moves
+transfer to self-presentation), but the skill no longer writes that genre. Also
+skip it for casual texting, humor-first writing, punchy marketing copy,
 minimalist technical instructions, or legal/medical/financial advice where
 neutrality outweighs voice. For obligation-only edits to agent-instruction docs
 (AGENTS.md, CLAUDE.md, SKILL.md), use `writing-principles`. For code comments or

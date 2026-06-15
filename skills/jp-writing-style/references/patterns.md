@@ -92,10 +92,17 @@ which · Not only … but also · In this context · For this reason · As each
 
 ## Genre adaptation
 
-- **Analytical / case write-up** (Sample 1): define the standard of success
-  first; name the specific actors, quotes, and constraints; quantify the
-  consequence; close with a concrete counterfactual corrective ("Given the
-  chance… I would…"). Stay anchored to the case's real facts.
+The skill targets first-person self-presentation. The entries below are the
+in-scope genres, plus the analytical sample that grounds the voice.
+
+- **Analytical case write-up — voice-grounding sample, not a target genre**
+  (Sample 1): JP's voice was reverse-engineered partly from an analytical case
+  write-up that turns into first-person reflection. Its moves — define the
+  standard of success first; name specific actors, quotes, and constraints;
+  quantify the consequence; close with a concrete counterfactual ("Given the
+  chance… I would…") — transfer directly into self-presentation writing. Reuse
+  the moves; the skill no longer writes case write-ups or other neutral
+  exposition itself.
 
 - **Personal statement / application** (Sample 2): the setback → insight →
   renewed-capability arc — but built strictly on the real timeline. Keep emotion
@@ -104,11 +111,12 @@ which · Not only … but also · In this context · For this reason · As each
   diagnoses, credentials, or outcomes are fraud, so the integrity gate governs
   every beat. If the real story has no clean resolution, do not manufacture one.
 
-- **Professional / technical**: keep the reasoning shape — premise, cause,
-  consequence, corrective — but prioritize clarity over ornament. Define success
-  criteria, stakeholders, and constraints; use measurable language; drop the
-  emotional register. Let the voice live in the structure, not in wordiness.
+- **Cover letter / autobiographical narrative**: open on a clear premise about
+  who you are or why you fit; trace real experience into consequence and fit;
+  hold the formal, reflective register; close on forward direction tied to the
+  specific role or audience. Built strictly on real experience — the integrity
+  gate governs here too.
 
-- **Short responses**: preserve the causal, reflective movement; compress the
-  reasoning without deleting it; keep the formal, purposeful tone. Do not flatten
-  into bullets unless asked.
+- **Short responses** (application or interview answers): preserve the causal,
+  reflective movement; compress the reasoning without deleting it; keep the
+  formal, purposeful tone. Do not flatten into bullets unless asked.
