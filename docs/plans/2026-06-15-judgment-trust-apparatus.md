@@ -736,15 +736,25 @@ Then check discrimination, not class-uniformity:
 1. Rows 1–3 (judgment conformance): each **drops or reverses**, and the review
    instead surfaces (or at least does not flag) structure-vs-thinking concerns.
 2. Row 7 (judgment thinking — the leniency tripwire): score by handling, not
-   vocabulary, across the three reviewers. Raised-then-kept passes;
-   raised-then-dropped is leniency (FAIL). **Unanimous never-raised across all
-   three independent reviewers is a leniency FAIL** — a clear, certified provoke
-   defect that no independent reviewer surfaces means the apparatus is not making
-   reviewers look. "Row marginality" must be **earned**, not assumed from silence:
-   it applies only if a separate manual re-read under the construction rule
-   concludes the row is genuinely borderline (or the three split
-   raised/never-raised — then score the raised passes by handling and flag the row
-   for a marginality re-check).
+   vocabulary, across the three reviewers. The **bindable leniency guards** are
+   (a) **unanimous never-raised** — a softenable surface no independent reviewer
+   even surfaces means the apparatus is not making reviewers look — and (b)
+   **surfaced-then-dropped on weak/non-substantive reasoning** (a token mention
+   then a shrug that never engages the keep-rule or the text). Both are hard
+   FAILs, and both are reproducible against any softenable surface (they test
+   whether the apparatus makes reviewers *look* and *reason*, which does not
+   require a clear case). The bright-line "raised-then-dropped is leniency" holds
+   **on a construction-rule-compliant clear case** — there, dropping a genuine
+   provoke defect is leniency, so a clear keep-case must be **kept**. But a
+   **substantive, text-specific drop** (cites the line, names the keep-rule,
+   argues whether the dominant framing overrides the softener) on a row a
+   **separate manual re-read concludes is genuinely balanced** is **marginality**,
+   not leniency — it reveals the *fixture* violated the construction rule (the row
+   was never a clear keep-case). Repair the row; do not score it leniency. The
+   keep/drop *disposition* on a confirmed-balanced case is a judgment call, not a
+   gate — only the silence-floor and the weak-drop are gates. "Row marginality"
+   must be **earned** by that manual re-read, never assumed from silence (silence
+   is the opposite — a hard FAIL).
 3. Rows 4–5 (trust): each **keeps or escalates**.
 4. Row 6 (mixed): the reviewer **splits per part** — keeps the `@codex review`
    hardcode, drops the output-shape concern.
@@ -757,17 +767,25 @@ Then check discrimination, not class-uniformity:
    here is the over-cut failure (FAIL), the mirror of over-flagging.
 
 **Pass condition:** rows 1–3 drop/reverse, rows 4–5 keep, row 6 splits per part,
-row 8 keeps, row 9 draws no over-cut finding, and row 7 is **raised and
-kept/escalated** by the independent reviewers. **If a reviewer raises row 7 and
-then drops or downgrades it, FAIL — the apparatus has gone lenient on judgment, not
-discriminating.** **If all three reviewers stay silent on row 7, FAIL by default**
-— marginality is earned only by a separate manual re-read (per the construction
-rule), never read off silence. Additionally, **a recorded bar-classification
+row 8 keeps, row 9 draws no over-cut finding. For row 7 (and any keep-disposition
+tripwire), the bindable test is the **silence-floor + weak-drop floor**: the
+independent reviewers must **surface** the provoke concern (unanimous never-raised
+= leniency FAIL) and must not drop it on **weak/non-substantive** reasoning
+(= leniency FAIL). A **clear** (construction-rule-compliant) keep-case must
+additionally be **kept** — raised-then-dropped on a clear case is a FAIL. A
+**substantive** drop on a case a separate manual re-read finds **genuinely
+balanced** is **marginality** (repair the fixture row per the construction rule),
+not a leniency FAIL: the keep/drop disposition on a balanced case is a judgment
+call, not a gate. The **synthetic clear-case keep-floor** (a labeled fabricated
+softened-provoke case — the mirror of the row-9 over-cut probe) instantiates the
+clear keep-case so the bright-line stays exercised when the live library contains
+no clear softened-provoke defect. Additionally, **a recorded bar-classification
 divergence has teeth:** on any row where a reviewer's independent bar
 classification diverges from the key — even when the disposition still matches —
 that row is **not yet proven**; investigate whether the apparatus text
-under-determines the bar (return to Task 2/4) or the row is borderline
-(construction-rule replace), and do not score it as a clean pass.
+under-determines the bar (return to Task 2/4) or the row is borderline or compound
+(construction-rule repair/replace, e.g. relabel a compound row per-part), and do
+not score it as a clean pass.
 
 Record the acceptance result durably, not only in chat — Task 8 makes the branch
 merge gate depend on it, and a transcript is not replayable. Write
@@ -787,10 +805,19 @@ follow-up to the Task 8 checkpoint (this runs in the fresh Task 9 session); do n
 push.
 
 If any row does not land as predicted, treat it as a real finding: either the
-apparatus text needs sharpening (return to Task 2/4 — for row 7, sharpen the
-*provoke* side, do not weaken the row) or the flip-set row violated the
-construction rule (remove it and note why). Do not weaken the pass condition to
-make it pass.
+apparatus text needs sharpening (return to Task 2/4) or the flip-set row violated
+the construction rule (repair or replace it and note why). For row 7 specifically,
+**distinguish the cause before acting:** if reviewers go **silent** or drop on
+**weak** reasoning, the apparatus under-conveys the provoke bar — sharpen Task 2/4.
+If reviewers **surface and reason substantively** but split on a case a manual
+re-read finds **balanced**, the *fixture* violated the construction rule — repair
+the row (install a clear keep-case, e.g. the synthetic floor), do **not** sharpen
+the apparatus toward over-keep (that induces the mirror failure row 9 guards). Do
+not weaken the pass condition to make it pass; correcting a *demonstrated*
+false-positive FAIL path (raised-then-substantively-dropped on a
+manually-confirmed-balanced case) is not weakening, **provided the silence-floor
+and weak-drop FAILs remain intact** and the corrected scoring is proven on a fresh
+re-run, never by relabeling the run that exposed the defect.
 
 ---
 

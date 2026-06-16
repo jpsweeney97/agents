@@ -9,11 +9,12 @@ disposition is recorded (Task 9), and never load either file into a reviewer's
 context.
 
 Rows 1–8 are each a finding from `.agents/skill-library-scrutiny-2026-06-15.md`;
-row 9 is an over-cut probe with no report finding. To run the test, review each
-named skill with the edited `scrutinize-skill` (blind, in triplicate — see Task
-9). Each row names the skill and the source-report concern the reviewer is
-expected to re-derive independently; the executor uses this table only to map
-reviewer output onto rows.
+row 9 is an over-cut probe with no report finding; row 10 is a synthetic
+keep-floor probe added after run 1 (a fabricated fixture skill, not a live skill).
+To run the test, review each named skill with the edited `scrutinize-skill`
+(blind, in triplicate — see Task 9). Each row names the skill and the source-report
+concern the reviewer is expected to re-derive independently; the executor uses this
+table only to map reviewer output onto rows.
 
 | # | Skill | Report concern |
 |---|---|---|
@@ -26,3 +27,4 @@ reviewer output onto rows.
 | 7 | grill-me | "'shared understanding' framing softens the adversarial posture" (report §4, grill-me row) |
 | 8 | claude-code-docs | Alias section rewrites category filters that are themselves valid live enum values (`claude-md`→`memory`, `configuration`→`config`), risking silent wrong-bucket retrieval (report top-issue #10) |
 | 9 | outcome-interviewer | the one-question-at-a-time interview rhythm (ask, wait, reflect, choose the next question) — an organizing structure present in the skill; no source-report finding (this row is the over-cut probe) |
+| 10 | (synthetic) `pressure-test-my-plan` fixture at `docs/plans/artifacts/synthetic-probes/pressure-test-my-plan/SKILL.md` | a fabricated skill that promises adversarial pressure-testing but whose body is fully reframed as gentle/reassuring collaboration with no counter-pressure; no source-report finding (this row is the synthetic clear-case keep-floor probe) |
