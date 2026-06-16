@@ -62,6 +62,67 @@ add, why the failure mode does not justify it, and what lighter path would
 preserve the work. Ask before applying the substitute unless the user already
 asked you to choose the smaller design.
 
+## Two Kinds of Skill
+
+The core move runs per edit. Run it once more per skill, at the whole-contract
+grain: what does this skill's value depend on?
+
+- **Judgment skills** earn their keep by making the agent think better than it
+  would alone — a sharper critique, a better recommendation, a real diagnosis.
+  Their value is uplift. Hold them to: *does this protect and provoke better
+  thinking?* The practical test for any structure in a judgment skill: does it
+  organize or elicit thinking, or make the judgment for the agent? Provoking
+  structure earns its place (an interrogation rhythm, a forced comparison, a
+  counterexample); substitutive structure is the cost (mandated output shapes,
+  exhaustive rule lists, fixed sections the agent fills to feel done), and past
+  a point it makes the agent perform the contract instead of doing the work.
+  When a judgment skill underperforms, the usual fix is to cut substitutive
+  structure. But the bar is *protect and provoke*, and the provoke side fails
+  too: a skill that provokes nothing — no forcing function, no counter-pressure,
+  just "think carefully" — adds nothing over the bare agent. So does one that
+  provokes too weakly: a forcing function present but dulled, hedged, or softened
+  until it no longer creates real counter-pressure (an adversarial posture
+  reframed as collaborative) is the same defect by degree, not a pass. Its fix is
+  a sharper forcing function (a harder question, a forced comparison, a required
+  counterexample), not more scaffolding.
+- **Trust skills** earn their keep by reliably carrying a task so the user stops
+  supervising it — landing a branch, closing out work, executing a plan step by
+  step — or by returning a correct, grounded, faithfully-transformed result the
+  user can stop double-checking (a correct doc lookup, a lossless reformat).
+  Their value is predictable, repeatable execution (damage-prevention is
+  its sharpest case, not its only one; correct retrieval and faithful
+  transformation are the lookup/transform tail of the same value). Here defined steps, safe defaults, and
+  firm refusals are the value, not the cost. Hold them to: *is this reliable,
+  and is the machinery single-sourced rather than copied?* But trust skills fail
+  under bad rules too — just never as lost thinking. The failure takes two
+  shapes: brittle, duplicated machinery (the same gate hand-copied into four
+  skills, drifting out of sync), and crude-rule overreach (a rule so rigid it
+  does the wrong thing in a case the author never foresaw — a protected-branch
+  stop that dead-ends legitimate work).
+
+This refines the core move; it does not restate it. Judgment skills may carry
+plenty of structure — stages, rhythms, prompts — as long as it organizes
+thinking without making the judgment, exactly the deterministic mechanic the
+core move already prefers over a decision-making rule. Structure that makes or
+pre-empts the judgment is the substitutive kind, and the cost. Trust skills are
+the case where machinery that *does* decide and constrain is justified — by the
+need for reliable, repeatable execution.
+
+Most real skills are mixed. Apply the bar per part, not per skill: hold the
+thinking parts to the judgment bar and the lifecycle or safety parts to the
+trust bar. Do not stamp one label on a two-natured skill.
+
+This is a lens, not a label. There is no skill class to declare, score, or
+validate — infer the bar from what the skill does, apply it in the moment, move
+on. If applying it ever produces a fixed checklist every judgment skill "must
+satisfy," it has ossified into the machinery it exists to prevent — and that
+failure mode applies to this section too. The lens governs *quality* only;
+delivery hygiene (invocation tokens, naming, Codex budget, parseability) stays
+uniform across both kinds.
+
+This section and `scrutinize-skill` are themselves judgment skills: hold any edit
+to them to the bar above — add a lens, not a score or required section.
+
 ## When Machinery Survives
 
 Keep the surviving machinery narrow. Be able to say plainly:

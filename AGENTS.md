@@ -131,8 +131,12 @@ workflow:
   support doc, `AGENTS.md`, `CLAUDE.md`, or `agents/*.yaml`.
 - `agent-facing-design` — before adding or materially expanding agent-facing
   obligations, proof standards, authority rules, lifecycle behavior, mutation
-  boundaries, persistence, routing, or machinery. The canonical gate is
-  `skills/agent-facing-design/SKILL.md`; do not duplicate it here.
+  boundaries, persistence, routing, or machinery. It also owns the
+  judgment-vs-trust distinction: a skill whose value is better thinking is held
+  to "does this protect and provoke better thinking?", a skill whose value is
+  reliable execution to "is this reliable, and is the machinery single-sourced
+  rather than copied?"; apply the bar per part for mixed skills. The canonical
+  gate is `skills/agent-facing-design/SKILL.md`; do not duplicate it here.
 - `scrutinize-skill` — review-only skill-contract critique. After the review
   is accepted, patch the owning skill surfaces directly — but when the patched
   skill is plugin-distributed (`scrutinize-skill` itself and the rest of
@@ -163,9 +167,16 @@ workflow:
   and rationale out of frontmatter; they belong in the body. Name neighboring
   skills or exclusions only when selection-critical.
 - Soft 25-60 word description budget; go past ~90 words only to prevent a
-  specific likely misroute.
-- In the body, state expected behavior, defaults, stop conditions, and output
-  shape.
+  specific likely misroute. Description length is a Codex-budget input, not a
+  skill-quality score: a judgment skill is not lower-quality for sitting near
+  the cap. Trim for budget pressure, not for conformance.
+- In the body, state expected behavior and defaults. For trust skills, also fix
+  stop conditions and output shape — predictable shape is their value. For
+  judgment skills, structure is fine when it organizes or provokes thinking (a
+  rhythm, a forced comparison, a findings format) and a defect when it makes the
+  judgment for the agent (fill-in sections completed to feel done, a rigid stop
+  sequence that pre-empts thinking). See `agent-facing-design`, Two Kinds of
+  Skill.
 - Keep long rubrics, worked examples, and rationale in `references/` or
   `examples/`, named by purpose. Do not move behavior-critical instructions
   into a reference unless `SKILL.md` clearly says when to load it.

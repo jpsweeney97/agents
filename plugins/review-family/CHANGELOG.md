@@ -4,6 +4,18 @@ All notable changes to the Review Family plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.3.10 - 2026-06-15
+
+### Added
+
+- `scrutinize-skill`: apply the judgment-vs-trust bar. Two new failure modes (a
+  judgment skill over-ruled into performing the contract; a judgment skill that
+  provokes nothing or only weakly — a dulled or softened forcing function), a
+  bar-classification step in the review workflow (judgment vs trust, per part for
+  mixed skills), and severity-by-bar guidance. The distinction is single-sourced
+  in `agent-facing-design` (`## Two Kinds of Skill`) and anchored in `AGENTS.md`.
+  No skill class field — a lens applied per part.
+
 ## 0.3.9 - 2026-06-14
 
 ### Changed
