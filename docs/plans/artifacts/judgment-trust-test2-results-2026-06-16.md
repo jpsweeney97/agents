@@ -5,7 +5,7 @@ project: agents
 design: judgment-trust-test2-human-coldjudge-design-2026-06-16.md @ 9f34f69 (protocol + scoring + sealed limits)
 sealed_key: test2-corpus/sealed-key.md (opened only AFTER all 14 answers were transcribed)
 packet: .agents/scratch/test2-run/blind-packet-shuffled-2026-06-16.md (5197 bytes; md5 fd633222056762bc602eca373b2f850a; byte-identical to the phone copy)
-answer_source: /Users/jp/scratch-workspace/skill-stuff/blind-packet-answered-2026-06-16.md
+answer_source: .agents/scratch/test2-run/blind-packet-answered-2026-06-16.md (durable run-data copy, git-ignored, md5 7bf565db7971464baf5c58fb2fc71e4c; provided by the user from /Users/jp/scratch-workspace/skill-stuff/blind-packet-answered-2026-06-16.md)
 judge: software/design professional (experienced engineer/designer, not an AI-skill-design specialist); identity not separately recorded; administered WHOLE-PACKET (all 14 Elements visible at once), NOT one-at-a-time — see § Integrity and § Sealed limits
 scoring: 3 independent Claude scorers (diverse lenses) + 1 transcription/map verifier + 3 adversarial refuters (wf_9e36986c-30f)
 verdict: PASS — a bar-naive human expert agrees with bar-ON on 12/14 (contested 6–7/9); the finding-cap resolves toward DEFEND; calibration holds under the design's pre-registered reasoning-over-label rule; every disagreement is over-cut, never lenient
