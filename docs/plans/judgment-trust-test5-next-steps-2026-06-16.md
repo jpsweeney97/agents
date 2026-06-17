@@ -3,7 +3,7 @@ type: action-plan
 project: agents
 created: 2026-06-16
 source: "test-5 red-team interim results (feca720) §§6–10 + run findings"
-status: "Phase 1 COMPLETE (T1+T2+T3); G1 resolved (close test 5). T6 (test 4, cut-then-use) DONE — AT-LEAST-AS-GOOD (next-steps Pre-Final Checklist cut; both scorer families + tie-break agree). T5 (red-team v2) still optional/open."
+status: "ALL DONE. Phase 1 (T1+T2+T3) complete; G1 resolved. T6 (test 4, cut-then-use) DONE — AT-LEAST-AS-GOOD. T5 (red-team v2) DONE — CLOSED as characterized: an 8-lens design panel caught the test-4-lever misattribution and gated the seal on a pilot; two pre-seal pilots showed the FN leniency channel empty (0/6 sharpened levers) and the FP over-cut channel empty on neutral material → no sealed run warranted, apparatus UNCHANGED. The 5-test menu is COMPLETE (1✓2✓3✓4✓5✓)."
 ---
 
 # Action plan — after test-5 (red-team), reviewer-side INCONCLUSIVE
@@ -78,9 +78,16 @@ state.)*
 
 - **T4 — Push decision.** *Done when:* push of the finalized record is authorized (or explicitly
   deferred). Inferred-deps on T2 so pushed history carries the final, not interim, results.
-- **T5 — Red-team v2 (only if warranted by Gate G1).** Re-keyed leniency + optionally a Claude-built
-  adversary (off the Codex hole-model) and FP-scale-up. *Done when:* designed + sealed and either run or
-  explicitly deferred with rationale.
+- **T5 — Red-team v2. ✅ DONE — CLOSED as characterized** (no sealed run; channel proven empty pre-seal).
+  Drafted a both-arms v2 prereg → hardened by an 8-lens design panel (`wf_60516e04-80c`, SEAL-AFTER-FIXES)
+  which caught the load-bearing error (the test-4 whole-section cut was **bar-ON's**, not the baseline's, so
+  the FN divergence cell was forbidden by construction) and made BLOCKER #2: gate the seal on an unsealed
+  base-rate pilot. Pilot (`wf_c1397f11-68b`, 36 reviews): the designed FN/FP levers were dead; one
+  borderline FN flicker via a new lever (a crude overreach embedded in a forcing function). Sharpening
+  pilot (`wf_5b2a2271-e04`, 48 reviews): **0/6 levers reproduce** — bar-ON catches the embedded overreach
+  using the lens's own vocabulary; controls clean. **Verdict: leniency not constructible (5 probes),
+  over-cut empty on neutral material, apparatus UNCHANGED.** Record:
+  `docs/plans/artifacts/judgment-trust-test5-v2-pilot-results-2026-06-16.md`.
 
 **Independent track (no dependency; priority-deferred)**
 
