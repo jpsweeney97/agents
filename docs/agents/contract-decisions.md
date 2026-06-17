@@ -289,6 +289,20 @@ entries; do not rewrite settled ones.
   human arm to a fresh judge. Repo-scoped home chosen (recurrence concentrated
   here) over global, by JP. Evidence: breach disclosed in results §8 and scored
   in §12 (`51ab24e`); rule at `AGENTS.md` `## Blind Evaluations` (this commit).
+- 2026-06-17 — jp-writing-style: retired (removed from source). The skill was
+  admitted, built, scope-narrowed, and hard-deleted all on 2026-06-15 — a
+  targeted removal of exactly its three files (`7d76940` "chore: cleanup", 381
+  deletions) ~8.5h after the build (`6239f9c`, 01:51). This entry completes the
+  retirement record left half-done at the time: the orphaned `~/.claude/skills`
+  symlink (dangling since the delete, its source target missing) is reaped, and
+  the 2026-06-15 admission above is superseded. Source is NOT moved to
+  `skills-archive/` (the charter's default skill-retirement home), by JP's
+  call: the skill's `references/corpus.md` was real personal writing, and
+  re-committing it to a repo that pushes to GitHub is the exposure the same-day
+  deletion avoided — a deliberate, recorded deviation from the archive default.
+  The source remains recoverable from git history at `6239f9c` if the decision
+  is ever reversed. Evidence: deletion `7d76940`; source/recovery point
+  `6239f9c`; symlink reap + this entry (this commit).
 
 ## Parks
 
