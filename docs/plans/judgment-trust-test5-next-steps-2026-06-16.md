@@ -3,7 +3,7 @@ type: action-plan
 project: agents
 created: 2026-06-16
 source: "test-5 red-team interim results (feca720) §§6–10 + run findings"
-status: "Phase 1 COMPLETE — T1 + T2 + T3 DONE; G1 resolved (close test 5; T5/T6 optional); push (T4) pending on explicit ask"
+status: "Phase 1 COMPLETE (T1+T2+T3); G1 resolved (close test 5). T6 (test 4, cut-then-use) DONE — AT-LEAST-AS-GOOD (next-steps Pre-Final Checklist cut; both scorer families + tie-break agree). T5 (red-team v2) still optional/open."
 ---
 
 # Action plan — after test-5 (red-team), reviewer-side INCONCLUSIVE
@@ -84,8 +84,17 @@ state.)*
 
 **Independent track (no dependency; priority-deferred)**
 
-- **T6 — Test 4 (cut-then-use).** The other unrun menu item; schedule once test 5 is closed. *Done when:*
-  designed/sealed or explicitly deferred.
+- **T6 — Test 4 (cut-then-use). ✅ DONE — AT-LEAST-AS-GOOD** (results
+  `…-test4-cutthenuse-results-2026-06-16.md`; seal `2ce0935`). A cold, blind 48-skill discovery pass +
+  3-lens adversarial verification surfaced exactly one clean bar-recommended cut (`next-steps`' 8-item
+  Pre-Final Checklist — pure recap of body obligations); `writing-principles` disqualified (reshape, not
+  cut). Cut made on-branch, sealed, then 60 blind hermetic runs (2 arms × 10 inputs × 3 reps) blind-scored
+  by a Claude panel + cross-model Codex (gpt-5.5). Claude: both arms perfect ceiling (identical). Codex
+  (discriminating): cut arm non-inferior **and slightly cleaner** (overall 0.929→0.970; P3 invent
+  0.67→0.86; P7 park 0.90→1.00; holistic 4.24→4.57; no collapse). Tie-break confirmed a real P7 defect in
+  the WITH arm the cut arm lacks. Both families + tie-break agree: **acting on the bar's cut is safe
+  (mildly beneficial)**; substitutive-recap theory holds, salience-reinforcement refuted for this cut.
+  Apparatus UNCHANGED. Decision: keep/land the cut (JP go).
 
 ## Decision Gates
 
