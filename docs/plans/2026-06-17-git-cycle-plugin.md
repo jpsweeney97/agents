@@ -18,7 +18,18 @@ false-pass clause corrected (`skills/`-only; Codex never scans `skills-claude/`)
 requires `installed, enabled`; R3 — the new drift canary is mirrored into the `claude-skills-sync.sh`
 recovery sample; R4 — WS1 issue closure is gated on an explicit user ask. Plus two adjudicator-found
 should-fix items: M1 — the WS3 "four target paths" count corrected to three; M2 — Task 3.8 gains a
-session-restart checkpoint (the Claude `git-cycle:` proof needs a fresh session).
+session-restart checkpoint (the Claude `git-cycle:` proof needs a fresh session). Patched a fourth time
+2026-06-17 after a `review-reviewer` adjudication of a fourth supplied review (partially reliable — all
+four findings factually grounded, two severity-inflated against shipped-plugin precedent): R1 (act) — the
+WS1 commit subject changed from `closes #9, #10` to a non-closing `refs #9, #10` so an authorized *push*
+of `main` cannot auto-close the issues behind the explicit-ask closure gate; R2 (narrow) — Task 3.10
+gains an `rg` old-path consumer sweep (bare skill-*name* references resolve to `git-cycle:<skill>` exactly
+as the repo already references review-family/handoff skills by bare name, so they need no edit — only a
+stray file-*path* consumer would break); R3 (narrow) — Task 3.8 now distinguishes cache-inspection
+(proves plugin *delivery*, the copy-first concern) from model-visibility under Codex's silent budget
+truncation (a pre-existing repo-wide property), with a best-effort, non-blocking visibility check; R4
+(defer) — a note that the manifest's forward-looking mirror URLs are inert until the out-of-scope mirror
+publish, matching the shipped `handoff`/`review-family` manifests.
 
 ## What this builds
 
@@ -453,7 +464,7 @@ git switch main && git merge --ff-only fix/git-hygiene-protected-set
 Commit message:
 
 ```text
-fix(git-hygiene): converge protected resolution + add revert marker (closes #9, #10)
+fix(git-hygiene): converge protected resolution + add revert marker (refs #9, #10)
 
 Resolve "protected" repo-defined-first, else the canonical fallback set, matching
 merge-branch/closeout-check/acceptance-map in the no-config case (#9); add revert to
@@ -473,7 +484,13 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 **Closing #9/#10 is a remote mutation — gate it on an explicit ask.** The plan's own convention (no
 push, remote mutation, or publish unless the user asks) covers closing GitHub issues. So do **not** run
 the close commands as part of landing WS1: stop after the fast-forward merge, report the exact commands
-with the real merge hash substituted for `<hash>`, and run them only if the user authorizes it.
+with the real merge hash substituted for `<hash>`, and run them only if the user authorizes it. The
+commit subject deliberately uses `refs #9, #10`, **not** a closing keyword (`closes`/`fixes`/...
+directly followed by `#N`): GitHub auto-closes issues from commit closing-keywords once the commit lands
+on the default branch, so a later authorized *push* of `main` — authorized to sync, not to close —
+would otherwise close the issues behind this gate. Keep closure only in the gated `gh issue close`
+commands below. (The `fix(git-hygiene):` prefix and the body's `(#9)`/`(#10)` mentions are inert — a
+closing keyword fires only when immediately followed by the issue reference.)
 
 ```bash
 # Run ONLY after the user authorizes closing the issues:
@@ -793,6 +810,12 @@ Create `plugins/git-cycle/.claude-plugin/plugin.json` with exactly:
 Version 1.0.0 is honest: this packages six in-production skills (panel finding #11 — 0.1.0 would signal
 "never shipped"). Justify it in the CHANGELOG (Task 3.3).
 
+> Note — the `interface` `websiteURL`/`privacyPolicyURL`/`termsOfServiceURL` point at the GitHub release
+> **mirror** (`…/codex-tool-dev/…/turbo-mode/git-cycle/…`), which is **out of scope** here and does not
+> exist yet. This matches the shipped `handoff`/`review-family` manifests, whose identical forward-looking
+> URLs resolved only once those plugins were mirror-published; the git-cycle URLs resolve when the mirror
+> is published on an explicit ask. Inert display metadata until then — not a blocker, no change needed.
+
 Verify it parses:
 
 ```bash
@@ -1047,6 +1070,16 @@ the still-live originals cannot fake:
   way Claude does, confirm the six there too — but Codex skill-namespacing is unconfirmed, so the cache
   inspection above is the required proof, not a namespaced list.)
 
+  **Proof boundary — delivery vs model-visibility.** This cache inspection proves the plugin *delivers*
+  the six (the wiring that copy-first protects), not that all six survive Codex's documented silent
+  over-budget truncation into the model-visible skill list (`AGENTS.md`: Codex "silently truncates the
+  skill list when over it"). That truncation is a pre-existing, repo-wide property that hits the
+  standalone originals equally, so it is **not** a reason to keep them, and "installed cache" is itself an
+  `AGENTS.md`-sanctioned runtime-inspection path. So treat the model-visible list as **best-effort, not a
+  delete gate**: if the Codex session exposes a model-visible skills list, confirm the six appear and note
+  it; if it does not, or the list is truncated, record that limit in the commit body — do **not** block
+  deletion on a model-visibility proof Codex may not expose. The cache proof is what gates Task 3.9.
+
 If any of the six fails to load **from the plugin** in either runtime, fix the manifest/paths before
 Task 3.9. The originals are still the live source, so nothing is lost.
 
@@ -1085,13 +1118,23 @@ done
 for s in git-hygiene closeout-check merge-branch gh-address-comments gh-pr-review-loop; do
   ruby -ryaml -e 'YAML.load_file(ARGV[0])' "plugins/git-cycle/skills/$s/agents/openai.yaml" && echo "openai.yaml ok: $s"
 done
+# No live consumer references the OLD skill PATHS after the move. Bare skill-NAME references in prose
+# (acceptance-map, execute-plan, orient-status point at closeout-check/merge-branch/git-hygiene) are
+# FINE — they resolve to git-cycle:<skill> exactly as the repo already references review-family/handoff
+# skills by bare name (e.g. AGENTS.md names `scrutinize-skill`, a packaged review-family skill, with no
+# standalone symlink). This sweep catches only a stray file-PATH consumer, which WOULD break on deletion:
+rg -n 'skills/(git-hygiene|closeout-check|merge-branch|gh-address-comments|gh-pr-review-loop)|skills-claude/exiting-worktrees' \
+  --glob '!docs/plans/**' --glob '!plugins/git-cycle/**' \
+  && echo "REVIEW: stray old-path consumer(s) above — repoint or confirm intentional" \
+  || echo "no stray old-path consumers"
 scripts/check-protected-set.sh
 git diff --check
 git status --short
 ```
 Expected: `manifest ok`; the validator passes for all six (the documented
 `argument-hint`/`disable-model-invocation` "unexpected key" note is accepted); each `openai.yaml`
-parses; drift check `OK: ... 5 surfaces`; `git diff --check` silent;
+parses; `no stray old-path consumers` (bare skill-name references need no edit — see the comment);
+drift check `OK: ... 5 surfaces`; `git diff --check` silent;
 `git status` shows the additions under `plugins/git-cycle/`, the marketplace edit, the script repoint,
 and the deletions of the old skill dirs.
 
