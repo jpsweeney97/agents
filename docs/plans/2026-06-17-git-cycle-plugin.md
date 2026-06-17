@@ -11,7 +11,14 @@ live-load gate to require runtime-inspection proof that the loaded source is `gi
 skills (a symlink/bare-name sighting can false-pass while the originals are still live); P2 mirrored the
 drift check into the tracked `.codex/hooks.json` canary so it fires in Codex sessions too; P2 added the
 missing `mkdir -p .claude-plugin` to Task 3.1; P2 added `git diff --stat`/scoped-diff review to every
-commit gate (Tasks 1.8/2.6/3.10) per `AGENTS.md`.
+commit gate (Tasks 1.8/2.6/3.10) per `AGENTS.md`. Patched a third time 2026-06-17 after a
+`review-reviewer` adjudication of a second supplied review (partially reliable; 4/4 findings confirmed,
+all should-fix): R1 — WS3 now updates the `AGENTS.md` plugin-source enumeration; R2a — Task 3.8's Codex
+false-pass clause corrected (`skills/`-only; Codex never scans `skills-claude/`); R2b — the Codex gate
+requires `installed, enabled`; R3 — the new drift canary is mirrored into the `claude-skills-sync.sh`
+recovery sample; R4 — WS1 issue closure is gated on an explicit user ask. Plus two adjudicator-found
+should-fix items: M1 — the WS3 "four target paths" count corrected to three; M2 — Task 3.8 gains a
+session-restart checkpoint (the Claude `git-cycle:` proof needs a fresh session).
 
 ## What this builds
 
@@ -272,8 +279,9 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CANON='Treat repo-defined protected branches first; if the repo defines none, treat `main`, `master`, `develop`, and `release/*` as protected.'
 
 # Every always-loaded surface that must carry the sentence verbatim.
-# WS3 repoints the four skill paths under plugins/git-cycle/skills/ (acceptance-map
-# and AGENTS.md stay put) — update this list in that migration step.
+# WS3 repoints the three SKILL.md that move under plugins/git-cycle/skills/ (git-hygiene,
+# merge-branch, closeout-check); acceptance-map and AGENTS.md stay put — update this list
+# in that migration step (Task 3.5).
 TARGETS=(
   "AGENTS.md"
   "skills/git-hygiene/SKILL.md"
@@ -367,15 +375,40 @@ that fuller shape (Codex hooks have no separate permission model, so there is no
 
 Because `.codex/hooks.json` is tracked, stage it in the WS1 commit (Task 1.8).
 
-Verify both files still parse and each carries the new entry:
+**3. Recovery source — `scripts/claude-skills-sync.sh` header (tracked; this edit ships).** The
+`.claude/settings.local.json` canary is untracked, so its only recovery path on a fresh machine is the
+sample SessionStart JSON in this script's `# Bootstrap / recovery` header block (`AGENTS.md` names the
+script header as the recovery home) — which today recreates only the two existing hooks. Replace that
+two-entry sample with the three-entry version so a restored machine regenerates the full canary
+(note the trailing comma added after the second entry):
+
+```text
+#        {"hooks": {"SessionStart": [{"hooks": [
+#          {"type": "command",
+#           "command": "/Users/jp/.agents/scripts/claude-skills-sync.sh --check || true",
+#           "timeout": 15, "statusMessage": "Checking managed-skill invariant"},
+#          {"type": "command",
+#           "command": "/Users/jp/.agents/scripts/codex-plugins-sync.sh --check || true",
+#           "timeout": 15, "statusMessage": "Checking Codex plugin cache drift"},
+#          {"type": "command",
+#           "command": "/Users/jp/.agents/scripts/check-protected-set.sh || true",
+#           "timeout": 15, "statusMessage": "Checking protected-set drift"}]}]}}
+```
+
+Stage `scripts/claude-skills-sync.sh` in the WS1 commit (Task 1.8).
+
+Verify each edited surface still parses / carries the new entry:
 
 ```bash
 python3 -c "import json; json.load(open('.claude/settings.local.json')); print('settings.local.json parses')"
 python3 -c "import json; json.load(open('.codex/hooks.json')); print('hooks.json parses')"
-grep -n 'check-protected-set.sh' .claude/settings.local.json   # hook command + permission (2 matches)
-grep -n 'check-protected-set.sh' .codex/hooks.json             # hook command (1 match)
+grep -n 'check-protected-set.sh' .claude/settings.local.json     # hook command + permission (2 matches)
+grep -n 'check-protected-set.sh' .codex/hooks.json               # hook command (1 match)
+grep -n 'check-protected-set.sh' scripts/claude-skills-sync.sh   # recovery sample (1 match)
+bash -n scripts/claude-skills-sync.sh && echo "sync script still parses"
 ```
-Expected: both parse; two matches in the Claude file, one in the Codex file.
+Expected: both JSON files parse; 2 matches in the Claude settings, 1 in the Codex hooks, 1 in the
+sync-script recovery sample; the sync script still parses.
 
 > Note: `codex-plugins-sync.sh --check` only diffs trees and runs no plugin script, and `--publish`
 > repairs drift without running checks. Do **not** claim either as a caller of this script. Cache-side
@@ -411,7 +444,8 @@ Review the changes, then commit (close both issues) and fast-forward onto `main`
 git diff --stat                                                              # only the intended surfaces
 git diff -- skills/git-hygiene/SKILL.md skills/merge-branch/SKILL.md AGENTS.md   # read the content
 git add skills/git-hygiene/SKILL.md skills/git-hygiene/references/git-hygiene-reference.md \
-        skills/merge-branch/SKILL.md AGENTS.md scripts/check-protected-set.sh .codex/hooks.json
+        skills/merge-branch/SKILL.md AGENTS.md scripts/check-protected-set.sh \
+        scripts/claude-skills-sync.sh .codex/hooks.json
 git commit  # message below; .claude/settings.local.json is untracked/local — do not stage
 git switch main && git merge --ff-only fix/git-hygiene-protected-set
 ```
@@ -436,14 +470,18 @@ is expected.
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 ```
 
-Then close the tracker issues with a one-line evidence comment each (the merge commit hash):
+**Closing #9/#10 is a remote mutation — gate it on an explicit ask.** The plan's own convention (no
+push, remote mutation, or publish unless the user asks) covers closing GitHub issues. So do **not** run
+the close commands as part of landing WS1: stop after the fast-forward merge, report the exact commands
+with the real merge hash substituted for `<hash>`, and run them only if the user authorizes it.
 
 ```bash
+# Run ONLY after the user authorizes closing the issues:
 gh issue close 9 --repo jpsweeney97/agents --comment "Fixed in <hash>: git-hygiene resolves protected repo-defined-first else the canonical fallback; wording canonicalized across 4 bodies; drift guarded by scripts/check-protected-set.sh; AGENTS.md floor added. Cross-skill perfect consistency is a documented known limit."
 gh issue close 10 --repo jpsweeney97/agents --comment "Fixed in <hash>: revert added to git-hygiene SKILL.md:40 (always-loaded) and references marker list."
 ```
 
-**WS1 landed.** It does not depend on WS2 or WS3.
+**WS1 landed.** It does not depend on WS2 or WS3. (Issue closure is gated on the user's ask, above.)
 
 ---
 
@@ -690,8 +728,10 @@ git switch -c feature/git-cycle-plugin main
 - `plugins/git-cycle/skills/{git-hygiene,closeout-check,merge-branch,exiting-worktrees,gh-address-comments,gh-pr-review-loop}/`
   — copied from `skills/` and `skills-claude/`.
 - `plugins/marketplace.json` — add the `git-cycle` entry.
-- `scripts/check-protected-set.sh` — repoint four target paths.
+- `scripts/check-protected-set.sh` — repoint the three moved skill paths (`git-hygiene`,
+  `merge-branch`, `closeout-check`; `acceptance-map` and `AGENTS.md` stay) (Task 3.5).
 - `scripts/codex-plugins-sync.sh` — add `git-cycle` to the bootstrap/recovery block (Task 3.7).
+- `AGENTS.md` — update the Plugin Layout plugin-source enumeration to include `git-cycle` (Task 3.7).
 - Old `skills/{...}` and `skills-claude/exiting-worktrees` — trashed **last** (Task 3.9).
 
 ### Task 3.1 — Scaffold the plugin manifest
@@ -941,13 +981,38 @@ grep -n 'codex plugin add git-cycle@turbo-mode' scripts/codex-plugins-sync.sh &&
 ```
 Expected: a match and `bootstrap updated`.
 
+Finally, update the repo's authority enumeration so it stops naming only two plugins. In `AGENTS.md`
+("Plugin Layout And Delivery"), the sentence "the canonical dual-runtime plugin sources (currently
+`handoff`, `review-family`)" is false once `git-cycle` lands — add `git-cycle`:
+
+```text
+- `plugins/<name>/` holds the canonical dual-runtime plugin sources (currently
+  `handoff`, `review-family`, `git-cycle`) in Claude format: `.claude-plugin/plugin.json`
+```
+
+Verify:
+
+```bash
+grep -n 'handoff`, `review-family`, `git-cycle`' AGENTS.md && echo 'AGENTS.md enumeration updated'
+```
+Expected: a match on the Plugin Layout line; `AGENTS.md enumeration updated`. (`AGENTS.md` is staged by
+the WS3 `git add -A` in Task 3.10.)
+
 ### Task 3.8 — Live load test in both runtimes (the gate before deletion)
+
+**Session checkpoint — the Claude proof needs a fresh session.** Task 3.7 just created the
+`~/.claude/skills/git-cycle` symlink, but Claude's skills-directory discovery is **next-session**: the
+`git-cycle:` skills will not appear in the current session. So finish Task 3.7, then **restart the
+Claude session** before running the Claude proof below, and do **not** advance to Task 3.9 (deletion)
+until the fresh-session Claude proof **and** the Codex proof both pass here.
 
 Do not proceed to deletion until all six skills are proven to load **from the plugin** in **both**
 runtimes. A resolving symlink or a bare skill name appearing is **not** sufficient proof: the standalone
 originals are still live until Task 3.9, so Claude would surface the six via their own
-`~/.claude/skills/<name>` links and Codex via the in-place `skills/`/`skills-claude/` scan **even if
-plugin delivery is broken** — a false pass that would defeat the copy-first safety net. Per `AGENTS.md`
+`~/.claude/skills/<name>` links, and Codex would surface the **five former `skills/` members** via its
+in-place `skills/` scan — **even if plugin delivery is broken** — a false pass that defeats the
+copy-first safety net for those five. (Codex never scans `skills-claude/`, so `exiting-worktrees` has no
+standalone Codex source; its Codex sighting is already necessarily plugin-sourced.) Per `AGENTS.md`
 ("Make runtime claims … only from a runtime inspection path: installed cache, app-server `plugin/read`,
 `plugin/list`, `skills/list` …"), the gate requires proof that the *loaded source is `git-cycle`*, which
 the still-live originals cannot fake:
@@ -968,15 +1033,19 @@ the still-live originals cannot fake:
   is missing under that namespace, plugin delivery is broken.
 
 - **Codex:** Codex serves installed plugins from the **version-keyed cache**, not the in-place scan, so
-  the runtime-inspection proof is that `git-cycle` is installed and the cache carries the six skills:
+  the runtime-inspection proof is that `git-cycle@turbo-mode` is **`installed, enabled`** (not merely
+  installed — an installed-but-disabled plugin delivers nothing) and the cache carries the six skills:
 
   ```bash
-  codex plugin list                                            # git-cycle present/installed
+  codex plugin list                                            # git-cycle@turbo-mode: "installed, enabled"
   ls ~/.codex/plugins/cache/turbo-mode/git-cycle/*/skills/     # the six skill dirs, plugin-sourced
   ```
-  Expected: `git-cycle` installed; the cache `skills/` dir lists all six. A bare `merge-branch` sighting
-  in the merged skill *list* does **not** prove plugin delivery while the standalone original is still
-  scanned — inspect the cache (the installed-cache path) instead.
+  Expected: `git-cycle@turbo-mode` shows status `installed, enabled`; the cache `skills/` dir lists all
+  six. A bare `merge-branch` sighting in the merged skill *list* does **not** prove plugin delivery while
+  the standalone original is still scanned — inspect the cache (the installed-cache path) instead.
+  (Optional, verify-first: if a Codex session exposes plugin skills under a `git-cycle:` namespace the
+  way Claude does, confirm the six there too — but Codex skill-namespacing is unconfirmed, so the cache
+  inspection above is the required proof, not a namespaced list.)
 
 If any of the six fails to load **from the plugin** in either runtime, fix the manifest/paths before
 Task 3.9. The originals are still the live source, so nothing is lost.
