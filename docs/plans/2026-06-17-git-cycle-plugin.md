@@ -2,7 +2,9 @@
 
 **Status:** ready to execute · **Date:** 2026-06-17 · **Source:** locked design from this
 session's outcome-interview → design-exploration → adversarial-panel scrutiny (run
-`wf_9986b895-452`, 11 confirmed findings folded in). Reference file **dropped**.
+`wf_9986b895-452`, 11 confirmed findings folded in). Reference file **dropped**. Patched 2026-06-17
+after a `review-reviewer` adjudication (R1 protected-resolution blocker; R2 Codex-test relabel; R3
+charter note; R4 Codex bootstrap; R5 six-skill validation; R6 Markdown fences).
 
 ## What this builds
 
@@ -23,7 +25,7 @@ check. No skills are merged; each keeps its modes and distinct protected-branch 
 | WS | What | Lands on | Gates | Closes |
 |----|------|----------|-------|--------|
 | **1** | git-hygiene #9/#10 fixes + protected-set canonicalization + drift check + `AGENTS.md` floor | in place on `skills/` (immediate dual-runtime) | nothing | #9, #10 |
-| **2** | `exiting-worktrees` dual-runtime port + Codex behavior proof | in place on `skills-claude/` | a passing **Codex** behavior-smoke-test | — |
+| **2** | `exiting-worktrees` dual-runtime port + Codex *mechanism* proof | in place on `skills-claude/` | a passing **Codex** command/mechanism smoke test | — |
 | **3** | `git-cycle` packaging migration (copy-first) | new `plugins/git-cycle/` | WS1 **and** WS2 landed | the coherence goal |
 
 **WS1 and WS2 are independently executable and landable now.** WS3 absorbs the already-fixed skills;
@@ -77,9 +79,10 @@ already-canonical in Task 1.4, not edited.
 
 `skills/git-hygiene/SKILL.md` Core Rules currently resolve protection via the default branch + a
 `branchProtection` glob, with **no** literal fallback — the divergence #9 reports. Replace the rule so
-it carries the canonical fallback **only when the repo defines no protection** (this is the panel's
-finding #4: an unconditional union would force-branch legitimate work on `develop`/`release/*` in a
-`trunk`-default repo).
+it carries the canonical fallback **only when the repo defines no `branchProtection` policy**, keeping
+the default branch always-protected as a separate condition (this is the panel's finding #4: an
+unconditional union would force-branch legitimate work on `develop`/`release/*` in a `trunk`-default
+repo).
 
 Replace this exact block (lines 16–20):
 
@@ -94,18 +97,22 @@ Replace this exact block (lines 16–20):
 with:
 
 ```text
-- Never commit onto the default or a protected branch. Resolve protection
-  repo-defined first: the default branch and any `branchProtection` globs are the
-  per-repo override. Treat repo-defined protected branches first; if the repo
-  defines none, treat `main`, `master`, `develop`, and `release/*` as protected.
-  Before any `commit-shaping` or `commit-only` commit, create a working branch
-  (`chore/`, `fix/`, or `feature/`) when the checked-out branch is protected under
-  that resolution; reuse the branch and default branch already captured in preflight.
+- Never commit onto the default branch or a protected branch. The default branch
+  is always protected; resolve the *protected* set repo-defined first, where
+  "repo-defined" means the configured `branchProtection` policy — not the mere
+  existence of a default branch. Treat repo-defined protected branches first; if
+  the repo defines none, treat `main`, `master`, `develop`, and `release/*` as
+  protected. Before any `commit-shaping` or `commit-only` commit, create a working
+  branch (`chore/`, `fix/`, or `feature/`) when the checked-out branch is the
+  default branch or is protected under that resolution; reuse the branch and
+  default branch already captured in preflight.
 ```
 
-This embeds the canonical sentence verbatim, keeps the default+glob mechanism, frames
-`branchProtection` as the per-repo override, and applies the fallback only absent repo-defined
-protection. **Known limit to record in the commit body (do not paper over):** perfect cross-skill
+This embeds the canonical sentence verbatim, keeps the default branch as a separate always-protected
+condition (matching `closeout-check` and `acceptance-map`, which gate on "protected or the repo's
+default branch"), defines "repo-defined protection" as the configured `branchProtection` policy — not
+the mere existence of a default branch — and applies the fallback set only when no `branchProtection`
+policy is defined. **Known limit to record in the commit body (do not paper over):** perfect cross-skill
 consistency is not achievable — the four skills read "repo-defined protection" from different sources
 (git default detection, `AGENTS.md`/`CLAUDE.md` policy, `.git-hygiene.json` `branchProtection`), which
 is the settled "cannot single-home core behavior across independently-loaded skills" rule. #9 fixes the
@@ -402,7 +409,7 @@ gh issue close 10 --repo jpsweeney97/agents --comment "Fixed in <hash>: revert a
 
 # Workstream 2 — `exiting-worktrees` dual-runtime port
 
-Lands in place; **gated on a passing Codex behavior-smoke-test**. The skill stays in `skills-claude/`
+Lands in place; **gated on a passing Codex command/mechanism smoke test**. The skill stays in `skills-claude/`
 (Claude-only) until that test passes — only then does WS3 move it into the plugin as dual-runtime.
 Start on a branch:
 
@@ -423,7 +430,7 @@ takes the path the skill labels "fallback"). Invert that.
 Replace the entire section that begins `## The ExitWorktree Tool` (line 10) and ends just before
 `## Why This Skill Exists` (line 39) with this content:
 
-```text
+````text
 ## Removing a Worktree
 
 The baseline removal path is native `git worktree`, which works in every runtime. The Claude Code
@@ -471,7 +478,7 @@ harmless, but then fall back to the native baseline above, run from the main rep
 **Branch cleanup:** `ExitWorktree` may not delete the branch (notably with `discard_changes: true`).
 After it returns, verify with `git branch --list '<branch-pattern>'`; if the branch survives, delete it
 with `git branch -d <branch-name>`.
-```
+````
 
 (The not-yet-landed inline-merge path in Pre-Exit Checklist step 4, lines 101–120, already uses
 `git -C <main-repo-path>` and stays unchanged — it is already runtime-neutral.)
@@ -499,7 +506,7 @@ Uses native `git worktree` removal (with Claude Code's ExitWorktree as an optimi
 Replace the Exit Procedure block (lines 161–169) that begins `**2. Call ExitWorktree:**` and ends at
 the `discard_changes: true` caveat with:
 
-```text
+````text
 **2. Remove the worktree:**
 
 If the Claude Code `ExitWorktree` tool is available, prefer it:
@@ -516,7 +523,7 @@ If `ExitWorktree` is unavailable (any non-Claude-Code runtime) or returns the no
 session is active", use the native baseline from "Removing a Worktree": resolve `<main-repo-path>`
 porcelain-first, then `git -C <main-repo-path> worktree remove <worktree-path>` and
 `git -C <main-repo-path> branch -d <branch-name>`. Never `cd` into the worktree to remove it.
-```
+````
 
 ---
 
@@ -545,11 +552,14 @@ Expected: validator passes; `git diff --check` silent.
 
 ---
 
-### Task 2.5 — Codex behavior-smoke-test (the gate; run in a Codex session)
+### Task 2.5 — Codex command/mechanism smoke test (the gate; run in a Codex session)
 
 This is the panel's single most important fix and **cannot** be satisfied by prose. It must run in a
 **Codex** session (where `ExitWorktree` does not exist) to prove the native baseline is CWD-safe and
-its guards hold. Run against a throwaway repo, not `.agents`.
+its guards hold. **Scope:** this proves the native command *mechanism* is CWD-safe in Codex's shell —
+it does **not** prove Codex discovers, routes to, or obeys the skill (it cannot: `skills-claude/` is
+Claude-only per `AGENTS.md`). Codex skill *discovery* is verified separately by the both-runtime load
+check in Task 3.8 (discovery, not obedience). Run against a throwaway repo, not `.agents`.
 
 ```bash
 # Setup a throwaway repo with a worktree holding a landed commit
@@ -598,8 +608,9 @@ fix(exiting-worktrees): native git worktree removal as the dual-runtime baseline
 Make `git -C <main-repo-path> worktree remove` (run from the main repo, never inside the
 worktree) the baseline path that carries every CWD-safety and data-loss guard; demote the
 Claude-only ExitWorktree built-in to an availability-conditional optimization. Proven on
-Codex by a behavior-smoke-test (worktree removed from inside it via `git -C`, CWD-safe,
-guards intact). Skill stays in skills-claude/ until packaged by the git-cycle migration.
+Codex by a command/mechanism smoke test (worktree removed from inside it via `git -C`,
+CWD-safe, guards intact); this proves the native mechanism, not Codex skill routing or
+obedience. Skill stays in skills-claude/ until packaged by the git-cycle migration.
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 ```
@@ -612,7 +623,17 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 
 **Prerequisite:** WS1 and WS2 are landed on `main`. This workstream only packages already-fixed skills;
 it introduces no behavior change beyond delivery. Copy-first: the originals remain the rollback point
-until the new plugin is proven live in both runtimes (panel finding #7). Start on a branch:
+until the new plugin is proven live in both runtimes (panel finding #7).
+
+**Charter check (consulted; no ledger entry).** This packages six **already-admitted, first-party**
+skills into a delivery plugin — same jobs, none merged, none archived, none losing its job (each
+contract persists at the new path). Per the charter's four triggers (`docs/agents/charter.md`) this is
+**neither an admission, fold, rejection, park, nor retirement**, so it takes **no
+`docs/agents/contract-decisions.md` entry** — consistent with the prior `handoff`/`review-family`
+packaging, which were never themselves ledgered. One Owner Per Job is unaffected: no new owner, no
+collision, and `acceptance-map` stays out.
+
+Start on a branch:
 
 ```bash
 git switch -c feature/git-cycle-plugin main
@@ -625,6 +646,7 @@ git switch -c feature/git-cycle-plugin main
   — copied from `skills/` and `skills-claude/`.
 - `plugins/marketplace.json` — add the `git-cycle` entry.
 - `scripts/check-protected-set.sh` — repoint four target paths.
+- `scripts/codex-plugins-sync.sh` — add `git-cycle` to the bootstrap/recovery block (Task 3.7).
 - Old `skills/{...}` and `skills-claude/exiting-worktrees` — trashed **last** (Task 3.9).
 
 ### Task 3.1 — Scaffold the plugin manifest
@@ -833,6 +855,22 @@ Expected: the link command creates the `~/.claude/skills/git-cycle` entry; `--pu
 `codex plugin add git-cycle@turbo-mode` and re-checks clean; both `--check` runs report no drift /
 no missing links for git-cycle.
 
+Then update the **bootstrap/recovery** block in `scripts/codex-plugins-sync.sh` (the stated recovery
+home) so a fresh machine restores all three plugins — after WS3 the six skills live only in
+`git-cycle`. In the header's `# Bootstrap / recovery` block, add a third install line under step 2,
+beside `handoff` and `review-family`:
+
+```text
+#      codex plugin add git-cycle@turbo-mode
+```
+
+Verify:
+
+```bash
+grep -n 'codex plugin add git-cycle@turbo-mode' scripts/codex-plugins-sync.sh && echo 'bootstrap updated'
+```
+Expected: a match and `bootstrap updated`.
+
 ### Task 3.8 — Live load test in both runtimes (the gate before deletion)
 
 Do not proceed to deletion until all six skills load in **both** runtimes from the plugin.
@@ -882,12 +920,22 @@ dangling link for any of the six, remove it with `trash`.
 
 ```bash
 python3 -c "import json; json.load(open('plugins/git-cycle/.claude-plugin/plugin.json'))" && echo "manifest ok"
-python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py plugins/git-cycle/skills/merge-branch
+# Structurally validate all six copied skills (cp -R of already-validated sources; catches a partial
+# copy and re-parses each frontmatter at its new path):
+for s in git-hygiene closeout-check merge-branch exiting-worktrees gh-address-comments gh-pr-review-loop; do
+  python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py "plugins/git-cycle/skills/$s"
+done
+# Parse every copied openai.yaml companion (exiting-worktrees has none):
+for s in git-hygiene closeout-check merge-branch gh-address-comments gh-pr-review-loop; do
+  ruby -ryaml -e 'YAML.load_file(ARGV[0])' "plugins/git-cycle/skills/$s/agents/openai.yaml" && echo "openai.yaml ok: $s"
+done
 scripts/check-protected-set.sh
 git diff --check
 git status --short
 ```
-Expected: `manifest ok`; validator passes; drift check `OK: ... 5 surfaces`; `git diff --check` silent;
+Expected: `manifest ok`; the validator passes for all six (the documented
+`argument-hint`/`disable-model-invocation` "unexpected key" note is accepted); each `openai.yaml`
+parses; drift check `OK: ... 5 surfaces`; `git diff --check` silent;
 `git status` shows the additions under `plugins/git-cycle/`, the marketplace edit, the script repoint,
 and the deletions of the old skill dirs.
 
@@ -925,7 +973,7 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 
 - **Coverage:** every locked-design element maps to a task — #9 convergence (1.1), #10 both sites
   (1.2/1.3), canonicalization (1.4), `AGENTS.md` floor (1.5), drift check + real caller (1.6/1.7),
-  worktree port + Codex proof (2.1–2.5), copy-first packaging with load gate (3.1–3.9). The dropped
+  worktree port + Codex *mechanism* proof (2.1–2.5), copy-first packaging with load gate (3.1–3.9). The dropped
   reference appears nowhere. acceptance-map's copy is covered by the check (1.6 target list) though it
   stays out of the plugin.
 - **Independence:** WS1 and WS2 each land on their own branch with their own verification and never
@@ -937,4 +985,3 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
   not achievable (recorded in 1.1 and the commit body); the `AGENTS.md` floor is `.agents`-local and
   does not travel (stated in 1.5); the drift check's only ship-relevant caller is the validation ladder
   plus the local SessionStart canary (1.7) — the Codex publish path is not a caller and is not claimed.
-```
