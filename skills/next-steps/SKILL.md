@@ -52,7 +52,3 @@ After those sections, add one concise sentence offering to save the plan to a fi
 - `Critical Path`: treat dependency-critical and scheduling-critical as separate claims. Use `not claimed - no durations or deadlines supplied` for scheduling-critical status unless durations or deadlines are supplied.
 - `Critical Path`: name the highest-risk task only when supplied evidence supports it; otherwise use `unknown` or `tied` and explain why.
 - `Out of Scope (Parked)`: list only real parked findings with `revisit when`; use `None - no supplied findings are parked.` when applicable.
-
-## Pre-Final Checklist
-
-Before finalizing, verify: finding source selected; active findings mapped; no findings, risks, or parked items invented; dependencies closed or marked inferred; phase ordering valid; critical path subclaims separated or limits stated; parked items justified; save offer included for non-early-exit plans.
