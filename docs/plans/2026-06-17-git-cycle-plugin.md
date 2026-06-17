@@ -4,7 +4,8 @@
 session's outcome-interview → design-exploration → adversarial-panel scrutiny (run
 `wf_9986b895-452`, 11 confirmed findings folded in). Reference file **dropped**. Patched 2026-06-17
 after a `review-reviewer` adjudication (R1 protected-resolution blocker; R2 Codex-test relabel; R3
-charter note; R4 Codex bootstrap; R5 six-skill validation; R6 Markdown fences).
+charter note; R4 Codex bootstrap; R5 six-skill validation; R6 Markdown fences; M2 SessionStart-permission
+convention + forward-test; M3 dual-runtime name/companion check for `exiting-worktrees`).
 
 ## What this builds
 
@@ -332,6 +333,15 @@ Add the matching permission to the `permissions.allow` array so it runs without 
 ```json
 "Bash(scripts/check-protected-set.sh)"
 ```
+
+**Absolute hook command, relative permission — mirror it, do not "fix" it.** The two existing canary
+entries already pair an absolute-path command (`/Users/jp/.agents/scripts/<s> --check || true`) with a
+relative-path permission (`Bash(scripts/<s> --check)`) and run prompt-free today, so this split is the
+working convention, not a mismatch to correct — do not rewrite the permission to an absolute path. The
+`Bash(...)` permission's role for a harness-run SessionStart hook is unverified (the hooks may run
+regardless), so forward-test it: on the next session start, confirm the new check prints its
+`OK:`/`DRIFT:` line with **no** permission prompt; if it prompts, copy the exact string form the two
+existing entries use.
 
 Verify the file still parses and the canary entry is present:
 
@@ -789,6 +799,24 @@ Expected: the six skill directories listed. Confirm git-hygiene's reference trav
 test -f plugins/git-cycle/skills/git-hygiene/references/git-hygiene-reference.md && echo "reference copied"
 ```
 Expected: `reference copied`.
+
+`exiting-worktrees` is the only member without an `agents/openai.yaml` companion — that is fine:
+companion metadata is optional per `AGENTS.md` (minimal or absent is acceptable), so none needs to be
+authored for the migration. But moving it out of Claude-only `skills-claude/` into the dual-runtime
+plugin makes it **Codex-scanned**, so its name must now clear the **Codex-bundled** set too (previously
+it only had to avoid Claude-bundled names). Confirm all six clear both bundled sets:
+
+```bash
+for n in git-hygiene closeout-check merge-branch exiting-worktrees gh-address-comments gh-pr-review-loop; do
+  case "$n" in
+    openai-docs|skill-creator|skill-installer|plugin-creator|imagegen|pdf|doc|codex-primary-runtime|code-review|debug|loop|claude-api|run|verify)
+      echo "COLLISION: $n" ;;
+    *) echo "ok: $n" ;;
+  esac
+done
+```
+Expected: `ok:` for all six — `exiting-worktrees` clears both the Codex-bundled and Claude-bundled name
+lists (the other five were already dual-runtime).
 
 ### Task 3.5 — Repoint the drift check at the new locations
 
