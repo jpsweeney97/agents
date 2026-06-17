@@ -11,7 +11,7 @@ constructor_model: "gpt-5.5 / Codex (white-box adversary, medium effort)"
 reviewer_model: "claude-opus-4-8 (bar-ON and bar-OFF arms, hermetic, blind, 3 reps)"
 disposition_judge: "claude-opus-4-8 (blind, arm-relabelled)"
 ground_truth: "HUMAN — NOT YET COLLECTED (deferred; see §9 and the disclosure in §8)"
-reviewer_side_verdict: "INCONCLUSIVE (W2) — with zero observed lens leniency"
+reviewer_side_verdict: "INCONCLUSIVE (W2) — zero observed lens leniency; re-key + independent re-code + 4-way refutation confirm (see §11)"
 ---
 
 # Results — test 5, adversarial red-team (INTERIM: reviewer-side)
@@ -156,3 +156,58 @@ The 5-test menu: **1 ✓ (foreign, CALIBRATED) · 2 ✓ (human cold-judge, bar�
 deferred)**. Test 4 (cut-then-use) remains unrun. The apparatus has now survived a deliberate adversarial
 leniency attack without a single confirmed lenient call, while the test's own falsification channel came
 up empty — an honest INCONCLUSIVE, not a victory lap.
+
+## 11. Addendum — leniency re-keyed (DEFEND-as-is vs any-change)
+
+§6 named the dominant limitation: the sealed ΔFN rubric keyed "baseline caught it" on **CUT** — a
+disposition opus reviewers almost never emit for an embedded focal choice. This addendum re-measures the
+**same 108 reviews** (no new reviews, no Codex, no human) under a *fair* yardstick, and adds two
+independent confirmations the interim run did not carry. It does **not** change the sealed verdict.
+
+**The fair re-key** (per focal choice, per arm, 3 reps):
+
+- **CAUGHT** = the reviewer changed the choice in any way — `CUT + RESHAPE ≥ 2/3`.
+- **LENIENT** = the reviewer left it as-is — `DEFEND ≥ 2/3`.
+
+A **lens-leniency** case = bar-ON LENIENT ∧ bar-OFF CAUGHT (the lens excused a flaw the baseline flagged);
+the reverse, **lens-stricter** = bar-OFF LENIENT ∧ bar-ON CAUGHT.
+
+| measure | value |
+|---|---|
+| lens-leniency cases (FN-arm: bar-ON DEFEND≥2 ∧ bar-OFF caught≥2) | **0 (none)** |
+| lens-stricter cases (bar-OFF DEFEND≥2 ∧ bar-ON caught≥2) | **2 — FN6, GOOD1** |
+| specimens with *any* bar-ON LENIENT arm | 2 — FN4, GOOD2 — **both also bar-OFF LENIENT** |
+
+Even under the generous "any change = caught" reading there is **zero lens leniency**: no specimen has the
+lens defending a focal choice the baseline changed. The only two specimens the lens leaves as-is (FN4,
+GOOD2) are also left as-is by the baseline — no divergence to be lenient about. Where the arms *do*
+diverge, the lens is **stricter**, never softer (FN6: baseline DEFEND 3/3, lens RESHAPE 3/3 citing the
+provoke-side clause; GOOD1 likewise). The sealed-rubric verdict still reads **INCONCLUSIVE** — the prereg
+keyed on CUT and we honor it — but the descriptive zero-leniency is now solid rather than hostage to the
+CUT-vs-RESHAPE technicality.
+
+**Confirmation 1 — independent blind re-coding (coder-robustness).** A fresh panel of 13 agents re-coded
+the **same arm-blind bundles the original judge saw** (per-focal-choice disposition, blind to arm and to
+the sealed codes). De-blinded and recomputed: per-review exact 4-way agreement with the sealed judge
+**74/78 = 94.9%**; arm-class (CAUGHT/LENIENT) agreement **25/26 = 96.2%**; independent **lens-leniency =
+0** (robust to coder), independent lens-stricter = **3 (FN6, GOOD1, *and* GOOD2)**. The single arm-class
+disagreement — GOOD2's bar-ON (sealed RESHAPE+2·DEFEND = LENIENT vs independent 2·RESHAPE+DEFEND =
+CAUGHT) — moved the lens toward *more* strictness, never leniency, and GOOD2 is a good control, so it
+cannot bear on lens leniency either way.
+
+**Confirmation 2 — adversarial refutation (4 skeptics).** Four agents were tasked to *refute* zero
+leniency by pulling the raw reviews and finding any bar-ON-defends-while-bar-OFF-catches pair. **All four
+returned no case found**, each having verified against raw text that (a) FN4 and GOOD2's bar-OFF arms
+genuinely defend the focal choice (their CUT/RESHAPE verdicts target peripheral things — heading
+collisions, missing fetch tooling, routing — not the focal mechanic), so they cannot flip to leniency;
+(b) the FN6/GOOD1 bar-ON arms genuinely catch (reverse the focal posture / forcing function), not hidden
+defends; and (c) no all-RESHAPE bar-ON arm is a miskeyed defend.
+
+**Net.** The CUT-vs-RESHAPE flaw was the *only* reason test 5 graded INCONCLUSIVE rather than cleanly "no
+leniency." Re-keyed to the fair yardstick the finding is unchanged and now triangulated three ways
+(sealed re-key, independent re-code, adversarial refutation): **zero lens-induced leniency; the lens is,
+if anything, stricter than the no-lens baseline.** This does **not** upgrade the sealed verdict (still
+INCONCLUSIVE per prereg §7) and does **not** substitute for the deferred human arm (§8–§9), which alone
+decides whether the reshaped material was genuinely BAD. Reviewer-side, this closes plan task **T1** and
+the reviewer-side half of Gate **G1**. *(Re-measure on disk: `.agents/scratch/test5-run/verify-recode/` —
+independent codings, de-blind key, and `recompute.py`.)*
