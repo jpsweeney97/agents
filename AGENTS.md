@@ -110,6 +110,12 @@ manifest. Primary work is day-to-day skill editing.
   `jpsweeney97/agents`.
 - `docs/agents/triage-labels.md` — the default five-label triage vocabulary.
 - `docs/agents/domain.md` — the single-context domain-doc layout.
+- `docs/agents/contract-evaluation-methodology.md` — playbook (not an
+  obligation) for testing whether a behavior contract is load-bearing and
+  beneficial while escaping circularity: pre-register/seal, single-variable
+  differential, blind cross-model arms, human cold-judge anchor, pilot before
+  seal. Distilled from the judgment-trust apparatus arc (tests 1–5). Reach for
+  it when a contract's value is the open question; overkill for ordinary edits.
 
 ## Blind Evaluations
 
