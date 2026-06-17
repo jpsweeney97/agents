@@ -51,7 +51,7 @@ manifest. Primary work is day-to-day skill editing.
 ## Plugin Layout And Delivery
 
 - `plugins/<name>/` holds the canonical dual-runtime plugin sources (currently
-  `handoff`, `review-family`) in Claude format: `.claude-plugin/plugin.json`
+  `handoff`, `review-family`, `git-cycle`) in Claude format: `.claude-plugin/plugin.json`
   plus `skills/`. One source serves both runtimes; never create per-runtime
   copies.
 - Claude Code loads each plugin dir in place through its `~/.claude/skills`

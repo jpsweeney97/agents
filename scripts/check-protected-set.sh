@@ -18,9 +18,9 @@ CANON='Treat repo-defined protected branches first; if the repo defines none, tr
 # in that migration step (Task 3.5).
 TARGETS=(
   "AGENTS.md"
-  "skills/git-hygiene/SKILL.md"
-  "skills/merge-branch/SKILL.md"
-  "skills/closeout-check/SKILL.md"
+  "plugins/git-cycle/skills/git-hygiene/SKILL.md"
+  "plugins/git-cycle/skills/merge-branch/SKILL.md"
+  "plugins/git-cycle/skills/closeout-check/SKILL.md"
   "skills/acceptance-map/SKILL.md"
 )
 
