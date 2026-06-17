@@ -276,6 +276,19 @@ entries; do not rewrite settled ones.
   prompt → elicits real facts and refuses to invent a backstory; bare-notes
   rewrite → withholds unsupported causes/lessons and asks). Evidence: commit
   `6239f9c` (skill build, rewritten from review) + this ledger entry.
+- 2026-06-16 — blind-evaluation blinding guard (test-5 red-team breach, plan
+  T3): admitted a new rule to repo `AGENTS.md` (`## Blind Evaluations`) — in any
+  blind evaluation, never reveal apparatus state (reviewer/model outputs,
+  intermediate scores, predictions, arm identities) to a current or potential
+  ground-truth judge until their independent judgment is recorded; lost blinding
+  is unrecoverable. Owns an evaluation-blinding discipline no lane held
+  (`skill-benchmark` is quantitative skill benchmarking — different job; the
+  global evidence-before-claims rule governs claims, not blinding). Prevents the
+  observed breach where the orchestrator narrated reviewer/disposition results
+  before certification and contaminated the human + self as judges, forcing the
+  human arm to a fresh judge. Repo-scoped home chosen (recurrence concentrated
+  here) over global, by JP. Evidence: breach disclosed in results §8 and scored
+  in §12 (`51ab24e`); rule at `AGENTS.md` `## Blind Evaluations` (this commit).
 
 ## Parks
 

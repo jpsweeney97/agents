@@ -111,6 +111,15 @@ manifest. Primary work is day-to-day skill editing.
 - `docs/agents/triage-labels.md` — the default five-label triage vocabulary.
 - `docs/agents/domain.md` — the single-context domain-doc layout.
 
+## Blind Evaluations
+
+This repo hosts blind, pre-registered evaluations (the judgment-trust apparatus
+tests under `docs/plans/`). In any such evaluation, never reveal apparatus state
+— reviewer or model outputs, intermediate scores, predictions, or arm identities
+— in any channel a current or potential ground-truth judge (human or a separate
+model) can see, until their independent judgment is recorded. Lost blinding is
+unrecoverable; re-administer to a fresh judge.
+
 ## Working Defaults
 
 - Start file-changing work with `git status --short --branch`.

@@ -3,7 +3,7 @@ type: action-plan
 project: agents
 created: 2026-06-16
 source: "test-5 red-team interim results (feca720) §§6–10 + run findings"
-status: "Phase 1 executing — T1 DONE (3464918, §11) + T2 DONE (§12, human arm scored); G1 resolved; T3 remaining"
+status: "Phase 1 COMPLETE — T1 + T2 + T3 DONE; G1 resolved (close test 5; T5/T6 optional); push (T4) pending on explicit ask"
 ---
 
 # Action plan — after test-5 (red-team), reviewer-side INCONCLUSIVE
@@ -19,8 +19,10 @@ Test 5 is **fully run**. Reviewer-side: **INCONCLUSIVE (W2) with zero observed l
 bar-OFF CUT 0/27 FN-arm reps; all 4 arm-divergences bar-ON-harsher). **T1 DONE** (`3464918`, results §11:
 re-keyed DEFEND-vs-any-change, zero leniency, triangulated 3 ways). **T2 DONE** (results §12: a fresh
 blind administrator scored the packet — zero ground-truth leniency, GATE-FN=0, human↔bar 9/13 both arms,
-lens corrects baseline on FN6, genuinely-BAD 5/9). Verdict + apparatus UNCHANGED. **T3 (blinding guard)
-is the remaining Phase-1 item.** `main` is +8 unpushed (push only on explicit ask).
+lens corrects baseline on FN6, genuinely-BAD 5/9). Verdict + apparatus UNCHANGED. **T3 DONE** — blinding
+guard authored in repo `AGENTS.md` (`## Blind Evaluations`) + charter ledger entry; forward-tested (the
+rule withholds and seals; the no-rule control reproduces the breach). **Phase 1 is complete.** `main` is
++9 unpushed (push only on explicit ask).
 
 Findings sequenced:
 
@@ -62,9 +64,12 @@ T6: Test 4 (cut-then-use)                                 - covers: F7 - depends
   **GATE-FN = 0** (no human-flagged flaw the lens defended); human↔bar **9/13 both arms** (8/12 without
   item A); **FN6: lens corrects baseline toward human**; genuinely-BAD **5/9** (detection-engagement 5/5);
   over-cut lens-specific only at GOOD1; 0 "remove" votes. Verdict **INCONCLUSIVE** unchanged.
-- **T3 — Author the blinding guard.** Generalize the breach into a rule: in blind-human experiments the
-  orchestrator must not reveal reviewer/apparatus results in any channel the human judge can see until
-  the ground-truth arm completes. *Done when:* the rule lands in the owning contract surface.
+- **T3 — Author the blinding guard. ✅ DONE.** Landed as a general rule in repo `AGENTS.md`
+  (`## Blind Evaluations`): in any blind evaluation, never reveal apparatus state to a current/potential
+  ground-truth judge until their independent judgment is recorded; lost blinding is unrecoverable. Charter
+  ledger entry added; `agent-facing-design` gate + One-Owner check passed (no collision with
+  `skill-benchmark`); forward-tested (with-rule withholds and seals, no-rule control reproduces the
+  breach).
 
 *(Parallel rationale: T1 is local analysis, T2 is external-human, T3 is contract authoring — no shared
 state.)*
