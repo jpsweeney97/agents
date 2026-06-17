@@ -1,5 +1,13 @@
 # Implementation Plan: Teach the Skill Apparatus the Judgment-vs-Trust Distinction
 
+> **Status — CLOSED (2026-06-17).** The apparatus change in this plan landed
+> (`3eb0e74`); the 5-test validation arc that followed is COMPLETE
+> (1✓ 2✓ 3✓ 4✓ 5✓) with the apparatus UNCHANGED throughout. This is a
+> historical record, not live work. Closing state:
+> `judgment-trust-test5-next-steps-2026-06-16.md`; distilled method:
+> `docs/agents/contract-evaluation-methodology.md`. (The `jp-writing-style`
+> delivery/charter P0s referenced below were resolved in `0483eba`.)
+
 Date: 2026-06-15
 Branch: `feature/judgment-trust-distinction`
 Source design: approved in session (design-exploration), grounded in
