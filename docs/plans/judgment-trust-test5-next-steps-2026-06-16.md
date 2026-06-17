@@ -3,7 +3,7 @@ type: action-plan
 project: agents
 created: 2026-06-16
 source: "test-5 red-team interim results (feca720) §§6–10 + run findings"
-status: "plan — not executed"
+status: "Phase 1 executing — T1 DONE (3464918, §11) + T2 DONE (§12, human arm scored); G1 resolved; T3 remaining"
 ---
 
 # Action plan — after test-5 (red-team), reviewer-side INCONCLUSIVE
@@ -15,10 +15,12 @@ characterization, parked.
 
 ## Current State
 
-Test 5 is reviewer-side complete: **INCONCLUSIVE (W2) with zero observed lens leniency** (ΔFN=0; bar-OFF
-CUT 0/27 FN-arm reps; all 4 arm-divergences bar-ON-harsher). Apparatus UNCHANGED. `main` is +5 unpushed.
-The human ground-truth arm is deferred to a fresh blind judge after an orchestrator disclosure
-contaminated JP + self as judges.
+Test 5 is **fully run**. Reviewer-side: **INCONCLUSIVE (W2) with zero observed lens leniency** (ΔFN=0;
+bar-OFF CUT 0/27 FN-arm reps; all 4 arm-divergences bar-ON-harsher). **T1 DONE** (`3464918`, results §11:
+re-keyed DEFEND-vs-any-change, zero leniency, triangulated 3 ways). **T2 DONE** (results §12: a fresh
+blind administrator scored the packet — zero ground-truth leniency, GATE-FN=0, human↔bar 9/13 both arms,
+lens corrects baseline on FN6, genuinely-BAD 5/9). Verdict + apparatus UNCHANGED. **T3 (blinding guard)
+is the remaining Phase-1 item.** `main` is +8 unpushed (push only on explicit ask).
 
 Findings sequenced:
 
@@ -51,12 +53,15 @@ T6: Test 4 (cut-then-use)                                 - covers: F7 - depends
 
 **Phase 1 — close test 5 (parallel; all independent)**
 
-- **T1 — Re-score existing reviews under the corrected key.** Cheap (data already on disk); checks
-  whether bar-ON ever DEFENDED-as-is where bar-OFF wanted any change. *Done when:* a re-keyed leniency
-  table is appended to the results doc and zero-leniency is confirmed or overturned.
-- **T2 — Fresh blind human judge.** A person who has not seen the results administers the preserved A–M
-  packet under the sealed map. *Done when:* 13 calls recorded; genuinely-BAD confirmation + human↔bar
-  agreement (with/without item A) computed and results doc §§8–9 amended.
+- **T1 — Re-score existing reviews under the corrected key. ✅ DONE** (`3464918`, results §11). Re-keyed
+  DEFEND-as-is vs any-change: **lens-leniency = 0**, lens-stricter = FN6/GOOD1; triangulated by an
+  independent 13-agent blind re-code (96.2% arm-class agreement, still 0) and a 4-way adversarial
+  refutation (no counterexample). Zero leniency **confirmed**.
+- **T2 — Fresh blind human judge. ✅ DONE** (results §12). A fresh administrator (saw only packet + sheet)
+  returned 13 calls; scored deterministically + independently (3 scorers identical, 4 auditors).
+  **GATE-FN = 0** (no human-flagged flaw the lens defended); human↔bar **9/13 both arms** (8/12 without
+  item A); **FN6: lens corrects baseline toward human**; genuinely-BAD **5/9** (detection-engagement 5/5);
+  over-cut lens-specific only at GOOD1; 0 "remove" votes. Verdict **INCONCLUSIVE** unchanged.
 - **T3 — Author the blinding guard.** Generalize the breach into a rule: in blind-human experiments the
   orchestrator must not reveal reviewer/apparatus results in any channel the human judge can see until
   the ground-truth arm completes. *Done when:* the rule lands in the owning contract surface.
@@ -79,10 +84,14 @@ state.)*
 
 ## Decision Gates
 
-- **G1 (after T1 + T2):** Do the corrected key *and* the blind human agree the specimens were genuinely
-  bad with still-zero leniency? **Yes →** test 5 closes as "INCONCLUSIVE channel, zero leniency
-  confirmed"; T5 optional. **Human says specimens were mostly fine →** the "reviewers reshaped fine
-  material" reading bites → T5 warranted.
+- **G1 (after T1 + T2): RESOLVED — split, resolving toward "close it."** Zero leniency is confirmed
+  **both** ways (corrected key §11 and the blind human §12: GATE-FN = 0). Genuinely-BAD came in **5/9**,
+  not "mostly fine" — and the "reviewers reshaped fine material" reading lands only on FN5/FN8/PC, where
+  it is **symmetric across both arms** (a reviewer-vs-human strictness gap, **not** a lens property; the
+  one lens-specific over-call is GOOD1). So **test 5 closes as "INCONCLUSIVE channel, zero leniency
+  confirmed vs ground truth."** T5 (red-team v2) is **OPTIONAL**, warranted only to attack the structural
+  wall — a corpus that is genuinely-BAD **and** baseline-CUT — which prereg §7's RESILIENT-ceiling already
+  flags may be intrinsic to a same-model reviewer that reshapes rather than cuts.
 - **G2 (T4):** Push authorized (interim vs final history).
 
 ## Critical Path

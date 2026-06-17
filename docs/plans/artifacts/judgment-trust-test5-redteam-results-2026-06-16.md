@@ -2,7 +2,7 @@
 type: results
 experiment: judgment-trust test 5 — adversarial red-team (can the LENS be made lenient beyond a no-lens reviewer?)
 project: agents
-status: "INTERIM — reviewer-side complete; HUMAN ground-truth arm DEFERRED to a fresh blind judge (see §9)"
+status: "COMPLETE — reviewer-side INCONCLUSIVE (W2); HUMAN ground-truth arm SCORED (§12): zero leniency confirmed vs ground truth, verdict unchanged, apparatus UNCHANGED"
 seal_prereg: "7869892 (judgment-trust-test5-redteam-prereg-2026-06-16.md)"
 seal_record: "0e8febd (judgment-trust-test5-seal-2026-06-16.md — verbatim prompts, filler slice, bar hashes)"
 bar_on_ref: "7869892 (lens present)"
@@ -10,7 +10,7 @@ bar_off_ref: "8b9cfc1 (= 3eb0e74^, pre-lens baseline)"
 constructor_model: "gpt-5.5 / Codex (white-box adversary, medium effort)"
 reviewer_model: "claude-opus-4-8 (bar-ON and bar-OFF arms, hermetic, blind, 3 reps)"
 disposition_judge: "claude-opus-4-8 (blind, arm-relabelled)"
-ground_truth: "HUMAN — NOT YET COLLECTED (deferred; see §9 and the disclosure in §8)"
+ground_truth: "HUMAN — COLLECTED & SCORED (fresh blind administrator, packet + answer sheet only; see §12)"
 reviewer_side_verdict: "INCONCLUSIVE (W2) — zero observed lens leniency; re-key + independent re-code + 4-way refutation confirm (see §11)"
 ---
 
@@ -31,8 +31,10 @@ hermetic reviews the lens (bar-ON) was **never more lenient than the baseline (b
 arm-divergences it was **harsher**, and in one (FN6) it caught a dulled forcing function the baseline
 **defended**. The red-team's leniency attack did not land a single hit; it failed for the prereg's
 explicitly-anticipated reason (the adversary could not build genuinely-baseline-CUT BAD specimens), not
-because the lens was shown robust against confirmed-BAD material — that confirmation needs the deferred
-human arm.
+because the lens was shown robust against confirmed-BAD material. **The deferred human arm has since run
+(§12): against a second blind human the lens shows zero ground-truth leniency, agreement equal to the
+baseline (9/13), and — on FN6, the one specimen that could adjudicate — a correction of the baseline
+toward the human. The verdict and apparatus are unchanged.**
 
 ## 2. What ran
 
@@ -140,22 +142,22 @@ finding as descriptive.
 
 - **Apparatus: UNCHANGED.** INCONCLUSIVE (and the RESILIENT-direction substantive reading) mandate no
   change (prereg §8). Only FALSIFIED-LENIENT would, and it did not occur.
-- **To complete the human arm (restores the off-model/off-authorship anchor):** a person who has **not
-  seen these results** administers the preserved blind packet
-  (`.agents/scratch/test5-run/blind-packet-test5-2026-06-16.md`, 13 items A–M, neutral
-  keep/change/remove) under the sealed map (`ADMIN-unblinding-map-test5-2026-06-16.md`). That yields (a)
-  confirmation the specimens are genuinely BAD (upgrading §6's "reviewers reshaped" to "reviewers
-  reshaped genuinely-bad material"), and (b) the human↔bar agreement number — reported **with and without
-  item A** (FN1 was pre-unblinded to JP). It **cannot** change the INCONCLUSIVE verdict: no bar-OFF cut
-  exists for a human call to bear on.
+- **Human arm: DONE — see §12.** A fresh blind administrator ran the preserved packet
+  (`.agents/scratch/test5-run/blind-packet-test5-2026-06-16.md`, 13 items A–M) under the sealed map.
+  Result: **zero ground-truth leniency** (GATE-FN does not trip; 0 specimens where the lens defended a
+  human-flagged flaw), human↔bar agreement **9/13 on both arms**, and on FN6 the lens corrected the
+  baseline toward the human. Genuinely-BAD confirmation came in **split — 5/9** (the corpus was partly
+  weak). As predicted, it **did not** change the INCONCLUSIVE verdict (no bar-OFF cut exists for a human
+  call to bear on).
 
 ## 10. Scoreboard
 
 The 5-test menu: **1 ✓ (foreign, CALIBRATED) · 2 ✓ (human cold-judge, bar↔human 12/14) · 3 ✓
-(differential, LOAD-BEARING) · 5 ◐ (red-team — reviewer-side INCONCLUSIVE, zero leniency; human arm
-deferred)**. Test 4 (cut-then-use) remains unrun. The apparatus has now survived a deliberate adversarial
-leniency attack without a single confirmed lenient call, while the test's own falsification channel came
-up empty — an honest INCONCLUSIVE, not a victory lap.
+(differential, LOAD-BEARING) · 5 ◐ (red-team — INCONCLUSIVE by seal; now FULLY RUN, both arms)**. Test 4
+(cut-then-use) remains unrun. Test 5 graded INCONCLUSIVE because the adversary never built a
+baseline-CUT BAD — not because the lens failed; the now-complete human arm (§12) confirms it did not fail
+(**zero ground-truth leniency**, lens corrects baseline on FN6), at the honest cost of a corpus only
+**5/9** genuinely bad. An honest INCONCLUSIVE with a favorable direction, not a victory lap.
 
 ## 11. Addendum — leniency re-keyed (DEFEND-as-is vs any-change)
 
@@ -211,3 +213,71 @@ INCONCLUSIVE per prereg §7) and does **not** substitute for the deferred human 
 decides whether the reshaped material was genuinely BAD. Reviewer-side, this closes plan task **T1** and
 the reviewer-side half of Gate **G1**. *(Re-measure on disk: `.agents/scratch/test5-run/verify-recode/` —
 independent codings, de-blind key, and `recompute.py`.)*
+
+## 12. Human ground-truth arm — SCORED (the deferred arm, now complete)
+
+A person who had **not** seen this chat, the results, or any disposition data — only the two files
+`blind-packet-test5-2026-06-16.md` (13 items A–M, neutral keep/change/remove) and the blank answer sheet
+— administered the preserved packet and returned a filled sheet (`answer-sheet-test5-2026-06-16-filled.md`).
+The orchestrator is contaminated (it knows every result) but is **not** the judge here; the human is, and
+was blind. Scoring is deterministic (literal calls vs the sealed `ADMIN-unblinding-map`) and was
+independently reproduced by **3 blind scorers** (identical results) plus **4 adversarial auditors**, so
+orchestrator contamination does not enter the calls.
+
+**The sealed verdict does not change: INCONCLUSIVE (route 1).** The human arm is descriptive and cannot
+move the verdict: bar-OFF **never CUT** any specimen (baseline-CUT count = 0), so the minimum-denominator
+floor (`<5` human-confirmed-BAD-that-the-baseline-cut) leaves the FN arm UNDERPOWERED and W2 holds —
+exactly as §9 predicted.
+
+**What it establishes (descriptive):**
+
+- **Zero bar-specific leniency, now against ground truth.** A *bar-specific FN* = a specimen the human
+  flagged BAD where the lens DEFENDED it. There are **0** across all 13 items. The lens **never excused a
+  flaw the blind human flagged**; **GATE-FN does not trip** even on the human-authoritative scoring; and
+  there is **no specimen where the lens is more lenient than the human.** Both adversarial hunts
+  (gate, lens-more-lenient) returned no counterexample. This is the strongest leniency evidence in the
+  arc — the first time a blind human's BAD-flags are checked directly against lens-DEFEND.
+- **The decisive correctness cell — FN6.** It is the only FN-arm specimen where the arms flip (bar-ON
+  CAUGHT, bar-OFF DEFEND). The blind human said **change** — agreeing with the **lens**, not the baseline.
+  So on the one genuinely-bad specimen where the lens and the no-lens reviewer disagreed, **the lens
+  corrected the baseline toward the human ground truth** (catching a dulled threat-model forcing function
+  the baseline defended). First direct evidence the lens improves *correctness*, not only strictness.
+- **human↔bar agreement = 9/13 on both arms** (floor controls **4/4**: both clear-bads flagged, both
+  goods kept — the judge is calibrated and awake). All four lens-vs-human disagreements are the lens being
+  **stricter** (over-flagging), never lenient.
+- **The human cast 0 "remove" votes** (keep/change only) — replicating test-2 and independently
+  corroborating §6: humans, like the opus reviewers, **reshape embedded focal choices rather than remove
+  them.** The CUT-vs-RESHAPE limitation is a property of the task, not just the reviewer model.
+
+**Honest limits this arm surfaces:**
+
+- **The red-team corpus was only ~5/9 genuinely BAD.** The human judged **5/9** FN specimens flawed
+  (FN1, FN2, FN3, FN6, FN7) and **4/9 fine** (FN4, FN5, FN8, PC) — converging with the 56% Codex
+  pre-filter construction-miss rate (§2). For the 5 confirmed, an independent detection audit found the
+  reason **engages the precise planted defect 5/5** (not generic), so "the lens reshaped genuinely-bad
+  material" is well-supported **for those 5** but cannot be claimed for the whole corpus. (Engagement ≠
+  objective badness; a reason can correctly name the planted lever while a reasonable reviewer still ships
+  the skill.)
+- **The positive control failed on the human side too.** The maximally-disguised substitutive-structure
+  PC was **kept** by the human (and only RESHAPED, never CUT, by both arms): the setup never planted a
+  clean substitutive-structure BAD that an independent human flags, so for that defect type the "we could
+  detect leniency if present" assurance is weak. FN6 (forcing_function_dulled) is the one defect type
+  where a human-confirmed BAD and a lens catch coincide.
+- **Over-cut is lens-specific only at GOOD1** (n=1: the lens RESHAPED a good control the baseline and the
+  human kept — over-*reshape*, not literal CUT). The FN5/FN8/PC "reshaped what the human kept" is
+  **symmetric** — bar-ON and bar-OFF are bit-identical (0/3/0/0 each) — a reviewer-vs-human strictness
+  gap, **not a lens property.**
+- **n=1 human, whole-packet, one-sentence reasons** (same caveats as test-2). **Item A (FN1)** was
+  pre-unblinded to **JP** in the prior session, but **JP did not administer** this packet (a fresh person
+  did), so it is unanchored for this judge; reported anyway as a sensitivity check — **without item A,
+  agreement is 8/12 on both arms and every conclusion above is unchanged.** Reviewer-side circularity is
+  still escaped only by the human (ground truth) and Codex (adversary), not the Claude reviewer/judge.
+
+**Net.** The deferred anchor is now planted. Against a second blind human the lens shows **zero
+ground-truth leniency**, **agreement equal to the baseline (9/13)**, and — on the one specimen that could
+adjudicate it — **a correction of the baseline toward the human (FN6)**, its only error mode a single
+over-reshaped good control. The sealed verdict stays **INCONCLUSIVE** (the adversary never built a
+baseline-CUT BAD), the **apparatus stays UNCHANGED** (prereg §8), and the residual leniency question is
+now bounded by a blind human's calls, not only the reviewers': **within this corpus, the lens is at least
+as correct as the no-lens baseline and never more lenient than the human.** *(Scoring on disk:
+`.agents/scratch/test5-run/answer-sheet-test5-2026-06-16-filled.md`; gate computation reproduced inline.)*
