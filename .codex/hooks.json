@@ -14,6 +14,12 @@
             "command": "/Users/jp/.agents/scripts/codex-plugins-sync.sh --check || true",
             "timeout": 15,
             "statusMessage": "Checking Codex plugin cache drift"
+          },
+          {
+            "type": "command",
+            "command": "/Users/jp/.agents/scripts/check-protected-set.sh || true",
+            "timeout": 15,
+            "statusMessage": "Checking protected-set drift"
           }
         ]
       }

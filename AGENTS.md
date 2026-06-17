@@ -261,6 +261,11 @@ Proof boundaries:
 - Do file-changing work on a working branch (`chore/`, `fix/`, `feature/`) and
   land it on `main` with a fast-forward merge; a Claude Code user-level hook
   enforces this by blocking edits on `main`.
+- Protected-branch floor (this repo): never commit on the default branch or a
+  protected branch. Treat repo-defined protected branches first; if the repo
+  defines none, treat `main`, `master`, `develop`, and `release/*` as protected.
+  This always-loaded floor governs work in this repo only; it does not travel to
+  other repositories, where the `git-cycle` skills carry their own inline copy.
 - Review `git diff --stat` and the relevant diff before staging or committing.
 - For completed, focused, file-changing work, create a local commit by default
   after focused verification — unless the user asked not to commit, the turn

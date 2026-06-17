@@ -13,11 +13,15 @@ Read [`references/git-hygiene-reference.md`](references/git-hygiene-reference.md
 
 - One repository at a time; submodules are read-only.
 - If scope, file classification, or branch safety is ambiguous, no-op and ask.
-- Never commit onto the default or a protected branch. Before any `commit-shaping`
-  or `commit-only` commit, create a working branch (`chore/`, `fix/`, or
-  `feature/`) when the checked-out branch is the default branch or matches a
-  `branchProtection` glob; reuse the branch and default branch already captured in
-  preflight.
+- Never commit onto the default branch or a protected branch. The default branch
+  is always protected; resolve the *protected* set repo-defined first, where
+  "repo-defined" means the configured `branchProtection` policy — not the mere
+  existence of a default branch. Treat repo-defined protected branches first; if
+  the repo defines none, treat `main`, `master`, `develop`, and `release/*` as
+  protected. Before any `commit-shaping` or `commit-only` commit, create a working
+  branch (`chore/`, `fix/`, or `feature/`) when the checked-out branch is the
+  default branch or is protected under that resolution; reuse the branch and
+  default branch already captured in preflight.
 - Never skip preview, even when the user says "just do it."
 - Never use `rm` or `git clean -fd`; use `trash` only after explicit approval.
 - Never delete protected files from batch approval alone.
@@ -37,7 +41,7 @@ Do not create a cleanup branch for audit-only, no-op, remote-prune-only, or loca
 
 ## Preflight
 
-Before audit or execution, confirm repo root, branch, default branch, remotes, and worktrees; abort on rebase, merge, cherry-pick, or bisect; count file and branch scope; ask before full analysis above 100 changed/untracked files or 50 local branches; warn on shallow clones; load valid repo-root `.git-hygiene.json` only.
+Before audit or execution, confirm repo root, branch, default branch, remotes, and worktrees; abort on any in-progress git operation (rebase, merge, cherry-pick, revert, or bisect); count file and branch scope; ask before full analysis above 100 changed/untracked files or 50 local branches; warn on shallow clones; load valid repo-root `.git-hygiene.json` only.
 
 ## Lanes and Gates
 

@@ -17,7 +17,7 @@ git branch --list
 git rev-parse --is-shallow-repository
 ```
 
-Use the git directory from `git rev-parse --git-dir` to inspect rebase, merge, cherry-pick, and bisect markers. Use `git status --porcelain=v1 --untracked-files=all` for counts. Preview stale remote refs with `git remote prune <remote> --dry-run`.
+Use the git directory from `git rev-parse --git-dir` to inspect rebase, merge, cherry-pick, revert, and bisect markers. Use `git status --porcelain=v1 --untracked-files=all` for counts. Preview stale remote refs with `git remote prune <remote> --dry-run`.
 
 Branch checks:
 

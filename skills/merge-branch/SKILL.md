@@ -58,9 +58,8 @@ Use the path from `git rev-parse --git-dir` to check for operation markers such
 as `rebase-merge`, `rebase-apply`, `MERGE_HEAD`, `CHERRY_PICK_HEAD`,
 `REVERT_HEAD`, or `BISECT_LOG`.
 
-Treat protected branches as repo-defined protected branches first. If the repo
-does not define them, treat `main`, `master`, `develop`, and `release/*` as
-protected for this workflow.
+Treat repo-defined protected branches first; if the repo defines none, treat
+`main`, `master`, `develop`, and `release/*` as protected.
 
 Stop if any precondition fails:
 
