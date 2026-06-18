@@ -20,6 +20,12 @@
             "command": "/Users/jp/.agents/scripts/check-protected-set.sh || true",
             "timeout": 15,
             "statusMessage": "Checking protected-set drift"
+          },
+          {
+            "type": "command",
+            "command": "/Users/jp/.agents/scripts/check-handoff-paths.sh || true",
+            "timeout": 15,
+            "statusMessage": "Checking handoff path-set drift"
           }
         ]
       }
