@@ -125,11 +125,10 @@ Label what was actually proven:
 
 Use these as honest boundaries, not as ceremony. A source or structural check
 does not prove behavior, remote state, plugin installation state, or end-to-end
-behavior unless that path was actually exercised. For local skills in `skills/`,
-the edited file is the live local source for future invocations; do not require
-or report a separate installed-runtime check unless the claim involves a plugin
-copy, cache, marketplace entry, hook, service, or other distributed runtime
-surface.
+behavior unless that path was actually exercised. When the edited file is itself
+the live source, those structural checks are its proof; install, cache,
+distributed-copy, hook, service, and other runtime surfaces need their own checks
+only when that surface is part of the claim.
 
 ## Blocking Failures
 

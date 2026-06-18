@@ -124,7 +124,7 @@ Fields:
 - `ignorePatterns`: candidate `.gitignore` additions, not silent file deletion.
 - `protectedPatterns`: extra patterns that require per-file deletion approval.
 - `groupingHints`: path prefixes to concern labels for commit grouping.
-- `branchProtection`: branch names or globs never proposed for deletion.
+- `branchProtection`: branch names or globs never proposed for deletion, and the repo-defined protected set used to gate commit creation — `commit-shaping`/`commit-only` branch first rather than commit onto a protected or default branch.
 - `defaultCommitPrefix`: Conventional Commits type for ambiguous real changes.
 
 Config rules can strengthen safety rules, never weaken them.

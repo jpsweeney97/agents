@@ -4,6 +4,17 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.0.1 - 2026-06-17
+
+### Changed
+
+- `closeout-check`: genericized the Proof Boundary proof-discipline sentence — dropped the `.agents`-specific
+  "local skills in `skills/`" framing so the rule reads portably in any repo where this skill runs. No behavior
+  added; the proof-class distinction is unchanged (refs #13).
+- `git-hygiene`: the config reference now documents `branchProtection`'s commit-gating use (the repo-defined
+  protected set that blocks commits onto a protected or default branch), not only deletion-protection.
+  Doc-alignment only; runtime was already safety-strengthening (refs #16).
+
 ## 1.0.0 - 2026-06-17
 
 ### Added
