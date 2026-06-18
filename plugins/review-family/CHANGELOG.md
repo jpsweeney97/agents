@@ -4,6 +4,24 @@ All notable changes to the Review Family plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.3.11 - 2026-06-18
+
+### Changed
+
+- Drift-detection across the five independently-loaded review skills (issue #11): the
+  read-only / protected-action boundary and the bounded-review contract are normalized to a
+  shared CORE carried verbatim inline by each skill, with per-skill riders and verdict
+  vocabulary kept explicit. New `scripts/check-review-family.sh` asserts the read-only core
+  across all 5 skills and the bounded-review core across the 3 adversarial skills (scrutinize,
+  scrutinize-skill, implementation-review), wired into the SessionStart canary in both runtimes.
+- `scrutinize-skill` is now reachable as a redirect target from `implementation-review`,
+  `system-design-review`, and `review-reviewer` routing (previously only `scrutinize` named it).
+- One unverified-marker token across the family: `review-reviewer`'s truth-verdict scale is now
+  `confirmed` / `challenged` / `unverified` (was `needs-verification`) and `scrutinize`'s
+  Assumptions-Audit evidence tag uses `unverified`; `review-reviewer`'s Current-Claim-Check ↔
+  truth-verdict cross-walk is removed. `system-design-review`'s `insufficient evidence` screening
+  status is a distinct verdict scale and is left unchanged.
+
 ## 0.3.10 - 2026-06-15
 
 ### Added

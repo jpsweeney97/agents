@@ -189,14 +189,14 @@ location-free findings when the target is file-backed.
 
 Use `Bounded Review Scope` before `Target And Surface` when the target or skill
 set comparison is too large to inspect completely in one pass. In bounded mode,
-state the reviewed subset, mark omitted surfaces `unverified`, name the next
-slice needed, and do not use `Defensible` for the full target.
+state the reviewed subset before findings, review the highest-risk surface first,
+mark omitted areas `unverified`, give the next slice needed for a complete review,
+and do not issue a full-clearance verdict for the full target (do not use
+`Defensible`).
 
 ## Guardrails
 
-- Stay read-only. Do not edit files, stage, commit, push, delete, sync,
-  publish, install, refresh plugin caches, or mutate runtime state unless the
-  user explicitly asks for that separate action after the review.
+- Stay read-only: do not edit files, stage, commit, push, delete, sync, publish, or implement fixes unless the user explicitly asks for that separate action after the review; the same gate covers installing, refreshing plugin caches, and mutating runtime state.
 - Do not mentally repair weak instructions. Review the behavior contract that
   exists, not the one the author probably intended.
 - Do not pad with generic writing advice. Every finding must identify a concrete
