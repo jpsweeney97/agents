@@ -1,0 +1,7 @@
+interface:
+  display_name: "Setup Matt Pocock's Skills"
+  short_description: "Scaffold the repo-local agent-skills config"
+  default_prompt: "Use $setup-matt-pocock-skills to scaffold this repo's `## Agent skills` block and `docs/agents/` configuration (issue tracker, triage labels, domain docs) — explore, confirm with me, then write."
+
+policy:
+  allow_implicit_invocation: false

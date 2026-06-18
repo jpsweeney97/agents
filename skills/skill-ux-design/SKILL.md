@@ -215,8 +215,8 @@ patch-shaped proposal requiring explicit approval.
    paths, run the available skill validator when present, run whitespace checks,
    and do a realistic dry run when practical.
 8. Label the proof boundary honestly: structural validation is not behavior
-   proof. For local skills, do not invent a separate installed-runtime layer;
-   name plugin/cache/marketplace/runtime checks only when those surfaces matter.
+   proof; name plugin, cache, marketplace, or runtime checks only when those
+   surfaces are part of the claim.
 
 ## Progress Visibility
 
@@ -270,8 +270,8 @@ For direct `Safe UX` edits, close with:
 ```markdown
 Changed: <files/sections>
 Safe UX because <one sentence explaining why this clarified existing behavior without changing protected surfaces>
-Verified: <frontmatter/YAML/quick_validate/diff check/etc.>
-Proof boundary: structural/source validation only; no realistic behavior smoke test was run.
+Verified: <frontmatter/YAML parse, referenced paths, available validator, diff check, etc.>
+Proof boundary: <what was and wasn't proven — e.g. structural/source validation only, no behavior smoke test; or note the realistic dry run / smoke test if one was run>.
 Not touched: <protected surfaces intentionally left alone>
 ```
 
@@ -289,8 +289,8 @@ as the edit-path receipt. Close with an approval and lifecycle rationale instead
 Changed: <files/sections>
 Approved change: <named user-approved proposal-first/protected change>
 Lifecycle/protected-surface rationale: <what expectation, authority, proof, mutation, persistence, behavior-smoke, plugin/runtime, or lifecycle surface changed>
-Verified: <frontmatter/YAML/quick_validate/diff check/etc.>
-Proof boundary: structural/source validation only; no realistic behavior smoke test was run. Plugin/cache/marketplace/runtime surfaces were not checked unless named above.
+Verified: <frontmatter/YAML parse, referenced paths, available validator, diff check, etc.>
+Proof boundary: <what was and wasn't proven — structural/source validation, and whether a realistic dry run / behavior smoke test was run>. Plugin/cache/marketplace/runtime surfaces were not checked unless named above.
 Not touched: <protected surfaces intentionally left alone>
 ```
 
@@ -324,6 +324,6 @@ Validate the exact surfaces edited.
   zero hits is required.
 
 Do not claim plugin install, marketplace, cache, distributed-copy, hook, remote,
-or live runtime behavior changed unless that path was verified. For local skills
-edited directly in `skills/`, treat the edited file as the live local source and
-separate structural validation from behavior smoke testing instead.
+or live runtime behavior changed unless that path was verified. When the edited
+file is itself the live source, treat it as such and separate structural
+validation from behavior smoke testing instead of inventing a runtime proof layer.

@@ -82,9 +82,7 @@ Avoid specific file paths or code snippets — they go stale fast. Exception: if
 
 ## Acceptance criteria
 
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
+- [ ] One checkbox per externally observable outcome — a check someone could verify by exercising the slice (behavior, output, or state), not an implementation step.
 
 ## Blocked by
 
@@ -95,3 +93,7 @@ Or "None - can start immediately" if no blockers.
 </issue-template>
 
 Do NOT close or modify any parent issue.
+
+After publishing, name the next lane and stop: the `ready-for-agent` issues are
+now execution's to pick up, and the `ready-for-human` issues await a human. Do
+not implement them yourself unless the user asks.

@@ -40,8 +40,8 @@ Pick the output mode before recording findings:
   read-only output, or chat only, or when the target has no writable artifact
   location. Label the missing artifact as a proof limit.
 
-Read repo instructions first for artifact conflicts, but do not require an
-existing repo audit convention. `tech-debt-scan` owns the default
+Read repo instructions (`AGENTS.md` or `CLAUDE.md`) first for artifact
+conflicts, but do not require an existing repo audit convention. `tech-debt-scan` owns the default
 `docs/audits/YYYY-MM-DD-<target-slug>-debt-scan.md` convention.
 If the default parent directory is missing and repo instructions do not forbid
 it, create the parent directory before writing the artifact. If parent-directory

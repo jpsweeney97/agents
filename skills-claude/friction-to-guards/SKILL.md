@@ -58,7 +58,7 @@ proposed tier and target surface, and why a lighter tier would not hold.
 
 Route approved applications through the owning lane rather than editing
 directly from here: `update-config` for hooks and settings when available,
-the repo's instruction-editing lane for `AGENTS.md`/`CLAUDE.md` prose, the
+`writing-principles` for `AGENTS.md`/`CLAUDE.md` prose, the
 owning skill's editing path for contract changes, and the agent-facing
 design gate before any materially new agent-facing obligation. Memory
 entries may be written directly.

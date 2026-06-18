@@ -76,12 +76,6 @@ define new agent-facing capabilities here; route construction and capability
 decisions to the skill-construction and `agent-facing-design` lanes named under
 Scope.
 
-This skill wins for obligation-only prose edits inside an existing `SKILL.md`,
-`AGENTS.md`, `CLAUDE.md`, support doc, `agents/*.md`, or `agents/*.yaml` that
-make one of the stay-in edits defined below. Neighboring skill-authoring
-workflows win when the change alters the capability, bundle shape, resources,
-scripts, generated metadata, or install/runtime surface.
-
 Before editing, read the live target and nearby authority needed to understand
 what controls the obligation: repo instructions, companion metadata, referenced
 examples, validators, workflows, or neighboring docs. Keep edits scoped to the
@@ -192,9 +186,10 @@ Always separate proof classes. Structural source validation proves parsing,
 shape, references, or static checks only; it does not prove behavior,
 certification, sync, plugin install, cache, marketplace, hook, distributed-copy,
 remote, or live runtime, and does not show that a realistic invocation followed
-the behavior unless one was run. For local skills in `skills/`, do not invent a
-separate installed-runtime layer. Those claims need their own checks only when
-that surface is part of the claim.
+the behavior unless one was run. When the edited file is itself the live source,
+those structural checks are its proof; install, cache, distributed-copy, and
+other runtime surfaces need their own checks only when that surface is part of
+the claim.
 
 ## Validation
 

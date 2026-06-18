@@ -44,7 +44,7 @@ Active findings are F1: weak service-to-service trust boundaries, F2: incomplete
 
 - non-critical cosmetic docs cleanup - revisit when rollout readiness is decided
 
-I can save this plan to a file if useful; tell me the path.
+I can save this plan to a file if that's useful.
 
 ## Edge Case: Ambiguous Source
 

@@ -175,12 +175,12 @@ that explicitly. Do not call the smoke test passed from structural checks alone.
 Structural checks show whether the controlling files are loadable and coherent.
 They do not prove that the changed behavior was followed.
 
-For local skills, the minimum structural checks are:
+For a changed skill or agent-facing artifact, the minimum structural checks are:
 
 - parse `SKILL.md` frontmatter
 - parse `agents/openai.yaml` when present
 - inspect referenced paths and confirm each exists
-- run the available local skill validator when present
+- run the available validator when present
 - run a diff whitespace check when files were edited or are under review
 
 Report structural checks separately from behavior proof. If a structural check
