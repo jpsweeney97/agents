@@ -44,8 +44,6 @@ should carry:
 - **An Evidence Boundary** note: what was and was not inspected, which citations
   were independently verified, and that later edits can invalidate them.
 
-See `2026-06-18-skill-library-capability-growth-review.md` for the first record.
-
 ## Status of these records
 
 Evidence, not authority. A record is true *at the commit it names*. Later edits
