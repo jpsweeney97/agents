@@ -1,11 +1,14 @@
 # Behavior Contracts Charter
 
-What earns a place in this environment, and on what terms. Consult this before
-authoring a new contract — skill, command, or rule — installing anything that
-ships contract text, retiring a contract, or deciding the fate of third-party
-contract material. These four events are the charter's triggers: every surface
-that routes here must name all four, and a pointer that names fewer
-under-triggers the charter.
+What earns a place in this environment, and on what terms. Skills and commands
+are build-and-prune and are **not** charter events — build them whenever they
+seem worth trying, prune them freely when they do not (see Reversibility Class).
+Consult this only before the events that stay gated: authoring or retiring an
+always-loaded contract (a rule, an AGENTS.md line, a hook, any ambient
+instruction), installing anything that ships contract text, or deciding the fate
+of third-party contract material. Every surface that routes here must name these
+gated events; a pointer that gates skill or command authoring over-triggers the
+charter.
 
 ## Scope
 
@@ -36,6 +39,31 @@ other governance docs in `docs/agents/` support it. None is a contract admitted
 under the charter: they are maintained by direct editing and take no admission,
 retirement, or decision-ledger entry of their own.
 
+## Reversibility Class
+
+How much a contract is gated turns on one thing: whether a bad one is *caught
+cheaply and undone cleanly*.
+
+- **Build-and-prune — skills and commands.** A skill fires *visibly*: both
+  runtimes surface every invocation, including model-initiated ones, so a
+  mis-fire or a stolen fire shows up in the transcript the moment it happens.
+  And it is *modular* — a directory you trash. So build one whenever it seems
+  worth trying, judge it by watching it fire on real work, and prune it freely
+  when it does not earn its place. No observed-friction proof, no admission
+  test, no park, no ledger entry, no archive step. Healthy churn is the design,
+  not a failure — the library is meant to turn over.
+- **Gated — rules, AGENTS.md lines, hooks, any always-loaded instruction.** An
+  ambient contract has *no visible fire*: it shapes every response with no
+  trigger in the transcript, so you cannot watch it mis-fire. And it is
+  *entangled* — woven into surrounding guidance, so removing it has non-local
+  effects you will not reliably notice. You can neither see it go wrong nor
+  cleanly prune it, so it keeps the full Admission and Retirement discipline
+  below.
+
+Infer the class from whether the contract fires visibly and prunes cleanly; this
+is a lens, not a label to declare. Third-party material is gated regardless of
+class — its risk is authorship coherence (Thesis), not reversibility.
+
 ## Thesis
 
 Every behavior contract that runs in this environment is first-party —
@@ -64,7 +92,17 @@ versus precision, per-turn versus per-branch), and the coverage, timing, or
 unprompted action that follow from them, do not by themselves make it a
 different job.
 
+For build-and-prune contracts this is a design heuristic, not an up-front gate:
+a collision surfaces as competing fires in the transcript and is resolved by
+pruning the weaker, so do not build an obvious duplicate, but do not litigate
+overlap before building either. For gated contracts it is a firm admission
+condition.
+
 ## Admission
+
+This test governs **gated** contracts only — always-loaded instructions and
+third-party material. Skills and commands are build-and-prune (see Reversibility
+Class) and do not run it.
 
 Merit decides, authorship-blind: a better contract is a better contract,
 wherever it was found. Before admitting a new contract — authored or extracted
@@ -119,18 +157,21 @@ curation passes mine them and remove them on the same terms.
 
 ## Retirement
 
-A repo contract that loses its job — absorbed, superseded, or no longer worth
-its slot — retires: a skill moves to `skills-archive/`; a non-skill contract
-(a rule, a command, an instruction line with no archive home) is deleted from
-its surface. An installed contract that loses its job is removed under
-Extraction's terms. "No longer worth its slot" takes the
-same evidence discipline as rejecting a candidate: name the observed-work
-evidence, never route-absence alone. Update or remove every contract that
-routes to it.
+A skill or command is build-and-prune: trash it the moment it stops earning its
+place — no evidence ceremony, and archiving to `skills-archive/` is optional, not
+required. A **gated** contract that loses its job — absorbed, superseded, or no
+longer worth its slot — retires under discipline: a rule or instruction line with
+no archive home is deleted from its surface; an installed third-party contract is
+removed under Extraction's terms. For these gated retirements, "no longer worth
+its slot" takes the same evidence discipline as admitting one: name the
+observed-work evidence, never route-absence alone. Update or remove every contract
+that routes to a removed surface, whichever class it was.
 
 ## Decision Record
 
-Every admission, fold, rejection, park, and retirement gets one entry
+Build-and-prune churn — creating or pruning skills and commands — takes no
+ledger entry. Every **gated** decision — an admission, fold, rejection, park, or
+retirement of an ambient contract or third-party material — gets one entry
 in `contract-decisions.md` (this directory): date, surface, outcome, evidence
 pointer, and — for parks — the reopen trigger. The evidence pointer must be
 durable and replayable — a commit, a tracked file, or a named, persistent

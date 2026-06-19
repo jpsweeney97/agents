@@ -96,14 +96,16 @@ manifest. Primary work is day-to-day skill editing.
 ## Repo Docs
 
 - `docs/agents/charter.md` — contracts charter governing admission,
-  extraction, and retirement of behavior contracts. Consult it before any of
-  the four events it names: authoring a contract (skill, command, or rule),
-  installing contract-shipping material, retiring a contract, or deciding the
-  fate of third-party material.
+  extraction, and retirement of behavior contracts. Skills and commands are
+  build-and-prune and are not charter events (build/prune freely); consult the
+  charter only before the gated events it names: authoring or retiring an
+  always-loaded contract (a rule, an AGENTS.md line, or a hook), installing
+  contract-shipping material, or deciding the fate of third-party material.
 - `docs/agents/contract-decisions.md` — the append-only decision ledger the
-  charter requires: one entry per charter decision (admission, fold, rejection,
-  park, retirement) with an evidence pointer. The durable, runtime-neutral
-  record; append, never rewrite settled entries.
+  charter requires: one entry per gated charter decision (admission, fold,
+  rejection, park, retirement of an ambient contract or third-party material;
+  build-and-prune skill/command churn is not ledgered) with an evidence pointer.
+  The durable, runtime-neutral record; append, never rewrite settled entries.
 - `docs/agents/issue-tracker.md` — issues are tracked in GitHub Issues for
   `jpsweeney97/agents`.
 - `docs/agents/triage-labels.md` — the default five-label triage vocabulary.
