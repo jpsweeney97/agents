@@ -92,10 +92,8 @@ an observed failure or demonstrated friction that would reopen the call.
 Parked candidates are settled until their trigger fires; do not silently
 re-litigate them.
 
-Slots are paid for. Codex truncates the skill list silently over its budget,
-and every contract adds routing surface in each runtime that loads it — a
-Claude-only lane in `skills-claude/` pays no Codex budget. A contract that
-cannot name the work it owns does not get a slot.
+Every contract adds routing surface in each runtime that loads it. A contract
+that cannot name the work it owns does not get a slot.
 
 ## Extraction
 

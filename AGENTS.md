@@ -31,9 +31,7 @@ manifest. Primary work is day-to-day skill editing.
   `--check` (it never deletes). Remove stale `~/.claude/skills` entries with
   `trash`. Bootstrap and recovery live in the script header; `--link-all`
   rebuilds the symlink farm.
-- Codex gives skills a ~2% context budget and silently truncates the skill
-  list when over it: keep skill count and description growth in mind.
-  Claude-side symlink discovery and live reload are undocumented behavior,
+- Claude-side symlink discovery and live reload are undocumented behavior,
   canary-guarded at session start.
 - A `skills/` skill is dual-runtime, so name it to avoid both Codex-bundled
   names (`~/.codex/skills/`, including `.system/`: `openai-docs`,
@@ -182,9 +180,9 @@ workflow:
   and rationale out of frontmatter; they belong in the body. Name neighboring
   skills or exclusions only when selection-critical.
 - Soft 25-60 word description budget; go past ~90 words only to prevent a
-  specific likely misroute. Description length is a Codex-budget input, not a
-  skill-quality score: a judgment skill is not lower-quality for sitting near
-  the cap. Trim for budget pressure, not for conformance.
+  specific likely misroute. Description length is a routing-clarity input, not
+  a skill-quality score: a judgment skill is not lower-quality for sitting near
+  the cap. Trim for routing precision, not for conformance.
 - In the body, state expected behavior and defaults. For trust skills, also fix
   stop conditions and output shape — predictable shape is their value. For
   judgment skills, structure is fine when it organizes or provokes thinking (a
