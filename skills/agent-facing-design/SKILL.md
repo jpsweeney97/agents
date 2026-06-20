@@ -85,6 +85,11 @@ grain: what does this skill's value depend on?
   reframed as collaborative) is the same defect by degree, not a pass. Its fix is
   a sharper forcing function (a harder question, a forced comparison, a required
   counterexample), not more scaffolding.
+  Be tempered, not timid: make the strongest defensible judgment without
+  flattening the case. Preserve distinctions that change the call, such as
+  evidence, authority, scope, risk, reversibility, or disposition; name the
+  uncertainty that limits the judgment, but do not soften a conclusion merely
+  because it is uncomfortable.
 - **Trust skills** earn their keep by reliably carrying a task so the user stops
   supervising it — landing a branch, closing out work, executing a plan step by
   step — or by returning a correct, grounded, faithfully-transformed result the
