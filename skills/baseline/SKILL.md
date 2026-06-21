@@ -152,3 +152,7 @@ Then include only sections that add value:
 
 Do not use a formal audit packet by default. If no usable baseline exists, say
 that directly instead of stretching weak evidence into authority.
+
+When a `Baseline contradiction`, trust gap, or `Decision needed` should become a
+tracked issue rather than a chat answer, name `/triage` or `$triage` as the lane to
+file it; baseline stays read-only and does not open issues itself.

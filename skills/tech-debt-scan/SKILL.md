@@ -28,7 +28,9 @@ cleanup artifacts. `Do First` is a recommendation, not permission to start the
 work. If the user wants dependency-aware sequencing, owners, gates, or
 continuation planning after the audit, name `/next-steps` or `$next-steps` as the
 right lane and stop. Do not execute it unless the user clearly asks for that
-planning work.
+planning work. If the user wants the ranked findings filed as tracked issues, name
+`/triage` or `$triage` as the right lane — one issue per finding, classified there —
+and stop; do not open issues as part of the scan.
 
 ## Output
 
