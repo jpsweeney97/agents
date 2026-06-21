@@ -40,7 +40,7 @@ List each consumer with its location (`path:line` where static) and how it was f
 
 - **Version** — map the highest-severity delta to a semver bump (any breaking → major; additive-only → minor; behavior-preserving → patch), or to this project's release convention if it differs. Flag any breaking delta hiding under a non-breaking version.
 - **Sequence** — prefer the safe order: ship additive first → migrate consumers off the old path → deprecate with a window → remove. But name the constraint that forces a different order here — a consumer you cannot migrate before the producer ships, an impossible dual-write, a consumer in a repo you do not control — and sequence around it. Where a compat layer (shim, overload, dual-write, adapter) makes the change non-breaking, say so, as advice not a mandate.
-- **Hand off** — this skill produces the plan; it does not execute it. If the rollout spans many sites, hand the confirmed consumer list to a sharded-execution lane (`migration-campaign`, when available) or to `to-issues` to track the work — otherwise carry it out under a sharded plan you drive.
+- **Hand off** — this skill produces the plan; it does not execute it. If the rollout spans many sites, hand the confirmed consumer list to a sharded-execution lane (`migration-campaign`) or to `to-issues` to track the work — otherwise carry it out under a sharded plan you drive.
 
 ## Boundaries
 
@@ -50,7 +50,7 @@ Out of scope — route instead:
 
 - reviewing an **already-completed** change against a plan → `implementation-review` (it looks backward at a done change; this looks forward at a proposed one).
 - architecture or design quality, boundaries, tradeoffs → `system-design-review`.
-- **applying** the change across shards with burndown tracking → `migration-campaign` when available; either way this skill stops at the plan and never applies the change.
+- **applying** the change across shards with burndown tracking → `migration-campaign`; either way this skill stops at the plan and never applies the change.
 - slicing the plan into grabbable issues → `to-issues`.
 
 Read-only and judgment-only. Read code and the supplied change freely; do **not** edit files, apply the migration, stage, commit, or publish unless the user explicitly asks for that as a separate step. The `rg` sweep is evidence for your judgment, not an authority — never present it as an exhaustive consumer list.
