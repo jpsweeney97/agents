@@ -1,0 +1,4 @@
+interface:
+  display_name: "Explain Codebase"
+  short_description: "First-pass model of an unfamiliar codebase"
+  default_prompt: "Use $explain-codebase to understand an unfamiliar codebase first-pass: read the repo's own map before its source, stay strictly read-only (detect build/test/run commands, don't run them), trace one representative path end-to-end, and report an honest coverage ledger."
