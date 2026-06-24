@@ -303,6 +303,22 @@ entries; do not rewrite settled ones.
   The source remains recoverable from git history at `6239f9c` if the decision
   is ever reversed. Evidence: deletion `7d76940`; source/recovery point
   `6239f9c`; symlink reap + this entry (this commit).
+- 2026-06-23 — Markdown prose-wrap default (user-level global instruction,
+  `~/.claude/CLAUDE.md`, "Markdown Artifacts"): admitted a style default —
+  generated Markdown prose artifacts (handoffs, specs, reviews, plans, PRDs)
+  are written one logical line per paragraph/bullet, never hard-wrapped at a
+  fixed column; established repo wrapping conventions override it (this repo's
+  hard-wrapped instruction docs and this ledger still win, which is why this
+  entry is hard-wrapped). No existing lane owned generated-prose wrapping
+  (closest: the global `Code Style` and `Communication` sections, which cover
+  code and chat register, not artifact line-wrapping). Pure context — a
+  formatting default, no machinery (no field, classifier, or score) — passes
+  the agent-facing-design gate trivially. Friction: recurring
+  hard-wrap-at-~100-col, corrected this session and made durable at JP's
+  explicit request. Contract surface is user-level and untracked. Evidence:
+  reflow commit `241dc91` on `feature/skill-squad-spec` (skill-squad spec
+  unwrapped, content verified word-for-word identical); this entry (this
+  commit).
 
 ## Parks
 
