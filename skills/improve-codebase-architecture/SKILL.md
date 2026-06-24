@@ -82,10 +82,4 @@ Side effects happen inline as decisions crystallize:
 - **User rejects the candidate with a load-bearing reason?** Offer an ADR, framed as: _"Want me to record this as an ADR so future architecture reviews don't re-suggest it?"_ Only offer when the reason would actually be needed by a future explorer to avoid re-suggesting the same thing — skip ephemeral reasons ("not worth it right now") and self-evident ones. See [ADR-FORMAT.md](../grill-with-docs/ADR-FORMAT.md).
 - **Want to explore alternative interfaces for the deepened module?** See [INTERFACE-DESIGN.md](INTERFACE-DESIGN.md).
 
-Before the first `CONTEXT.md` or ADR write, run `git status`; if the worktree is
-dirty, tell the user your writes will land alongside their uncommitted changes,
-and never write over unrelated edits in a file you touch. Update incrementally but
-do not commit — leave the changes for the user to review, and report which files
-you created or edited when you pause or finish.
-(The HTML report stays in the temp directory, per step 2.) Proof boundary: you
-recorded glossary and decision text, not verified refactors.
+Before the first `CONTEXT.md` or ADR write, run `git status`; if the worktree is dirty, tell the user your writes will land alongside their uncommitted changes, and never write over unrelated edits in a file you touch. Update incrementally but do not commit — leave the changes for the user to review, and report which files you created or edited when you pause or finish. (The HTML report stays in the temp directory, per step 2.) Proof boundary: you recorded glossary and decision text, not verified refactors.

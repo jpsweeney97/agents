@@ -7,21 +7,13 @@ description: "Use when the user wants to convert an existing plan, spec, PRD, or
 
 Break a plan into independently-grabbable issues using vertical slices (tracer bullets).
 
-The issue tracker and triage label vocabulary should have been provided to you.
-If they are missing, use `/setup-matt-pocock-skills` or
-`$setup-matt-pocock-skills` when that skill is available; otherwise ask the
-smallest setup question needed before publishing.
+The issue tracker and triage label vocabulary should have been provided to you. If they are missing, use `/setup-matt-pocock-skills` or `$setup-matt-pocock-skills` when that skill is available; otherwise ask the smallest setup question needed before publishing.
 
 ## Side Effects And Proof Boundary
 
-This skill publishes approved slices to the configured issue tracker. Do not
-publish until the user has approved the slice breakdown or explicitly asked to
-use an already-approved breakdown.
+This skill publishes approved slices to the configured issue tracker. Do not publish until the user has approved the slice breakdown or explicitly asked to use an already-approved breakdown.
 
-After publishing, report the created issue identifiers or URLs, parent links,
-labels applied, source artifact used, and proof boundary. Issue publication
-proves the tracker artifacts were created; it does not prove implementation,
-acceptance satisfaction, or tracker state beyond the actions performed.
+After publishing, report the created issue identifiers or URLs, parent links, labels applied, source artifact used, and proof boundary. Issue publication proves the tracker artifacts were created; it does not prove implementation, acceptance satisfaction, or tracker state beyond the actions performed.
 
 ## Process
 
@@ -42,8 +34,7 @@ Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an
 <vertical-slice-rules>
 - Each slice delivers a narrow but COMPLETE path through every layer (schema, API, UI, tests)
 - A completed slice is demoable or verifiable on its own
-- Prefer many thin slices over few thick ones
-</vertical-slice-rules>
+- Prefer many thin slices over few thick ones </vertical-slice-rules>
 
 ### 4. Quiz the user
 
@@ -94,6 +85,4 @@ Or "None - can start immediately" if no blockers.
 
 Do NOT close or modify any parent issue.
 
-After publishing, name the next lane and stop: the `ready-for-agent` issues are
-now execution's to pick up, and the `ready-for-human` issues await a human. Do
-not implement them yourself unless the user asks.
+After publishing, name the next lane and stop: the `ready-for-agent` issues are now execution's to pick up, and the `ready-for-human` issues await a human. Do not implement them yourself unless the user asks.

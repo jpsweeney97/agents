@@ -6,22 +6,19 @@ disable-model-invocation: true
 
 # Action Plan
 
-Turn existing findings into a small dependency-aware strategic plan. This skill
-is explicit-only; use it only when the user selects `/next-steps` or `$next-steps`.
+Turn existing findings into a small dependency-aware strategic plan. This skill is explicit-only; use it only when the user selects `/next-steps` or `$next-steps`.
 
 Read [references/example.md](references/example.md) only when the user asks for an example or needs output or edge-case calibration.
 
 ## Use
 
 - For review findings, audit results, retrospectives, brainstorming notes, or similar analysis.
-- For sequencing supplied findings. Use `making-recommendations` instead when
-  the user wants to choose among options, prioritize options, or rank trade-offs.
+- For sequencing supplied findings. Use `making-recommendations` instead when the user wants to choose among options, prioritize options, or rank trade-offs.
 - Not for step-by-step coding plans, direct execution, or session-sized implementation plans.
 - These are early exits that do not need the full output packet:
   - No findings: ask what artifact or discussion to plan from.
   - One obvious next step: say so instead of fabricating phases.
-  - Implementation-ready work: say this is ready for
-    `implementation-planning`, then stop.
+  - Implementation-ready work: say this is ready for `implementation-planning`, then stop.
 
 ## Build
 
@@ -44,8 +41,7 @@ Read [references/example.md](references/example.md) only when the user asks for 
 
 ## Output Sections
 
-For non-early-exit cases, return: `Current State`, `Dependency Map`, `Sequenced Plan`, `Decision Gates`, `Critical Path`, and `Out of Scope (Parked)`.
-After those sections, add one concise sentence offering to save the plan to a file. Do not save automatically. If the user accepts without naming a path, ask one path question before writing.
+For non-early-exit cases, return: `Current State`, `Dependency Map`, `Sequenced Plan`, `Decision Gates`, `Critical Path`, and `Out of Scope (Parked)`. After those sections, add one concise sentence offering to save the plan to a file. Do not save automatically. If the user accepts without naming a path, ask one path question before writing.
 
 - `Decision Gates`: use `None - all tasks have a single forward path.` when applicable.
 - `Critical Path`: include `Dependency-critical chain`, `Scheduling-critical status`, and `Highest-risk task`.

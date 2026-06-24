@@ -5,49 +5,23 @@ description: "Use when the user wants to turn a settled design, spec, PRD, or ap
 
 # Implementation Planning
 
-Write an implementation plan a skilled engineer with zero context for this
-codebase could execute without guessing. Assume they know their craft but
-nothing about this repo's toolset, domain, or conventions. The plan document
-is the deliverable; executing it belongs to `execute-plan` or another
-executor.
+Write an implementation plan a skilled engineer with zero context for this codebase could execute without guessing. Assume they know their craft but nothing about this repo's toolset, domain, or conventions. The plan document is the deliverable; executing it belongs to `execute-plan` or another executor.
 
 ## Trigger Boundaries
 
-- Requires settled source material: an approved design, spec, PRD, or
-  equivalent decision. If the design is still open, name `design-exploration`
-  and ask before switching.
-- Tracker issue slicing is `to-issues`; observable acceptance checks are
-  `acceptance-map`; dependency-aware sequencing of findings is `/next-steps` or
-  `$next-steps`, which the user must invoke explicitly. This lane owns the
-  executable plan document.
+- Requires settled source material: an approved design, spec, PRD, or equivalent decision. If the design is still open, name `design-exploration` and ask before switching.
+- Tracker issue slicing is `to-issues`; observable acceptance checks are `acceptance-map`; dependency-aware sequencing of findings is `/next-steps` or `$next-steps`, which the user must invoke explicitly. This lane owns the executable plan document.
 - Writing the plan grants no execution authority. Do not start implementing.
 
 ## Plan Standards
 
-- Ground the plan first: read the settled source design, spec, or PRD in full,
-  and inspect the actual repo — existing file layout, conventions, and the
-  build/test commands — so every path, pattern, and command the plan names is
-  one you verified, not one you assumed.
-- If the source design covers multiple independent subsystems, flag it and
-  split into one plan per subsystem; each plan should yield working,
-  verifiable software on its own.
-- Map the file structure before tasks: which files are created or modified
-  and each one's single responsibility. Follow existing repo patterns.
-- Number the tasks and order them so each is buildable and verifiable given
-  only the tasks before it; when a task depends on earlier work, an
-  earlier-numbered task must satisfy that dependency. The executor runs them in
-  document order.
-- Decompose into tasks that produce self-contained, verifiable changes.
-  Within tasks, bite-sized steps — one action each: write the failing test,
-  run it and watch it fail, implement minimally, run and watch it pass,
-  commit. Keep test-shaped steps consistent with the `tdd` skill.
-- Exact file paths always. Complete code in every code step. Exact commands
-  with expected output.
-- No placeholders. "TBD", "add appropriate error handling", "write tests for
-  the above", and "similar to Task N" are plan failures: show the actual
-  content, and repeat it rather than cross-referencing — the executor may
-  read tasks out of order. Reference no type, function, or method that no
-  task defines.
+- Ground the plan first: read the settled source design, spec, or PRD in full, and inspect the actual repo — existing file layout, conventions, and the build/test commands — so every path, pattern, and command the plan names is one you verified, not one you assumed.
+- If the source design covers multiple independent subsystems, flag it and split into one plan per subsystem; each plan should yield working, verifiable software on its own.
+- Map the file structure before tasks: which files are created or modified and each one's single responsibility. Follow existing repo patterns.
+- Number the tasks and order them so each is buildable and verifiable given only the tasks before it; when a task depends on earlier work, an earlier-numbered task must satisfy that dependency. The executor runs them in document order.
+- Decompose into tasks that produce self-contained, verifiable changes. Within tasks, bite-sized steps — one action each: write the failing test, run it and watch it fail, implement minimally, run and watch it pass, commit. Keep test-shaped steps consistent with the `tdd` skill.
+- Exact file paths always. Complete code in every code step. Exact commands with expected output.
+- No placeholders. "TBD", "add appropriate error handling", "write tests for the above", and "similar to Task N" are plan failures: show the actual content, and repeat it rather than cross-referencing — the executor may read tasks out of order. Reference no type, function, or method that no task defines.
 
 ## Self-Review
 
@@ -61,8 +35,4 @@ Fix issues inline and move on.
 
 ## Artifact And Handoff
 
-Save the plan to `docs/plans/YYYY-MM-DD-<topic>.md` unless the user or repo
-convention names another location; state the path. Commit only per repo
-convention or user request. Then name the executor: `execute-plan` for
-in-session execution, or `to-issues` when the user wants tracker slices
-instead of a plan run.
+Save the plan to `docs/plans/YYYY-MM-DD-<topic>.md` unless the user or repo convention names another location; state the path. Commit only per repo convention or user request. Then name the executor: `execute-plan` for in-session execution, or `to-issues` when the user wants tracker slices instead of a plan run.

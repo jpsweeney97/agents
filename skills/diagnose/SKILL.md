@@ -104,13 +104,9 @@ If a correct seam exists:
 4. Watch it pass.
 5. Re-run the Phase 1 feedback loop against the original (un-minimised) scenario.
 
-Fix where the bad value or wrong behavior originates, not the layer where the
-symptom surfaced.
+Fix where the bad value or wrong behavior originates, not the layer where the symptom surfaced.
 
-If the fix fails, return to Phase 3 with the new evidence instead of stacking
-another change on top. When roughly three fixes have failed — especially when
-each one reveals a new problem somewhere else — the architecture is the
-hypothesis now: stop and raise that with the user before attempting a fourth.
+If the fix fails, return to Phase 3 with the new evidence instead of stacking another change on top. When roughly three fixes have failed — especially when each one reveals a new problem somewhere else — the architecture is the hypothesis now: stop and raise that with the user before attempting a fourth.
 
 ## Phase 6 — Cleanup + post-mortem
 

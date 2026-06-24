@@ -57,9 +57,7 @@ Before writing any code:
 
 Ask: "What should the public interface look like? Which behaviors are most important to test?"
 
-If running unattended with no user to confirm, do not stall: record the interface
-and behavior assumptions you are making explicitly, proceed on them, and surface
-them for review rather than treating the plan as approved silently.
+If running unattended with no user to confirm, do not stall: record the interface and behavior assumptions you are making explicitly, proceed on them, and surface them for review rather than treating the plan as approved silently.
 
 **You can't test everything.** Confirm with the user exactly which behaviors matter most. Focus testing effort on critical paths and complex logic, not every possible edge case.
 
@@ -86,12 +84,9 @@ GREEN: Minimal code to pass → passes
 Rules:
 
 - One test at a time
-- Run the new test and watch it fail before implementing. A test that passes
-  immediately is testing existing behavior; a test that errors for an unrelated
-  reason needs fixing first. A test you never saw fail proves nothing.
+- Run the new test and watch it fail before implementing. A test that passes immediately is testing existing behavior; a test that errors for an unrelated reason needs fixing first. A test you never saw fail proves nothing.
 - Only enough code to pass current test
-- After implementing, run the tests and watch them pass with clean output
-  before starting the next cycle
+- After implementing, run the tests and watch them pass with clean output before starting the next cycle
 - Don't anticipate future tests
 - Keep tests focused on observable behavior
 

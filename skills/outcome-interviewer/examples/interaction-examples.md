@@ -1,7 +1,6 @@
 # Outcome Interviewer Interaction Examples
 
-Use these examples to calibrate output shape, not to add extra required fields to
-the main skill contract.
+Use these examples to calibrate output shape, not to add extra required fields to the main skill contract.
 
 ## Technical Plan
 
@@ -32,8 +31,7 @@ something real quickly, the rest of the product has more time to explain itself.
 
 ## Artifact First
 
-When reading first would save the user from answering a performative question,
-fold the inspected context into the read instead of reporting a file inventory.
+When reading first would save the user from answering a performative question, fold the inspected context into the read instead of reporting a file inventory.
 
 ```markdown
 My read so far: You want the migration plan to make reviewers stop worrying that
@@ -81,14 +79,11 @@ Turn 2 - My read so far: You want whoever is on call to instantly tell a real
 failure from the familiar flaky one, so they trust the page enough to act fast.
 ```
 
-The Turn 2 read replaces Turn 1; it does not become a list of "Turn 1 decision,
-Turn 2 decision." Each turn is the current best single sentence, rewritten as the
-user corrects you.
+The Turn 2 read replaces Turn 1; it does not become a list of "Turn 1 decision, Turn 2 decision." Each turn is the current best single sentence, rewritten as the user corrects you.
 
 ## Lightweight Closure
 
-When the user asks to summarize or the next useful move is clear, stop without
-turning the interview into a spec.
+When the user asks to summarize or the next useful move is clear, stop without turning the interview into a spec.
 
 ```markdown
 Here is the clarified shape:
@@ -109,8 +104,7 @@ Avoid:
 - "What is the rollout safety bar?"
 - "What operator confidence replaces the approval model?"
 - "What is the target failure taxonomy?"
-- "Which architectural boundary is most consistent with the existing control
-  plane?"
+- "Which architectural boundary is most consistent with the existing control plane?"
 
 Prefer:
 

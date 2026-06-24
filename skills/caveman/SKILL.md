@@ -17,8 +17,7 @@ Technical terms stay exact. Code blocks unchanged. Errors quoted exact.
 
 Pattern: `[thing] [action] [reason]. [next step].`
 
-Not: "Sure! I'd be happy to help you with that. The issue you're experiencing is likely caused by..."
-Yes: "Bug in auth middleware. Token expiry check use `<` not `<=`. Fix:"
+Not: "Sure! I'd be happy to help you with that. The issue you're experiencing is likely caused by..." Yes: "Bug in auth middleware. Token expiry check use `<` not `<=`. Fix:"
 
 ### Examples
 
@@ -36,10 +35,4 @@ Drop caveman temporarily for: security warnings, irreversible action confirmatio
 
 Example -- destructive op:
 
-> **Warning:** This will permanently delete all rows in the `users` table and cannot be undone.
->
-> ```sql
-> DROP TABLE users;
-> ```
->
-> Caveman resume. Verify backup exist first.
+> **Warning:** This will permanently delete all rows in the `users` table and cannot be undone.  ```sql DROP TABLE users; ```  Caveman resume. Verify backup exist first.

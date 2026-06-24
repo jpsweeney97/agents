@@ -7,22 +7,13 @@ description: "Use when the user wants to turn the current conversation and repo 
 
 This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT interview the user — just synthesize what you already know.
 
-The issue tracker and triage label vocabulary should have been provided to you.
-If they are missing, use `/setup-matt-pocock-skills` or
-`$setup-matt-pocock-skills` when that skill is available; otherwise ask the
-smallest setup question needed before publishing.
+The issue tracker and triage label vocabulary should have been provided to you. If they are missing, use `/setup-matt-pocock-skills` or `$setup-matt-pocock-skills` when that skill is available; otherwise ask the smallest setup question needed before publishing.
 
 ## Side Effects And Proof Boundary
 
-This skill publishes to the configured issue tracker. Treat publication as a
-remote or tracker mutation, not as ordinary planning. Do not publish until the
-user has approved publishing the PRD.
+This skill publishes to the configured issue tracker. Treat publication as a remote or tracker mutation, not as ordinary planning. Do not publish until the user has approved publishing the PRD.
 
-Before publishing, identify the issue tracker, label mapping, and source context
-used for the PRD. After publishing, report the issue identifier or URL, labels
-applied, source context inspected, and proof boundary. Publishing proves the PRD
-artifact exists in the tracker; it does not prove implementation readiness,
-runtime behavior, or issue-tracker state beyond the actions performed.
+Before publishing, identify the issue tracker, label mapping, and source context used for the PRD. After publishing, report the issue identifier or URL, labels applied, source context inspected, and proof boundary. Publishing proves the PRD artifact exists in the tracker; it does not prove implementation readiness, runtime behavior, or issue-tracker state beyond the actions performed.
 
 ## Process
 
@@ -53,8 +44,7 @@ A LONG, numbered list of user stories. Each user story should be in the format o
 1. As an <actor>, I want a <feature>, so that <benefit>
 
 <user-story-example>
-1. As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending
-</user-story-example>
+1. As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending </user-story-example>
 
 This list of user stories should be extremely extensive and cover all aspects of the feature.
 

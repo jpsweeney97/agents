@@ -224,17 +224,12 @@ When the user's code uses `client.responses.create()`, search for Responses API 
 
 ## Troubleshooting
 
-**Search returns "MCP server not available":**
-The openaiDeveloperDocs MCP server isn't running. Check `/mcp` to verify server status.
+**Search returns "MCP server not available":** The openaiDeveloperDocs MCP server isn't running. Check `/mcp` to verify server status.
 
-**Search returns few/no results for a known feature:**
-The query terms don't match the documentation vocabulary. Work through the "When results are sparse or irrelevant" recipe under Multi-Search Strategies, and try the query both with and without specificity qualifiers. If search consistently fails, use `list_api_endpoints` to confirm the endpoint exists, then `get_openapi_spec` to get details directly.
+**Search returns few/no results for a known feature:** The query terms don't match the documentation vocabulary. Work through the "When results are sparse or irrelevant" recipe under Multi-Search Strategies, and try the query both with and without specificity qualifiers. If search consistently fails, use `list_api_endpoints` to confirm the endpoint exists, then `get_openapi_spec` to get details directly.
 
-**`fetch_openai_doc` returns empty or minimal content:**
-The URL may be stale, or the page may have been reorganized. Re-search to find the current URL. Some pages (especially `platform.openai.com` settings pages) have minimal indexable content — these are dashboard links, not documentation. Filter them out and focus on `developers.openai.com` results.
+**`fetch_openai_doc` returns empty or minimal content:** The URL may be stale, or the page may have been reorganized. Re-search to find the current URL. Some pages (especially `platform.openai.com` settings pages) have minimal indexable content — these are dashboard links, not documentation. Filter them out and focus on `developers.openai.com` results.
 
-**`get_openapi_spec` returns no code samples:**
-Not all endpoints have code samples in the OpenAPI spec. Fall back to searching for guide pages that cover the endpoint, or check the cookbooks at `developers.openai.com/cookbook/` for worked examples.
+**`get_openapi_spec` returns no code samples:** Not all endpoints have code samples in the OpenAPI spec. Fall back to searching for guide pages that cover the endpoint, or check the cookbooks at `developers.openai.com/cookbook/` for worked examples.
 
-**Results seem outdated or contradicted by the user's experience:**
-OpenAI ships changes frequently. If the user reports behavior that contradicts the docs, note the discrepancy and suggest the user check the changelog or status page. Do not assume the docs are wrong — but do not assume the user is wrong either. State what the documentation says and flag the conflict.
+**Results seem outdated or contradicted by the user's experience:** OpenAI ships changes frequently. If the user reports behavior that contradicts the docs, note the discrepancy and suggest the user check the changelog or status page. Do not assume the docs are wrong — but do not assume the user is wrong either. State what the documentation says and flag the conflict.

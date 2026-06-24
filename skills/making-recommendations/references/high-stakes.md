@@ -4,18 +4,11 @@ Load this only for high-stakes decisions: hard-to-reverse choices, broad blast r
 
 ## Extra Checks
 
-- For the high-stakes risk sections (`Commitment Point`, `Rollback / Blast
-  Radius`, `Gaps / What Could Flip`) and the rule to compress them into prose
-  rather than silently dropping them in a very short answer, follow the Output
-  section in `SKILL.md`.
+- For the high-stakes risk sections (`Commitment Point`, `Rollback / Blast Radius`, `Gaps / What Could Flip`) and the rule to compress them into prose rather than silently dropping them in a very short answer, follow the Output section in `SKILL.md`.
 - Define the commitment point: when the decision becomes costly to reverse.
 - Name owners, affected systems or people, and rollback options.
 - Separate must-have constraints from preferences.
 - For each material unknown, state the cheapest check that could resolve it before commitment.
 - For each non-recommended option, state the smallest realistic change that would make it win.
-- Do not rank when options are not comparable, only one serious option exists,
-  or a material missing detail would change the recommendation. Use the matching
-  pre-ranking exit from `SKILL.md`.
-- Mark the result `best available` unless gaps are non-material or resolved;
-  use `not enough to recommend yet`, `decision needed`, or `options not
-  comparable` when the high-stakes facts do not support a recommendation.
+- Do not rank when options are not comparable, only one serious option exists, or a material missing detail would change the recommendation. Use the matching pre-ranking exit from `SKILL.md`.
+- Mark the result `best available` unless gaps are non-material or resolved; use `not enough to recommend yet`, `decision needed`, or `options not comparable` when the high-stakes facts do not support a recommendation.

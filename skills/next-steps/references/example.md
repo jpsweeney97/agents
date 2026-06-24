@@ -29,8 +29,7 @@ Active findings are F1: weak service-to-service trust boundaries, F2: incomplete
 
 ### 4. Decision Gates
 
-- After T1 and T2: decide rollout readiness. If readiness is approved, hand off
-  to `implementation-planning`; if not, keep the plan at the decision stage.
+- After T1 and T2: decide rollout readiness. If readiness is approved, hand off to `implementation-planning`; if not, keep the plan at the decision stage.
 
 ### 5. Critical Path
 

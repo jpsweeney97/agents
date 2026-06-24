@@ -39,11 +39,7 @@ project's focus on content authoring. Theming is a concern for downstream
 consumers who embed or redistribute the output.
 
 ```ts
-// The current ThemeConfig interface is not designed for runtime switching:
-interface ThemeConfig {
-  colors: ColorPalette; // single palette, resolved at build time
-  fonts: FontStack;
-}
+// The current ThemeConfig interface is not designed for runtime switching: interface ThemeConfig { colors: ColorPalette; // single palette, resolved at build time fonts: FontStack; }
 ```
 
 ## Prior requests

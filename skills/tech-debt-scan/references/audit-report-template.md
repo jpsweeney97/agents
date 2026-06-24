@@ -2,9 +2,7 @@
 
 Use this reference when writing the saved `tech-debt-scan` artifact.
 
-The report is the durable evidence and ranked debt backlog. For what
-`tech-debt-scan` is and is not (an audit-and-backlog skill, not implementation,
-handoff, ticket, or planning), follow the scope rule in SKILL.md.
+The report is the durable evidence and ranked debt backlog. For what `tech-debt-scan` is and is not (an audit-and-backlog skill, not implementation, handoff, ticket, or planning), follow the scope rule in SKILL.md.
 
 ## Default Path
 
@@ -14,14 +12,9 @@ Write the default artifact to:
 docs/audits/YYYY-MM-DD-<target-slug>-debt-scan.md
 ```
 
-Read repo instructions first for conflicts. Do not require the repo to already
-use `docs/audits/`; this skill owns that convention. If repo instructions forbid
-or redirect audit artifacts, follow the repo instruction or ask one path question
-when the conflict cannot be resolved safely.
+Read repo instructions first for conflicts. Do not require the repo to already use `docs/audits/`; this skill owns that convention. If repo instructions forbid or redirect audit artifacts, follow the repo instruction or ask one path question when the conflict cannot be resolved safely.
 
-For parent-directory creation and the write-failure fallback (fall back to
-chat-only, label the missing artifact a proof limit, and do not claim the saved
-audit exists), follow the Output section in SKILL.md.
+For parent-directory creation and the write-failure fallback (fall back to chat-only, label the missing artifact a proof limit, and do not claim the saved audit exists), follow the Output section in SKILL.md.
 
 ## Status Lifecycle
 
@@ -37,27 +30,17 @@ and flip it to:
 Status: complete
 ```
 
-only per the lifecycle rule in SKILL.md (Output) — after synthesis, caps,
-metrics, coverage limits, and fidelity checks pass. If interrupted or blocked
-before those checks, leave the status as `draft - incomplete` and record the
-blocker or next evidence slice in `Coverage Gaps / Next Probes`.
+only per the lifecycle rule in SKILL.md (Output) — after synthesis, caps, metrics, coverage limits, and fidelity checks pass. If interrupted or blocked before those checks, leave the status as `draft - incomplete` and record the blocker or next evidence slice in `Coverage Gaps / Next Probes`.
 
 ## Authority Order
 
-The artifact's authority order (`Evidence Trail` > `Ranked Backlog` > `Coverage
-Gaps / Next Probes`) is governed by SKILL.md (Output); follow it.
+The artifact's authority order (`Evidence Trail` > `Ranked Backlog` > `Coverage Gaps / Next Probes`) is governed by SKILL.md (Output); follow it.
 
-Do not let a ranked finding, top call, or chat summary contradict the evidence
-trail. If a synthesis sentence drifts, fix the synthesis or lower confidence.
+Do not let a ranked finding, top call, or chat summary contradict the evidence trail. If a synthesis sentence drifts, fix the synthesis or lower confidence.
 
 ## Hard Exclusions
 
-Do not include owners, dependency chains, decision gates, ticket mutations,
-implementation steps, or security vulnerability claims. For continuation,
-sequencing, owners, or gates after the audit (route to `/next-steps` or
-`$next-steps`, do not execute unless the user clearly asks) and for the security
-boundary (route CVE/GHSA/exploitability/package-audit/vulnerability findings to a
-security-scan skill, never use them as debt evidence), follow SKILL.md.
+Do not include owners, dependency chains, decision gates, ticket mutations, implementation steps, or security vulnerability claims. For continuation, sequencing, owners, or gates after the audit (route to `/next-steps` or `$next-steps`, do not execute unless the user clearly asks) and for the security boundary (route CVE/GHSA/exploitability/package-audit/vulnerability findings to a security-scan skill, never use them as debt evidence), follow SKILL.md.
 
 ## Report Template
 
@@ -216,7 +199,4 @@ Artifact Path: docs/audits/YYYY-MM-DD-<target-slug>-debt-scan.md
 - Evidence Sources: package manifest, lockfile, CI install command
 ```
 
-This finding can appear in `Top Debt Calls` only if the evidence trail records at
-least two distinct source classes or independently observed signals and a
-present-tense cost. Otherwise keep it in `Ranked Backlog`, `Watch List`, or
-`Coverage Gaps / Next Probes`.
+This finding can appear in `Top Debt Calls` only if the evidence trail records at least two distinct source classes or independently observed signals and a present-tense cost. Otherwise keep it in `Ranked Backlog`, `Watch List`, or `Coverage Gaps / Next Probes`.
