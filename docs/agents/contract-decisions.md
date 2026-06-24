@@ -1,361 +1,44 @@
 # Contract Decisions
 
-Ledger required by the charter's Decision Record section (`charter.md`): one
-entry per admission, fold, rejection, park, or retirement — date, surface,
-outcome, evidence pointer, and the reopen trigger for parks. Append new
-entries; do not rewrite settled ones.
+Ledger required by the charter's Decision Record section (`charter.md`): one entry per admission, fold, rejection, park, or retirement — date, surface, outcome, evidence pointer, and the reopen trigger for parks. Append new entries; do not rewrite settled ones.
 
 ## Decisions
 
-- 2026-06-12 — superpowers (pass 1): folded into `tdd` (+`mocking.md`),
-  `diagnose`, `behavior-smoke-test`, and a global evidence-before-claims rule;
-  admitted `design-exploration`, `implementation-planning`, `execute-plan`;
-  requesting-review meta-skill rejected (collides with review lanes;
-  checkpoint habit folded into `closeout-check`). Plugin removed. Evidence:
-  commits `360fc77`, `966f903`, `d7351ec`.
-- 2026-06-12 — commit-commands (pass 2): folded `[gone]` deletion-candidate
-  discipline and a squash-merge proof path into `git-hygiene`;
-  `commit`/`commit-push-pr` rejected (one-message/no-review mandates weaker
-  than house discipline). Plugin removed. Evidence: commit `3b4cbc1`.
-- 2026-06-12 — pr-review-toolkit + code-simplifier rider (pass 3): folded
-  error-suppression and test-inadequacy lenses into `implementation-review`
-  (review-family 0.3.2) and a clarity-over-brevity guardrail into
-  `simplify-code`; six agent lanes rejected (numeric confidence/criticality
-  scoring is rejected machinery; foreign CLAUDE.md leakage). Both plugins
-  removed. Evidence: commit `5f64a54`.
-- 2026-06-12 — feature-dev (pass 4): folded exploration grounding into
-  `design-exploration` (read subagent-named key files first-hand before
-  designing); command and three agents rejected (lane decomposition owns the
-  workflow; settled no-numeric-confidence precedent). Plugin removed.
-  Evidence: commit `2dc1b95`.
-- 2026-06-12 — hookify (pass 5): zero folds — engine adjudicated capability
-  tooling (charter-exempt as a category) but removed as unused; all six
-  contract surfaces rejected (runtime-bundled `update-config` owns hook-backed
-  automation). Plugin removed. Evidence: commits `ad9c0cc` (ledger entry) +
-  `6f7833d` (route-absence amendment from the same session). Fuller detail is in
-  the untracked local handoff
-  `2026-06-12_18-35-34_feature-dev-hookify-mined-charter-amended-audit-reopens.md`
-  — not a durable pointer, not part of the durable record.
-- 2026-06-12 — discard audit (after the route-absence amendment, `6f7833d`):
-  reopened two prior rejections — comment-accuracy lens folded into
-  `implementation-review` (review-family 0.3.3, commit `1d0091a`);
-  `friction-to-guards` admitted Claude-only in `skills-claude/` (commit
-  `a5e6642`). All other prior discards held.
-- 2026-06-12 — gh-address-comments: admitted (owns PR-comment addressing
-  without publish authority); authoring deferred. Evidence: commit `ad9c0cc`
-  (admission recorded); built in commit `993cd93`. Tracking: issue
-  jpsweeney97/agents#2.
-- 2026-06-12 — frontend-design (pass 6): zero folds — the sole contract
-  surface (a 41-line web-frontend aesthetics SKILL.md) parked rather than
-  admitted. No local lane owns web-frontend aesthetic guidance, but the job
-  has no observed work: installed since 2025-12-17 with zero invocations
-  across all session transcripts (search pattern control-verified against
-  known-invoked skills), no web-frontend stack in any project directory
-  (lyrics-software is native SwiftUI), and zero inbound routes from curated
-  contracts. Plugin removed; source recoverable in the claude-plugins-official
-  marketplace catalog. Evidence: commit `45c8a5a`.
-- 2026-06-12 — claude-code-setup (pass 7): zero folds — the sole skill
-  (`claude-automation-recommender` + five reference files) rejected. The job
-  decomposes entirely into owned lanes: feature/setup questions →
-  runtime-bundled `claude-code-guide` + local `claude-code-docs`; hook and
-  settings implementation → runtime-bundled `update-config` (settled pass 5);
-  permission allowlists → runtime-bundled `fewer-permission-prompts`;
-  automation-worthiness → the charter's admission test + `friction-to-guards`;
-  skill authoring → `skill-creator`. Its speculative codebase-signal
-  recommendation method contradicts the observed-friction admission standard,
-  and its tables recommend reinstalling plugins this ledger already removed
-  (frontend-design, hookify, commit-commands, feature-dev, pr-review-toolkit,
-  code-simplifier) — running it as-is recreates resolved collisions. Friction
-  looked for and not found: zero invocations since 2026-01-21 install
-  (control-verified transcript search), no setup-recommendation requests in
-  memory or handoffs; static Claude Code facts it carries are owned live by
-  `claude-code-docs`. Plugin removed; source recoverable in the
-  claude-plugins-official marketplace catalog. Evidence: commit `ae12dc3`.
-- 2026-06-12 — skill-creator (pass 8): keep-with-cleanup. Bundle construction
-  stays owned on Codex by the bundled copy (`~/.codex/skills/.system/`, fixed
-  terrain); its do-work scripts are charter-exempt and the `quick_validate.py`
-  the Validation Ladder cites resolves there. The removable third-party Claude
-  plugin install (`skill-creator@claude-plugins-official`) — an eval/benchmark
-  build (`run_loop`/`run_eval`/`aggregate_benchmark`/`improve_description`/
-  `generate_review`; ships its own `quick_validate.py` but no `init_skill.py`/
-  `generate_openai_yaml.py`) — removed under Extraction. Its authoring doctrine
-  overlaps and folds into `agent-facing-design`/`writing-principles`/
-  `skill-ux-design`/`behavior-smoke-test`/`scrutinize-skill` and persists in the
-  Codex bundle. Its eval/benchmark capability re-authored to house standards as
-  `skill-benchmark` (admitted, Claude-only in `skills-claude/`): owns
-  quantitative skill benchmarking and trigger/description optimization, a job no
-  local lane held (`behavior-smoke-test` is single-shot qualitative; never
-  co-loads with the Codex-bundled `skill-creator`). Four inbound routes
-  (`AGENTS.md` routing lane; `writing-principles` ×2; `agent-facing-design`)
-  re-pointed availability-conditionally: Codex construction → bundled
-  `skill-creator`; Claude construction → hand-author against the folded doctrine
-  plus the Codex-bundled `quick_validate.py` via Bash (no invocable Claude-side
-  constructor remains, by design). Reconciles pass-7 above: "skill authoring"
-  still decomposes into an owned/fixed surface. Friction looked for and not
-  found: zero failed or misrouted constructions, and the install's eval
-  machinery never exercised, across two 2026-06-12 main-thread invocations that
-  produced four now-live skills by hand-authoring + manual construction. Plugin
-  uninstalled (`claude plugin uninstall`); source recoverable in the
-  claude-plugins-official marketplace catalog. Evidence: commits `a5e6642`,
-  `966f903`.
-- 2026-06-13 — code-review (pass 9): fold-then-remove. The removable third-party
-  Claude plugin `code-review@claude-plugins-official` — one command
-  (`commands/code-review.md`): a fixed GitHub-PR pipeline (5 Sonnet lenses + a
-  Haiku 0-100 confidence scorer, `<80` filter, `gh pr comment` post-back) —
-  removed under Extraction. Three genuinely-novel false-positive exclusions
-  folded into `implementation-review` (review-family 0.3.4), framed as the
-  symmetric evidence burden on findings: correct code that resembles a bug;
-  linter/typechecker/compiler/CI-catchable issues; and repo-instruction
-  violations explicitly silenced in code (verified absent from the lane — zero
-  matches across its skill dir). The 0-100 rubric + `<80` gate **not** folded.
-  Scoring ruling (JP): the no-numeric-confidence precedent **bites** this
-  internal, never-exposed gate, **scoped** to confidence/criticality scoring used
-  as a judgment substitute, not all internal numbers; reached on inspectability
-  grounds (a hidden gate is worse than an exposed one — "Found 0 issues" cannot
-  be told from suppressed), reinforced by a verified miscalibration (the rubric's
-  own 75 "important real issue" anchor sits below the `<80` cut; the same defect
-  rode in the pass-3/pass-4 rejected artifacts). Everything else owned or banned:
-  gh-PR-comment channel by fixed-terrain bundled `/code-review`+`/review`; 5-lens
-  substance already folded passes 3 and 0.3.3; CLAUDE.md-adherence lens rejected
-  pass 3 (foreign-CLAUDE.md leakage). Friction basis corrected: the queue's "in
-  active use" is **refuted** — zero genuine invocations of the plugin or bare
-  `/code-review` in this repo (triangulated; the apparent hits are this pass's
-  own grep echoes). Per Admission this cannot decide removal but forecloses a
-  relied-upon retention defense; removal stands on the same-runtime collision with
-  the two Claude builtins. Correction for future passes: `codex-review` is itself
-  an installed third-party plugin (codex-collaboration cache), unmined source
-  material subject to Extraction — not a curated owner to lean on. Plugin
-  uninstalled (`claude plugin uninstall`); source recoverable in the
-  claude-plugins-official marketplace catalog. Evidence: commit `3691ca0`
-  (pass-9 route-inventory + merit-adjudication).
-- 2026-06-13 — security-guidance (pass 10): fold-then-remove. The installed +
-  enabled third-party plugin `security-guidance@claude-plugins-official`
-  (v2.0.6) — a hooks bundle with no invocation token that auto-fires on
-  UserPromptSubmit/PostToolUse/Stop, injecting 25 regex pattern warnings on
-  edits, a single-shot LLM diff review on Stop, and an agentic cross-file
-  investigate→self-refute reviewer on commit/push — removed under Extraction.
-  Scope ruling (JP-ratified): the hooks engine is charter-exempt capability
-  tooling (ll.22-24), but the injected instruction text is in-scope contract
-  (l.24; l.14 names "instruction text delivered by hooks"), and the fused engine
-  departs with the contract as packaging. Removal is value-independent
-  (Extraction ll.87-90) — the engine was demonstrably used (80 review fires over
-  16 days; one fully-closed fire-and-mattered loop where a commit-review finding
-  changed committed `settings.json`), so pass 5's "removed as unused" is a
-  distinguishable, not controlling, prior. One-Owner: the Stop/commit/push
-  LLM-review jobs claim the same work as the fixed-terrain bundled
-  `/security-review` (ll.16-20, 37); the collision resolves on the local side —
-  delivery-mode differences (auto-fire vs invoke; recall vs precision; turn/commit
-  vs branch) do not save job identity (pass-9 precedent). Two genuinely-novel
-  disciplines folded into `implementation-review` (review-family 0.3.5), both
-  verified zero-match in the lane: (1) resource-cap-defeat DoS — report
-  exhaustion only when a change defeats an existing cap, not volumetric load
-  (sits in the gap `/security-review` explicitly excludes); (2) attacker/victim +
-  privilege-boundary + off-diff adversarial-refute discipline, including the
-  agent-capability-gate carve-out (the model is the attacker, the user is the
-  victim). Confidence-precedent (pass 9) does NOT trip — scoped to
-  confidence-as-judgment-substitute: the plugin gates on an ordinal severity enum
-  + qualitative cited-evidence self-refutation; its numeric `confidence` field is
-  schema-optional and no code path filters on it (the exposed, inspectable kind
-  the precedent prefers). Jobs rejected: inline 25-pattern edit warnings
-  (lighter-alternative beats a paid slot, ll.53-55); Stop/commit/push LLM review
-  (collision). Two lower-confidence folds (additive-only embedded-guidance
-  guardrail; over-broad-grant sharpening) declined by JP. No inbound curated
-  routes to repair (`tech-debt-scan`'s hand-off targets a hypothetical Codex
-  `codex-security:security-scan`, availability-conditioned with a clean
-  fallback). Plugin uninstalled (`claude plugin uninstall`); source recoverable
-  in the claude-plugins-official marketplace catalog. Evidence: commit `63daf9f`
-  (pass-10 route-inventory + merit-adjudication).
-- 2026-06-13 — explanatory-output-style (pass 11): reject (zero-fold removal).
-  The installed-but-disabled third-party plugin
-  `explanatory-output-style@claude-plugins-official` (v1.0.0) — a single
-  SessionStart hook (`session-start.sh`, a heredoc `cat` of a static
-  `additionalContext` blob: an always-on "explanatory output style" teaching
-  register emitting `★ Insight` boxes before/after writing code,
-  codebase-specific, "may exceed typical length constraints") — removed under
-  Extraction; the contract IS the deliverable and the engine does no work, so the
-  pass-10 packaging-departure + value-independent removal (ll.87-93) apply a
-  fortiori (pass 10 had a real engine to exempt; here a trivial `cat`). One-Owner:
-  doubly owned. (1) The fixed-terrain built-in "Explanatory" output style is
-  live/un-deprecated (changelog "Un-deprecate output styles"; `outputStyle:
-  "Explanatory"` documented; only the `/output-style` command was removed) and
-  does the exact job; the plugin's "deprecated" self-label is factually stale;
-  same-runtime (Claude-only — no Codex output-style/SessionStart-`additionalContext`
-  analogue), co-loadable, resolves local-side (ll.16-20, 36-44). (2) Global
-  `~/.claude/CLAUDE.md` Communication defaults own the chat register; the contract
-  inverts them on three axes (always-on insights vs task-focus; "may exceed length
-  constraints" vs brevity/outcome-first; `★`-box scaffold in chat vs "save formal
-  structure for artifacts"). Zero folds: the lone substantive discipline
-  (codebase-specific-not-generic insights) fails Extraction step-1 — inseparable
-  from the always-on packaging and already owned by `scrutinize-skill`
-  (SKILL.md:137,155), `writing-principles` (SKILL.md:172), the built-in's
-  description, and CLAUDE.md. Rejection evidence (ll.60-66): usage was
-  demonstrably PRESENT (715 fires, ~1380 obeyed codebase-specific boxes,
-  2026-05-14 → eve of mining, concentrated in codex-collaboration), so
-  usage-absence is barred as a rationale; the reject rests instead on a
-  positive-control friction search (memory + handoffs + AGENTS.md + CLAUDE.md +
-  ripgrep for teach/educational/insight/pedagog/verbose/output-style) that
-  returned ZERO teaching-register friction while the same instrument fired on the
-  opposite-vector brevity/compression family (caveman; pass-3 clarity-over-brevity
-  guardrail) — that asymmetry is the finding. Lighter-alternative (ll.53-55):
-  README concedes CLAUDE.md-equivalence and `outputStyle` is a one-line setting,
-  both beating a paid slot. No park (the need is owned now by the live built-in,
-  one `/config` flip away); keep-with-cleanup foreclosed (no Codex co-load,
-  unlike pass 8). First-of-its-kind communication/output-style precedent — no
-  prior chat-verbosity contract; this reject sets it. JP steer honored as
-  reinforcing, not load-bearing: Ruling A (disable ruled "incidental") treated as
-  neutral — the reject never rests on the toggle; Ruling B ("built-in is enough;
-  no standing register") converges with the independently-reached verdict and
-  forecloses any register-reinstating fold/park. Plugin uninstalled (`claude
-  plugin uninstall`); source recoverable in the claude-plugins-official
-  marketplace catalog. Evidence: commit `094ad22`
-  (pass-11 route-inventory + merit-adjudication).
-- 2026-06-13 — github plugin (assessment, not a mining pass): exempt — pure
-  capability tooling, no contract text; stays installed and enabled. Full file
-  inventory of the installed + enabled `github@claude-plugins-official` cache
-  (`find -type f` over the plugin dir) shows only `.mcp.json` (one HTTP MCP
-  server → `api.githubcopilot.com/mcp/`, `GITHUB_PERSONAL_ACCESS_TOKEN`-authed),
-  a name/description/author `plugin.json` with no component declarations, and
-  `.in_use/` PID lockfiles; `commands/`, `skills/`, `agents/`, `hooks/`, and
-  `output-styles/` all absent. No slash command, SKILL.md, agent definition,
-  hook-injected `additionalContext`, or output-style register — the plugin.json
-  `description` is marketplace catalog metadata, not injected instruction the
-  agent must follow (all `mcp__plugin_github_github__*` tools come from the
-  hosted MCP server, not bundled prose). Per the capability-tooling exemption
-  (charter ll.22-24, "MCP servers ... out of scope. Tools are tools"), a
-  standalone exempt tool with no accompanying contract is out of scope: no
-  mining, and — unlike the fused-engine cases (pass 5 hookify, pass 10
-  security-guidance, where an exempt engine departs as packaging for in-scope
-  injected contract) — there is no in-scope contract to extract, so nothing is
-  removed and the plugin stays installed. First pure-exemption outcome. Closes
-  the mining program: the queue's last residual surface is resolved. Evidence:
-  commit `71ce1ca` (plugin-cache file inventory).
-- 2026-06-13 — gh-address-comments (build of the 2026-06-12 admission):
-  authored as a dual-runtime skill in `skills/` (`SKILL.md` +
-  `agents/openai.yaml`); owns PR review-comment addressing without publish
-  authority — verify each thread against evidence, classify (5 dispositions),
-  fix locally, draft replies, stop at one local commit; never push/resolve/
-  re-review. Folds the superpowers `receiving-code-review` reception discipline
-  (pushback with technical reasoning; no performative agreement; Pasted-Content
-  reconciliation) per #2's addendum. `gh-pr-review-loop` refactored to
-  one-owner-per-job: it now runs the gh-address-comments inner loop and
-  contributes only the publish layer, with all publish-side obligations
-  preserved (human-reviewer caution, resolve eligibility, `@codex` trigger,
-  no-code-change path, empty-threads guard, publish checkpoints, final-response
-  fields). Validated (frontmatter parse, `quick_validate.py`, `openai.yaml`
-  parse, whitespace) and three context-isolated behavior-proxy smoke tests
-  pass: stop-line holds under deadline + authority pressure, routing-in selects
-  the skill, publish authorization escalates to `gh-pr-review-loop`. Closes the
-  authoring-deferred state. Evidence: commit `993cd93`; issue
-  jpsweeney97/agents#2.
-- 2026-06-15 — jp-writing-style: admitted (first-party authored, not a mining
-  pass). Owns generation and rewriting of prose in JP's personal voice —
-  reflective essays, personal statements, application responses, analytical/
-  professional narratives, memos, recommendations, explanations — grounded in a
-  real two-piece corpus (`references/corpus.md`, lightly redacted: school names,
-  grades, and clinical labels replaced with neutral stand-ins) plus a
-  deduplicated move/diction/genre pattern bank (`references/patterns.md`). No
-  local or bundled lane held voice-grounded prose generation. One Owner Per Job
-  (checked in both runtimes, since dual-runtime): distinct in kind from
-  `writing-principles` (obligation-only edits to agent-instruction docs),
-  `markdown-synthesis`/`markdown-reformat` (structural Markdown consolidation/
-  formatting, not voice), and from every Codex- and Claude-bundled skill (none
-  does prose-voice work) — all co-loadable without collision. Lighter context
-  rejected: an `AGENTS.md`/`CLAUDE.md` line cannot carry the corpus, the
-  integrity gate, the elicitation step, or the per-genre pattern bank, and the
-  skill's first draft proved voice-by-assertion (no corpus) collapses into
-  generic AI-formal. Houses standards: Use-when/Do-not-use boundary; one
-  justified hard rule (the integrity gate, surviving the agent-facing-design
-  machinery test — fabrication in personal statements/applications is fraud)
-  that is also the first blocking quality-check item; runtime-neutral phrasing
-  (joint `AGENTS.md`/`CLAUDE.md` naming, no Claude-only tokens). Placement
-  `skills/` (dual-runtime), not `skills-claude/`: observed-work call — JP
-  confirms he regularly drafts this writing from Codex too, so the skill earns
-  its Codex skill-list slot rather than being demoted Claude-only. Validated:
-  frontmatter parse, `quick_validate.py`, whitespace, references resolve; two
-  context-isolated adversarial forward tests pass (thin personal-statement
-  prompt → elicits real facts and refuses to invent a backstory; bare-notes
-  rewrite → withholds unsupported causes/lessons and asks). Evidence: commit
-  `6239f9c` (skill build, rewritten from review) + this ledger entry.
-- 2026-06-16 — blind-evaluation blinding guard (test-5 red-team breach, plan
-  T3): admitted a new rule to repo `AGENTS.md` (`## Blind Evaluations`) — in any
-  blind evaluation, never reveal apparatus state (reviewer/model outputs,
-  intermediate scores, predictions, arm identities) to a current or potential
-  ground-truth judge until their independent judgment is recorded; lost blinding
-  is unrecoverable. Owns an evaluation-blinding discipline no lane held
-  (`skill-benchmark` is quantitative skill benchmarking — different job; the
-  global evidence-before-claims rule governs claims, not blinding). Prevents the
-  observed breach where the orchestrator narrated reviewer/disposition results
-  before certification and contaminated the human + self as judges, forcing the
-  human arm to a fresh judge. Repo-scoped home chosen (recurrence concentrated
-  here) over global, by JP. Evidence: breach disclosed in results §8 and scored
-  in §12 (`51ab24e`); rule at `AGENTS.md` `## Blind Evaluations` (this commit).
-- 2026-06-17 — jp-writing-style: retired (removed from source). The skill was
-  admitted, built, scope-narrowed, and hard-deleted all on 2026-06-15 — a
-  targeted removal of exactly its three files (`7d76940` "chore: cleanup", 381
-  deletions) ~8.5h after the build (`6239f9c`, 01:51). This entry completes the
-  retirement record left half-done at the time: the orphaned `~/.claude/skills`
-  symlink (dangling since the delete, its source target missing) is reaped, and
-  the 2026-06-15 admission above is superseded. Source is NOT moved to
-  `skills-archive/` (the charter's default skill-retirement home), by JP's
-  call: the skill's `references/corpus.md` was real personal writing, and
-  re-committing it to a repo that pushes to GitHub is the exposure the same-day
-  deletion avoided — a deliberate, recorded deviation from the archive default.
-  The source remains recoverable from git history at `6239f9c` if the decision
-  is ever reversed. Evidence: deletion `7d76940`; source/recovery point
-  `6239f9c`; symlink reap + this entry (this commit).
-- 2026-06-23 — Markdown prose-wrap default (user-level global instruction,
-  `~/.claude/CLAUDE.md`, "Markdown Artifacts"): admitted a style default —
-  generated Markdown prose artifacts (handoffs, specs, reviews, plans, PRDs)
-  are written one logical line per paragraph/bullet, never hard-wrapped at a
-  fixed column; established repo wrapping conventions override it (this repo's
-  hard-wrapped instruction docs and this ledger still win, which is why this
-  entry is hard-wrapped). No existing lane owned generated-prose wrapping
-  (closest: the global `Code Style` and `Communication` sections, which cover
-  code and chat register, not artifact line-wrapping). Pure context — a
-  formatting default, no machinery (no field, classifier, or score) — passes
-  the agent-facing-design gate trivially. Friction: recurring
-  hard-wrap-at-~100-col, corrected this session and made durable at JP's
-  explicit request. Contract surface is user-level and untracked. Evidence:
-  reflow commit `241dc91` on `feature/skill-squad-spec` (skill-squad spec
-  unwrapped, content verified word-for-word identical); this entry (this
-  commit).
+- 2026-06-12 — superpowers (pass 1): folded into `tdd` (+`mocking.md`), `diagnose`, `behavior-smoke-test`, and a global evidence-before-claims rule; admitted `design-exploration`, `implementation-planning`, `execute-plan`; requesting-review meta-skill rejected (collides with review lanes; checkpoint habit folded into `closeout-check`). Plugin removed. Evidence: commits `360fc77`, `966f903`, `d7351ec`.
+- 2026-06-12 — commit-commands (pass 2): folded `[gone]` deletion-candidate discipline and a squash-merge proof path into `git-hygiene`; `commit`/`commit-push-pr` rejected (one-message/no-review mandates weaker than house discipline). Plugin removed. Evidence: commit `3b4cbc1`.
+- 2026-06-12 — pr-review-toolkit + code-simplifier rider (pass 3): folded error-suppression and test-inadequacy lenses into `implementation-review` (review-family 0.3.2) and a clarity-over-brevity guardrail into `simplify-code`; six agent lanes rejected (numeric confidence/criticality scoring is rejected machinery; foreign CLAUDE.md leakage). Both plugins removed. Evidence: commit `5f64a54`.
+- 2026-06-12 — feature-dev (pass 4): folded exploration grounding into `design-exploration` (read subagent-named key files first-hand before designing); command and three agents rejected (lane decomposition owns the workflow; settled no-numeric-confidence precedent). Plugin removed. Evidence: commit `2dc1b95`.
+- 2026-06-12 — hookify (pass 5): zero folds — engine adjudicated capability tooling (charter-exempt as a category) but removed as unused; all six contract surfaces rejected (runtime-bundled `update-config` owns hook-backed automation). Plugin removed. Evidence: commits `ad9c0cc` (ledger entry) + `6f7833d` (route-absence amendment from the same session). Fuller detail is in the untracked local handoff `2026-06-12_18-35-34_feature-dev-hookify-mined-charter-amended-audit-reopens.md` — not a durable pointer, not part of the durable record.
+- 2026-06-12 — discard audit (after the route-absence amendment, `6f7833d`): reopened two prior rejections — comment-accuracy lens folded into `implementation-review` (review-family 0.3.3, commit `1d0091a`); `friction-to-guards` admitted Claude-only in `skills-claude/` (commit `a5e6642`). All other prior discards held.
+- 2026-06-12 — gh-address-comments: admitted (owns PR-comment addressing without publish authority); authoring deferred. Evidence: commit `ad9c0cc` (admission recorded); built in commit `993cd93`. Tracking: issue jpsweeney97/agents#2.
+- 2026-06-12 — frontend-design (pass 6): zero folds — the sole contract surface (a 41-line web-frontend aesthetics SKILL.md) parked rather than admitted. No local lane owns web-frontend aesthetic guidance, but the job has no observed work: installed since 2025-12-17 with zero invocations across all session transcripts (search pattern control-verified against known-invoked skills), no web-frontend stack in any project directory (lyrics-software is native SwiftUI), and zero inbound routes from curated contracts. Plugin removed; source recoverable in the claude-plugins-official marketplace catalog. Evidence: commit `45c8a5a`.
+- 2026-06-12 — claude-code-setup (pass 7): zero folds — the sole skill (`claude-automation-recommender` + five reference files) rejected. The job decomposes entirely into owned lanes: feature/setup questions → runtime-bundled `claude-code-guide` + local `claude-code-docs`; hook and settings implementation → runtime-bundled `update-config` (settled pass 5); permission allowlists → runtime-bundled `fewer-permission-prompts`; automation-worthiness → the charter's admission test + `friction-to-guards`; skill authoring → `skill-creator`. Its speculative codebase-signal recommendation method contradicts the observed-friction admission standard, and its tables recommend reinstalling plugins this ledger already removed (frontend-design, hookify, commit-commands, feature-dev, pr-review-toolkit, code-simplifier) — running it as-is recreates resolved collisions. Friction looked for and not found: zero invocations since 2026-01-21 install (control-verified transcript search), no setup-recommendation requests in memory or handoffs; static Claude Code facts it carries are owned live by `claude-code-docs`. Plugin removed; source recoverable in the claude-plugins-official marketplace catalog. Evidence: commit `ae12dc3`.
+- 2026-06-12 — skill-creator (pass 8): keep-with-cleanup. Bundle construction stays owned on Codex by the bundled copy (`~/.codex/skills/.system/`, fixed terrain); its do-work scripts are charter-exempt and the `quick_validate.py` the Validation Ladder cites resolves there. The removable third-party Claude plugin install (`skill-creator@claude-plugins-official`) — an eval/benchmark build (`run_loop`/`run_eval`/`aggregate_benchmark`/`improve_description`/ `generate_review`; ships its own `quick_validate.py` but no `init_skill.py`/ `generate_openai_yaml.py`) — removed under Extraction. Its authoring doctrine overlaps and folds into `agent-facing-design`/`writing-principles`/ `skill-ux-design`/`behavior-smoke-test`/`scrutinize-skill` and persists in the Codex bundle. Its eval/benchmark capability re-authored to house standards as `skill-benchmark` (admitted, Claude-only in `skills-claude/`): owns quantitative skill benchmarking and trigger/description optimization, a job no local lane held (`behavior-smoke-test` is single-shot qualitative; never co-loads with the Codex-bundled `skill-creator`). Four inbound routes (`AGENTS.md` routing lane; `writing-principles` ×2; `agent-facing-design`) re-pointed availability-conditionally: Codex construction → bundled `skill-creator`; Claude construction → hand-author against the folded doctrine plus the Codex-bundled `quick_validate.py` via Bash (no invocable Claude-side constructor remains, by design). Reconciles pass-7 above: "skill authoring" still decomposes into an owned/fixed surface. Friction looked for and not found: zero failed or misrouted constructions, and the install's eval machinery never exercised, across two 2026-06-12 main-thread invocations that produced four now-live skills by hand-authoring + manual construction. Plugin uninstalled (`claude plugin uninstall`); source recoverable in the claude-plugins-official marketplace catalog. Evidence: commits `a5e6642`, `966f903`.
+- 2026-06-13 — code-review (pass 9): fold-then-remove. The removable third-party Claude plugin `code-review@claude-plugins-official` — one command (`commands/code-review.md`): a fixed GitHub-PR pipeline (5 Sonnet lenses + a Haiku 0-100 confidence scorer, `<80` filter, `gh pr comment` post-back) — removed under Extraction. Three genuinely-novel false-positive exclusions folded into `implementation-review` (review-family 0.3.4), framed as the symmetric evidence burden on findings: correct code that resembles a bug; linter/typechecker/compiler/CI-catchable issues; and repo-instruction violations explicitly silenced in code (verified absent from the lane — zero matches across its skill dir). The 0-100 rubric + `<80` gate **not** folded. Scoring ruling (JP): the no-numeric-confidence precedent **bites** this internal, never-exposed gate, **scoped** to confidence/criticality scoring used as a judgment substitute, not all internal numbers; reached on inspectability grounds (a hidden gate is worse than an exposed one — "Found 0 issues" cannot be told from suppressed), reinforced by a verified miscalibration (the rubric's own 75 "important real issue" anchor sits below the `<80` cut; the same defect rode in the pass-3/pass-4 rejected artifacts). Everything else owned or banned: gh-PR-comment channel by fixed-terrain bundled `/code-review`+`/review`; 5-lens substance already folded passes 3 and 0.3.3; CLAUDE.md-adherence lens rejected pass 3 (foreign-CLAUDE.md leakage). Friction basis corrected: the queue's "in active use" is **refuted** — zero genuine invocations of the plugin or bare `/code-review` in this repo (triangulated; the apparent hits are this pass's own grep echoes). Per Admission this cannot decide removal but forecloses a relied-upon retention defense; removal stands on the same-runtime collision with the two Claude builtins. Correction for future passes: `codex-review` is itself an installed third-party plugin (codex-collaboration cache), unmined source material subject to Extraction — not a curated owner to lean on. Plugin uninstalled (`claude plugin uninstall`); source recoverable in the claude-plugins-official marketplace catalog. Evidence: commit `3691ca0` (pass-9 route-inventory + merit-adjudication).
+- 2026-06-13 — security-guidance (pass 10): fold-then-remove. The installed + enabled third-party plugin `security-guidance@claude-plugins-official` (v2.0.6) — a hooks bundle with no invocation token that auto-fires on UserPromptSubmit/PostToolUse/Stop, injecting 25 regex pattern warnings on edits, a single-shot LLM diff review on Stop, and an agentic cross-file investigate→self-refute reviewer on commit/push — removed under Extraction. Scope ruling (JP-ratified): the hooks engine is charter-exempt capability tooling (ll.22-24), but the injected instruction text is in-scope contract (l.24; l.14 names "instruction text delivered by hooks"), and the fused engine departs with the contract as packaging. Removal is value-independent (Extraction ll.87-90) — the engine was demonstrably used (80 review fires over 16 days; one fully-closed fire-and-mattered loop where a commit-review finding changed committed `settings.json`), so pass 5's "removed as unused" is a distinguishable, not controlling, prior. One-Owner: the Stop/commit/push LLM-review jobs claim the same work as the fixed-terrain bundled `/security-review` (ll.16-20, 37); the collision resolves on the local side — delivery-mode differences (auto-fire vs invoke; recall vs precision; turn/commit vs branch) do not save job identity (pass-9 precedent). Two genuinely-novel disciplines folded into `implementation-review` (review-family 0.3.5), both verified zero-match in the lane: (1) resource-cap-defeat DoS — report exhaustion only when a change defeats an existing cap, not volumetric load (sits in the gap `/security-review` explicitly excludes); (2) attacker/victim + privilege-boundary + off-diff adversarial-refute discipline, including the agent-capability-gate carve-out (the model is the attacker, the user is the victim). Confidence-precedent (pass 9) does NOT trip — scoped to confidence-as-judgment-substitute: the plugin gates on an ordinal severity enum
+  + qualitative cited-evidence self-refutation; its numeric `confidence` field is schema-optional and no code path filters on it (the exposed, inspectable kind the precedent prefers). Jobs rejected: inline 25-pattern edit warnings (lighter-alternative beats a paid slot, ll.53-55); Stop/commit/push LLM review (collision). Two lower-confidence folds (additive-only embedded-guidance guardrail; over-broad-grant sharpening) declined by JP. No inbound curated routes to repair (`tech-debt-scan`'s hand-off targets a hypothetical Codex `codex-security:security-scan`, availability-conditioned with a clean fallback). Plugin uninstalled (`claude plugin uninstall`); source recoverable in the claude-plugins-official marketplace catalog. Evidence: commit `63daf9f` (pass-10 route-inventory + merit-adjudication).
+- 2026-06-13 — explanatory-output-style (pass 11): reject (zero-fold removal). The installed-but-disabled third-party plugin `explanatory-output-style@claude-plugins-official` (v1.0.0) — a single SessionStart hook (`session-start.sh`, a heredoc `cat` of a static `additionalContext` blob: an always-on "explanatory output style" teaching register emitting `★ Insight` boxes before/after writing code, codebase-specific, "may exceed typical length constraints") — removed under Extraction; the contract IS the deliverable and the engine does no work, so the pass-10 packaging-departure + value-independent removal (ll.87-93) apply a fortiori (pass 10 had a real engine to exempt; here a trivial `cat`). One-Owner: doubly owned. (1) The fixed-terrain built-in "Explanatory" output style is live/un-deprecated (changelog "Un-deprecate output styles"; `outputStyle: "Explanatory"` documented; only the `/output-style` command was removed) and does the exact job; the plugin's "deprecated" self-label is factually stale; same-runtime (Claude-only — no Codex output-style/SessionStart-`additionalContext` analogue), co-loadable, resolves local-side (ll.16-20, 36-44). (2) Global `~/.claude/CLAUDE.md` Communication defaults own the chat register; the contract inverts them on three axes (always-on insights vs task-focus; "may exceed length constraints" vs brevity/outcome-first; `★`-box scaffold in chat vs "save formal structure for artifacts"). Zero folds: the lone substantive discipline (codebase-specific-not-generic insights) fails Extraction step-1 — inseparable from the always-on packaging and already owned by `scrutinize-skill` (SKILL.md:137,155), `writing-principles` (SKILL.md:172), the built-in's description, and CLAUDE.md. Rejection evidence (ll.60-66): usage was demonstrably PRESENT (715 fires, ~1380 obeyed codebase-specific boxes, 2026-05-14 → eve of mining, concentrated in codex-collaboration), so usage-absence is barred as a rationale; the reject rests instead on a positive-control friction search (memory + handoffs + AGENTS.md + CLAUDE.md + ripgrep for teach/educational/insight/pedagog/verbose/output-style) that returned ZERO teaching-register friction while the same instrument fired on the opposite-vector brevity/compression family (caveman; pass-3 clarity-over-brevity guardrail) — that asymmetry is the finding. Lighter-alternative (ll.53-55): README concedes CLAUDE.md-equivalence and `outputStyle` is a one-line setting, both beating a paid slot. No park (the need is owned now by the live built-in, one `/config` flip away); keep-with-cleanup foreclosed (no Codex co-load, unlike pass 8). First-of-its-kind communication/output-style precedent — no prior chat-verbosity contract; this reject sets it. JP steer honored as reinforcing, not load-bearing: Ruling A (disable ruled "incidental") treated as neutral — the reject never rests on the toggle; Ruling B ("built-in is enough; no standing register") converges with the independently-reached verdict and forecloses any register-reinstating fold/park. Plugin uninstalled (`claude plugin uninstall`); source recoverable in the claude-plugins-official marketplace catalog. Evidence: commit `094ad22` (pass-11 route-inventory + merit-adjudication).
+- 2026-06-13 — github plugin (assessment, not a mining pass): exempt — pure capability tooling, no contract text; stays installed and enabled. Full file inventory of the installed + enabled `github@claude-plugins-official` cache (`find -type f` over the plugin dir) shows only `.mcp.json` (one HTTP MCP server → `api.githubcopilot.com/mcp/`, `GITHUB_PERSONAL_ACCESS_TOKEN`-authed), a name/description/author `plugin.json` with no component declarations, and `.in_use/` PID lockfiles; `commands/`, `skills/`, `agents/`, `hooks/`, and `output-styles/` all absent. No slash command, SKILL.md, agent definition, hook-injected `additionalContext`, or output-style register — the plugin.json `description` is marketplace catalog metadata, not injected instruction the agent must follow (all `mcp__plugin_github_github__*` tools come from the hosted MCP server, not bundled prose). Per the capability-tooling exemption (charter ll.22-24, "MCP servers ... out of scope. Tools are tools"), a standalone exempt tool with no accompanying contract is out of scope: no mining, and — unlike the fused-engine cases (pass 5 hookify, pass 10 security-guidance, where an exempt engine departs as packaging for in-scope injected contract) — there is no in-scope contract to extract, so nothing is removed and the plugin stays installed. First pure-exemption outcome. Closes the mining program: the queue's last residual surface is resolved. Evidence: commit `71ce1ca` (plugin-cache file inventory).
+- 2026-06-13 — gh-address-comments (build of the 2026-06-12 admission): authored as a dual-runtime skill in `skills/` (`SKILL.md` + `agents/openai.yaml`); owns PR review-comment addressing without publish authority — verify each thread against evidence, classify (5 dispositions), fix locally, draft replies, stop at one local commit; never push/resolve/ re-review. Folds the superpowers `receiving-code-review` reception discipline (pushback with technical reasoning; no performative agreement; Pasted-Content reconciliation) per #2's addendum. `gh-pr-review-loop` refactored to one-owner-per-job: it now runs the gh-address-comments inner loop and contributes only the publish layer, with all publish-side obligations preserved (human-reviewer caution, resolve eligibility, `@codex` trigger, no-code-change path, empty-threads guard, publish checkpoints, final-response fields). Validated (frontmatter parse, `quick_validate.py`, `openai.yaml` parse, whitespace) and three context-isolated behavior-proxy smoke tests pass: stop-line holds under deadline + authority pressure, routing-in selects the skill, publish authorization escalates to `gh-pr-review-loop`. Closes the authoring-deferred state. Evidence: commit `993cd93`; issue jpsweeney97/agents#2.
+- 2026-06-15 — jp-writing-style: admitted (first-party authored, not a mining pass). Owns generation and rewriting of prose in JP's personal voice — reflective essays, personal statements, application responses, analytical/ professional narratives, memos, recommendations, explanations — grounded in a real two-piece corpus (`references/corpus.md`, lightly redacted: school names, grades, and clinical labels replaced with neutral stand-ins) plus a deduplicated move/diction/genre pattern bank (`references/patterns.md`). No local or bundled lane held voice-grounded prose generation. One Owner Per Job (checked in both runtimes, since dual-runtime): distinct in kind from `writing-principles` (obligation-only edits to agent-instruction docs), `markdown-synthesis`/`markdown-reformat` (structural Markdown consolidation/ formatting, not voice), and from every Codex- and Claude-bundled skill (none does prose-voice work) — all co-loadable without collision. Lighter context rejected: an `AGENTS.md`/`CLAUDE.md` line cannot carry the corpus, the integrity gate, the elicitation step, or the per-genre pattern bank, and the skill's first draft proved voice-by-assertion (no corpus) collapses into generic AI-formal. Houses standards: Use-when/Do-not-use boundary; one justified hard rule (the integrity gate, surviving the agent-facing-design machinery test — fabrication in personal statements/applications is fraud) that is also the first blocking quality-check item; runtime-neutral phrasing (joint `AGENTS.md`/`CLAUDE.md` naming, no Claude-only tokens). Placement `skills/` (dual-runtime), not `skills-claude/`: observed-work call — JP confirms he regularly drafts this writing from Codex too, so the skill earns its Codex skill-list slot rather than being demoted Claude-only. Validated: frontmatter parse, `quick_validate.py`, whitespace, references resolve; two context-isolated adversarial forward tests pass (thin personal-statement prompt → elicits real facts and refuses to invent a backstory; bare-notes rewrite → withholds unsupported causes/lessons and asks). Evidence: commit `6239f9c` (skill build, rewritten from review) + this ledger entry.
+- 2026-06-16 — blind-evaluation blinding guard (test-5 red-team breach, plan T3): admitted a new rule to repo `AGENTS.md` (`## Blind Evaluations`) — in any blind evaluation, never reveal apparatus state (reviewer/model outputs, intermediate scores, predictions, arm identities) to a current or potential ground-truth judge until their independent judgment is recorded; lost blinding is unrecoverable. Owns an evaluation-blinding discipline no lane held (`skill-benchmark` is quantitative skill benchmarking — different job; the global evidence-before-claims rule governs claims, not blinding). Prevents the observed breach where the orchestrator narrated reviewer/disposition results before certification and contaminated the human + self as judges, forcing the human arm to a fresh judge. Repo-scoped home chosen (recurrence concentrated here) over global, by JP. Evidence: breach disclosed in results §8 and scored in §12 (`51ab24e`); rule at `AGENTS.md` `## Blind Evaluations` (this commit).
+- 2026-06-17 — jp-writing-style: retired (removed from source). The skill was admitted, built, scope-narrowed, and hard-deleted all on 2026-06-15 — a targeted removal of exactly its three files (`7d76940` "chore: cleanup", 381 deletions) ~8.5h after the build (`6239f9c`, 01:51). This entry completes the retirement record left half-done at the time: the orphaned `~/.claude/skills` symlink (dangling since the delete, its source target missing) is reaped, and the 2026-06-15 admission above is superseded. Source is NOT moved to `skills-archive/` (the charter's default skill-retirement home), by JP's call: the skill's `references/corpus.md` was real personal writing, and re-committing it to a repo that pushes to GitHub is the exposure the same-day deletion avoided — a deliberate, recorded deviation from the archive default. The source remains recoverable from git history at `6239f9c` if the decision is ever reversed. Evidence: deletion `7d76940`; source/recovery point `6239f9c`; symlink reap + this entry (this commit).
+- 2026-06-23 — Markdown prose-wrap default (global + this repo): admitted a style default that generated Markdown prose artifacts (handoffs, specs, reviews, plans, PRDs) are written one logical line per paragraph/bullet, never hard-wrapped at a fixed column. Recorded two ways: as a user-level global instruction (`~/.claude/CLAUDE.md`, "Markdown Artifacts"; Claude-only, untracked) and — at JP's direction that this repo not carry a different convention — adopted as this repo's own rule for both runtimes via `AGENTS.md` ("Working Defaults"), with no per-repo override. Existing hard-wrapped repo Markdown reflowed to conform on this branch (`AGENTS.md`, `CLAUDE.md` shim, `docs/`, `skills/`, `skills-claude/`, `plugins/`); `skills-archive/` left as retired history; the skill-squad spec/plan reflowed on `feature/skill-squad-spec` (`241dc91`, `d981fde`); plugin Codex-cache republish deferred to JP (cosmetic source-vs-cache drift until then). No existing lane owned generated-prose wrapping (closest: the global `Code Style` and `Communication` sections — code and chat register, not artifact line-wrapping). Pure context — a formatting default, no machinery (no field, classifier, or score) — passes the agent-facing-design gate trivially. Friction: recurring hard-wrap-at-~100-col, corrected this session and made durable at JP's explicit request. Evidence: reflow commit `241dc91` (skill-squad spec; content verified word-for-word identical) plus the convention + repo-wide reflow commits on `chore/md-prose-wrap-default` (this entry and the following reflow commits).
 
 ## Parks
 
-- type-design invariant lens — parked by JP's explicit choice (2026-06-12;
-  recorded in `ad9c0cc`); reopen only on JP's ask.
-- feature-dev approach-triad example — parked by JP's explicit choice
-  (2026-06-12; recorded in `ad9c0cc`, from the feature-dev pass `2dc1b95`);
-  reopen only on JP's ask.
-- code-comprehension lane — parked (2026-06-12; recorded in `ad9c0cc`); reopen
-  on an observed comprehension failure in real work.
-- frontend-design web-aesthetics guidance — parked (2026-06-12; recorded in
-  `45c8a5a`); reopen on the first real web-frontend build task in observed work;
-  on reopen, re-author to
-  house standards from the marketplace catalog source, do not reinstall.
-- security-guidance Codex-runtime security review — parked (2026-06-13, pass 10);
-  reopen on the first observed Codex-side security-review need or a genuine
-  `codex-security:security-scan` fire. On reopen, author to house standards; do
-  not reinstall the plugin.
-- security-guidance on-disk/at-rest secret detection — parked (2026-06-13,
-  pass 10); reopen on the first observed at-rest-secret miss in real work (the
-  gap bundled `/security-review` explicitly disclaims).
-- security-guidance whole-repo / pre-existing-code security scanning — parked
-  (2026-06-13, pass 10); reopen on the first observed pre-existing-code
-  vulnerability that a diff-scoped review missed.
+- type-design invariant lens — parked by JP's explicit choice (2026-06-12; recorded in `ad9c0cc`); reopen only on JP's ask.
+- feature-dev approach-triad example — parked by JP's explicit choice (2026-06-12; recorded in `ad9c0cc`, from the feature-dev pass `2dc1b95`); reopen only on JP's ask.
+- code-comprehension lane — parked (2026-06-12; recorded in `ad9c0cc`); reopen on an observed comprehension failure in real work.
+- frontend-design web-aesthetics guidance — parked (2026-06-12; recorded in `45c8a5a`); reopen on the first real web-frontend build task in observed work; on reopen, re-author to house standards from the marketplace catalog source, do not reinstall.
+- security-guidance Codex-runtime security review — parked (2026-06-13, pass 10); reopen on the first observed Codex-side security-review need or a genuine `codex-security:security-scan` fire. On reopen, author to house standards; do not reinstall the plugin.
+- security-guidance on-disk/at-rest secret detection — parked (2026-06-13, pass 10); reopen on the first observed at-rest-secret miss in real work (the gap bundled `/security-review` explicitly disclaims).
+- security-guidance whole-repo / pre-existing-code security scanning — parked (2026-06-13, pass 10); reopen on the first observed pre-existing-code vulnerability that a diff-scoped review missed.
 
 ## Mining Queue
 
-Unmined contract-shipping surfaces, on amended charter terms (rejection
-evidence named per discard):
+Unmined contract-shipping surfaces, on amended charter terms (rejection evidence named per discard):
 
 (empty — all ten queued surfaces mined through pass 11.)
 
-Assessed and exempt (2026-06-13): the `github` plugin — pure MCP capability
-tooling, no contract text (see Decisions). Out of scope; nothing to extract;
-stays installed. The mining program is fully closed — no queued or unassessed
-contract surfaces remain. Fully closed means the discovery sweep is complete —
-the queue is empty and every discovered surface has a recorded disposition — not
-that every job is final: parked surfaces stay open until their trigger fires.
-Installing or reinstalling any running contract, or a park trigger firing,
-reopens the program.
+Assessed and exempt (2026-06-13): the `github` plugin — pure MCP capability tooling, no contract text (see Decisions). Out of scope; nothing to extract; stays installed. The mining program is fully closed — no queued or unassessed contract surfaces remain. Fully closed means the discovery sweep is complete — the queue is empty and every discovered surface has a recorded disposition — not that every job is final: parked surfaces stay open until their trigger fires. Installing or reinstalling any running contract, or a park trigger firing, reopens the program.

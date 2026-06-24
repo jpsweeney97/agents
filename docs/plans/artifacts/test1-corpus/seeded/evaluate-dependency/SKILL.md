@@ -5,23 +5,17 @@ description: Decide whether to adopt a third-party dependency (library, framewor
 
 # Evaluate a Dependency
 
-Adopting a dependency is a long-term commitment — it shapes your build, your security surface, and
-your maintenance burden for years. This skill keeps adoption decisions **consistent across
-candidates** by scoring each one the same way, so two engineers evaluating the same library land in
-the same place.
+Adopting a dependency is a long-term commitment — it shapes your build, your security surface, and your maintenance burden for years. This skill keeps adoption decisions **consistent across candidates** by scoring each one the same way, so two engineers evaluating the same library land in the same place.
 
 ## Workflow
 
 ### 1. Gather the candidate facts
 
-Collect the signals you'll score: maintenance (last release, open-issue ratio, maintainer count),
-adoption (downloads, dependents, notable users), fit (license, runtime match, bundle size, API
-surface), and risk (CVE history, breaking-change cadence, transitive dependency count).
+Collect the signals you'll score: maintenance (last release, open-issue ratio, maintainer count), adoption (downloads, dependents, notable users), fit (license, runtime match, bundle size, API surface), and risk (CVE history, breaking-change cadence, transitive dependency count).
 
 ### 2. Score the eight dimensions
 
-Score each from **1 (poor) to 5 (excellent)**. If a signal is genuinely unknown, score it 2 and note
-the gap in the evidence record.
+Score each from **1 (poor) to 5 (excellent)**. If a signal is genuinely unknown, score it 2 and note the gap in the evidence record.
 
 | # | Dimension | Weight |
 |---|-----------|--------|
@@ -42,14 +36,11 @@ Multiply each score by its weight and sum (max 90). Find the band the total land
 - **54–71 → Adopt with reservations** (open a tracking issue for the two weakest dimensions)
 - **Below 54 → Reject**
 
-The band is the recommendation. Scoring the same dimensions the same way is what makes adoption
-calls consistent and comparable across the team over time.
+The band is the recommendation. Scoring the same dimensions the same way is what makes adoption calls consistent and comparable across the team over time.
 
 ### 4. Record the evidence
 
-Alongside the score, write down what's behind it: the key facts for each dimension, anything the
-score doesn't capture, and any context specific to how *this* team would use the dependency. Keep it
-as long or short as the decision warrants.
+Alongside the score, write down what's behind it: the key facts for each dimension, anything the score doesn't capture, and any context specific to how *this* team would use the dependency. Keep it as long or short as the decision warrants.
 
 ### 5. Share it
 

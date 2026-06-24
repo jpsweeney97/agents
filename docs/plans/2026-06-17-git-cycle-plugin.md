@@ -1,49 +1,12 @@
 # Implementation Plan: the `git-cycle` plugin (lean Approach A)
 
-**Status:** ready to execute · **Date:** 2026-06-17 · **Source:** locked design from this
-session's outcome-interview → design-exploration → adversarial-panel scrutiny (run
-`wf_9986b895-452`, 11 confirmed findings folded in). Reference file **dropped**. Patched 2026-06-17
-after a `review-reviewer` adjudication (R1 protected-resolution blocker; R2 Codex-test relabel; R3
-charter note; R4 Codex bootstrap; R5 six-skill validation; R6 Markdown fences; M2 SessionStart-permission
-convention + forward-test; M3 dual-runtime name/companion check for `exiting-worktrees`). Patched again
-2026-06-17 after a second supplied review — four findings, all confirmed: P1 hardened the Task 3.8
-live-load gate to require runtime-inspection proof that the loaded source is `git-cycle` for all six
-skills (a symlink/bare-name sighting can false-pass while the originals are still live); P2 mirrored the
-drift check into the tracked `.codex/hooks.json` canary so it fires in Codex sessions too; P2 added the
-missing `mkdir -p .claude-plugin` to Task 3.1; P2 added `git diff --stat`/scoped-diff review to every
-commit gate (Tasks 1.8/2.6/3.10) per `AGENTS.md`. Patched a third time 2026-06-17 after a
-`review-reviewer` adjudication of a second supplied review (partially reliable; 4/4 findings confirmed,
-all should-fix): R1 — WS3 now updates the `AGENTS.md` plugin-source enumeration; R2a — Task 3.8's Codex
-false-pass clause corrected (`skills/`-only; Codex never scans `skills-claude/`); R2b — the Codex gate
-requires `installed, enabled`; R3 — the new drift canary is mirrored into the `claude-skills-sync.sh`
-recovery sample; R4 — WS1 issue closure is gated on an explicit user ask. Plus two adjudicator-found
-should-fix items: M1 — the WS3 "four target paths" count corrected to three; M2 — Task 3.8 gains a
-session-restart checkpoint (the Claude `git-cycle:` proof needs a fresh session). Patched a fourth time
-2026-06-17 after a `review-reviewer` adjudication of a fourth supplied review (partially reliable — all
-four findings factually grounded, two severity-inflated against shipped-plugin precedent): R1 (act) — the
-WS1 commit subject changed from `closes #9, #10` to a non-closing `refs #9, #10` so an authorized *push*
-of `main` cannot auto-close the issues behind the explicit-ask closure gate; R2 (narrow) — Task 3.10
-gains an `rg` old-path consumer sweep (bare skill-*name* references resolve to `git-cycle:<skill>` exactly
-as the repo already references review-family/handoff skills by bare name, so they need no edit — only a
-stray file-*path* consumer would break); R3 (narrow) — Task 3.8 now distinguishes cache-inspection
-(proves plugin *delivery*, the copy-first concern) from model-visibility under Codex's silent budget
-truncation (a pre-existing repo-wide property), with a best-effort, non-blocking visibility check; R4
-(defer) — a note that the manifest's forward-looking mirror URLs are inert until the out-of-scope mirror
-publish, matching the shipped `handoff`/`review-family` manifests.
+**Status:** ready to execute · **Date:** 2026-06-17 · **Source:** locked design from this session's outcome-interview → design-exploration → adversarial-panel scrutiny (run `wf_9986b895-452`, 11 confirmed findings folded in). Reference file **dropped**. Patched 2026-06-17 after a `review-reviewer` adjudication (R1 protected-resolution blocker; R2 Codex-test relabel; R3 charter note; R4 Codex bootstrap; R5 six-skill validation; R6 Markdown fences; M2 SessionStart-permission convention + forward-test; M3 dual-runtime name/companion check for `exiting-worktrees`). Patched again 2026-06-17 after a second supplied review — four findings, all confirmed: P1 hardened the Task 3.8 live-load gate to require runtime-inspection proof that the loaded source is `git-cycle` for all six skills (a symlink/bare-name sighting can false-pass while the originals are still live); P2 mirrored the drift check into the tracked `.codex/hooks.json` canary so it fires in Codex sessions too; P2 added the missing `mkdir -p .claude-plugin` to Task 3.1; P2 added `git diff --stat`/scoped-diff review to every commit gate (Tasks 1.8/2.6/3.10) per `AGENTS.md`. Patched a third time 2026-06-17 after a `review-reviewer` adjudication of a second supplied review (partially reliable; 4/4 findings confirmed, all should-fix): R1 — WS3 now updates the `AGENTS.md` plugin-source enumeration; R2a — Task 3.8's Codex false-pass clause corrected (`skills/`-only; Codex never scans `skills-claude/`); R2b — the Codex gate requires `installed, enabled`; R3 — the new drift canary is mirrored into the `claude-skills-sync.sh` recovery sample; R4 — WS1 issue closure is gated on an explicit user ask. Plus two adjudicator-found should-fix items: M1 — the WS3 "four target paths" count corrected to three; M2 — Task 3.8 gains a session-restart checkpoint (the Claude `git-cycle:` proof needs a fresh session). Patched a fourth time 2026-06-17 after a `review-reviewer` adjudication of a fourth supplied review (partially reliable — all four findings factually grounded, two severity-inflated against shipped-plugin precedent): R1 (act) — the WS1 commit subject changed from `closes #9, #10` to a non-closing `refs #9, #10` so an authorized *push* of `main` cannot auto-close the issues behind the explicit-ask closure gate; R2 (narrow) — Task 3.10 gains an `rg` old-path consumer sweep (bare skill-*name* references resolve to `git-cycle:<skill>` exactly as the repo already references review-family/handoff skills by bare name, so they need no edit — only a stray file-*path* consumer would break); R3 (narrow) — Task 3.8 now distinguishes cache-inspection (proves plugin *delivery*, the copy-first concern) from model-visibility under Codex's silent budget truncation (a pre-existing repo-wide property), with a best-effort, non-blocking visibility check; R4 (defer) — a note that the manifest's forward-looking mirror URLs are inert until the out-of-scope mirror publish, matching the shipped `handoff`/`review-family` manifests.
 
 ## What this builds
 
-The six git skills become one coherent dual-runtime plugin, `git-cycle` (the packaging/coherence
-home for the arc "local change → merged-and-shared, safely"). There is **no shared-reference file**:
-the adversarial panel showed it was the wrong vehicle for safety machinery, which silently degrades
-if a conditionally-loaded pointer is missed. All safety machinery stays **inline and always-loaded**.
-Anti-drift comes from (a) a textual consistency check over the inline copies and (b) an always-loaded
-`AGENTS.md` floor — both honestly **drift-detection**, not single-sourcing.
+The six git skills become one coherent dual-runtime plugin, `git-cycle` (the packaging/coherence home for the arc "local change → merged-and-shared, safely"). There is **no shared-reference file**: the adversarial panel showed it was the wrong vehicle for safety machinery, which silently degrades if a conditionally-loaded pointer is missed. All safety machinery stays **inline and always-loaded**. Anti-drift comes from (a) a textual consistency check over the inline copies and (b) an always-loaded `AGENTS.md` floor — both honestly **drift-detection**, not single-sourcing.
 
-Members (6): `git-hygiene`, `closeout-check`, `merge-branch`, `exiting-worktrees`,
-`gh-address-comments`, `gh-pr-review-loop`. `acceptance-map` stays **out** of the plugin (it defines
-"done" before building — a different job) but its protected-set copy **is** covered by the drift
-check. No skills are merged; each keeps its modes and distinct protected-branch response.
+Members (6): `git-hygiene`, `closeout-check`, `merge-branch`, `exiting-worktrees`, `gh-address-comments`, `gh-pr-review-loop`. `acceptance-map` stays **out** of the plugin (it defines "done" before building — a different job) but its protected-set copy **is** covered by the drift check. No skills are merged; each keeps its modes and distinct protected-branch response.
 
 ## How to use this plan — three independent workstreams
 
@@ -53,28 +16,19 @@ check. No skills are merged; each keeps its modes and distinct protected-branch 
 | **2** | `exiting-worktrees` dual-runtime port + Codex *mechanism* proof | in place on `skills-claude/` | a passing **Codex** command/mechanism smoke test | — |
 | **3** | `git-cycle` packaging migration (copy-first) | new `plugins/git-cycle/` | WS1 **and** WS2 landed | the coherence goal |
 
-**WS1 and WS2 are independently executable and landable now.** WS3 absorbs the already-fixed skills;
-it depends on WS1+WS2 being landed but must not block them. Run each workstream on its own working
-branch and fast-forward onto `main` when its verification passes.
+**WS1 and WS2 are independently executable and landable now.** WS3 absorbs the already-fixed skills; it depends on WS1+WS2 being landed but must not block them. Run each workstream on its own working branch and fast-forward onto `main` when its verification passes.
 
 ## Repo conventions every task obeys
 
-- **Branching:** do file-changing work on a `chore/`/`fix/`/`feature/` branch and fast-forward onto
-  `main`. A user-level hook blocks edits made directly on `main`.
+- **Branching:** do file-changing work on a `chore/`/`fix/`/`feature/` branch and fast-forward onto `main`. A user-level hook blocks edits made directly on `main`.
 - **Deletion:** `trash <path>`, never `rm`.
-- **No publish:** do not push, add remotes, open PRs, or publish the mirror unless the user asks.
-  Codex cache republish (WS3) is local and expected; the GitHub release mirror is **out of scope**.
-- **Validation ladder:** parse edited `SKILL.md` frontmatter and `plugin.json`; confirm every
-  referenced path exists; run focused checks on changed scripts; add a live invocation / forward test
-  / realistic dry run for behavior changes. `quick_validate.py` is structural-only — accept its
-  "unexpected key" complaint on `argument-hint`/`disable-model-invocation`; never delete those fields.
+- **No publish:** do not push, add remotes, open PRs, or publish the mirror unless the user asks. Codex cache republish (WS3) is local and expected; the GitHub release mirror is **out of scope**.
+- **Validation ladder:** parse edited `SKILL.md` frontmatter and `plugin.json`; confirm every referenced path exists; run focused checks on changed scripts; add a live invocation / forward test / realistic dry run for behavior changes. `quick_validate.py` is structural-only — accept its "unexpected key" complaint on `argument-hint`/`disable-model-invocation`; never delete those fields.
 - **The canonical protected-set sentence** (used verbatim throughout this plan):
 
-  > Treat repo-defined protected branches first; if the repo defines none, treat `main`, `master`, `develop`, and `release/*` as protected.
+> Treat repo-defined protected branches first; if the repo defines none, treat `main`, `master`, `develop`, and `release/*` as protected.
 
-  `closeout-check` and `acceptance-map` already carry it verbatim. `merge-branch` carries a reworded
-  variant (fixed in WS1). `git-hygiene` carries no literal list today (added in WS1). `AGENTS.md`
-  gains it as the floor (WS1).
+`closeout-check` and `acceptance-map` already carry it verbatim. `merge-branch` carries a reworded variant (fixed in WS1). `git-hygiene` carries no literal list today (added in WS1). `AGENTS.md` gains it as the floor (WS1).
 
 ---
 
@@ -87,27 +41,20 @@ git switch -c fix/git-hygiene-protected-set main
 ```
 
 ### Files touched
-- `skills/git-hygiene/SKILL.md` — converge protected resolution (#9); add `revert` to the
-  always-loaded preflight clause (#10).
+- `skills/git-hygiene/SKILL.md` — converge protected resolution (#9); add `revert` to the always-loaded preflight clause (#10).
 - `skills/git-hygiene/references/git-hygiene-reference.md` — add `revert` to the marker clause (#10).
 - `skills/merge-branch/SKILL.md` — reword its protected-set sentence to the canonical wording.
 - `AGENTS.md` — add the protected-set floor to "Git And Cleanup".
 - `scripts/check-protected-set.sh` — **new** drift-detection script.
 - `.claude/settings.local.json` — wire the check into the SessionStart canary (real caller).
 
-`skills/closeout-check/SKILL.md` and `skills/acceptance-map/SKILL.md` are **read-only here** — verified
-already-canonical in Task 1.4, not edited.
+`skills/closeout-check/SKILL.md` and `skills/acceptance-map/SKILL.md` are **read-only here** — verified already-canonical in Task 1.4, not edited.
 
 ---
 
 ### Task 1.1 — Converge git-hygiene's protected resolution (#9)
 
-`skills/git-hygiene/SKILL.md` Core Rules currently resolve protection via the default branch + a
-`branchProtection` glob, with **no** literal fallback — the divergence #9 reports. Replace the rule so
-it carries the canonical fallback **only when the repo defines no `branchProtection` policy**, keeping
-the default branch always-protected as a separate condition (this is the panel's finding #4: an
-unconditional union would force-branch legitimate work on `develop`/`release/*` in a `trunk`-default
-repo).
+`skills/git-hygiene/SKILL.md` Core Rules currently resolve protection via the default branch + a `branchProtection` glob, with **no** literal fallback — the divergence #9 reports. Replace the rule so it carries the canonical fallback **only when the repo defines no `branchProtection` policy**, keeping the default branch always-protected as a separate condition (this is the panel's finding #4: an unconditional union would force-branch legitimate work on `develop`/`release/*` in a `trunk`-default repo).
 
 Replace this exact block (lines 16–20):
 
@@ -133,16 +80,7 @@ with:
   default branch already captured in preflight.
 ```
 
-This embeds the canonical sentence verbatim, keeps the default branch as a separate always-protected
-condition (matching `closeout-check` and `acceptance-map`, which gate on "protected or the repo's
-default branch"), defines "repo-defined protection" as the configured `branchProtection` policy — not
-the mere existence of a default branch — and applies the fallback set only when no `branchProtection`
-policy is defined. **Known limit to record in the commit body (do not paper over):** perfect cross-skill
-consistency is not achievable — the four skills read "repo-defined protection" from different sources
-(git default detection, `AGENTS.md`/`CLAUDE.md` policy, `.git-hygiene.json` `branchProtection`), which
-is the settled "cannot single-home core behavior across independently-loaded skills" rule. #9 fixes the
-common **no-config** case (all four now protect the same fallback set) and aligns the wording; exotic
-partial-config divergence remains and is expected.
+This embeds the canonical sentence verbatim, keeps the default branch as a separate always-protected condition (matching `closeout-check` and `acceptance-map`, which gate on "protected or the repo's default branch"), defines "repo-defined protection" as the configured `branchProtection` policy — not the mere existence of a default branch — and applies the fallback set only when no `branchProtection` policy is defined. **Known limit to record in the commit body (do not paper over):** perfect cross-skill consistency is not achievable — the four skills read "repo-defined protection" from different sources (git default detection, `AGENTS.md`/`CLAUDE.md` policy, `.git-hygiene.json` `branchProtection`), which is the settled "cannot single-home core behavior across independently-loaded skills" rule. #9 fixes the common **no-config** case (all four now protect the same fallback set) and aligns the wording; exotic partial-config divergence remains and is expected.
 
 Verify the canonical sentence is present verbatim (modulo line-wrap):
 
@@ -157,9 +95,7 @@ Expected output: `git-hygiene: canonical present`
 
 ### Task 1.2 — Add `revert` to git-hygiene's always-loaded preflight clause (#10)
 
-`skills/git-hygiene/SKILL.md:40` (the always-loaded Preflight prose) lists in-progress operations but
-omits revert — the exact #10 gap. Because it is always-loaded, this is where the fix must land (panel
-finding #6).
+`skills/git-hygiene/SKILL.md:40` (the always-loaded Preflight prose) lists in-progress operations but omits revert — the exact #10 gap. Because it is always-loaded, this is where the fix must land (panel finding #6).
 
 In `skills/git-hygiene/SKILL.md`, find:
 
@@ -185,8 +121,7 @@ Expected: a line 40 match and `preflight names revert`.
 
 ### Task 1.3 — Add `revert` to the git-hygiene reference marker clause (#10, second site)
 
-`skills/git-hygiene/references/git-hygiene-reference.md:20` repeats the operation list and also omits
-revert. Fix it so the conditionally-loaded surface agrees with the always-loaded one.
+`skills/git-hygiene/references/git-hygiene-reference.md:20` repeats the operation list and also omits revert. Fix it so the conditionally-loaded surface agrees with the always-loaded one.
 
 Find:
 
@@ -244,12 +179,9 @@ Expected: `OK:` for all three.
 
 ### Task 1.5 — Add the protected-set floor to `AGENTS.md`
 
-Promote the protected-set obligation to the always-loaded repo instructions (panel finding #8 — the
-always-loaded backstop the library review credited does not currently carry the set). State the floor's
-scope honestly.
+Promote the protected-set obligation to the always-loaded repo instructions (panel finding #8 — the always-loaded backstop the library review credited does not currently carry the set). State the floor's scope honestly.
 
-In `AGENTS.md`, under `## Git And Cleanup`, after the existing first bullet that ends
-`enforces this by blocking edits on `main`.`, insert this new bullet:
+In `AGENTS.md`, under `## Git And Cleanup`, after the existing first bullet that ends `enforces this by blocking edits on `main`.`, insert this new bullet:
 
 ```text
 - Protected-branch floor (this repo): never commit on the default branch or a
@@ -331,23 +263,15 @@ chmod +x scripts/check-protected-set.sh
 bash -n scripts/check-protected-set.sh && echo "syntax OK"
 scripts/check-protected-set.sh
 ```
-Expected: `syntax OK`, then `OK: protected-set sentence consistent across 5 surfaces`.
-If it reports DRIFT, fix the named file to match the canonical sentence before continuing.
+Expected: `syntax OK`, then `OK: protected-set sentence consistent across 5 surfaces`. If it reports DRIFT, fix the named file to match the canonical sentence before continuing.
 
 ---
 
 ### Task 1.7 — Wire the check into the SessionStart canary (a real caller)
 
-The validation ladder (Task 1.8) is the script's primary caller. To also catch drift **every session in
-both runtimes** — and because the panel showed the canary does **not** currently call any in-plugin
-script — add a third SessionStart hook entry to **both** existing canary surfaces. They mirror the same
-two checks today (`claude-skills-sync.sh --check` and `codex-plugins-sync.sh --check`): the untracked
-Claude `.claude/settings.local.json` and the tracked Codex `.codex/hooks.json`. Adding only the Claude
-file would leave every Codex session unguarded, so the third check goes in both.
+The validation ladder (Task 1.8) is the script's primary caller. To also catch drift **every session in both runtimes** — and because the panel showed the canary does **not** currently call any in-plugin script — add a third SessionStart hook entry to **both** existing canary surfaces. They mirror the same two checks today (`claude-skills-sync.sh --check` and `codex-plugins-sync.sh --check`): the untracked Claude `.claude/settings.local.json` and the tracked Codex `.codex/hooks.json`. Adding only the Claude file would leave every Codex session unguarded, so the third check goes in both.
 
-**1. Claude — `.claude/settings.local.json` (untracked/local; this edit does not ship).** The
-`SessionStart` hooks array already contains the two command entries. Add a third sibling entry with the
-same shape:
+**1. Claude — `.claude/settings.local.json` (untracked/local; this edit does not ship).** The `SessionStart` hooks array already contains the two command entries. Add a third sibling entry with the same shape:
 
 ```json
 {
@@ -362,18 +286,9 @@ Add the matching permission to the `permissions.allow` array so it runs without 
 "Bash(scripts/check-protected-set.sh)"
 ```
 
-**Absolute hook command, relative permission — mirror it, do not "fix" it.** The two existing canary
-entries already pair an absolute-path command (`/Users/jp/.agents/scripts/<s> --check || true`) with a
-relative-path permission (`Bash(scripts/<s> --check)`) and run prompt-free today, so this split is the
-working convention, not a mismatch to correct — do not rewrite the permission to an absolute path. The
-`Bash(...)` permission's role for a harness-run SessionStart hook is unverified (the hooks may run
-regardless), so forward-test it: on the next session start, confirm the new check prints its
-`OK:`/`DRIFT:` line with **no** permission prompt; if it prompts, copy the exact string form the two
-existing entries use.
+**Absolute hook command, relative permission — mirror it, do not "fix" it.** The two existing canary entries already pair an absolute-path command (`/Users/jp/.agents/scripts/<s> --check || true`) with a relative-path permission (`Bash(scripts/<s> --check)`) and run prompt-free today, so this split is the working convention, not a mismatch to correct — do not rewrite the permission to an absolute path. The `Bash(...)` permission's role for a harness-run SessionStart hook is unverified (the hooks may run regardless), so forward-test it: on the next session start, confirm the new check prints its `OK:`/`DRIFT:` line with **no** permission prompt; if it prompts, copy the exact string form the two existing entries use.
 
-**2. Codex — `.codex/hooks.json` (tracked; this edit ships).** The single `SessionStart` group's `hooks`
-array carries the same two checks, each with a `timeout` and `statusMessage`. Add a third sibling with
-that fuller shape (Codex hooks have no separate permission model, so there is nothing else to add):
+**2. Codex — `.codex/hooks.json` (tracked; this edit ships).** The single `SessionStart` group's `hooks` array carries the same two checks, each with a `timeout` and `statusMessage`. Add a third sibling with that fuller shape (Codex hooks have no separate permission model, so there is nothing else to add):
 
 ```json
 {
@@ -386,12 +301,7 @@ that fuller shape (Codex hooks have no separate permission model, so there is no
 
 Because `.codex/hooks.json` is tracked, stage it in the WS1 commit (Task 1.8).
 
-**3. Recovery source — `scripts/claude-skills-sync.sh` header (tracked; this edit ships).** The
-`.claude/settings.local.json` canary is untracked, so its only recovery path on a fresh machine is the
-sample SessionStart JSON in this script's `# Bootstrap / recovery` header block (`AGENTS.md` names the
-script header as the recovery home) — which today recreates only the two existing hooks. Replace that
-two-entry sample with the three-entry version so a restored machine regenerates the full canary
-(note the trailing comma added after the second entry):
+**3. Recovery source — `scripts/claude-skills-sync.sh` header (tracked; this edit ships).** The `.claude/settings.local.json` canary is untracked, so its only recovery path on a fresh machine is the sample SessionStart JSON in this script's `# Bootstrap / recovery` header block (`AGENTS.md` names the script header as the recovery home) — which today recreates only the two existing hooks. Replace that two-entry sample with the three-entry version so a restored machine regenerates the full canary (note the trailing comma added after the second entry):
 
 ```text
 #        {"hooks": {"SessionStart": [{"hooks": [
@@ -418,12 +328,9 @@ grep -n 'check-protected-set.sh' .codex/hooks.json               # hook command 
 grep -n 'check-protected-set.sh' scripts/claude-skills-sync.sh   # recovery sample (1 match)
 bash -n scripts/claude-skills-sync.sh && echo "sync script still parses"
 ```
-Expected: both JSON files parse; 2 matches in the Claude settings, 1 in the Codex hooks, 1 in the
-sync-script recovery sample; the sync script still parses.
+Expected: both JSON files parse; 2 matches in the Claude settings, 1 in the Codex hooks, 1 in the sync-script recovery sample; the sync script still parses.
 
-> Note: `codex-plugins-sync.sh --check` only diffs trees and runs no plugin script, and `--publish`
-> repairs drift without running checks. Do **not** claim either as a caller of this script. Cache-side
-> drift is already caught because `--check` is a content diff, not version-gated.
+> Note: `codex-plugins-sync.sh --check` only diffs trees and runs no plugin script, and `--publish` repairs drift without running checks. Do **not** claim either as a caller of this script. Cache-side drift is already caught because `--check` is a content diff, not version-gated.
 
 ---
 
@@ -440,16 +347,11 @@ git diff --check
 # The drift check passes (5 surfaces)
 scripts/check-protected-set.sh
 ```
-Expected: validators pass (the documented `argument-hint`/`disable-model-invocation` "unexpected key"
-note, if any, is accepted), `git diff --check` is silent, drift check prints `OK: ... 5 surfaces`.
+Expected: validators pass (the documented `argument-hint`/`disable-model-invocation` "unexpected key" note, if any, is accepted), `git diff --check` is silent, drift check prints `OK: ... 5 surfaces`.
 
-Behavior forward-test (panel finding #5 — prove the always-loaded floor holds without any reference):
-read `skills/git-hygiene/SKILL.md` Core Rules + Preflight **only** and confirm that, with no other
-file loaded, an agent on a `develop` branch in a no-config repo would (a) treat `develop` as protected
-and branch first, and (b) abort on an in-progress `revert`. Record the two answers in the commit body.
+Behavior forward-test (panel finding #5 — prove the always-loaded floor holds without any reference): read `skills/git-hygiene/SKILL.md` Core Rules + Preflight **only** and confirm that, with no other file loaded, an agent on a `develop` branch in a no-config repo would (a) treat `develop` as protected and branch first, and (b) abort on an in-progress `revert`. Record the two answers in the commit body.
 
-Review the changes, then commit (close both issues) and fast-forward onto `main` (`AGENTS.md`: review
-`git diff --stat` and the relevant diff before staging or committing):
+Review the changes, then commit (close both issues) and fast-forward onto `main` (`AGENTS.md`: review `git diff --stat` and the relevant diff before staging or committing):
 
 ```bash
 git diff --stat                                                              # only the intended surfaces
@@ -481,16 +383,7 @@ is expected.
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 ```
 
-**Closing #9/#10 is a remote mutation — gate it on an explicit ask.** The plan's own convention (no
-push, remote mutation, or publish unless the user asks) covers closing GitHub issues. So do **not** run
-the close commands as part of landing WS1: stop after the fast-forward merge, report the exact commands
-with the real merge hash substituted for `<hash>`, and run them only if the user authorizes it. The
-commit subject deliberately uses `refs #9, #10`, **not** a closing keyword (`closes`/`fixes`/...
-directly followed by `#N`): GitHub auto-closes issues from commit closing-keywords once the commit lands
-on the default branch, so a later authorized *push* of `main` — authorized to sync, not to close —
-would otherwise close the issues behind this gate. Keep closure only in the gated `gh issue close`
-commands below. (The `fix(git-hygiene):` prefix and the body's `(#9)`/`(#10)` mentions are inert — a
-closing keyword fires only when immediately followed by the issue reference.)
+**Closing #9/#10 is a remote mutation — gate it on an explicit ask.** The plan's own convention (no push, remote mutation, or publish unless the user asks) covers closing GitHub issues. So do **not** run the close commands as part of landing WS1: stop after the fast-forward merge, report the exact commands with the real merge hash substituted for `<hash>`, and run them only if the user authorizes it. The commit subject deliberately uses `refs #9, #10`, **not** a closing keyword (`closes`/`fixes`/... directly followed by `#N`): GitHub auto-closes issues from commit closing-keywords once the commit lands on the default branch, so a later authorized *push* of `main` — authorized to sync, not to close — would otherwise close the issues behind this gate. Keep closure only in the gated `gh issue close` commands below. (The `fix(git-hygiene):` prefix and the body's `(#9)`/`(#10)` mentions are inert — a closing keyword fires only when immediately followed by the issue reference.)
 
 ```bash
 # Run ONLY after the user authorizes closing the issues:
@@ -504,26 +397,20 @@ gh issue close 10 --repo jpsweeney97/agents --comment "Fixed in <hash>: revert a
 
 # Workstream 2 — `exiting-worktrees` dual-runtime port
 
-Lands in place; **gated on a passing Codex command/mechanism smoke test**. The skill stays in `skills-claude/`
-(Claude-only) until that test passes — only then does WS3 move it into the plugin as dual-runtime.
-Start on a branch:
+Lands in place; **gated on a passing Codex command/mechanism smoke test**. The skill stays in `skills-claude/` (Claude-only) until that test passes — only then does WS3 move it into the plugin as dual-runtime. Start on a branch:
 
 ```bash
 git switch -c fix/exiting-worktrees-dual-runtime main
 ```
 
 ### Files touched
-- `skills-claude/exiting-worktrees/SKILL.md` — make the native `git -C <main>` path the baseline;
-  demote `ExitWorktree` to an availability-conditional optimization.
+- `skills-claude/exiting-worktrees/SKILL.md` — make the native `git -C <main>` path the baseline; demote `ExitWorktree` to an availability-conditional optimization.
 
 ### Task 2.1 — Reframe the removal section: native baseline first
 
-The skill currently presents `ExitWorktree` (a Claude-only built-in) as the primary mechanism and the
-native path as a fallback (panel BLOCKER finding #1: a Codex agent has no `ExitWorktree`, so it always
-takes the path the skill labels "fallback"). Invert that.
+The skill currently presents `ExitWorktree` (a Claude-only built-in) as the primary mechanism and the native path as a fallback (panel BLOCKER finding #1: a Codex agent has no `ExitWorktree`, so it always takes the path the skill labels "fallback"). Invert that.
 
-Replace the entire section that begins `## The ExitWorktree Tool` (line 10) and ends just before
-`## Why This Skill Exists` (line 39) with this content:
+Replace the entire section that begins `## The ExitWorktree Tool` (line 10) and ends just before `## Why This Skill Exists` (line 39) with this content:
 
 ````text
 ## Removing a Worktree
@@ -575,8 +462,7 @@ After it returns, verify with `git branch --list '<branch-pattern>'`; if the bra
 with `git branch -d <branch-name>`.
 ````
 
-(The not-yet-landed inline-merge path in Pre-Exit Checklist step 4, lines 101–120, already uses
-`git -C <main-repo-path>` and stays unchanged — it is already runtime-neutral.)
+(The not-yet-landed inline-merge path in Pre-Exit Checklist step 4, lines 101–120, already uses `git -C <main-repo-path>` and stays unchanged — it is already runtime-neutral.)
 
 ---
 
@@ -598,8 +484,7 @@ Uses native `git worktree` removal (with Claude Code's ExitWorktree as an optimi
 
 ### Task 2.3 — Make the Exit Procedure removal step availability-conditional
 
-Replace the Exit Procedure block (lines 161–169) that begins `**2. Call ExitWorktree:**` and ends at
-the `discard_changes: true` caveat with:
+Replace the Exit Procedure block (lines 161–169) that begins `**2. Call ExitWorktree:**` and ends at the `discard_changes: true` caveat with:
 
 ````text
 **2. Remove the worktree:**
@@ -624,8 +509,7 @@ porcelain-first, then `git -C <main-repo-path> worktree remove <worktree-path>` 
 
 ### Task 2.4 — Fix the Prohibited Actions table
 
-The table's first row forbids `git worktree remove` outright and points only to `ExitWorktree`, which
-contradicts the native baseline. In the `## Prohibited Actions` table, replace the first row:
+The table's first row forbids `git worktree remove` outright and points only to `ExitWorktree`, which contradicts the native baseline. In the `## Prohibited Actions` table, replace the first row:
 
 ```text
 | `git worktree remove` | Breaks when run from inside worktree; CWD becomes invalid | `ExitWorktree` tool |
@@ -649,12 +533,7 @@ Expected: validator passes; `git diff --check` silent.
 
 ### Task 2.5 — Codex command/mechanism smoke test (the gate; run in a Codex session)
 
-This is the panel's single most important fix and **cannot** be satisfied by prose. It must run in a
-**Codex** session (where `ExitWorktree` does not exist) to prove the native baseline is CWD-safe and
-its guards hold. **Scope:** this proves the native command *mechanism* is CWD-safe in Codex's shell —
-it does **not** prove Codex discovers, routes to, or obeys the skill (it cannot: `skills-claude/` is
-Claude-only per `AGENTS.md`). Codex skill *discovery* is verified separately by the both-runtime load
-check in Task 3.8 (discovery, not obedience). Run against a throwaway repo, not `.agents`.
+This is the panel's single most important fix and **cannot** be satisfied by prose. It must run in a **Codex** session (where `ExitWorktree` does not exist) to prove the native baseline is CWD-safe and its guards hold. **Scope:** this proves the native command *mechanism* is CWD-safe in Codex's shell — it does **not** prove Codex discovers, routes to, or obeys the skill (it cannot: `skills-claude/` is Claude-only per `AGENTS.md`). Codex skill *discovery* is verified separately by the both-runtime load check in Task 3.8 (discovery, not obedience). Run against a throwaway repo, not `.agents`.
 
 ```bash
 # Setup a throwaway repo with a worktree holding a landed commit
@@ -677,20 +556,17 @@ git -C "$MAIN" worktree list
 ```
 
 **Pass criteria (all must hold):**
-1. `git -C "$MAIN" worktree list` after removal succeeds and no longer lists the `wt` path — i.e. the
-   `git -C` form did not depend on the now-deleted CWD.
+1. `git -C "$MAIN" worktree list` after removal succeeds and no longer lists the `wt` path — i.e. the `git -C` form did not depend on the now-deleted CWD.
 2. `git -C "$MAIN" branch -d feature` succeeds (the landed branch deletes cleanly).
 3. The final `worktree list` shows only the main checkout.
 
-If any step fails, **do not land WS2** and do not let WS3 move the skill into the plugin — the skill
-stays Claude-only. Capture the transcript. (Clean up: `cd / && trash "$TMP"`.)
+If any step fails, **do not land WS2** and do not let WS3 move the skill into the plugin — the skill stays Claude-only. Capture the transcript. (Clean up: `cd / && trash "$TMP"`.)
 
 ---
 
 ### Task 2.6 — WS2 commit and land (only after Task 2.5 passes on Codex)
 
-Review the change before staging (`AGENTS.md`: review `git diff --stat` and the relevant diff before
-staging or committing):
+Review the change before staging (`AGENTS.md`: review `git diff --stat` and the relevant diff before staging or committing):
 
 ```bash
 git diff --stat
@@ -721,17 +597,9 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 
 # Workstream 3 — `git-cycle` packaging migration (copy-first)
 
-**Prerequisite:** WS1 and WS2 are landed on `main`. This workstream only packages already-fixed skills;
-it introduces no behavior change beyond delivery. Copy-first: the originals remain the rollback point
-until the new plugin is proven live in both runtimes (panel finding #7).
+**Prerequisite:** WS1 and WS2 are landed on `main`. This workstream only packages already-fixed skills; it introduces no behavior change beyond delivery. Copy-first: the originals remain the rollback point until the new plugin is proven live in both runtimes (panel finding #7).
 
-**Charter check (consulted; no ledger entry).** This packages six **already-admitted, first-party**
-skills into a delivery plugin — same jobs, none merged, none archived, none losing its job (each
-contract persists at the new path). Per the charter's four triggers (`docs/agents/charter.md`) this is
-**neither an admission, fold, rejection, park, nor retirement**, so it takes **no
-`docs/agents/contract-decisions.md` entry** — consistent with the prior `handoff`/`review-family`
-packaging, which were never themselves ledgered. One Owner Per Job is unaffected: no new owner, no
-collision, and `acceptance-map` stays out.
+**Charter check (consulted; no ledger entry).** This packages six **already-admitted, first-party** skills into a delivery plugin — same jobs, none merged, none archived, none losing its job (each contract persists at the new path). Per the charter's four triggers (`docs/agents/charter.md`) this is **neither an admission, fold, rejection, park, nor retirement**, so it takes **no `docs/agents/contract-decisions.md` entry** — consistent with the prior `handoff`/`review-family` packaging, which were never themselves ledgered. One Owner Per Job is unaffected: no new owner, no collision, and `acceptance-map` stays out.
 
 Start on a branch:
 
@@ -740,21 +608,17 @@ git switch -c feature/git-cycle-plugin main
 ```
 
 ### Files created / moved
-- `plugins/git-cycle/.claude-plugin/plugin.json`, `README.md`, `LICENSE`, `PRIVACY.md`, `TERMS.md`,
-  `CHANGELOG.md` — **new**.
-- `plugins/git-cycle/skills/{git-hygiene,closeout-check,merge-branch,exiting-worktrees,gh-address-comments,gh-pr-review-loop}/`
-  — copied from `skills/` and `skills-claude/`.
+- `plugins/git-cycle/.claude-plugin/plugin.json`, `README.md`, `LICENSE`, `PRIVACY.md`, `TERMS.md`, `CHANGELOG.md` — **new**.
+- `plugins/git-cycle/skills/{git-hygiene,closeout-check,merge-branch,exiting-worktrees,gh-address-comments,gh-pr-review-loop}/` — copied from `skills/` and `skills-claude/`.
 - `plugins/marketplace.json` — add the `git-cycle` entry.
-- `scripts/check-protected-set.sh` — repoint the three moved skill paths (`git-hygiene`,
-  `merge-branch`, `closeout-check`; `acceptance-map` and `AGENTS.md` stay) (Task 3.5).
+- `scripts/check-protected-set.sh` — repoint the three moved skill paths (`git-hygiene`, `merge-branch`, `closeout-check`; `acceptance-map` and `AGENTS.md` stay) (Task 3.5).
 - `scripts/codex-plugins-sync.sh` — add `git-cycle` to the bootstrap/recovery block (Task 3.7).
 - `AGENTS.md` — update the Plugin Layout plugin-source enumeration to include `git-cycle` (Task 3.7).
 - Old `skills/{...}` and `skills-claude/exiting-worktrees` — trashed **last** (Task 3.9).
 
 ### Task 3.1 — Scaffold the plugin manifest
 
-Create the manifest directory first (nothing has made `plugins/git-cycle/.claude-plugin/` yet — the
-`mkdir` in Task 3.2 only creates `plugins/git-cycle`), then write the manifest:
+Create the manifest directory first (nothing has made `plugins/git-cycle/.claude-plugin/` yet — the `mkdir` in Task 3.2 only creates `plugins/git-cycle`), then write the manifest:
 
 ```bash
 mkdir -p plugins/git-cycle/.claude-plugin
@@ -807,14 +671,9 @@ Create `plugins/git-cycle/.claude-plugin/plugin.json` with exactly:
 }
 ```
 
-Version 1.0.0 is honest: this packages six in-production skills (panel finding #11 — 0.1.0 would signal
-"never shipped"). Justify it in the CHANGELOG (Task 3.3).
+Version 1.0.0 is honest: this packages six in-production skills (panel finding #11 — 0.1.0 would signal "never shipped"). Justify it in the CHANGELOG (Task 3.3).
 
-> Note — the `interface` `websiteURL`/`privacyPolicyURL`/`termsOfServiceURL` point at the GitHub release
-> **mirror** (`…/codex-tool-dev/…/turbo-mode/git-cycle/…`), which is **out of scope** here and does not
-> exist yet. This matches the shipped `handoff`/`review-family` manifests, whose identical forward-looking
-> URLs resolved only once those plugins were mirror-published; the git-cycle URLs resolve when the mirror
-> is published on an explicit ask. Inert display metadata until then — not a blocker, no change needed.
+> Note — the `interface` `websiteURL`/`privacyPolicyURL`/`termsOfServiceURL` point at the GitHub release **mirror** (`…/codex-tool-dev/…/turbo-mode/git-cycle/…`), which is **out of scope** here and does not exist yet. This matches the shipped `handoff`/`review-family` manifests, whose identical forward-looking URLs resolved only once those plugins were mirror-published; the git-cycle URLs resolve when the mirror is published on an explicit ask. Inert display metadata until then — not a blocker, no change needed.
 
 Verify it parses:
 
@@ -834,8 +693,7 @@ cp plugins/review-family/PRIVACY.md plugins/git-cycle/PRIVACY.md
 cp plugins/review-family/TERMS.md plugins/git-cycle/TERMS.md
 ```
 
-Open `plugins/git-cycle/PRIVACY.md` and `plugins/git-cycle/TERMS.md`; if either names "review-family"
-or "Review Family" in its body, replace those with "git-cycle" / "Git Cycle". Verify:
+Open `plugins/git-cycle/PRIVACY.md` and `plugins/git-cycle/TERMS.md`; if either names "review-family" or "Review Family" in its body, replace those with "git-cycle" / "Git Cycle". Verify:
 
 ```bash
 grep -in 'review.family' plugins/git-cycle/PRIVACY.md plugins/git-cycle/TERMS.md || echo "no stale plugin name"
@@ -905,11 +763,7 @@ test -f plugins/git-cycle/skills/git-hygiene/references/git-hygiene-reference.md
 ```
 Expected: `reference copied`.
 
-`exiting-worktrees` is the only member without an `agents/openai.yaml` companion — that is fine:
-companion metadata is optional per `AGENTS.md` (minimal or absent is acceptable), so none needs to be
-authored for the migration. But moving it out of Claude-only `skills-claude/` into the dual-runtime
-plugin makes it **Codex-scanned**, so its name must now clear the **Codex-bundled** set too (previously
-it only had to avoid Claude-bundled names). Confirm all six clear both bundled sets:
+`exiting-worktrees` is the only member without an `agents/openai.yaml` companion — that is fine: companion metadata is optional per `AGENTS.md` (minimal or absent is acceptable), so none needs to be authored for the migration. But moving it out of Claude-only `skills-claude/` into the dual-runtime plugin makes it **Codex-scanned**, so its name must now clear the **Codex-bundled** set too (previously it only had to avoid Claude-bundled names). Confirm all six clear both bundled sets:
 
 ```bash
 for n in git-hygiene closeout-check merge-branch exiting-worktrees gh-address-comments gh-pr-review-loop; do
@@ -920,14 +774,11 @@ for n in git-hygiene closeout-check merge-branch exiting-worktrees gh-address-co
   esac
 done
 ```
-Expected: `ok:` for all six — `exiting-worktrees` clears both the Codex-bundled and Claude-bundled name
-lists (the other five were already dual-runtime).
+Expected: `ok:` for all six — `exiting-worktrees` clears both the Codex-bundled and Claude-bundled name lists (the other five were already dual-runtime).
 
 ### Task 3.5 — Repoint the drift check at the new locations
 
-In `scripts/check-protected-set.sh`, replace the `TARGETS` array so the three relocated skills point
-into the plugin (`closeout-check` and `merge-branch` move; `git-hygiene` moves; `acceptance-map` and
-`AGENTS.md` stay):
+In `scripts/check-protected-set.sh`, replace the `TARGETS` array so the three relocated skills point into the plugin (`closeout-check` and `merge-branch` move; `git-hygiene` moves; `acceptance-map` and `AGENTS.md` stay):
 
 ```bash
 TARGETS=(
@@ -948,8 +799,7 @@ Expected: `OK: protected-set sentence consistent across 5 surfaces`.
 
 ### Task 3.6 — Add the marketplace entry and verify resolution
 
-In `plugins/marketplace.json`, add a third object to the `plugins` array (after `review-family`),
-matching the existing shape exactly:
+In `plugins/marketplace.json`, add a third object to the `plugins` array (after `review-family`), matching the existing shape exactly:
 
 ```json
 {
@@ -973,8 +823,7 @@ python3 -c "import json; d=json.load(open('plugins/marketplace.json')); print([p
 test -d plugins/git-cycle && echo "git-cycle source dir exists"
 codex plugin list
 ```
-Expected: the name list includes `git-cycle`; `git-cycle source dir exists`; `codex plugin list` runs
-without error (it need not yet show git-cycle as installed — that is Task 3.7).
+Expected: the name list includes `git-cycle`; `git-cycle source dir exists`; `codex plugin list` runs without error (it need not yet show git-cycle as installed — that is Task 3.7).
 
 ### Task 3.7 — Link (Claude) and publish (Codex)
 
@@ -984,14 +833,9 @@ scripts/codex-plugins-sync.sh --publish git-cycle
 scripts/claude-skills-sync.sh --check
 scripts/codex-plugins-sync.sh --check
 ```
-Expected: the link command creates the `~/.claude/skills/git-cycle` entry; `--publish` runs
-`codex plugin add git-cycle@turbo-mode` and re-checks clean; both `--check` runs report no drift /
-no missing links for git-cycle.
+Expected: the link command creates the `~/.claude/skills/git-cycle` entry; `--publish` runs `codex plugin add git-cycle@turbo-mode` and re-checks clean; both `--check` runs report no drift / no missing links for git-cycle.
 
-Then update the **bootstrap/recovery** block in `scripts/codex-plugins-sync.sh` (the stated recovery
-home) so a fresh machine restores all three plugins — after WS3 the six skills live only in
-`git-cycle`. In the header's `# Bootstrap / recovery` block, add a third install line under step 2,
-beside `handoff` and `review-family`:
+Then update the **bootstrap/recovery** block in `scripts/codex-plugins-sync.sh` (the stated recovery home) so a fresh machine restores all three plugins — after WS3 the six skills live only in `git-cycle`. In the header's `# Bootstrap / recovery` block, add a third install line under step 2, beside `handoff` and `review-family`:
 
 ```text
 #      codex plugin add git-cycle@turbo-mode
@@ -1004,9 +848,7 @@ grep -n 'codex plugin add git-cycle@turbo-mode' scripts/codex-plugins-sync.sh &&
 ```
 Expected: a match and `bootstrap updated`.
 
-Finally, update the repo's authority enumeration so it stops naming only two plugins. In `AGENTS.md`
-("Plugin Layout And Delivery"), the sentence "the canonical dual-runtime plugin sources (currently
-`handoff`, `review-family`)" is false once `git-cycle` lands — add `git-cycle`:
+Finally, update the repo's authority enumeration so it stops naming only two plugins. In `AGENTS.md` ("Plugin Layout And Delivery"), the sentence "the canonical dual-runtime plugin sources (currently `handoff`, `review-family`)" is false once `git-cycle` lands — add `git-cycle`:
 
 ```text
 - `plugins/<name>/` holds the canonical dual-runtime plugin sources (currently
@@ -1018,70 +860,32 @@ Verify:
 ```bash
 grep -n 'handoff`, `review-family`, `git-cycle`' AGENTS.md && echo 'AGENTS.md enumeration updated'
 ```
-Expected: a match on the Plugin Layout line; `AGENTS.md enumeration updated`. (`AGENTS.md` is staged by
-the WS3 `git add -A` in Task 3.10.)
+Expected: a match on the Plugin Layout line; `AGENTS.md enumeration updated`. (`AGENTS.md` is staged by the WS3 `git add -A` in Task 3.10.)
 
 ### Task 3.8 — Live load test in both runtimes (the gate before deletion)
 
-**Session checkpoint — the Claude proof needs a fresh session.** Task 3.7 just created the
-`~/.claude/skills/git-cycle` symlink, but Claude's skills-directory discovery is **next-session**: the
-`git-cycle:` skills will not appear in the current session. So finish Task 3.7, then **restart the
-Claude session** before running the Claude proof below, and do **not** advance to Task 3.9 (deletion)
-until the fresh-session Claude proof **and** the Codex proof both pass here.
+**Session checkpoint — the Claude proof needs a fresh session.** Task 3.7 just created the `~/.claude/skills/git-cycle` symlink, but Claude's skills-directory discovery is **next-session**: the `git-cycle:` skills will not appear in the current session. So finish Task 3.7, then **restart the Claude session** before running the Claude proof below, and do **not** advance to Task 3.9 (deletion) until the fresh-session Claude proof **and** the Codex proof both pass here.
 
-Do not proceed to deletion until all six skills are proven to load **from the plugin** in **both**
-runtimes. A resolving symlink or a bare skill name appearing is **not** sufficient proof: the standalone
-originals are still live until Task 3.9, so Claude would surface the six via their own
-`~/.claude/skills/<name>` links, and Codex would surface the **five former `skills/` members** via its
-in-place `skills/` scan — **even if plugin delivery is broken** — a false pass that defeats the
-copy-first safety net for those five. (Codex never scans `skills-claude/`, so `exiting-worktrees` has no
-standalone Codex source; its Codex sighting is already necessarily plugin-sourced.) Per `AGENTS.md`
-("Make runtime claims … only from a runtime inspection path: installed cache, app-server `plugin/read`,
-`plugin/list`, `skills/list` …"), the gate requires proof that the *loaded source is `git-cycle`*, which
-the still-live originals cannot fake:
+Do not proceed to deletion until all six skills are proven to load **from the plugin** in **both** runtimes. A resolving symlink or a bare skill name appearing is **not** sufficient proof: the standalone originals are still live until Task 3.9, so Claude would surface the six via their own `~/.claude/skills/<name>` links, and Codex would surface the **five former `skills/` members** via its in-place `skills/` scan — **even if plugin delivery is broken** — a false pass that defeats the copy-first safety net for those five. (Codex never scans `skills-claude/`, so `exiting-worktrees` has no standalone Codex source; its Codex sighting is already necessarily plugin-sourced.) Per `AGENTS.md` ("Make runtime claims … only from a runtime inspection path: installed cache, app-server `plugin/read`, `plugin/list`, `skills/list` …"), the gate requires proof that the *loaded source is `git-cycle`*, which the still-live originals cannot fake:
 
-- **Claude Code:** the plugin's skills surface **namespaced** as `git-cycle:<skill>` (matching the
-  existing `handoff:*` / `review-family:*` plugins); the bare `<skill>` form is the standalone original.
-  So the disambiguating proof is all six appearing under the `git-cycle:` namespace. Skills-directory
-  discovery is **next-session** (live reload, per `AGENTS.md`), so verify this at the **start of a fresh
-  Claude session** after the symlink is created — not in the same session. First confirm the symlink,
-  then the namespaced skills:
+- **Claude Code:** the plugin's skills surface **namespaced** as `git-cycle:<skill>` (matching the existing `handoff:*` / `review-family:*` plugins); the bare `<skill>` form is the standalone original. So the disambiguating proof is all six appearing under the `git-cycle:` namespace. Skills-directory discovery is **next-session** (live reload, per `AGENTS.md`), so verify this at the **start of a fresh Claude session** after the symlink is created — not in the same session. First confirm the symlink, then the namespaced skills:
 
   ```bash
   readlink ~/.claude/skills/git-cycle   # must print /Users/jp/.agents/plugins/git-cycle
   ```
-  Then, in a fresh session, confirm all six are present in the skills list under the `git-cycle:`
-  namespace: `git-cycle:git-hygiene`, `git-cycle:closeout-check`, `git-cycle:merge-branch`,
-  `git-cycle:exiting-worktrees`, `git-cycle:gh-address-comments`, `git-cycle:gh-pr-review-loop`. If any
-  is missing under that namespace, plugin delivery is broken.
+Then, in a fresh session, confirm all six are present in the skills list under the `git-cycle:` namespace: `git-cycle:git-hygiene`, `git-cycle:closeout-check`, `git-cycle:merge-branch`, `git-cycle:exiting-worktrees`, `git-cycle:gh-address-comments`, `git-cycle:gh-pr-review-loop`. If any is missing under that namespace, plugin delivery is broken.
 
-- **Codex:** Codex serves installed plugins from the **version-keyed cache**, not the in-place scan, so
-  the runtime-inspection proof is that `git-cycle@turbo-mode` is **`installed, enabled`** (not merely
-  installed — an installed-but-disabled plugin delivers nothing) and the cache carries the six skills:
+- **Codex:** Codex serves installed plugins from the **version-keyed cache**, not the in-place scan, so the runtime-inspection proof is that `git-cycle@turbo-mode` is **`installed, enabled`** (not merely installed — an installed-but-disabled plugin delivers nothing) and the cache carries the six skills:
 
   ```bash
   codex plugin list                                            # git-cycle@turbo-mode: "installed, enabled"
   ls ~/.codex/plugins/cache/turbo-mode/git-cycle/*/skills/     # the six skill dirs, plugin-sourced
   ```
-  Expected: `git-cycle@turbo-mode` shows status `installed, enabled`; the cache `skills/` dir lists all
-  six. A bare `merge-branch` sighting in the merged skill *list* does **not** prove plugin delivery while
-  the standalone original is still scanned — inspect the cache (the installed-cache path) instead.
-  (Optional, verify-first: if a Codex session exposes plugin skills under a `git-cycle:` namespace the
-  way Claude does, confirm the six there too — but Codex skill-namespacing is unconfirmed, so the cache
-  inspection above is the required proof, not a namespaced list.)
+Expected: `git-cycle@turbo-mode` shows status `installed, enabled`; the cache `skills/` dir lists all six. A bare `merge-branch` sighting in the merged skill *list* does **not** prove plugin delivery while the standalone original is still scanned — inspect the cache (the installed-cache path) instead. (Optional, verify-first: if a Codex session exposes plugin skills under a `git-cycle:` namespace the way Claude does, confirm the six there too — but Codex skill-namespacing is unconfirmed, so the cache inspection above is the required proof, not a namespaced list.)
 
-  **Proof boundary — delivery vs model-visibility.** This cache inspection proves the plugin *delivers*
-  the six (the wiring that copy-first protects), not that all six survive Codex's documented silent
-  over-budget truncation into the model-visible skill list (`AGENTS.md`: Codex "silently truncates the
-  skill list when over it"). That truncation is a pre-existing, repo-wide property that hits the
-  standalone originals equally, so it is **not** a reason to keep them, and "installed cache" is itself an
-  `AGENTS.md`-sanctioned runtime-inspection path. So treat the model-visible list as **best-effort, not a
-  delete gate**: if the Codex session exposes a model-visible skills list, confirm the six appear and note
-  it; if it does not, or the list is truncated, record that limit in the commit body — do **not** block
-  deletion on a model-visibility proof Codex may not expose. The cache proof is what gates Task 3.9.
+**Proof boundary — delivery vs model-visibility.** This cache inspection proves the plugin *delivers* the six (the wiring that copy-first protects), not that all six survive Codex's documented silent over-budget truncation into the model-visible skill list (`AGENTS.md`: Codex "silently truncates the skill list when over it"). That truncation is a pre-existing, repo-wide property that hits the standalone originals equally, so it is **not** a reason to keep them, and "installed cache" is itself an `AGENTS.md`-sanctioned runtime-inspection path. So treat the model-visible list as **best-effort, not a delete gate**: if the Codex session exposes a model-visible skills list, confirm the six appear and note it; if it does not, or the list is truncated, record that limit in the commit body — do **not** block deletion on a model-visibility proof Codex may not expose. The cache proof is what gates Task 3.9.
 
-If any of the six fails to load **from the plugin** in either runtime, fix the manifest/paths before
-Task 3.9. The originals are still the live source, so nothing is lost.
+If any of the six fails to load **from the plugin** in either runtime, fix the manifest/paths before Task 3.9. The originals are still the live source, so nothing is lost.
 
 ### Task 3.9 — Remove the originals (only after Task 3.8 passes)
 
@@ -1102,8 +906,7 @@ trash skills-claude/exiting-worktrees
 scripts/claude-skills-sync.sh --check
 scripts/codex-plugins-sync.sh --check
 ```
-Expected: both `--check` runs clean (no MISSING, no DANGLING, no DRIFT). If `--check` reports a
-dangling link for any of the six, remove it with `trash`.
+Expected: both `--check` runs clean (no MISSING, no DANGLING, no DRIFT). If `--check` reports a dangling link for any of the six, remove it with `trash`.
 
 ### Task 3.10 — WS3 verification, commit, and land
 
@@ -1131,16 +934,9 @@ scripts/check-protected-set.sh
 git diff --check
 git status --short
 ```
-Expected: `manifest ok`; the validator passes for all six (the documented
-`argument-hint`/`disable-model-invocation` "unexpected key" note is accepted); each `openai.yaml`
-parses; `no stray old-path consumers` (bare skill-name references need no edit — see the comment);
-drift check `OK: ... 5 surfaces`; `git diff --check` silent;
-`git status` shows the additions under `plugins/git-cycle/`, the marketplace edit, the script repoint,
-and the deletions of the old skill dirs.
+Expected: `manifest ok`; the validator passes for all six (the documented `argument-hint`/`disable-model-invocation` "unexpected key" note is accepted); each `openai.yaml` parses; `no stray old-path consumers` (bare skill-name references need no edit — see the comment); drift check `OK: ... 5 surfaces`; `git diff --check` silent; `git status` shows the additions under `plugins/git-cycle/`, the marketplace edit, the script repoint, and the deletions of the old skill dirs.
 
-Review the full change set before staging — this adds the `plugins/git-cycle/` tree and removes the old
-skill dirs, so read it (`AGENTS.md`: review `git diff --stat` and the relevant diff before staging or
-committing) — then commit and fast-forward onto `main`:
+Review the full change set before staging — this adds the `plugins/git-cycle/` tree and removes the old skill dirs, so read it (`AGENTS.md`: review `git diff --stat` and the relevant diff before staging or committing) — then commit and fast-forward onto `main`:
 
 ```bash
 git diff --stat                       # tracked changes: the old skill-dir deletions, the script repoint
@@ -1165,8 +961,7 @@ trashed. Marketplace entry added; Codex cache republished. Mirror not published.
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 ```
 
-> Codex cache republish (Task 3.7) is local and expected. The GitHub release **mirror** is out of
-> scope — publish it only when the user explicitly asks.
+> Codex cache republish (Task 3.7) is local and expected. The GitHub release **mirror** is out of scope — publish it only when the user explicitly asks.
 
 **WS3 landed.** `git-cycle` is the coherence/packaging home for all six skills.
 
@@ -1174,17 +969,7 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 
 ## Self-review
 
-- **Coverage:** every locked-design element maps to a task — #9 convergence (1.1), #10 both sites
-  (1.2/1.3), canonicalization (1.4), `AGENTS.md` floor (1.5), drift check + real caller (1.6/1.7),
-  worktree port + Codex *mechanism* proof (2.1–2.5), copy-first packaging with load gate (3.1–3.9). The dropped
-  reference appears nowhere. acceptance-map's copy is covered by the check (1.6 target list) though it
-  stays out of the plugin.
-- **Independence:** WS1 and WS2 each land on their own branch with their own verification and never
-  reference plugin paths; WS3 explicitly lists WS1+WS2 landed as a prerequisite and only moves files.
-- **Placeholders:** the one intentional `<...>` token is `<main-repo-path>` / `<worktree-path>` /
-  `<branch-name>` inside skill prose and the behavior-test (resolved at runtime by the executor), and
-  `<hash>` in the issue-close comments (the merge commit hash). No "TBD"/"similar to Task N".
-- **Known limits carried forward (not gaps):** perfect cross-skill protected-resolution consistency is
-  not achievable (recorded in 1.1 and the commit body); the `AGENTS.md` floor is `.agents`-local and
-  does not travel (stated in 1.5); the drift check's only ship-relevant caller is the validation ladder
-  plus the local SessionStart canary (1.7) — the Codex publish path is not a caller and is not claimed.
+- **Coverage:** every locked-design element maps to a task — #9 convergence (1.1), #10 both sites (1.2/1.3), canonicalization (1.4), `AGENTS.md` floor (1.5), drift check + real caller (1.6/1.7), worktree port + Codex *mechanism* proof (2.1–2.5), copy-first packaging with load gate (3.1–3.9). The dropped reference appears nowhere. acceptance-map's copy is covered by the check (1.6 target list) though it stays out of the plugin.
+- **Independence:** WS1 and WS2 each land on their own branch with their own verification and never reference plugin paths; WS3 explicitly lists WS1+WS2 landed as a prerequisite and only moves files.
+- **Placeholders:** the one intentional `<...>` token is `<main-repo-path>` / `<worktree-path>` / `<branch-name>` inside skill prose and the behavior-test (resolved at runtime by the executor), and `<hash>` in the issue-close comments (the merge commit hash). No "TBD"/"similar to Task N".
+- **Known limits carried forward (not gaps):** perfect cross-skill protected-resolution consistency is not achievable (recorded in 1.1 and the commit body); the `AGENTS.md` floor is `.agents`-local and does not travel (stated in 1.5); the drift check's only ship-relevant caller is the validation ladder plus the local SessionStart canary (1.7) — the Codex publish path is not a caller and is not claimed.

@@ -5,9 +5,7 @@ description: Decide whether a feature or release is ready to ship by working thr
 
 # Release Readiness
 
-Shipping decisions are easy to get wrong under deadline pressure — it's tempting to call something
-done because you're tired of it. This skill replaces that pressure with a **clear, repeatable
-checklist**, so "ready to ship" means the same thing every time instead of depending on who's asking.
+Shipping decisions are easy to get wrong under deadline pressure — it's tempting to call something done because you're tired of it. This skill replaces that pressure with a **clear, repeatable checklist**, so "ready to ship" means the same thing every time instead of depending on who's asking.
 
 ## The checklist
 
@@ -24,12 +22,8 @@ Work through every item for the feature or release under review:
 
 ## The verdict
 
-**When every applicable item is checked, the feature is ready.** If any item is unchecked, it's not
-ready — resolve the open items and re-run the checklist. Checking the boxes is what readiness means
-here: it turns a call that used to vary by person and mood into a consistent, auditable bar everyone
-clears the same way.
+**When every applicable item is checked, the feature is ready.** If any item is unchecked, it's not ready — resolve the open items and re-run the checklist. Checking the boxes is what readiness means here: it turns a call that used to vary by person and mood into a consistent, auditable bar everyone clears the same way.
 
 ## After shipping
 
-Record which items applied and link the evidence (CI run, review, changelog) so the decision is
-auditable later.
+Record which items applied and link the evidence (CI run, review, changelog) so the decision is auditable later.

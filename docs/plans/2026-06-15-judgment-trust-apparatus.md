@@ -1,63 +1,32 @@
 # Implementation Plan: Teach the Skill Apparatus the Judgment-vs-Trust Distinction
 
-> **Status — CLOSED (2026-06-17).** The apparatus change in this plan landed
-> (`3eb0e74`); the 5-test validation arc that followed is COMPLETE
-> (1✓ 2✓ 3✓ 4✓ 5✓) with the apparatus UNCHANGED throughout. This is a
-> historical record, not live work. Closing state:
-> `judgment-trust-test5-next-steps-2026-06-16.md`; distilled method:
-> `docs/agents/contract-evaluation-methodology.md`. (The `jp-writing-style`
-> delivery/charter P0s referenced below were resolved in `0483eba`.)
+> **Status — CLOSED (2026-06-17).** The apparatus change in this plan landed (`3eb0e74`); the 5-test validation arc that followed is COMPLETE (1✓ 2✓ 3✓ 4✓ 5✓) with the apparatus UNCHANGED throughout. This is a historical record, not live work. Closing state: `judgment-trust-test5-next-steps-2026-06-16.md`; distilled method: `docs/agents/contract-evaluation-methodology.md`. (The `jp-writing-style` delivery/charter P0s referenced below were resolved in `0483eba`.)
 
-Date: 2026-06-15
-Branch: `feature/judgment-trust-distinction`
-Source design: approved in session (design-exploration), grounded in
-`.agents/skill-library-scrutiny-2026-06-15.md`.
+Date: 2026-06-15 Branch: `feature/judgment-trust-distinction` Source design: approved in session (design-exploration), grounded in `.agents/skill-library-scrutiny-2026-06-15.md`.
 
 ## Goal
 
-Make the skill-authoring/review apparatus hold two kinds of skill to two
-different bars:
+Make the skill-authoring/review apparatus hold two kinds of skill to two different bars:
 
-- **Judgment skills** (value = better thinking): *does this protect and provoke
-  better thinking?*
-- **Trust skills** (value = reliable execution): *is this reliable, and is the
-  machinery single-sourced rather than copied?*
+- **Judgment skills** (value = better thinking): *does this protect and provoke better thinking?*
+- **Trust skills** (value = reliable execution): *is this reliable, and is the machinery single-sourced rather than copied?*
 
-Today there is one bar — conformance — wrong for the judgment half. The change
-lands the distinction on three surfaces (a single concept, single-sourced and
-pointed-to), proves it with a flip-set acceptance test, then applies it to the
-present backlog.
+Today there is one bar — conformance — wrong for the judgment half. The change lands the distinction on three surfaces (a single concept, single-sourced and pointed-to), proves it with a flip-set acceptance test, then applies it to the present backlog.
 
 ## Scope and split
 
-This plan covers the **apparatus change**: Surfaces 1–3, the flip-set artifact,
-and the acceptance test (Tasks 1–9). It also includes the **re-triage** of the
-existing report backlog (Task 10), which is bounded and produces an artifact.
+This plan covers the **apparatus change**: Surfaces 1–3, the flip-set artifact, and the acceptance test (Tasks 1–9). It also includes the **re-triage** of the existing report backlog (Task 10), which is bounded and produces an artifact.
 
-It does **not** fully specify the **re-review-and-cut** of existing judgment
-skills — that content cannot exist until the new reviewer runs and produces
-findings. After Task 9 proves the apparatus, slice that follow-on via
-`to-issues` (one issue per judgment skill to re-review). This is named in
-"Follow-on work" below, not tasked here.
+It does **not** fully specify the **re-review-and-cut** of existing judgment skills — that content cannot exist until the new reviewer runs and produces findings. After Task 9 proves the apparatus, slice that follow-on via `to-issues` (one issue per judgment skill to re-review). This is named in "Follow-on work" below, not tasked here.
 
 ## Conventions (verified against the repo)
 
-- Edits run on branch `feature/judgment-trust-distinction` (already created; the
-  user-level hook blocks edits on `main`).
-- `agent-facing-design` is a local `skills/` skill: SKILL.md edits are live next
-  session; proof is structural (`quick_validate.py`) plus a forward test. No
-  installed-runtime proof layer.
-- `scrutinize-skill` is plugin-distributed (`plugins/review-family/`): its edit
-  follows the Plugin Layout publish path — version bump + Codex republish. The
-  **GitHub mirror** (`/Users/jp/Projects/active/codex-tool-dev`) is **out of
-  scope**: AGENTS.md Working Defaults forbids publishing mirror/marketplace
-  state unless the user asks. Do not touch the mirror in this plan.
+- Edits run on branch `feature/judgment-trust-distinction` (already created; the user-level hook blocks edits on `main`).
+- `agent-facing-design` is a local `skills/` skill: SKILL.md edits are live next session; proof is structural (`quick_validate.py`) plus a forward test. No installed-runtime proof layer.
+- `scrutinize-skill` is plugin-distributed (`plugins/review-family/`): its edit follows the Plugin Layout publish path — version bump + Codex republish. The **GitHub mirror** (`/Users/jp/Projects/active/codex-tool-dev`) is **out of scope**: AGENTS.md Working Defaults forbids publishing mirror/marketplace state unless the user asks. Do not touch the mirror in this plan.
 - `AGENTS.md` is standalone instruction Markdown: proof is `git diff --check`.
-- Validator: `python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill-dir>`.
-  Its `disable-model-invocation` "unexpected key" complaint is accepted policy;
-  no skill in this plan adds or removes that field, so expect a clean parse.
-- Commit locally per repo convention after each surface validates; **do not
-  push, open PRs, sync caches to remote, or update the mirror.**
+- Validator: `python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill-dir>`. Its `disable-model-invocation` "unexpected key" complaint is accepted policy; no skill in this plan adds or removes that field, so expect a clean parse.
+- Commit locally per repo convention after each surface validates; **do not push, open PRs, sync caches to remote, or update the mirror.**
 
 ## File structure (what changes, and each file's single responsibility)
 
@@ -83,23 +52,17 @@ findings. After Task 9 proves the apparatus, slice that follow-on via
    ```bash
    git status --short --branch
    ```
-   Expected: `## feature/judgment-trust-distinction`, the untracked plan file
-   `?? docs/plans/2026-06-15-judgment-trust-apparatus.md` (expected and
-   related — Task 8 stages it), and no *other* dirty files. If dirty files
-   unrelated to this plan exist, stop and resolve before proceeding (staging
-   would be ambiguous).
+Expected: `## feature/judgment-trust-distinction`, the untracked plan file `?? docs/plans/2026-06-15-judgment-trust-apparatus.md` (expected and related — Task 8 stages it), and no *other* dirty files. If dirty files unrelated to this plan exist, stop and resolve before proceeding (staging would be ambiguous).
 
 ---
 
 ## Task 2 — Surface 1: add `## Two Kinds of Skill` to `agent-facing-design`
 
-This section is the single source of the concept; later surfaces point to it, so
-it must exist first.
+This section is the single source of the concept; later surfaces point to it, so it must exist first.
 
 **File:** `skills/agent-facing-design/SKILL.md`
 
-Insert a new section between the end of `## Core Move` and the start of
-`## When Machinery Survives`.
+Insert a new section between the end of `## Core Move` and the start of `## When Machinery Survives`.
 
 **Find this exact text:**
 ```
@@ -186,32 +149,20 @@ to them to the bar above — add a lens, not a score or required section.
 ## When Machinery Survives
 ```
 
-**Then inspect the companion metadata.** This is a behavior change to
-`agent-facing-design`, so AGENTS.md Working Defaults requires inspecting its
-companion metadata and updating it if the change made it stale. Read
-`skills/agent-facing-design/agents/openai.yaml` and check `display_name`,
-`short_description`, and `default_prompt` against the new section. Likely
-outcome: no change — the `default_prompt` already frames the skill as keeping
-changes "judgment-supporting," which this section sharpens rather than
-contradicts. If you edit it, keep it aligned, re-parse
-(`ruby -ryaml -e 'YAML.load_file(ARGV[0])' skills/agent-facing-design/agents/openai.yaml`),
-and add it to Task 8 staging; if not, record a one-line no-change rationale.
+**Then inspect the companion metadata.** This is a behavior change to `agent-facing-design`, so AGENTS.md Working Defaults requires inspecting its companion metadata and updating it if the change made it stale. Read `skills/agent-facing-design/agents/openai.yaml` and check `display_name`, `short_description`, and `default_prompt` against the new section. Likely outcome: no change — the `default_prompt` already frames the skill as keeping changes "judgment-supporting," which this section sharpens rather than contradicts. If you edit it, keep it aligned, re-parse (`ruby -ryaml -e 'YAML.load_file(ARGV[0])' skills/agent-facing-design/agents/openai.yaml`), and add it to Task 8 staging; if not, record a one-line no-change rationale.
 
 **Verify:**
 ```bash
 python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/agent-facing-design
 git diff --check -- skills/agent-facing-design/SKILL.md
 ```
-Expected: `quick_validate.py` reports a clean/passing structural result (frontmatter
-parses, referenced `references/calibration.md` exists); `git diff --check` prints
-nothing (no whitespace errors).
+Expected: `quick_validate.py` reports a clean/passing structural result (frontmatter parses, referenced `references/calibration.md` exists); `git diff --check` prints nothing (no whitespace errors).
 
 ---
 
 ## Task 3 — Surface 3: three `AGENTS.md` edits
 
-`AGENTS.md` points at the concept Task 2 created and fixes the one universal rule
-that over-imposes trust-shape on judgment skills.
+`AGENTS.md` points at the concept Task 2 created and fixes the one universal rule that over-imposes trust-shape on judgment skills.
 
 **File:** `AGENTS.md`
 
@@ -278,8 +229,7 @@ git diff --check -- AGENTS.md
 grep -n "judgment-vs-trust distinction" AGENTS.md
 grep -n "Two Kinds of Skill" AGENTS.md
 ```
-Expected: `git diff --check` prints nothing; both `grep`s return one line each
-(anchor present, body-shape pointer present).
+Expected: `git diff --check` prints nothing; both `grep`s return one line each (anchor present, body-shape pointer present).
 
 ---
 
@@ -380,16 +330,7 @@ a bar-keyed required step, fixed section, or score to this review — that is it
 the over-ruling the lens exists to prevent, and it applies to this rubric too.
 ```
 
-**Then inspect the companion metadata.** This is a behavior change to
-`scrutinize-skill` (new failure modes, a bar-classification step, severity-by-bar),
-so inspect `plugins/review-family/skills/scrutinize-skill/agents/openai.yaml` and
-check `display_name`, `short_description`, and `default_prompt` against the edits.
-The `default_prompt` enumerates review dimensions ("UX, composability, overlap,
-proof gaps") without the bar; minimal metadata is acceptable, so either add a
-brief judgment-vs-trust-bar mention to keep it current or record a one-line
-no-change rationale. If you edit it, keep it aligned, re-parse
-(`ruby -ryaml -e 'YAML.load_file(ARGV[0])' plugins/review-family/skills/scrutinize-skill/agents/openai.yaml`),
-and add it to Task 8 staging.
+**Then inspect the companion metadata.** This is a behavior change to `scrutinize-skill` (new failure modes, a bar-classification step, severity-by-bar), so inspect `plugins/review-family/skills/scrutinize-skill/agents/openai.yaml` and check `display_name`, `short_description`, and `default_prompt` against the edits. The `default_prompt` enumerates review dimensions ("UX, composability, overlap, proof gaps") without the bar; minimal metadata is acceptable, so either add a brief judgment-vs-trust-bar mention to keep it current or record a one-line no-change rationale. If you edit it, keep it aligned, re-parse (`ruby -ryaml -e 'YAML.load_file(ARGV[0])' plugins/review-family/skills/scrutinize-skill/agents/openai.yaml`), and add it to Task 8 staging.
 
 **Verify:**
 ```bash
@@ -416,8 +357,7 @@ The Codex cache is version-keyed; a behavior change needs a new version.
   "version": "0.3.10",
 ```
 
-The CHANGELOG carries an entry for every prior version and the README points
-users to it, so a behavior change needs a matching entry.
+The CHANGELOG carries an entry for every prior version and the README points users to it, so a behavior change needs a matching entry.
 
 **File:** `plugins/review-family/CHANGELOG.md`
 
@@ -458,30 +398,21 @@ Expected output: `0.3.10`; the `grep` returns one line (the new changelog entry)
 
 ## Task 6 — Republish `review-family` to the local Codex cache
 
-This makes the `scrutinize-skill` edit live on Codex. **Local cache only — not
-the GitHub mirror.**
+This makes the `scrutinize-skill` edit live on Codex. **Local cache only — not the GitHub mirror.**
 
 ```bash
 scripts/codex-plugins-sync.sh --publish review-family
 scripts/codex-plugins-sync.sh --check
 ```
-Expected: `--publish` writes version `0.3.10` into
-`~/.codex/plugins/cache/turbo-mode/review-family/0.3.10`; `--check` exits 0 with
-no source-vs-cache drift reported for `review-family`. If `--check` reports
-drift, stop and resolve before continuing.
+Expected: `--publish` writes version `0.3.10` into `~/.codex/plugins/cache/turbo-mode/review-family/0.3.10`; `--check` exits 0 with no source-vs-cache drift reported for `review-family`. If `--check` reports drift, stop and resolve before continuing.
 
-> Proof boundary: this publishes to the local Codex cache. It does **not** update
-> the GitHub release mirror at `/Users/jp/Projects/active/codex-tool-dev`. Leave
-> the mirror untouched unless the user explicitly asks to publish.
+> Proof boundary: this publishes to the local Codex cache. It does **not** update the GitHub release mirror at `/Users/jp/Projects/active/codex-tool-dev`. Leave the mirror untouched unless the user explicitly asks to publish.
 
 ---
 
 ## Task 7 — Create the flip-set acceptance artifact (blind fixture + sealed key)
 
-The acceptance artifact is split into two files so the answer key cannot leak into
-a reviewer's context. **Reviewers get neither file** (Task 9 gives them only the
-skill + the edited rubric); the fixture is the executor's mapping reference, and
-the key is opened only after every disposition is recorded.
+The acceptance artifact is split into two files so the answer key cannot leak into a reviewer's context. **Reviewers get neither file** (Task 9 gives them only the skill + the edited rubric); the fixture is the executor's mapping reference, and the key is opened only after every disposition is recorded.
 
 ### 7a — Blind fixture
 
@@ -525,8 +456,7 @@ test -f docs/plans/artifacts/judgment-trust-flip-set.md && echo EXISTS
 git diff --check -- docs/plans/artifacts/judgment-trust-flip-set.md
 grep -c "Expected flip" docs/plans/artifacts/judgment-trust-flip-set.md
 ```
-Expected: `EXISTS`; `git diff --check` prints nothing; `grep -c` prints `0` (the
-fixture leaks no expected verdicts).
+Expected: `EXISTS`; `git diff --check` prints nothing; `grep -c` prints `0` (the fixture leaks no expected verdicts).
 
 ### 7b — Sealed answer key
 
@@ -643,21 +573,9 @@ Expected: `EXISTS`; `git diff --check` prints nothing.
 
 ## Task 8 — Commit the apparatus change as a provisional checkpoint (local only)
 
-This is a **checkpoint commit, not an acceptance-cleared one.** The behavioral
-acceptance gate (Task 9) can only run in a fresh session, so it has not run yet:
-the structural layer is verified (Tasks 2/4/7), the behavioral layer is not.
-Commit so the editing work is not stranded uncommitted across the session
-boundary, but treat the branch as **not merge-ready until Task 9 passes.**
+This is a **checkpoint commit, not an acceptance-cleared one.** The behavioral acceptance gate (Task 9) can only run in a fresh session, so it has not run yet: the structural layer is verified (Tasks 2/4/7), the behavioral layer is not. Commit so the editing work is not stranded uncommitted across the session boundary, but treat the branch as **not merge-ready until Task 9 passes.**
 
-> Live-before-proof (carry this): the apparatus is already live the moment these
-> edits exist — `agent-facing-design` loads from the working tree for Claude next
-> session, and Task 6 has already published `scrutinize-skill` to the Codex cache
-> from the working tree (`codex-plugins-sync.sh` copies source, not a committed
-> tree). So this commit does not gate exposure; the change is serving reviews on
-> both runtimes before Task 9 proves it. If Task 9 FAILS, treat it as a live
-> regression: fix per Task 9's loop and re-commit (amend or a follow-up `fix`
-> commit) promptly — do not leave a failed apparatus serving, and do not merge to
-> `main`.
+> Live-before-proof (carry this): the apparatus is already live the moment these edits exist — `agent-facing-design` loads from the working tree for Claude next session, and Task 6 has already published `scrutinize-skill` to the Codex cache from the working tree (`codex-plugins-sync.sh` copies source, not a committed tree). So this commit does not gate exposure; the change is serving reviews on both runtimes before Task 9 proves it. If Task 9 FAILS, treat it as a live regression: fix per Task 9's loop and re-commit (amend or a follow-up `fix` commit) promptly — do not leave a failed apparatus serving, and do not merge to `main`.
 
 ```bash
 # Add either companion yaml ONLY if Task 2/4 updated it (else omit that path).
@@ -680,187 +598,59 @@ not run yet; the branch is not merge-ready until it passes.
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 ```
-Expected: `git diff --cached --stat` lists the staged files — the core files
-(including `plugins/review-family/CHANGELOG.md`), plus
-`docs/plans/artifacts/judgment-trust-flip-set-key.md`, plus either companion yaml that
-Task 2/4 updated; commit succeeds on `feature/judgment-trust-distinction`. **Do
-not push; do not merge to `main` until Task 9 passes.**
+Expected: `git diff --cached --stat` lists the staged files — the core files (including `plugins/review-family/CHANGELOG.md`), plus `docs/plans/artifacts/judgment-trust-flip-set-key.md`, plus either companion yaml that Task 2/4 updated; commit succeeds on `feature/judgment-trust-distinction`. **Do not push; do not merge to `main` until Task 9 passes.**
 
 ---
 
 ## Task 9 — Acceptance test: re-score the flip-set (forward test)
 
-> Proof boundary: the edited `scrutinize-skill` is live for Claude **next
-> session** (SKILL.md edits load next session) and for Codex **after Task 6's
-> republish**. Run this test against the *loaded edited* skill — a fresh
-> session — not the version loaded before Task 4. State this when reporting.
+> Proof boundary: the edited `scrutinize-skill` is live for Claude **next session** (SKILL.md edits load next session) and for Codex **after Task 6's republish**. Run this test against the *loaded edited* skill — a fresh session — not the version loaded before Task 4. State this when reporting.
 
-**Task 9 preflight (run first, in this fresh session).** Confirm this session is
-testing the post-edit state before dispatching any reviewer. The working tree is
-the live Claude skill source and Codex serves the version-keyed cache, so a stale
-branch or an un-republished cache would silently score the *pre-edit* rubric:
+**Task 9 preflight (run first, in this fresh session).** Confirm this session is testing the post-edit state before dispatching any reviewer. The working tree is the live Claude skill source and Codex serves the version-keyed cache, so a stale branch or an un-republished cache would silently score the *pre-edit* rubric:
 
 ```bash
 git status --short --branch
 scripts/codex-plugins-sync.sh --check
 grep -c "Bar And Execution Quality" plugins/review-family/skills/scrutinize-skill/SKILL.md
 ```
-Expected: branch `feature/judgment-trust-distinction`, `HEAD` at the Task 8
-checkpoint commit, and no unrelated dirty files; `--check` exits 0 with
-`review-family` at `0.3.10` and no source-vs-cache drift; the `grep` prints a
-non-zero count (the loaded `scrutinize-skill` carries the new Task-4b bar step).
-If any check fails, stop and resolve — do not score the flip-set against an
-unverified or pre-edit skill version.
+Expected: branch `feature/judgment-trust-distinction`, `HEAD` at the Task 8 checkpoint commit, and no unrelated dirty files; `--check` exits 0 with `review-family` at `0.3.10` and no source-vs-cache drift; the `grep` prints a non-zero count (the loaded `scrutinize-skill` carries the new Task-4b bar step). If any check fails, stop and resolve — do not score the flip-set against an unverified or pre-edit skill version.
 
-Run the review **blind to the answer key,** and run it **independently in
-triplicate.** For each skill named in the flip-set, dispatch **three independent
-fresh reviewers** (separate subagents / fresh review passes), each reviewing the
-named skill with the edited `scrutinize-skill` rubric. Reviewers apply
-`scrutinize-skill`'s normal Evidence Floor — the skill bundle (`SKILL.md`,
-companion `agents/*.yaml`), directly-referenced behavior files, a sibling/overlap
-scan across the skill set, and any live check a finding needs (for row 8, the live
-`search_docs` category enum that `claude-code-docs` rewrites) — exactly as in a
-real review. The **only** materials withheld are the source report
-(`.agents/skill-library-scrutiny-2026-06-15.md`), the blind fixture
-(`docs/plans/artifacts/judgment-trust-flip-set.md`), the sealed answer key
-(`docs/plans/artifacts/judgment-trust-flip-set-key.md`), and **this plan file**
-(it embeds the key inline in Task 7b). Row 4 names four sibling skills
-(`merge-branch`/`closeout-check`/`acceptance-map`/`git-hygiene`): review them as a
-group so the cross-skill duplication is in scope — it is reachable only through the
-sibling scan, not from any one skill alone.
-Require each reviewer to record, for every finding, an explicit disposition —
-raise-and-keep, raise-and-drop, or (only if it genuinely sees nothing) not-raised —
-so that silence and a token mention are scored on the same leniency axis, not on
-opposite branches. Before recording any disposition, have each reviewer first state,
-in its own words, which bar (judgment or trust, or which parts are which) each
-finding falls under and why. Then record the dispositions it actually produces.
-Only after every disposition is recorded, open the answer key
-(`docs/plans/artifacts/judgment-trust-flip-set-key.md`) and diff against its expected column.
-None of the withheld materials above (source report, blind fixture, sealed key,
-or this plan file) may be in any reviewer's context while reviews run.
+Run the review **blind to the answer key,** and run it **independently in triplicate.** For each skill named in the flip-set, dispatch **three independent fresh reviewers** (separate subagents / fresh review passes), each reviewing the named skill with the edited `scrutinize-skill` rubric. Reviewers apply `scrutinize-skill`'s normal Evidence Floor — the skill bundle (`SKILL.md`, companion `agents/*.yaml`), directly-referenced behavior files, a sibling/overlap scan across the skill set, and any live check a finding needs (for row 8, the live `search_docs` category enum that `claude-code-docs` rewrites) — exactly as in a real review. The **only** materials withheld are the source report (`.agents/skill-library-scrutiny-2026-06-15.md`), the blind fixture (`docs/plans/artifacts/judgment-trust-flip-set.md`), the sealed answer key (`docs/plans/artifacts/judgment-trust-flip-set-key.md`), and **this plan file** (it embeds the key inline in Task 7b). Row 4 names four sibling skills (`merge-branch`/`closeout-check`/`acceptance-map`/`git-hygiene`): review them as a group so the cross-skill duplication is in scope — it is reachable only through the sibling scan, not from any one skill alone. Require each reviewer to record, for every finding, an explicit disposition — raise-and-keep, raise-and-drop, or (only if it genuinely sees nothing) not-raised — so that silence and a token mention are scored on the same leniency axis, not on opposite branches. Before recording any disposition, have each reviewer first state, in its own words, which bar (judgment or trust, or which parts are which) each finding falls under and why. Then record the dispositions it actually produces. Only after every disposition is recorded, open the answer key (`docs/plans/artifacts/judgment-trust-flip-set-key.md`) and diff against its expected column. None of the withheld materials above (source report, blind fixture, sealed key, or this plan file) may be in any reviewer's context while reviews run.
 
 Then check discrimination, not class-uniformity:
 
-1. Rows 1–3 (judgment conformance): each **drops or reverses**, and the review
-   instead surfaces (or at least does not flag) structure-vs-thinking concerns.
-2. Row 7 (judgment thinking — the leniency tripwire): score by handling, not
-   vocabulary, across the three reviewers. The **bindable leniency guards** are
-   (a) **unanimous never-raised** — a softenable surface no independent reviewer
-   even surfaces means the apparatus is not making reviewers look — and (b)
-   **surfaced-then-dropped on weak/non-substantive reasoning** (a token mention
-   then a shrug that never engages the keep-rule or the text). Both are hard
-   FAILs, and both are reproducible against any softenable surface (they test
-   whether the apparatus makes reviewers *look* and *reason*, which does not
-   require a clear case). The bright-line "raised-then-dropped is leniency" holds
-   **on a construction-rule-compliant clear case** — there, dropping a genuine
-   provoke defect is leniency, so a clear keep-case must be **kept**. But a
-   **substantive, text-specific drop** (cites the line, names the keep-rule,
-   argues whether the dominant framing overrides the softener) on a row a
-   **separate manual re-read concludes is genuinely balanced** is **marginality**,
-   not leniency — it reveals the *fixture* violated the construction rule (the row
-   was never a clear keep-case). Repair the row; do not score it leniency. The
-   keep/drop *disposition* on a confirmed-balanced case is a judgment call, not a
-   gate — only the silence-floor and the weak-drop are gates. "Row marginality"
-   must be **earned** by that manual re-read, never assumed from silence (silence
-   is the opposite — a hard FAIL).
+1. Rows 1–3 (judgment conformance): each **drops or reverses**, and the review instead surfaces (or at least does not flag) structure-vs-thinking concerns.
+2. Row 7 (judgment thinking — the leniency tripwire): score by handling, not vocabulary, across the three reviewers. The **bindable leniency guards** are (a) **unanimous never-raised** — a softenable surface no independent reviewer even surfaces means the apparatus is not making reviewers look — and (b) **surfaced-then-dropped on weak/non-substantive reasoning** (a token mention then a shrug that never engages the keep-rule or the text). Both are hard FAILs, and both are reproducible against any softenable surface (they test whether the apparatus makes reviewers *look* and *reason*, which does not require a clear case). The bright-line "raised-then-dropped is leniency" holds **on a construction-rule-compliant clear case** — there, dropping a genuine provoke defect is leniency, so a clear keep-case must be **kept**. But a **substantive, text-specific drop** (cites the line, names the keep-rule, argues whether the dominant framing overrides the softener) on a row a **separate manual re-read concludes is genuinely balanced** is **marginality**, not leniency — it reveals the *fixture* violated the construction rule (the row was never a clear keep-case). Repair the row; do not score it leniency. The keep/drop *disposition* on a confirmed-balanced case is a judgment call, not a gate — only the silence-floor and the weak-drop are gates. "Row marginality" must be **earned** by that manual re-read, never assumed from silence (silence is the opposite — a hard FAIL).
 3. Rows 4–5 (trust): each **keeps or escalates**.
-4. Row 6 (mixed): the reviewer **splits per part** — keeps the `@codex review`
-   hardcode, drops the output-shape concern.
-5. Row 8 (mechanical/lookup, trust): **keeps or escalates** — the reviewer treats
-   claude-code-docs as a trust skill and the wrong-bucket bug as a real
-   reliability defect, not a non-skill to wave off.
-6. Row 9 (over-cut probe): **no substitutive-structure finding is raised** against
-   outcome-interviewer's interview rhythm — the reviewer recognizes organizing/
-   eliciting structure and does not cut it. A raised "cut this structure" finding
-   here is the over-cut failure (FAIL), the mirror of over-flagging.
+4. Row 6 (mixed): the reviewer **splits per part** — keeps the `@codex review` hardcode, drops the output-shape concern.
+5. Row 8 (mechanical/lookup, trust): **keeps or escalates** — the reviewer treats claude-code-docs as a trust skill and the wrong-bucket bug as a real reliability defect, not a non-skill to wave off.
+6. Row 9 (over-cut probe): **no substitutive-structure finding is raised** against outcome-interviewer's interview rhythm — the reviewer recognizes organizing/ eliciting structure and does not cut it. A raised "cut this structure" finding here is the over-cut failure (FAIL), the mirror of over-flagging.
 
-**Pass condition:** rows 1–3 drop/reverse, rows 4–5 keep, row 6 splits per part,
-row 8 keeps, row 9 draws no over-cut finding. For row 7 (and any keep-disposition
-tripwire), the bindable test is the **silence-floor + weak-drop floor**: the
-independent reviewers must **surface** the provoke concern (unanimous never-raised
-= leniency FAIL) and must not drop it on **weak/non-substantive** reasoning
-(= leniency FAIL). A **clear** (construction-rule-compliant) keep-case must
-additionally be **kept** — raised-then-dropped on a clear case is a FAIL. A
-**substantive** drop on a case a separate manual re-read finds **genuinely
-balanced** is **marginality** (repair the fixture row per the construction rule),
-not a leniency FAIL: the keep/drop disposition on a balanced case is a judgment
-call, not a gate. The **synthetic clear-case keep-floor** (a labeled fabricated
-softened-provoke case — the mirror of the row-9 over-cut probe) instantiates the
-clear keep-case so the bright-line stays exercised when the live library contains
-no clear softened-provoke defect. Additionally, **a recorded bar-classification
-divergence has teeth:** on any row where a reviewer's independent bar
-classification diverges from the key — even when the disposition still matches —
-that row is **not yet proven**; investigate whether the apparatus text
-under-determines the bar (return to Task 2/4) or the row is borderline or compound
-(construction-rule repair/replace, e.g. relabel a compound row per-part), and do
-not score it as a clean pass.
+**Pass condition:** rows 1–3 drop/reverse, rows 4–5 keep, row 6 splits per part, row 8 keeps, row 9 draws no over-cut finding. For row 7 (and any keep-disposition tripwire), the bindable test is the **silence-floor + weak-drop floor**: the independent reviewers must **surface** the provoke concern (unanimous never-raised = leniency FAIL) and must not drop it on **weak/non-substantive** reasoning (= leniency FAIL). A **clear** (construction-rule-compliant) keep-case must additionally be **kept** — raised-then-dropped on a clear case is a FAIL. A **substantive** drop on a case a separate manual re-read finds **genuinely balanced** is **marginality** (repair the fixture row per the construction rule), not a leniency FAIL: the keep/drop disposition on a balanced case is a judgment call, not a gate. The **synthetic clear-case keep-floor** (a labeled fabricated softened-provoke case — the mirror of the row-9 over-cut probe) instantiates the clear keep-case so the bright-line stays exercised when the live library contains no clear softened-provoke defect. Additionally, **a recorded bar-classification divergence has teeth:** on any row where a reviewer's independent bar classification diverges from the key — even when the disposition still matches — that row is **not yet proven**; investigate whether the apparatus text under-determines the bar (return to Task 2/4) or the row is borderline or compound (construction-rule repair/replace, e.g. relabel a compound row per-part), and do not score it as a clean pass.
 
-Record the acceptance result durably, not only in chat — Task 8 makes the branch
-merge gate depend on it, and a transcript is not replayable. Write
-`docs/plans/artifacts/judgment-trust-flip-set-results.md` (tracked) containing: the
-loaded `review-family` version (Task 5/6), the reviewer/pass identifiers and which
-runtime/session loaded the edited skill, all nine dispositions across all three
-reviewers, each reviewer's independent bar classification, the per-row diff against
-the sealed key, any failures, and the final pass/fail. Summarize the same in chat.
+Record the acceptance result durably, not only in chat — Task 8 makes the branch merge gate depend on it, and a transcript is not replayable. Write `docs/plans/artifacts/judgment-trust-flip-set-results.md` (tracked) containing: the loaded `review-family` version (Task 5/6), the reviewer/pass identifiers and which runtime/session loaded the edited skill, all nine dispositions across all three reviewers, each reviewer's independent bar classification, the per-row diff against the sealed key, any failures, and the final pass/fail. Summarize the same in chat.
 
 **Verify:**
 ```bash
 test -f docs/plans/artifacts/judgment-trust-flip-set-results.md && echo EXISTS
 git diff --check -- docs/plans/artifacts/judgment-trust-flip-set-results.md
 ```
-Expected: `EXISTS`; no whitespace errors. Commit locally on the branch as a
-follow-up to the Task 8 checkpoint (this runs in the fresh Task 9 session); do not
-push.
+Expected: `EXISTS`; no whitespace errors. Commit locally on the branch as a follow-up to the Task 8 checkpoint (this runs in the fresh Task 9 session); do not push.
 
-If any row does not land as predicted, treat it as a real finding: either the
-apparatus text needs sharpening (return to Task 2/4) or the flip-set row violated
-the construction rule (repair or replace it and note why). For row 7 specifically,
-**distinguish the cause before acting:** if reviewers go **silent** or drop on
-**weak** reasoning, the apparatus under-conveys the provoke bar — sharpen Task 2/4.
-If reviewers **surface and reason substantively** but split on a case a manual
-re-read finds **balanced**, the *fixture* violated the construction rule — repair
-the row (install a clear keep-case, e.g. the synthetic floor), do **not** sharpen
-the apparatus toward over-keep (that induces the mirror failure row 9 guards). Do
-not weaken the pass condition to make it pass; correcting a *demonstrated*
-false-positive FAIL path (raised-then-substantively-dropped on a
-manually-confirmed-balanced case) is not weakening, **provided the silence-floor
-and weak-drop FAILs remain intact** and the corrected scoring is proven on a fresh
-re-run, never by relabeling the run that exposed the defect.
+If any row does not land as predicted, treat it as a real finding: either the apparatus text needs sharpening (return to Task 2/4) or the flip-set row violated the construction rule (repair or replace it and note why). For row 7 specifically, **distinguish the cause before acting:** if reviewers go **silent** or drop on **weak** reasoning, the apparatus under-conveys the provoke bar — sharpen Task 2/4. If reviewers **surface and reason substantively** but split on a case a manual re-read finds **balanced**, the *fixture* violated the construction rule — repair the row (install a clear keep-case, e.g. the synthetic floor), do **not** sharpen the apparatus toward over-keep (that induces the mirror failure row 9 guards). Do not weaken the pass condition to make it pass; correcting a *demonstrated* false-positive FAIL path (raised-then-substantively-dropped on a manually-confirmed-balanced case) is not weakening, **provided the silence-floor and weak-drop FAILs remain intact** and the corrected scoring is proven on a fresh re-run, never by relabeling the run that exposed the defect.
 
 ---
 
 ## Task 10 — Re-triage the existing report backlog through the distinction
 
-Bounded, artifact-producing. Closes the loop from "apparatus learned" toward
-"pain relieved."
+Bounded, artifact-producing. Closes the loop from "apparatus learned" toward "pain relieved."
 
-1. Read `.agents/skill-library-scrutiny-2026-06-15.md` §6 (Prioritized
-   Remediation Backlog, P0–P2) for the item list — **and** read §4 (headlines)
-   and §5 (Per-Skill Detailed Findings) for the evidence and rationale behind each
-   item. §6 is a compressed action table; on its own it is too thin to re-judge a
-   finding against the new bar or to tag `budget-driven` vs `conformance-driven`.
-2. For each backlog item, classify and re-disposition. **When an item is both a
-   budget-recovery trim and a conformance nit — an over-cap description on a
-   judgment skill is both — the budget reading wins while the description is over
-   the Codex cap: preserve it as budget, and drop the residual as conformance only
-   once it is back under the cap.** Tag each item `budget-driven` or
-   `conformance-driven` so the tie-break is recorded, not improvised.
-   - **Delivery hygiene** (dual-runtime tokens, naming, budget, parseability) and
-     the **delivery/charter P0s** (`jp-writing-style` dangling symlink + ledger
-     desync) — **preserve unchanged**; these are uniform and survive re-triage.
-   - **Conformance-quality nits on judgment skills** (e.g. P1/D2 description
-     trims on `making-recommendations`, `outcome-interviewer`; the `scrutinize`
-     casing nit; `system-design-review` cap-completion) — **drop or reverse** per
-     the new bar — **except** where the trim is the cheapest budget recovery for an
-     over-cap description, which stays preserved per the rule above until under the
-     cap.
+1. Read `.agents/skill-library-scrutiny-2026-06-15.md` §6 (Prioritized Remediation Backlog, P0–P2) for the item list — **and** read §4 (headlines) and §5 (Per-Skill Detailed Findings) for the evidence and rationale behind each item. §6 is a compressed action table; on its own it is too thin to re-judge a finding against the new bar or to tag `budget-driven` vs `conformance-driven`.
+2. For each backlog item, classify and re-disposition. **When an item is both a budget-recovery trim and a conformance nit — an over-cap description on a judgment skill is both — the budget reading wins while the description is over the Codex cap: preserve it as budget, and drop the residual as conformance only once it is back under the cap.** Tag each item `budget-driven` or `conformance-driven` so the tie-break is recorded, not improvised.
+   - **Delivery hygiene** (dual-runtime tokens, naming, budget, parseability) and the **delivery/charter P0s** (`jp-writing-style` dangling symlink + ledger desync) — **preserve unchanged**; these are uniform and survive re-triage.
+   - **Conformance-quality nits on judgment skills** (e.g. P1/D2 description trims on `making-recommendations`, `outcome-interviewer`; the `scrutinize` casing nit; `system-design-review` cap-completion) — **drop or reverse** per the new bar — **except** where the trim is the cheapest budget recovery for an over-cap description, which stays preserved per the rule above until under the cap.
    - **Trust-skill findings** — **keep or escalate**.
-3. Write the result to `docs/plans/artifacts/skill-library-backlog-retriaged-2026-06-15.md`:
-   a table of each original item with `{original disposition, class, new
-   disposition, one-line reason, evidence}`. For every item whose disposition
-   **changes** under the new bar, the `evidence` cell cites the originating §5
-   finding (skill + the report's evidence pointer) and, where the new bar flips the
-   result, a live skill line — so each re-disposition is grounded, not improvised.
+3. Write the result to `docs/plans/artifacts/skill-library-backlog-retriaged-2026-06-15.md`: a table of each original item with `{original disposition, class, new disposition, one-line reason, evidence}`. For every item whose disposition **changes** under the new bar, the `evidence` cell cites the originating §5 finding (skill + the report's evidence pointer) and, where the new bar flips the result, a live skill line — so each re-disposition is grounded, not improvised.
 
 **Verify:**
 ```bash
@@ -875,268 +665,70 @@ Expected: `EXISTS`; no whitespace errors. Commit locally (do not push).
 
 After Task 9 proves the apparatus and Task 10 produces the filtered backlog:
 
-- **Re-review each judgment skill** under the new reviewer and **cut substitutive
-  structure** it flags. This content cannot be pre-specified (it depends on the
-  reviewer's output), so slice it as one `to-issues` issue per judgment skill,
-  each referencing this plan and the re-triaged backlog.
-- **Signal A (longer-term):** once several judgment skills are trimmed, measure
-  uplift with `skill-benchmark` (with/without-skill eval runs) on a sample. A is
-  the lagging confirmation that the work got better; the flip-set (Task 9) is the
-  leading proxy. A is not a gate on this plan.
-- **Ossification re-test (standing):** after substantial future `scrutinize-skill`
-  edits, re-run the flip-set (Task 9). Checklist-creep surfaces as judgment rows
-  starting to mis-fire — once-dropped conformance rows beginning to keep, or the
-  failure-mode list having grown a required step. This is the recurring check the
-  inline self-guard (Task 4c) cannot enforce on its own. **Anti-accretion default:**
-  when a future `scrutinize-skill` edit is proposed to fix a mis-fire, the default
-  move is to **tighten or cut** existing bar text, not add a clause; any
-  net-additive edit to the 4a/4b/4c bar-handling material must justify why a rewrite
-  or deletion could not achieve the same. Treat the combined 4a/4b/4c bar material
-  as carrying a soft word budget — growth is visible and must be argued, the way 3c
-  makes description length a tracked input rather than a free dimension.
-- **Charter — consulted, not a charter event (determination, not deferred work):**
-  this change refines three already-admitted, first-party contracts
-  (`agent-facing-design`, `scrutinize-skill`, `AGENTS.md`). It is not an admission,
-  extraction, retirement, or third-party-material decision — the charter's four
-  triggers (`docs/agents/charter.md`) — so it takes **no `contract-decisions.md`
-  entry** (the ledger records only those five outcomes; a content refinement inside
-  an existing owner is none of them). Admission/One-Owner stay class-blind, and the
-  distinction lives inside `agent-facing-design`. The charter's existing "qualitative
-  judgment vs measured benchmark" language is a latent cousin if formal alignment is
-  ever wanted — genuinely optional, and the only part of this bullet that is future
-  work.
+- **Re-review each judgment skill** under the new reviewer and **cut substitutive structure** it flags. This content cannot be pre-specified (it depends on the reviewer's output), so slice it as one `to-issues` issue per judgment skill, each referencing this plan and the re-triaged backlog.
+- **Signal A (longer-term):** once several judgment skills are trimmed, measure uplift with `skill-benchmark` (with/without-skill eval runs) on a sample. A is the lagging confirmation that the work got better; the flip-set (Task 9) is the leading proxy. A is not a gate on this plan.
+- **Ossification re-test (standing):** after substantial future `scrutinize-skill` edits, re-run the flip-set (Task 9). Checklist-creep surfaces as judgment rows starting to mis-fire — once-dropped conformance rows beginning to keep, or the failure-mode list having grown a required step. This is the recurring check the inline self-guard (Task 4c) cannot enforce on its own. **Anti-accretion default:** when a future `scrutinize-skill` edit is proposed to fix a mis-fire, the default move is to **tighten or cut** existing bar text, not add a clause; any net-additive edit to the 4a/4b/4c bar-handling material must justify why a rewrite or deletion could not achieve the same. Treat the combined 4a/4b/4c bar material as carrying a soft word budget — growth is visible and must be argued, the way 3c makes description length a tracked input rather than a free dimension.
+- **Charter — consulted, not a charter event (determination, not deferred work):** this change refines three already-admitted, first-party contracts (`agent-facing-design`, `scrutinize-skill`, `AGENTS.md`). It is not an admission, extraction, retirement, or third-party-material decision — the charter's four triggers (`docs/agents/charter.md`) — so it takes **no `contract-decisions.md` entry** (the ledger records only those five outcomes; a content refinement inside an existing owner is none of them). Admission/One-Owner stay class-blind, and the distinction lives inside `agent-facing-design`. The charter's existing "qualitative judgment vs measured benchmark" language is a latent cousin if formal alignment is ever wanted — genuinely optional, and the only part of this bullet that is future work.
 
 ## Self-review (done against the design)
 
-- **Coverage:** Surfaces 1–3 (Tasks 2–4), plugin delivery (Tasks 5–6), flip-set
-  with the per-part row, judgment-keep tripwire, and the over-cut probe (Task 7),
-  acceptance test run in triplicate (Task 9), backlog re-triage
-  (Task 10), and the named follow-on all trace to design components. The six
-  session folds (rollout, signal A, trust failure modes, charter exclusion,
-  self-application note, word-count reframe) are each present.
-- **Placeholders:** none — every edit gives exact find/replace text and exact
-  verify commands with expected output.
-- **Consistency:** the full bar concept lives once in Task 2; Task 4b carries a
-  compact operative restatement of the classification criterion (per MECH-1, so
-  the reviewer can classify without the non-co-loaded sibling) and points to Task
-  2 for depth. The flip-set quotes the bars; `AGENTS.md` 3a quotes the bar
-  verbatim and 3b paraphrases the body-shape rule by pointer (it does not
-  re-define the bar). The round-2 additions follow the same pattern: the
-  softened/dulled-provocation shape and the lookup/transform trust tail are stated
-  in Task 2 and restated operatively in scrutinize-skill (4a/4b/4c) because the
-  loader never co-loads the sibling — the deliberate operative-restatement the load
-  model requires, not unmanaged duplication.
-- **Proof boundaries stated:** local-skill vs plugin-cache vs next-session-load,
-  and mirror explicitly out of scope.
+- **Coverage:** Surfaces 1–3 (Tasks 2–4), plugin delivery (Tasks 5–6), flip-set with the per-part row, judgment-keep tripwire, and the over-cut probe (Task 7), acceptance test run in triplicate (Task 9), backlog re-triage (Task 10), and the named follow-on all trace to design components. The six session folds (rollout, signal A, trust failure modes, charter exclusion, self-application note, word-count reframe) are each present.
+- **Placeholders:** none — every edit gives exact find/replace text and exact verify commands with expected output.
+- **Consistency:** the full bar concept lives once in Task 2; Task 4b carries a compact operative restatement of the classification criterion (per MECH-1, so the reviewer can classify without the non-co-loaded sibling) and points to Task 2 for depth. The flip-set quotes the bars; `AGENTS.md` 3a quotes the bar verbatim and 3b paraphrases the body-shape rule by pointer (it does not re-define the bar). The round-2 additions follow the same pattern: the softened/dulled-provocation shape and the lookup/transform trust tail are stated in Task 2 and restated operatively in scrutinize-skill (4a/4b/4c) because the loader never co-loads the sibling — the deliberate operative-restatement the load model requires, not unmanaged duplication.
+- **Proof boundaries stated:** local-skill vs plugin-cache vs next-session-load, and mirror explicitly out of scope.
 
 ## Post-evaluation hardening (2026-06-15, panel verdict: execute-with-fixes)
 
-An adversarial multi-lens panel evaluated this design pre-execution and returned
-`execute-with-fixes`. The four must-fixes are applied above; two were ratified
-forks (full scope; the mechanical/lookup tail governed by the trust bar):
+An adversarial multi-lens panel evaluated this design pre-execution and returned `execute-with-fixes`. The four must-fixes are applied above; two were ratified forks (full scope; the mechanical/lookup tail governed by the trust bar):
 
-- **MECH-1** (corroborated by 4 independent lenses): Task 4b now inlines the
-  bar-classification criterion instead of offloading it to `agent-facing-design`,
-  which the reviewer's loader never co-loads. The pointer stays as a deepening
-  reference, not the carrier of the operative rule.
-- **Row 7 / Task 9** (3 lenses): the leniency gate now scores row 7 by *handling* —
-  raised-then-kept passes, raised-then-dropped FAILS, never-raised is row
-  marginality (not an apparatus FAIL) — resolving the collapse the panel found.
-- **SCOPE-2:** Task 10 step 2 now orders budget-preserve over conformance-drop for
-  over-cap judgment descriptions, with a per-item budget/conformance tag.
-- **DICHOTOMY-3:** flip-set row 8 (`claude-code-docs`, mechanical/lookup) tests the
-  tail the binary is most likely to mis-sort; ratified intent = that tail is
-  governed by the **trust** bar.
-- **Independence break:** Task 9 now has the blind re-scorer state each finding's
-  bar in its own words before the key is revealed, so divergence is recorded as
-  signal.
+- **MECH-1** (corroborated by 4 independent lenses): Task 4b now inlines the bar-classification criterion instead of offloading it to `agent-facing-design`, which the reviewer's loader never co-loads. The pointer stays as a deepening reference, not the carrier of the operative rule.
+- **Row 7 / Task 9** (3 lenses): the leniency gate now scores row 7 by *handling* — raised-then-kept passes, raised-then-dropped FAILS, never-raised is row marginality (not an apparatus FAIL) — resolving the collapse the panel found.
+- **SCOPE-2:** Task 10 step 2 now orders budget-preserve over conformance-drop for over-cap judgment descriptions, with a per-item budget/conformance tag.
+- **DICHOTOMY-3:** flip-set row 8 (`claude-code-docs`, mechanical/lookup) tests the tail the binary is most likely to mis-sort; ratified intent = that tail is governed by the **trust** bar.
+- **Independence break:** Task 9 now has the blind re-scorer state each finding's bar in its own words before the key is revealed, so divergence is recorded as signal.
 
 Also folded in on request (the two should-addresses):
 
-- **LENIENCY-1:** Task 4b and 4c now carry the KEEP-side instruction explicitly — a
-  judgment part that provokes nothing or strangles thinking keeps/escalates, and
-  going toothless on judgment is named as the opposite failure — so a reviewer who
-  never runs the flip-set still carries it, not only the DROP-side.
-- **OSSIFY-3:** Task 4c now states inline that the judgment failure modes are
-  examples, not a checklist, and that adding a required step/section/score to the
-  review is itself the over-ruling the lens prevents; Follow-on adds a standing
-  flip-set re-test so checklist-creep resurfaces after future `scrutinize-skill`
-  edits.
+- **LENIENCY-1:** Task 4b and 4c now carry the KEEP-side instruction explicitly — a judgment part that provokes nothing or strangles thinking keeps/escalates, and going toothless on judgment is named as the opposite failure — so a reviewer who never runs the flip-set still carries it, not only the DROP-side.
+- **OSSIFY-3:** Task 4c now states inline that the judgment failure modes are examples, not a checklist, and that adding a required step/section/score to the review is itself the over-ruling the lens prevents; Follow-on adds a standing flip-set re-test so checklist-creep resurfaces after future `scrutinize-skill` edits.
 
 ## Post-evaluation hardening — round 2 (independent panel verdict: execute-with-fixes, converged)
 
-A second independent adversarial panel (15 lenses — 8 fresh design + 7 regression
-on the round-1 fixes — plus a completeness critic and an xhigh adjudicator; run
-`wf_ee58152b-885`, 109 agents) re-evaluated the hardened design. Verdict:
-`execute-with-fixes`, and **converged** ("stop after this fix; do not commission a
-round 3"). The regression panel cleared **5 of the 6** round-1 fixes outright; one
-blocking finding survived, plus three should-address majors the user chose to fold
-in (the fourth, ossification bloat, handled conservatively). All are applied above.
+A second independent adversarial panel (15 lenses — 8 fresh design + 7 regression on the round-1 fixes — plus a completeness critic and an xhigh adjudicator; run `wf_ee58152b-885`, 109 agents) re-evaluated the hardened design. Verdict: `execute-with-fixes`, and **converged** ("stop after this fix; do not commission a round 3"). The regression panel cleared **5 of the 6** round-1 fixes outright; one blocking finding survived, plus three should-address majors the user chose to fold in (the fourth, ossification bloat, handled conservatively). All are applied above.
 
-- **Blocking — the leniency tripwire was disarmed** (REG-TASK9-FALSEPASS-1,
-  corroborated by MECH2-PROVOKE-SHAPE-1, TRIPWIRE-NEVERRAISED-1,
-  ACCEPT-ROW7-MARGINAL, REG-TASK9-UNFALSIFIABLE-1). Two interacting defects, both
-  introduced by the round-1 three-way scoring fix: (a) the loaded rubric named the
-  provoke-defect only as *absence* ("provokes nothing"), but row 7's defect is a
-  *softening* — a shape named only in the answer key the blind reviewer cannot see;
-  and (b) `never-raised = row marginality` routed the most natural lenient behavior
-  (silence) to a PASS. Fix, per the user's three fork calls: (1) **name the
-  softened/dulled-provocation shape in the loaded rubric and the source concept** —
-  Task 2 and scrutinize-skill 4a/4b/4c now cover "provokes too weakly: a forcing
-  function present but dulled, hedged, or softened"; (2) **Task 9 runs three
-  independent reviewers and FAILS on unanimous never-raised** — marginality must be
-  earned by a separate manual re-read, never read off silence, and "raised" is
-  operationalized as an explicit per-finding disposition so silence and
-  token-mention sit on the same leniency axis. **Row 7 kept and sharpened** (not
-  replaced): a "material" replacement does not exist — the report's ~0 kept judgment
-  thinking-defects *is* the apparatus's motivating premise — so row 7's
-  source-report Minor/immaterial logging is carried knowingly, bounded by the
-  triplicate-silence rule, with `skill-benchmark` Signal A the lagging
-  author-independent control.
-- **Should-address (folded in) — trust definition reaches the lookup tail**
-  (DICHOTOMY-R2-1). The shipped trust bar was task-supervision only, so it did not
-  actually reach row 8's `claude-code-docs`; a grounded lookup could read as uplift.
-  Task 2 and the 4b criterion now name "a correct, grounded, faithfully-transformed
-  result the user can stop double-checking" as a trust value, so row 8 follows from
-  the rule the blind reviewer applies, not the key.
-- **Should-address (folded in) — over-cut probe added** (ACCEPT-OVERCUT-UNTESTED).
-  The flip-set tested over-flagging→drop but never the symmetric hazard the
-  apparatus introduces — over-CUTTING legitimate organizing structure. New **row 9**
-  (`outcome-interviewer` interview rhythm; expected = no substitutive-structure
-  finding raised) plus Task 9 check 6 close it; the construction rule admits it from
-  the other direction.
-- **Should-address (folded in) — independence check given teeth** (REG-INDEP-2).
-  "Recorded as signal" was inert (every check keyed on disposition). Task 9's pass
-  condition now makes a bar-classification divergence — even with a matching
-  disposition — mark the row *not yet proven*, routing to Task 2/4 or a
-  construction-rule replace.
-- **Ossification bloat handled conservatively** (OSSIFY-R2-3 / REG-OSSIFY-BLOAT-2,
-  user call). Rather than compress Task 4b step 3 — which risked re-opening the
-  MECH-1 offload — Follow-on's Ossification re-test gains an **anti-accretion
-  default**: the default fix for a future mis-fire is to tighten or cut bar text,
-  net-additive edits must be argued, and the combined 4a/4b/4c bar material carries
-  a soft word budget.
+- **Blocking — the leniency tripwire was disarmed** (REG-TASK9-FALSEPASS-1, corroborated by MECH2-PROVOKE-SHAPE-1, TRIPWIRE-NEVERRAISED-1, ACCEPT-ROW7-MARGINAL, REG-TASK9-UNFALSIFIABLE-1). Two interacting defects, both introduced by the round-1 three-way scoring fix: (a) the loaded rubric named the provoke-defect only as *absence* ("provokes nothing"), but row 7's defect is a *softening* — a shape named only in the answer key the blind reviewer cannot see; and (b) `never-raised = row marginality` routed the most natural lenient behavior (silence) to a PASS. Fix, per the user's three fork calls: (1) **name the softened/dulled-provocation shape in the loaded rubric and the source concept** — Task 2 and scrutinize-skill 4a/4b/4c now cover "provokes too weakly: a forcing function present but dulled, hedged, or softened"; (2) **Task 9 runs three independent reviewers and FAILS on unanimous never-raised** — marginality must be earned by a separate manual re-read, never read off silence, and "raised" is operationalized as an explicit per-finding disposition so silence and token-mention sit on the same leniency axis. **Row 7 kept and sharpened** (not replaced): a "material" replacement does not exist — the report's ~0 kept judgment thinking-defects *is* the apparatus's motivating premise — so row 7's source-report Minor/immaterial logging is carried knowingly, bounded by the triplicate-silence rule, with `skill-benchmark` Signal A the lagging author-independent control.
+- **Should-address (folded in) — trust definition reaches the lookup tail** (DICHOTOMY-R2-1). The shipped trust bar was task-supervision only, so it did not actually reach row 8's `claude-code-docs`; a grounded lookup could read as uplift. Task 2 and the 4b criterion now name "a correct, grounded, faithfully-transformed result the user can stop double-checking" as a trust value, so row 8 follows from the rule the blind reviewer applies, not the key.
+- **Should-address (folded in) — over-cut probe added** (ACCEPT-OVERCUT-UNTESTED). The flip-set tested over-flagging→drop but never the symmetric hazard the apparatus introduces — over-CUTTING legitimate organizing structure. New **row 9** (`outcome-interviewer` interview rhythm; expected = no substitutive-structure finding raised) plus Task 9 check 6 close it; the construction rule admits it from the other direction.
+- **Should-address (folded in) — independence check given teeth** (REG-INDEP-2). "Recorded as signal" was inert (every check keyed on disposition). Task 9's pass condition now makes a bar-classification divergence — even with a matching disposition — mark the row *not yet proven*, routing to Task 2/4 or a construction-rule replace.
+- **Ossification bloat handled conservatively** (OSSIFY-R2-3 / REG-OSSIFY-BLOAT-2, user call). Rather than compress Task 4b step 3 — which risked re-opening the MECH-1 offload — Follow-on's Ossification re-test gains an **anti-accretion default**: the default fix for a future mis-fire is to tighten or cut bar text, net-additive edits must be argued, and the combined 4a/4b/4c bar material carries a soft word budget.
 
-Preserved unchanged (panel-credited strengths): single-source discipline,
-lens-not-label, the per-part grain (row 6), the delivery-hygiene firewall, the
-raised-then-dropped FAIL branch, and the clean count migration. Round-2
-relitigation explicitly rejected: the "0 value findings" premise attack (a framing
-wart, not load-bearing), the lean-two-sentence alternative, the MECH-1 drift and
-row-8 non-discrimination challenges, and the same-author-key objection (bounded by
-Signal A). The flip-set is now **9 rows**; Task 9 runs in **triplicate**.
+Preserved unchanged (panel-credited strengths): single-source discipline, lens-not-label, the per-part grain (row 6), the delivery-hygiene firewall, the raised-then-dropped FAIL branch, and the clean count migration. Round-2 relitigation explicitly rejected: the "0 value findings" premise attack (a framing wart, not load-bearing), the lean-two-sentence alternative, the MECH-1 drift and row-8 non-discrimination challenges, and the same-author-key objection (bounded by Signal A). The flip-set is now **9 rows**; Task 9 runs in **triplicate**.
 
 ## Post-adjudication fixes (2026-06-15, `review-reviewer`: partially reliable)
 
-A `review-reviewer` adjudication of this plan (read-only, against live `AGENTS.md`,
-both companion `agents/openai.yaml`, and `scripts/codex-plugins-sync.sh`) returned
-**partially reliable**: two findings real and acted on, one minor, one (the second
-"High") challenged as resting on a misread of the Task 9 harness but adopted as
-cheap defense-in-depth. The converged round-1/round-2 design is unchanged; these
-are plan-text edits only.
+A `review-reviewer` adjudication of this plan (read-only, against live `AGENTS.md`, both companion `agents/openai.yaml`, and `scripts/codex-plugins-sync.sh`) returned **partially reliable**: two findings real and acted on, one minor, one (the second "High") challenged as resting on a misread of the Task 9 harness but adopted as cheap defense-in-depth. The converged round-1/round-2 design is unchanged; these are plan-text edits only.
 
-- **R1 + M1 — commit-before-proof.** Task 8 reframed as a **provisional
-  checkpoint**, not acceptance-cleared: the structural layer is verified but the
-  behavioral gate (Task 9) cannot run until a fresh session, so the branch is
-  **not merge-ready until Task 9 passes.** Added the live-before-proof note (M1):
-  the apparatus serves reviews on both runtimes the moment the edits exist (Claude
-  working-tree load; Codex Task-6 cache publish from source), so the commit does
-  not gate exposure and a Task 9 failure is a live regression to fix and re-commit
-  promptly.
-- **R2 — flip-set split for blind hygiene.** Task 7 now creates a **blind
-  fixture** (id + skill + report concern, no verdicts) and a **sealed answer key**
-  (class + expected flip + rationale + anti-leniency check). Reviewers still get
-  only the skill + rubric (neither file); the key is opened only after dispositions
-  are recorded (Task 9 updated to match). The adjudication confirmed the original
-  single file did not actually force a leak — reviewers were never handed flip-set
-  findings; they re-derive concerns by reviewing the skill cold, which the
-  triplicate-silence rule depends on — so this is defense-in-depth against an
-  executing agent accidentally pasting the key into a reviewer prompt, not a
-  correctness fix.
-- **R3 — companion metadata.** Tasks 2 and 4 now inspect each skill's
-  `agents/openai.yaml` against the behavior change, update if stale or record a
-  one-line no-change rationale, and stage only if changed (per AGENTS.md Working
-  Defaults); the file-structure table lists both as inspect targets.
-- **R4 — Task 1 clean state.** Task 1 now names the untracked plan file as
-  expected and related, so the executor does not mistake it for an unrelated dirty
-  file.
+- **R1 + M1 — commit-before-proof.** Task 8 reframed as a **provisional checkpoint**, not acceptance-cleared: the structural layer is verified but the behavioral gate (Task 9) cannot run until a fresh session, so the branch is **not merge-ready until Task 9 passes.** Added the live-before-proof note (M1): the apparatus serves reviews on both runtimes the moment the edits exist (Claude working-tree load; Codex Task-6 cache publish from source), so the commit does not gate exposure and a Task 9 failure is a live regression to fix and re-commit promptly.
+- **R2 — flip-set split for blind hygiene.** Task 7 now creates a **blind fixture** (id + skill + report concern, no verdicts) and a **sealed answer key** (class + expected flip + rationale + anti-leniency check). Reviewers still get only the skill + rubric (neither file); the key is opened only after dispositions are recorded (Task 9 updated to match). The adjudication confirmed the original single file did not actually force a leak — reviewers were never handed flip-set findings; they re-derive concerns by reviewing the skill cold, which the triplicate-silence rule depends on — so this is defense-in-depth against an executing agent accidentally pasting the key into a reviewer prompt, not a correctness fix.
+- **R3 — companion metadata.** Tasks 2 and 4 now inspect each skill's `agents/openai.yaml` against the behavior change, update if stale or record a one-line no-change rationale, and stage only if changed (per AGENTS.md Working Defaults); the file-structure table lists both as inspect targets.
+- **R4 — Task 1 clean state.** Task 1 now names the untracked plan file as expected and related, so the executor does not mistake it for an unrelated dirty file.
 
 ## Post-adjudication fixes — second pass (2026-06-15, `review-reviewer` on a Codex review: partially reliable)
 
-A second `review-reviewer` adjudication — this time of a supplied Codex
-`scrutinize-skill`-style review of this plan, read against live `.gitignore`, the
-charter, and git's ignore/stage behavior — returned **partially reliable**: one
-confirmed blocker, one confirmed should-fix, one challenged-and-narrowed finding.
-The converged round-1/round-2 design is unchanged; these are plan-text edits only.
+A second `review-reviewer` adjudication — this time of a supplied Codex `scrutinize-skill`-style review of this plan, read against live `.gitignore`, the charter, and git's ignore/stage behavior — returned **partially reliable**: one confirmed blocker, one confirmed should-fix, one challenged-and-narrowed finding. The converged round-1/round-2 design is unchanged; these are plan-text edits only.
 
-- **CF1 — acceptance artifacts were under ignored `.agents/` (CONFIRMED blocker,
-  empirically proven).** `git check-ignore -v` flagged all three created artifacts
-  (`.gitignore:9` ignores `.agents/` wholesale; zero files are tracked there), and
-  `git add` of an explicitly-named ignored path exits 1 — so Task 8's staging halted
-  as written, no `-f` present. The prior pass's own R2 split compounded this by
-  adding a second ignored artifact. Fix: the blind fixture, sealed key, and Task 10
-  retriage artifact moved from `.agents/` to the **tracked** path
-  `docs/plans/artifacts/`; every in-plan path reference, the file-structure table,
-  and the Task 8 staging line updated (plain `git add` now works). The source report
-  `.agents/skill-library-scrutiny-2026-06-15.md` stays put — read-only input, not
-  created or committed here. Root cause the review only treated as a symptom: Task 7
-  framed the fixture as the executor's scratch "mapping reference" while Task 8
-  committed it as proof — resolved here in favor of committed proof on a tracked
-  path.
-- **R-UX / M2 — chat-only acceptance gate (CONFIRMED should-fix).** Task 9 gated the
-  branch merge (Task 8) on a result recorded only in chat — not replayable. Task 9
-  now writes a tracked `docs/plans/artifacts/judgment-trust-flip-set-results.md`
-  (loaded version, reviewer/pass ids, all dispositions + bar classifications, key
-  diff, failures, pass/fail) and commits it in the fresh Task 9 session. This closes
-  the long-open M2.
-- **CF2 — "charter alignment is optional" (CHALLENGED, narrowed to a wording fix).**
-  The review pitched a co-equal blocker requiring an early charter-consult step and a
-  possible `contract-decisions.md` entry. Adjudication against charter text: refining
-  three already-admitted first-party contracts is none of the charter's four triggers
-  and none of the ledger's five recorded outcomes, so **no entry is owed** and the
-  severity was inflated. Kept only the real residue: the Follow-on "Charter alignment
-  (optional, future)" bullet is reworded to **record the determination** (consulted;
-  not a charter event; no ledger entry) rather than imply a deferred chore.
+- **CF1 — acceptance artifacts were under ignored `.agents/` (CONFIRMED blocker, empirically proven).** `git check-ignore -v` flagged all three created artifacts (`.gitignore:9` ignores `.agents/` wholesale; zero files are tracked there), and `git add` of an explicitly-named ignored path exits 1 — so Task 8's staging halted as written, no `-f` present. The prior pass's own R2 split compounded this by adding a second ignored artifact. Fix: the blind fixture, sealed key, and Task 10 retriage artifact moved from `.agents/` to the **tracked** path `docs/plans/artifacts/`; every in-plan path reference, the file-structure table, and the Task 8 staging line updated (plain `git add` now works). The source report `.agents/skill-library-scrutiny-2026-06-15.md` stays put — read-only input, not created or committed here. Root cause the review only treated as a symptom: Task 7 framed the fixture as the executor's scratch "mapping reference" while Task 8 committed it as proof — resolved here in favor of committed proof on a tracked path.
+- **R-UX / M2 — chat-only acceptance gate (CONFIRMED should-fix).** Task 9 gated the branch merge (Task 8) on a result recorded only in chat — not replayable. Task 9 now writes a tracked `docs/plans/artifacts/judgment-trust-flip-set-results.md` (loaded version, reviewer/pass ids, all dispositions + bar classifications, key diff, failures, pass/fail) and commits it in the fresh Task 9 session. This closes the long-open M2.
+- **CF2 — "charter alignment is optional" (CHALLENGED, narrowed to a wording fix).** The review pitched a co-equal blocker requiring an early charter-consult step and a possible `contract-decisions.md` entry. Adjudication against charter text: refining three already-admitted first-party contracts is none of the charter's four triggers and none of the ledger's five recorded outcomes, so **no entry is owed** and the severity was inflated. Kept only the real residue: the Follow-on "Charter alignment (optional, future)" bullet is reworded to **record the determination** (consulted; not a charter event; no ledger entry) rather than imply a deferred chore.
 
-Not acted on (challenged parts of CF2): adding a charter-consult task or any
-`contract-decisions.md` entry. The `/Users/jp/vault/` snapshot is no longer
-maintained — it has served its purpose; this plan file is now the sole canonical
-copy.
+Not acted on (challenged parts of CF2): adding a charter-consult task or any `contract-decisions.md` entry. The `/Users/jp/vault/` snapshot is no longer maintained — it has served its purpose; this plan file is now the sole canonical copy.
 
 ## Post-adjudication fixes — third pass (2026-06-15, `review-reviewer` of a second Codex-style review: partially reliable)
 
-A third `review-reviewer` adjudication of this plan (read-only against live
-`scrutinize-skill`'s Evidence Floor, `AGENTS.md`, the source report §4–§6, and the
-`review-family` CHANGELOG/README) returned **partially reliable**: no false
-positives, three confirmed should-fixes, two findings narrowed (one severity-
-inflated, one re-raising settled `AGENTS.md` 3b ground), plus two missed issues the
-adjudication added. The converged round-1/round-2 design is unchanged; these are
-plan-text edits only. No commit; the plan stays untracked until Task 8.
+A third `review-reviewer` adjudication of this plan (read-only against live `scrutinize-skill`'s Evidence Floor, `AGENTS.md`, the source report §4–§6, and the `review-family` CHANGELOG/README) returned **partially reliable**: no false positives, three confirmed should-fixes, two findings narrowed (one severity- inflated, one re-raising settled `AGENTS.md` 3b ground), plus two missed issues the adjudication added. The converged round-1/round-2 design is unchanged; these are plan-text edits only. No commit; the plan stays untracked until Task 8.
 
-- **R2 — fresh-session preflight (CONFIRMED should-fix).** Task 9 recorded the
-  loaded version only *after* the run. Added a **Task 9 preflight** that runs first
-  in the fresh session: branch/HEAD/dirty check, `codex-plugins-sync.sh --check`
-  (review-family at `0.3.10`), and a grep proving the loaded `scrutinize-skill`
-  carries the new Task-4b bar step — so the gate cannot score a stale or pre-edit
-  rubric.
-- **R1 + two missed issues — Task 9 evidence boundary (CHALLENGED → narrowed).**
-  "Too loose to prove the apparatus" overstated: `scrutinize-skill`'s Evidence
-  Floor already governs what reviewers inspect. But the wording "only the skill"
-  was ambiguous for the cross-skill (row 4) and live-enum (row 8) rows. Rewrote the
-  dispatch paragraph: reviewers apply the normal Evidence Floor (bundle, referenced
-  files, sibling/overlap scan, needed live checks); the **only** withheld materials
-  are the source report, fixture, key, **and this plan file** (which embeds the key
-  inline in Task 7b — the missed leak vector); row 4's four siblings are reviewed as
-  a group so the duplication is in scope.
-- **R4 — Task 10 read-from-evidence (CONFIRMED should-fix).** Task 10 read only the
-  compressed §6 action table. Now also reads §4 headlines + §5 detail, and the
-  retriage table gains an `evidence` column citing the originating §5 finding for
-  every changed disposition.
-- **R5 — changelog entry (CONFIRMED, low).** The version bump had no CHANGELOG
-  entry against a plugin that documents every release. Task 5 now also adds a
-  `0.3.10 - 2026-06-15` entry; Task 8 stages `CHANGELOG.md`; the file-structure
-  table lists it.
-- **R3 — `AGENTS.md` single-source (CHALLENGED, not acted on).** The "parallel
-  mini-contract" framing was inflated and largely re-raised the deliberately-settled
-  3b-offload point. 3a's two one-line bar questions are the anchor's essence, not a
-  second definition (the full concept stays single-sourced in `agent-facing-design`);
-  cutting them would weaken the anchor for no real drift reduction. Left unchanged.
+- **R2 — fresh-session preflight (CONFIRMED should-fix).** Task 9 recorded the loaded version only *after* the run. Added a **Task 9 preflight** that runs first in the fresh session: branch/HEAD/dirty check, `codex-plugins-sync.sh --check` (review-family at `0.3.10`), and a grep proving the loaded `scrutinize-skill` carries the new Task-4b bar step — so the gate cannot score a stale or pre-edit rubric.
+- **R1 + two missed issues — Task 9 evidence boundary (CHALLENGED → narrowed).** "Too loose to prove the apparatus" overstated: `scrutinize-skill`'s Evidence Floor already governs what reviewers inspect. But the wording "only the skill" was ambiguous for the cross-skill (row 4) and live-enum (row 8) rows. Rewrote the dispatch paragraph: reviewers apply the normal Evidence Floor (bundle, referenced files, sibling/overlap scan, needed live checks); the **only** withheld materials are the source report, fixture, key, **and this plan file** (which embeds the key inline in Task 7b — the missed leak vector); row 4's four siblings are reviewed as a group so the duplication is in scope.
+- **R4 — Task 10 read-from-evidence (CONFIRMED should-fix).** Task 10 read only the compressed §6 action table. Now also reads §4 headlines + §5 detail, and the retriage table gains an `evidence` column citing the originating §5 finding for every changed disposition.
+- **R5 — changelog entry (CONFIRMED, low).** The version bump had no CHANGELOG entry against a plugin that documents every release. Task 5 now also adds a `0.3.10 - 2026-06-15` entry; Task 8 stages `CHANGELOG.md`; the file-structure table lists it.
+- **R3 — `AGENTS.md` single-source (CHALLENGED, not acted on).** The "parallel mini-contract" framing was inflated and largely re-raised the deliberately-settled 3b-offload point. 3a's two one-line bar questions are the anchor's essence, not a second definition (the full concept stays single-sourced in `agent-facing-design`); cutting them would weaken the anchor for no real drift reduction. Left unchanged.

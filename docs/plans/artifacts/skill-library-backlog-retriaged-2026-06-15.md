@@ -1,39 +1,15 @@
 # Skill-Library Backlog — Re-triaged Through the Judgment-vs-Trust Bar
 
-Task 10 of `docs/plans/2026-06-15-judgment-trust-apparatus.md`. Re-dispositions
-every item in the source report's §6 Prioritized Remediation Backlog
-(`.agents/skill-library-scrutiny-2026-06-15.md`) through the judgment-vs-trust
-distinction now single-sourced in `agent-facing-design` (`## Two Kinds of Skill`).
-Grounded in §6 (the item list) plus §4 (verdict headlines) and §5 / §3.x (the
-evidence behind each item), not §6 alone.
+Task 10 of `docs/plans/2026-06-15-judgment-trust-apparatus.md`. Re-dispositions every item in the source report's §6 Prioritized Remediation Backlog (`.agents/skill-library-scrutiny-2026-06-15.md`) through the judgment-vs-trust distinction now single-sourced in `agent-facing-design` (`## Two Kinds of Skill`). Grounded in §6 (the item list) plus §4 (verdict headlines) and §5 / §3.x (the evidence behind each item), not §6 alone.
 
 ## How to read this
 
-- **Class** — the bar that governs the item: `trust`, `judgment`, `mixed`,
-  `delivery` (delivery hygiene: invocation tokens, naming, Codex budget,
-  parseability — uniform across both bars), `routing` (composability/One-Owner,
-  reviewed on its own merits, not as a judgment-conformance nit), or `charter`
-  (durable-record/delivery drift, lens-independent).
-- **New disposition** — `preserve` (do as written; the bar does not touch it),
-  `keep`, `escalate`, `drop`, `reverse`, or `split` (per part).
-- **Tie-break tag** — `budget-driven` or `conformance-driven` is recorded wherever
-  the budget-vs-conformance tie-break is live (per Task 10 step 2: an over-cap
-  description on a judgment skill is *both*, and the budget reading wins while it
-  is over the Codex cap — preserve as budget, drop the residual as conformance
-  only once back under the cap). Items where neither reading applies are tagged
-  `n/a — <class>`; forcing the binary onto a symlink fix or a trust reliability
-  bug would be the improvisation the rule exists to prevent.
-- **Evidence** — for every item whose disposition **changes** under the new bar,
-  the originating §5 / §3.x finding plus a live skill line (verified this pass).
+- **Class** — the bar that governs the item: `trust`, `judgment`, `mixed`, `delivery` (delivery hygiene: invocation tokens, naming, Codex budget, parseability — uniform across both bars), `routing` (composability/One-Owner, reviewed on its own merits, not as a judgment-conformance nit), or `charter` (durable-record/delivery drift, lens-independent).
+- **New disposition** — `preserve` (do as written; the bar does not touch it), `keep`, `escalate`, `drop`, `reverse`, or `split` (per part).
+- **Tie-break tag** — `budget-driven` or `conformance-driven` is recorded wherever the budget-vs-conformance tie-break is live (per Task 10 step 2: an over-cap description on a judgment skill is *both*, and the budget reading wins while it is over the Codex cap — preserve as budget, drop the residual as conformance only once back under the cap). Items where neither reading applies are tagged `n/a — <class>`; forcing the binary onto a symlink fix or a trust reliability bug would be the improvisation the rule exists to prevent.
+- **Evidence** — for every item whose disposition **changes** under the new bar, the originating §5 / §3.x finding plus a live skill line (verified this pass).
 
-**Headline result:** the new bar relaxes **nothing** in P0 and almost nothing in
-P1 — every correctness/safety/reliability and delivery-hygiene item is preserved
-or kept, several escalated. The flips are concentrated in the judgment-conformance
-tail (P2 + rolled-up minors): the `system-design-review` numeric finding-cap, the
-`review-reviewer` section-order nit, and the over-cap-description trims, which are
-re-read as budget recovery rather than quality nits. One trust item escalates:
-the protected-branch gate duplicated across four skills moves from P2 polish to a
-real brittle-duplication finding.
+**Headline result:** the new bar relaxes **nothing** in P0 and almost nothing in P1 — every correctness/safety/reliability and delivery-hygiene item is preserved or kept, several escalated. The flips are concentrated in the judgment-conformance tail (P2 + rolled-up minors): the `system-design-review` numeric finding-cap, the `review-reviewer` section-order nit, and the over-cap-description trims, which are re-read as budget recovery rather than quality nits. One trust item escalates: the protected-branch gate duplicated across four skills moves from P2 polish to a real brittle-duplication finding.
 
 ## P0 — correctness/safety drift
 
@@ -74,26 +50,9 @@ real brittle-duplication finding.
 
 ## What flipped, and why it matters
 
-- **Nothing in P0/P1 relaxed.** Every reliability, correctness, lifecycle, and
-  delivery-hygiene item is preserved or kept. The judgment bar is not a leniency
-  dial — it drops *conformance* pressure on thinking skills, never reliability
-  pressure on trust skills. (Trust rows 3–6, 11–13 and delivery rows 1–2, 7–9, 14
-  all stand.)
-- **One escalation (item 16).** Under conformance, the protected-branch gate
-  duplicated 4× read as P2 dedup polish. Under the trust bar, single-sourced
-  machinery *is* the value and copied-and-drifting machinery is real brittleness —
-  so it escalates, not drops.
-- **The genuine drops/reverses are judgment-conformance (items 19, 20, 22).**
-  A numeric finding-cap, a section-order uniformity nit, and cosmetic/output-shape
-  minors on thinking skills — exactly the over-flagging the apparatus exists to
-  stop. These match flip-set rows 1–3 (the conformance-drop axis).
-- **The tie-break did real work (items 14, 21).** Over-cap descriptions on
-  judgment skills (making-recommendations 63w, outcome-interviewer 62w,
-  agent-facing-design 61w, tdd 61w, …) are *not* dropped as conformance nits while
-  over the Codex cap — the trim is preserved as the cheapest budget recovery, with
-  only the post-cap residual dropping. Budget hygiene stays uniform; quality
-  conformance does not.
+- **Nothing in P0/P1 relaxed.** Every reliability, correctness, lifecycle, and delivery-hygiene item is preserved or kept. The judgment bar is not a leniency dial — it drops *conformance* pressure on thinking skills, never reliability pressure on trust skills. (Trust rows 3–6, 11–13 and delivery rows 1–2, 7–9, 14 all stand.)
+- **One escalation (item 16).** Under conformance, the protected-branch gate duplicated 4× read as P2 dedup polish. Under the trust bar, single-sourced machinery *is* the value and copied-and-drifting machinery is real brittleness — so it escalates, not drops.
+- **The genuine drops/reverses are judgment-conformance (items 19, 20, 22).** A numeric finding-cap, a section-order uniformity nit, and cosmetic/output-shape minors on thinking skills — exactly the over-flagging the apparatus exists to stop. These match flip-set rows 1–3 (the conformance-drop axis).
+- **The tie-break did real work (items 14, 21).** Over-cap descriptions on judgment skills (making-recommendations 63w, outcome-interviewer 62w, agent-facing-design 61w, tdd 61w, …) are *not* dropped as conformance nits while over the Codex cap — the trim is preserved as the cheapest budget recovery, with only the post-cap residual dropping. Budget hygiene stays uniform; quality conformance does not.
 
-This artifact closes the loop from "apparatus learned" toward "pain relieved": it
-is the filtered worklist the Follow-on `to-issues` slice draws from once Task 9
-proves the apparatus.
+This artifact closes the loop from "apparatus learned" toward "pain relieved": it is the filtered worklist the Follow-on `to-issues` slice draws from once Task 9 proves the apparatus.

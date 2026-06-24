@@ -1,13 +1,8 @@
 # Test 2 — SEALED KEY
 
-> **DO NOT OPEN until the human has answered every item in `blind-judge-packet.md`.**
-> Showing or paraphrasing any of this to the judge destroys the test.
+> **DO NOT OPEN until the human has answered every item in `blind-judge-packet.md`.** Showing or paraphrasing any of this to the judge destroys the test.
 
-Each packet item maps to a test-1 element. `bar-ON call` = the production reviewer's consensus
-disposition under the bar (test-1 results, 0f70235; ≥2/3 reps). Categories: **CONTESTED** = the
-cross-model-disagreed set + the cap (the real adjudication); **CTRL-KEEP** / **CTRL-CUT** =
-calibration controls where the bar's call is clear. (Item order was de-clustered after a Codex
-blinding leak-check; numbering here matches the current packet.)
+Each packet item maps to a test-1 element. `bar-ON call` = the production reviewer's consensus disposition under the bar (test-1 results, 0f70235; ≥2/3 reps). Categories: **CONTESTED** = the cross-model-disagreed set + the cap (the real adjudication); **CTRL-KEEP** / **CTRL-CUT** = calibration controls where the bar's call is clear. (Item order was de-clustered after a Codex blinding leak-check; numbering here matches the current packet.)
 
 | Item | Element | Skill (real) | Category | bar-ON call (test-1) | Function-grounded label | A human "keep" / "remove" means… |
 |------|---------|--------------|----------|----------------------|-------------------------|-----------------------------------|
@@ -28,12 +23,7 @@ blinding leak-check; numbering here matches the current packet.)
 
 ## How to read the result
 
-- **Calibration controls — items 4 and 9 (expect REMOVE), items 3, 10, 12 (expect KEEP).** If the
-  human's calls here mostly match, the comparison on the contested items is trustworthy. If not,
-  weight the contested results down and say why.
-- **The cap — item 1.** The human's call settles the test-3 ↔ test-1 self-disagreement. Single most
-  important output.
-- **Contested aggregate — items 1, 2, 5, 6, 7, 8, 11, 13, 14.** Human↔bar-ON agreement rate. The bar
-  CUT items 7, 8, 11, 13 — a human "keep" there is direct over-cut evidence; bar KEPT items 2, 6, 14
-  — a human "remove" there says the bar was lenient.
+- **Calibration controls — items 4 and 9 (expect REMOVE), items 3, 10, 12 (expect KEEP).** If the human's calls here mostly match, the comparison on the contested items is trustworthy. If not, weight the contested results down and say why.
+- **The cap — item 1.** The human's call settles the test-3 ↔ test-1 self-disagreement. Single most important output.
+- **Contested aggregate — items 1, 2, 5, 6, 7, 8, 11, 13, 14.** Human↔bar-ON agreement rate. The bar CUT items 7, 8, 11, 13 — a human "keep" there is direct over-cut evidence; bar KEPT items 2, 6, 14 — a human "remove" there says the bar was lenient.
 - **n = 1** (or few): a tie-breaker + direction signal, not a population estimate.

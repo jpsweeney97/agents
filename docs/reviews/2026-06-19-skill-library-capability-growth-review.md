@@ -20,23 +20,13 @@ posture: >-
 
 # Capability-Growth Review — `.agents` Skill Library
 
-This is the clean re-run of the outward capability-growth review under the
-now-relaxed build-and-prune charter (`charter.md` `## Reversibility Class`,
-`f8964f1`). The two prior `docs/reviews/` capability-growth artifacts were
-removed because each was shaped by a since-superseded rule — 2026-06-18 by the
-Codex skill-list-truncation mechanism (`0a3c11d`), 2026-06-19 by the
-observed-friction admission bar (`0755adc`). This record re-derives findings from
-live source rather than resurrecting either artifact.
+This is the clean re-run of the outward capability-growth review under the now-relaxed build-and-prune charter (`charter.md` `## Reversibility Class`, `f8964f1`). The two prior `docs/reviews/` capability-growth artifacts were removed because each was shaped by a since-superseded rule — 2026-06-18 by the Codex skill-list-truncation mechanism (`0a3c11d`), 2026-06-19 by the observed-friction admission bar (`0755adc`). This record re-derives findings from live source rather than resurrecting either artifact.
 
 ---
 
 ## 1. Executive Summary — the 5 highest-value opportunities
 
-The library is **mature on thinking, review, and continuity; genuinely thin on
-MAKE / MAINTAIN / SHIP** — confirmed by the map, not assumed. Under build-and-prune
-(`charter.md:42-54`), a new skill needs no friction proof, park, or ledger entry,
-so the bias is toward building and watching. Verdict spread across 36 verified
-candidates: **18 build-now, 6 expand-existing, 8 design-first, 4 reject**.
+The library is **mature on thinking, review, and continuity; genuinely thin on MAKE / MAINTAIN / SHIP** — confirmed by the map, not assumed. Under build-and-prune (`charter.md:42-54`), a new skill needs no friction proof, park, or ledger entry, so the bias is toward building and watching. Verdict spread across 36 verified candidates: **18 build-now, 6 expand-existing, 8 design-first, 4 reject**.
 
 | # | Opportunity | Kind | Why it's top-tier |
 |---|---|---|---|
@@ -46,11 +36,7 @@ candidates: **18 build-now, 6 expand-existing, 8 design-first, 4 reject**.
 | **4** | **Build `fan-out-attempts`** — parallel N-attempt best-of with objective fan-in | **New skill** (build-now, **high**) | A genuinely *new reusable agent capability*: `execute-plan` runs one subagent per plan task in sequence (`skills/execute-plan/SKILL.md:21`); nothing dispatches N independent attempts at one gradeable task and selects by an objective signal. Both runtime primitives (subagents, worktrees) are live. |
 | **5** | **Close the artifact-persistence & cross-skill-handoff gap** | **System-level** (a cluster of expand-existing edits + one design-first skill) | The biggest *connective-tissue* weakness: nearly every review/judgment skill **dies in chat** — `implementation-review` (`:176-194`), `scrutinize` (`:138`), `system-design-review` (`:66-70`), `baseline` (`:33-36`) — none route a blocker/finding to `to-issues`/`triage`, and `acceptance-map`'s central artifact has **no consumer** (`skills/acceptance-map/SKILL.md:291-293`). |
 
-Beyond the top 5, **12 more build-now skills** are ready (knowledge-authoring:
-`adr-authoring`, `postmortem`, `research-capture`, `runbook-authoring`,
-`doc-drift-audit`; MAINTAIN: `dependency-upgrade-triage`,
-`dependency-upgrade-execute`, `keep-green`, `spec-drift-reconcile`; plus
-`requirements-capture`, `library-integrity-check`).
+Beyond the top 5, **12 more build-now skills** are ready (knowledge-authoring: `adr-authoring`, `postmortem`, `research-capture`, `runbook-authoring`, `doc-drift-audit`; MAINTAIN: `dependency-upgrade-triage`, `dependency-upgrade-execute`, `keep-green`, `spec-drift-reconcile`; plus `requirements-capture`, `library-integrity-check`).
 
 ---
 
@@ -58,36 +44,20 @@ Beyond the top 5, **12 more build-now skills** are ready (knowledge-authoring:
 
 **Inspected (live working tree, `main @ 0755adc`):**
 
-- All **48 live skills** — `SKILL.md` read in full + `agents/openai.yaml` where
-  present + behavior-affecting `references/`/`examples/`/`scripts/` skimmed.
-- Governance: `docs/agents/charter.md` (incl. `## Reversibility Class`), the
-  345-line `docs/agents/contract-decisions.md`, `AGENTS.md`. Every candidate
-  grepped against both for settled-out/parked/rejected status.
+- All **48 live skills** — `SKILL.md` read in full + `agents/openai.yaml` where present + behavior-affecting `references/`/`examples/`/`scripts/` skimmed.
+- Governance: `docs/agents/charter.md` (incl. `## Reversibility Class`), the 345-line `docs/agents/contract-decisions.md`, `AGENTS.md`. Every candidate grepped against both for settled-out/parked/rejected status.
 - The five SessionStart `--check` canaries (for `library-integrity-check` scoping).
 
 **Did NOT inspect / out of scope:**
 
-- **Behavior validation** — no forward tests, dry runs, or `skill-benchmark`
-  runs. Every "build-now" is a *design* judgment, not proof the skill fires well.
+- **Behavior validation** — no forward tests, dry runs, or `skill-benchmark` runs. Every "build-now" is a *design* judgment, not proof the skill fires well.
 - Full line-by-line reads of long reference/playbook files (skimmed for behavior).
-- `skills-archive/` (history). The **global `deep-research` skill** is not in
-  this repo and is treated as an available out-of-repo capability — not
-  double-counted; candidates checked against it to avoid duplication.
-- Gated contracts (rules/AGENTS.md lines/hooks) — deliberately excluded; this is
-  a *skill* capability-growth review.
+- `skills-archive/` (history). The **global `deep-research` skill** is not in this repo and is treated as an available out-of-repo capability — not double-counted; candidates checked against it to avoid duplication.
+- Gated contracts (rules/AGENTS.md lines/hooks) — deliberately excluded; this is a *skill* capability-growth review.
 
-**External search:** 7 parallel sweeps (agentic work-loops, dev-tool automation,
-AI-assistant skill ecosystems, code-review, knowledge-management,
-AI-reliability/eval, lifecycle workflows) → 32 ideas with cited URLs.
-Opportunistic, not exhaustive.
+**External search:** 7 parallel sweeps (agentic work-loops, dev-tool automation, AI-assistant skill ecosystems, code-review, knowledge-management, AI-reliability/eval, lifecycle workflows) → 32 ideas with cited URLs. Opportunistic, not exhaustive.
 
-**Data caveat:** the gap-lens agents proposed *clusters* of sibling skills, so
-several candidates cite each other as "adjacent skills" that don't exist yet
-(`keep-green`, `dependency-upgrade-triage`, `migration-campaign`,
-`triage-failures`, `eval-design` were all named as adjacents before any exists).
-The verification pass caught every one against live files — verdicts are sound,
-but **treat each candidate's scope as standalone**, not as relying on an unbuilt
-sibling.
+**Data caveat:** the gap-lens agents proposed *clusters* of sibling skills, so several candidates cite each other as "adjacent skills" that don't exist yet (`keep-green`, `dependency-upgrade-triage`, `migration-campaign`, `triage-failures`, `eval-design` were all named as adjacents before any exists). The verification pass caught every one against live files — verdicts are sound, but **treat each candidate's scope as standalone**, not as relying on an unbuilt sibling.
 
 ---
 
@@ -107,16 +77,13 @@ sibling.
 | **External docs reference** | claude-code-docs, openai-docs (+ global deep-research) | **ADEQUATE** |
 | **Setup / triage / config** | setup-matt-pocock-skills, triage | adequate (config-dependent) |
 
-**Strong:** thinking, review/proof, continuity, agent-meta. **Thin (growth
-frontier):** MAKE-drive-to-done, MAINTAIN, SHIP, upstream onboarding, durable
-knowledge authoring.
+**Strong:** thinking, review/proof, continuity, agent-meta. **Thin (growth frontier):** MAKE-drive-to-done, MAINTAIN, SHIP, upstream onboarding, durable knowledge authoring.
 
 ---
 
 ## 4. Existing-Skill Upgrade Opportunities
 
-Strongest theme: **persistence and connective tissue** — high-value skills that
-produce ephemeral chat output or hand off cold.
+Strongest theme: **persistence and connective tissue** — high-value skills that produce ephemeral chat output or hand off cold.
 
 | Skill | Current value | Limiting factor | Proposed upgrade | Why more power | Evidence |
 |---|---|---|---|---|---|
@@ -188,43 +155,21 @@ All verified `is_dup=false` / `is_settled=false` unless noted.
 | **commit-range-audit** | Decomposes into `git-hygiene` (commit convention) + `implementation-review` (commit-range severity review); its sole novel slice (changelog reconciliation) has no consumer here; premised on a non-existent `release-cut`. |
 | **verifier-fresh-context** | Already fully implemented — `execute-plan/SKILL.md:22,28-31,39` mandates fresh-context verifiers; review-family *is* that role. At most a one-sentence inline-mode tightening. |
 
-Also rejected at the external-idea stage: **git-bisect skill** (already core to
-`diagnose`), **Oracle/second-opinion subagent** (covered by making-recommendations
-+ review-family + deep-research; harness mechanics not a skill),
-**project-constitution skill** (gated `AGENTS.md`/charter territory),
-**standalone decision-log** (duplicates save-handoff/throughline).
+Also rejected at the external-idea stage: **git-bisect skill** (already core to `diagnose`), **Oracle/second-opinion subagent** (covered by making-recommendations
++ review-family + deep-research; harness mechanics not a skill), **project-constitution skill** (gated `AGENTS.md`/charter territory), **standalone decision-log** (duplicates save-handoff/throughline).
 
 ---
 
 ## 6. Cross-Library Power Gaps
 
-1. **Reviews and audits evaporate.** `implementation-review`, `scrutinize`,
-   `system-design-review`, `baseline`, `tech-debt-scan` all end in chat with **no
-   handoff to `to-issues`/`triage`**. *Pain:* a blocker verdict or ranked backlog
-   must be manually re-keyed; findings silently lost at session end.
-   (`implementation-review/SKILL.md:176-194`; `tech-debt-scan/SKILL.md:27-31`)
-2. **acceptance-map's artifact has no reader** (`acceptance-map/SKILL.md:291-293`).
-   *Pain:* a careful acceptance map is produced, then nothing verifies against it.
-3. **Shaping handoffs are cold** (`outcome-interviewer/SKILL.md:250`). *Pain:* the
-   receiving lane re-derives outcome, constraints, and non-goals just established.
-4. **The generation chain is forward-only.** No reconciliation path when intent
-   changes mid-stream. *Pain:* the agent patches the leaf while the PRD/acceptance
-   map silently rot (the `spec-drift-reconcile` gap).
-5. **The SHIP lifecycle has a hole at "open the PR."** Every review-response skill
-   assumes the body exists; `implementation-review` depends on it (`:37`). *Pain:*
-   the highest-frequency authoring task in the ship path is unowned.
-6. **No eval lane for nondeterministic output** (`acceptance-map/SKILL.md:138-143`).
-   *Pain:* an agent building an AI feature is nudged toward a brittle exact-match
-   test. (Gated by host-work; see design-first cluster.)
-7. **Worktree lifecycle is one-sided** (`exiting-worktrees/SKILL.md:247-248`).
-   *Pain:* the entry half relies on raw tooling with no branch-naming/base guards.
-8. **Explicit-only skills under-fire.** `next-steps`, `zoom-out`,
-   `review-reviewer`, `gh-pr-review-loop`, `setup-matt-pocock-skills` are
-   `disable-model-invocation`, and peers don't detect-and-suggest them. *Pain:*
-   dependency-aware sequencing, decision re-derivation, and config bootstrap fire
-   only when the user remembers the token (`next-steps/SKILL.md:4`;
-   `setup-matt-pocock-skills/SKILL.md:3`). Cheap fix: have consumers surface a
-   one-line pointer when their precondition is missing.
+1. **Reviews and audits evaporate.** `implementation-review`, `scrutinize`, `system-design-review`, `baseline`, `tech-debt-scan` all end in chat with **no handoff to `to-issues`/`triage`**. *Pain:* a blocker verdict or ranked backlog must be manually re-keyed; findings silently lost at session end. (`implementation-review/SKILL.md:176-194`; `tech-debt-scan/SKILL.md:27-31`)
+2. **acceptance-map's artifact has no reader** (`acceptance-map/SKILL.md:291-293`). *Pain:* a careful acceptance map is produced, then nothing verifies against it.
+3. **Shaping handoffs are cold** (`outcome-interviewer/SKILL.md:250`). *Pain:* the receiving lane re-derives outcome, constraints, and non-goals just established.
+4. **The generation chain is forward-only.** No reconciliation path when intent changes mid-stream. *Pain:* the agent patches the leaf while the PRD/acceptance map silently rot (the `spec-drift-reconcile` gap).
+5. **The SHIP lifecycle has a hole at "open the PR."** Every review-response skill assumes the body exists; `implementation-review` depends on it (`:37`). *Pain:* the highest-frequency authoring task in the ship path is unowned.
+6. **No eval lane for nondeterministic output** (`acceptance-map/SKILL.md:138-143`). *Pain:* an agent building an AI feature is nudged toward a brittle exact-match test. (Gated by host-work; see design-first cluster.)
+7. **Worktree lifecycle is one-sided** (`exiting-worktrees/SKILL.md:247-248`). *Pain:* the entry half relies on raw tooling with no branch-naming/base guards.
+8. **Explicit-only skills under-fire.** `next-steps`, `zoom-out`, `review-reviewer`, `gh-pr-review-loop`, `setup-matt-pocock-skills` are `disable-model-invocation`, and peers don't detect-and-suggest them. *Pain:* dependency-aware sequencing, decision re-derivation, and config bootstrap fire only when the user remembers the token (`next-steps/SKILL.md:4`; `setup-matt-pocock-skills/SKILL.md:3`). Cheap fix: have consumers surface a one-line pointer when their precondition is missing.
 
 ---
 
@@ -254,74 +199,27 @@ Also rejected at the external-idea stage: **git-bisect skill** (already core to
 
 ## 8. Recommended Next Moves
 
-Tags: **[IMPL]** ready for implementation planning, **[DESIGN]** needs a design
-discussion first, **[REVIEW]** read-only follow-up.
+Tags: **[IMPL]** ready for implementation planning, **[DESIGN]** needs a design discussion first, **[REVIEW]** read-only follow-up.
 
-1. **[IMPL] Build `explain-codebase`** — highest leverage, zero open design
-   questions, read-only. The cheapest high-value first fire.
-2. **[IMPL] Build the SHIP authoring pair: `pr-description`, then `release-cut`.**
-   Both high-leverage, both fill the thinnest zone, clean boundaries to imitate.
-   Verified scope correction for `release-cut`: repo has **0 git tags** → anchor
-   "last release" on `plugin.json`/`CHANGELOG` headers.
-3. **[IMPL] Build `keep-green`** *before* the MAINTAIN skills — the grounded
-   self-correction loop `dependency-upgrade-execute` + `migration-campaign` want
-   to compose with. Keep stop conditions sharp; boundary against `closeout-check`
-   crisp.
-4. **[IMPL] Build `fan-out-attempts`** (Claude-only v1, PICK-ONE). Gate hard on
-   "objectively gradeable," cap concurrency, state the ~N× cost before dispatch.
-5. **[IMPL] Build the large-mechanical-change lane: `migration-campaign` +
-   `contract-change-propagation`.** Then `dependency-upgrade-triage` +
-   `dependency-upgrade-execute` (latter after `keep-green`). Tighten descriptions
-   against `to-issues`/`execute-plan` misroute.
-6. **[IMPL] Build the knowledge-authoring batch:** `adr-authoring`, `postmortem`,
-   `research-capture`, `doc-drift-audit`, `runbook-authoring`. All build-now,
-   cheap, durable-artifact skills. For `adr-authoring`, *point at* the existing
-   `ADR-FORMAT.md` rather than relocating it (3-skill refactor hazard).
-7. **[IMPL] Apply the persistence/glue existing-skill upgrades (Section 4).** Wire
-   `acceptance-map` into `implementation-review` + `implementation-planning`; add
-   "export findings → to-issues/triage" to the reviewers + `tech-debt-scan`; add
-   the `review-ai-code` lens (with the line-117 carve-out) and the USE-method perf
-   sweep to `diagnose`. Small edits, outsized leverage, directly close Section 6.
-   *(Plugin-distributed surfaces follow the version-bump + republish path.)*
-8. **[IMPL] Build `library-integrity-check`** scoped to the *uncovered* slice
-   (cross-ref/orphan/parse-drift), delegating delivery/cache/contract-drift to the
-   five canaries. Also answers the standing "structural-integrity check" question.
-9. **[DESIGN] Settle the eval-for-AI cluster** (`eval-design` /
-   `traces-to-eval-suite` / `eval-routing-line`) and the routing/naming questions
-   (`warm-handoff-packet`, `bug-intake-triage`, `triage-failures` name collision).
-   The eval lane is gated on whether resident LLM-app/trace work exists. Run
-   through `agent-facing-design`.
-10. **[REVIEW/NOTE] Do not build the 4 rejects.** If diff-security coverage later
-    feels thin, the charter-sanctioned move is a named reopen trigger (an observed
-    real-work miss), not a fresh build.
+1. **[IMPL] Build `explain-codebase`** — highest leverage, zero open design questions, read-only. The cheapest high-value first fire.
+2. **[IMPL] Build the SHIP authoring pair: `pr-description`, then `release-cut`.** Both high-leverage, both fill the thinnest zone, clean boundaries to imitate. Verified scope correction for `release-cut`: repo has **0 git tags** → anchor "last release" on `plugin.json`/`CHANGELOG` headers.
+3. **[IMPL] Build `keep-green`** *before* the MAINTAIN skills — the grounded self-correction loop `dependency-upgrade-execute` + `migration-campaign` want to compose with. Keep stop conditions sharp; boundary against `closeout-check` crisp.
+4. **[IMPL] Build `fan-out-attempts`** (Claude-only v1, PICK-ONE). Gate hard on "objectively gradeable," cap concurrency, state the ~N× cost before dispatch.
+5. **[IMPL] Build the large-mechanical-change lane: `migration-campaign` + `contract-change-propagation`.** Then `dependency-upgrade-triage` + `dependency-upgrade-execute` (latter after `keep-green`). Tighten descriptions against `to-issues`/`execute-plan` misroute.
+6. **[IMPL] Build the knowledge-authoring batch:** `adr-authoring`, `postmortem`, `research-capture`, `doc-drift-audit`, `runbook-authoring`. All build-now, cheap, durable-artifact skills. For `adr-authoring`, *point at* the existing `ADR-FORMAT.md` rather than relocating it (3-skill refactor hazard).
+7. **[IMPL] Apply the persistence/glue existing-skill upgrades (Section 4).** Wire `acceptance-map` into `implementation-review` + `implementation-planning`; add "export findings → to-issues/triage" to the reviewers + `tech-debt-scan`; add the `review-ai-code` lens (with the line-117 carve-out) and the USE-method perf sweep to `diagnose`. Small edits, outsized leverage, directly close Section 6. *(Plugin-distributed surfaces follow the version-bump + republish path.)*
+8. **[IMPL] Build `library-integrity-check`** scoped to the *uncovered* slice (cross-ref/orphan/parse-drift), delegating delivery/cache/contract-drift to the five canaries. Also answers the standing "structural-integrity check" question.
+9. **[DESIGN] Settle the eval-for-AI cluster** (`eval-design` / `traces-to-eval-suite` / `eval-routing-line`) and the routing/naming questions (`warm-handoff-packet`, `bug-intake-triage`, `triage-failures` name collision). The eval lane is gated on whether resident LLM-app/trace work exists. Run through `agent-facing-design`.
+10. **[REVIEW/NOTE] Do not build the 4 rejects.** If diff-security coverage later feels thin, the charter-sanctioned move is a named reopen trigger (an observed real-work miss), not a fresh build.
 
-**Net:** under build-and-prune, **~17 new skills and ~12 existing-skill upgrades
-are ready to build and watch fire** — concentrated in the thin zones (MAKE /
-MAINTAIN / SHIP), plus one system-level theme (kill the chat-only artifact death)
-that lifts the already-strong review and planning clusters.
+**Net:** under build-and-prune, **~17 new skills and ~12 existing-skill upgrades are ready to build and watch fire** — concentrated in the thin zones (MAKE / MAINTAIN / SHIP), plus one system-level theme (kill the chat-only artifact death) that lifts the already-strong review and planning clusters.
 
 ---
 
 ## Evidence Boundary
 
-- **Inspected:** all 48 live skills (`SKILL.md` in full, `agents/openai.yaml`
-  where present, behavior-affecting references/scripts skimmed); `charter.md`,
-  the 345-line `contract-decisions.md`, `AGENTS.md`; the five SessionStart
-  canaries. Every candidate was grepped against the charter + ledger and read
-  against its named adjacent skills.
-- **Not inspected:** behavior validation (no forward tests, dry runs, or
-  `skill-benchmark`); full reads of long reference/playbook files;
-  `skills-archive/`; gated/ambient contracts. The global `deep-research` skill is
-  out-of-repo and was not double-counted.
-- **Verification:** each of the 36 candidates was independently checked for
-  duplication (against live adjacent `SKILL.md`) and settled-out status (against
-  live `charter.md` + `contract-decisions.md`); 4 were rejected on that basis.
-- **Caveat:** candidates cross-reference sibling skills that do not yet exist
-  (proposed together by the gap lenses); treat each candidate's scope as
-  standalone. Several candidate summaries contained phantom-adjacency or
-  fabricated-rationale errors that the verification pass flagged — those are noted
-  inline.
-- **Status:** evidence at `0755adc`, not authority. Later edits can invalidate a
-  citation or finding — re-verify against live source. The build/expand/reject
-  verdicts reflect the relaxed build-and-prune charter as of `f8964f1`; a future
-  charter change could shift them.
+- **Inspected:** all 48 live skills (`SKILL.md` in full, `agents/openai.yaml` where present, behavior-affecting references/scripts skimmed); `charter.md`, the 345-line `contract-decisions.md`, `AGENTS.md`; the five SessionStart canaries. Every candidate was grepped against the charter + ledger and read against its named adjacent skills.
+- **Not inspected:** behavior validation (no forward tests, dry runs, or `skill-benchmark`); full reads of long reference/playbook files; `skills-archive/`; gated/ambient contracts. The global `deep-research` skill is out-of-repo and was not double-counted.
+- **Verification:** each of the 36 candidates was independently checked for duplication (against live adjacent `SKILL.md`) and settled-out status (against live `charter.md` + `contract-decisions.md`); 4 were rejected on that basis.
+- **Caveat:** candidates cross-reference sibling skills that do not yet exist (proposed together by the gap lenses); treat each candidate's scope as standalone. Several candidate summaries contained phantom-adjacency or fabricated-rationale errors that the verification pass flagged — those are noted inline.
+- **Status:** evidence at `0755adc`, not authority. Later edits can invalidate a citation or finding — re-verify against live source. The build/expand/reject verdicts reflect the relaxed build-and-prune charter as of `f8964f1`; a future charter change could shift them.

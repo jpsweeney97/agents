@@ -1,20 +1,8 @@
 # Judgment/Trust Flip-Set — Blind Fixture
 
-Input half of the acceptance test for the judgment-vs-trust apparatus change
-(`docs/plans/2026-06-15-judgment-trust-apparatus.md`). This file carries **no
-expected verdicts** — it is safe to reference while assembling reviewers. The
-answer key (class + expected flip + rationale) lives in
-`docs/plans/artifacts/judgment-trust-flip-set-key.md`; do **not** open it until every reviewer
-disposition is recorded (Task 9), and never load either file into a reviewer's
-context.
+Input half of the acceptance test for the judgment-vs-trust apparatus change (`docs/plans/2026-06-15-judgment-trust-apparatus.md`). This file carries **no expected verdicts** — it is safe to reference while assembling reviewers. The answer key (class + expected flip + rationale) lives in `docs/plans/artifacts/judgment-trust-flip-set-key.md`; do **not** open it until every reviewer disposition is recorded (Task 9), and never load either file into a reviewer's context.
 
-Rows 1–8 are each a finding from `.agents/skill-library-scrutiny-2026-06-15.md`;
-row 9 is an over-cut probe with no report finding; row 10 is a synthetic
-keep-floor probe added after run 1 (a fabricated fixture skill, not a live skill).
-To run the test, review each named skill with the edited `scrutinize-skill`
-(blind, in triplicate — see Task 9). Each row names the skill and the source-report
-concern the reviewer is expected to re-derive independently; the executor uses this
-table only to map reviewer output onto rows.
+Rows 1–8 are each a finding from `.agents/skill-library-scrutiny-2026-06-15.md`; row 9 is an over-cut probe with no report finding; row 10 is a synthetic keep-floor probe added after run 1 (a fabricated fixture skill, not a live skill). To run the test, review each named skill with the edited `scrutinize-skill` (blind, in triplicate — see Task 9). Each row names the skill and the source-report concern the reviewer is expected to re-derive independently; the executor uses this table only to map reviewer output onto rows.
 
 | # | Skill | Report concern |
 |---|---|---|
