@@ -1,19 +1,10 @@
 # Implementation Plan: `skill-squad` — orchestrated discovery for skill design
 
-**Status:** ready to execute · **Date:** 2026-06-23 · **Source:** locked design
-`docs/specs/2026-06-23-skill-squad.md` (commit `300a4dc`), itself the product of this session's
-`outcome-interviewer` → `making-recommendations` → `design-exploration` chain. **Class:** local
-`skills-claude/` skill — build-and-prune, **not** a charter event, **not** plugin-distributed (so **no**
-version bump / Codex republish / mirror). Executor authority is **not** granted by this plan; hand to
-`execute-plan` for a run.
+**Status:** ready to execute · **Date:** 2026-06-23 · **Source:** locked design `docs/specs/2026-06-23-skill-squad.md` (commit `300a4dc`), itself the product of this session's `outcome-interviewer` → `making-recommendations` → `design-exploration` chain. **Class:** local `skills-claude/` skill — build-and-prune, **not** a charter event, **not** plugin-distributed (so **no** version bump / Codex republish / mirror). Executor authority is **not** granted by this plan; hand to `execute-plan` for a run.
 
 ## What this builds
 
-One Claude-only skill, `skill-squad`, at `skills-claude/skill-squad/SKILL.md`. It is a **prose
-discovery protocol** (Approach A) — it provokes the invoking agent to author a fresh multi-agent
-**Workflow** per design; it does **not** embed a Workflow script. Single `SKILL.md`, no reference files
-(add one only if the body outgrows itself during the gate step). The skill produces an approved skill
-*design* and stops; it does not author the designed skill's `SKILL.md`.
+One Claude-only skill, `skill-squad`, at `skills-claude/skill-squad/SKILL.md`. It is a **prose discovery protocol** (Approach A) — it provokes the invoking agent to author a fresh multi-agent **Workflow** per design; it does **not** embed a Workflow script. Single `SKILL.md`, no reference files (add one only if the body outgrows itself during the gate step). The skill produces an approved skill *design* and stops; it does not author the designed skill's `SKILL.md`.
 
 ## File structure
 
@@ -23,31 +14,16 @@ discovery protocol** (Approach A) — it provokes the invoking agent to author a
 | `~/.claude/skills/skill-squad` | created (symlink, outside the repo) | Claude delivery; points to the repo source via `claude-skills-sync.sh --link` |
 | `docs/plans/2026-06-23-skill-squad.md` | this file | the plan |
 
-No other files change. The skill references no `references/`, `examples/`, or scripts, so there is no
-path-resolution surface to wire.
+No other files change. The skill references no `references/`, `examples/`, or scripts, so there is no path-resolution surface to wire.
 
 ## Conventions the executor needs (zero-context primer)
 
-- **Branch / hook:** A user-level `require-gitflow` hook **blocks all edits on `main`**. Execute on a
-  non-protected feature branch. This work continues on **`feature/skill-squad-spec`**, which already
-  carries the spec commit `300a4dc`; the build commits stack on top and land together in one
-  fast-forward merge. Protected branches (never commit on them): `main`, plus `master`/`develop`/
-  `release/*`.
-- **Delivery:** `skills-claude/` is Claude-only (Codex never scans it). A skill goes live for Claude via
-  a symlink in `~/.claude/skills` created by `scripts/claude-skills-sync.sh --link <name>`; the source
-  edit itself is the live skill for future invocations.
-- **Validation ladder:** structural validator is
-  `python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill-dir>`. Its
-  schema lacks some valid Claude fields (`argument-hint`, `disable-model-invocation`) and emits an
-  "unexpected key" complaint for them — that specific complaint is **accepted**, never fixed by deleting
-  the field. `skill-squad` uses neither field, so it should not even surface. Treat any **other** failure
-  as real.
+- **Branch / hook:** A user-level `require-gitflow` hook **blocks all edits on `main`**. Execute on a non-protected feature branch. This work continues on **`feature/skill-squad-spec`**, which already carries the spec commit `300a4dc`; the build commits stack on top and land together in one fast-forward merge. Protected branches (never commit on them): `main`, plus `master`/`develop`/ `release/*`.
+- **Delivery:** `skills-claude/` is Claude-only (Codex never scans it). A skill goes live for Claude via a symlink in `~/.claude/skills` created by `scripts/claude-skills-sync.sh --link <name>`; the source edit itself is the live skill for future invocations.
+- **Validation ladder:** structural validator is `python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill-dir>`. Its schema lacks some valid Claude fields (`argument-hint`, `disable-model-invocation`) and emits an "unexpected key" complaint for them — that specific complaint is **accepted**, never fixed by deleting the field. `skill-squad` uses neither field, so it should not even surface. Treat any **other** failure as real.
 - **Deletion:** use `trash <path>`, never `rm`.
-- **Commits:** conventional-commit subjects (`type(scope): summary`), explanatory body, end with the
-  `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>` trailer. Commit completed
-  focused work by default; review `git diff --cached --stat` before committing.
-- **No publish:** do not push, open PRs, or sync anything unless the user explicitly asks. Landing
-  (FF-merge) is the user-gated final step (Task 8).
+- **Commits:** conventional-commit subjects (`type(scope): summary`), explanatory body, end with the `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>` trailer. Commit completed focused work by default; review `git diff --cached --stat` before committing.
+- **No publish:** do not push, open PRs, or sync anything unless the user explicitly asks. Landing (FF-merge) is the user-gated final step (Task 8).
 
 ---
 
@@ -63,9 +39,7 @@ ls -d skills-claude                 # expect: skills-claude
 test ! -e skills-claude/skill-squad && echo "OK: skill-squad does not yet exist"
 ```
 
-Expected: branch is `feature/skill-squad-spec`, tree clean, `skills-claude/` present, and
-`skill-squad` not yet created. If the branch is `main`, create the build branch first:
-`git switch -c feature/skill-squad` (then use that branch for the rest of the plan).
+Expected: branch is `feature/skill-squad-spec`, tree clean, `skills-claude/` present, and `skill-squad` not yet created. If the branch is `main`, create the build branch first: `git switch -c feature/skill-squad` (then use that branch for the rest of the plan).
 
 ## Task 2 — Author `skills-claude/skill-squad/SKILL.md`
 
@@ -218,25 +192,12 @@ head -4 /Users/jp/.agents/skills-claude/skill-squad/SKILL.md   # expect frontmat
 
 ## Task 3 — Gate the draft through `agent-facing-design`
 
-The draft was written to pass the gate, but the spec flags prose-shape as the top risk, so verify it
-explicitly — this is judgment work, not a command. Load `agent-facing-design` and apply its
-**Two Kinds of Skill** lens to the file, per part:
+The draft was written to pass the gate, but the spec flags prose-shape as the top risk, so verify it explicitly — this is judgment work, not a command. Load `agent-facing-design` and apply its **Two Kinds of Skill** lens to the file, per part:
 
-- **Judgment core** (the protocol, the spread, the hybrid rules): confirm every piece *provokes*
-  (forcing questions, the kill step, the forced head-to-head) rather than *substitutes* (no scoring, no
-  classifier, no fill-in fields, no fixed agent count). The "What This Skill Will Not Do" section is the
-  self-check; confirm it is true of the body.
-- **Trust core** (the control discipline + validity check): confirm the machinery is narrow and
-  justified by a real failure (a corrupted control fakes a discovery), and that it is **single-sourced,
-  not copied** — the backstop delegates to `scrutinize-skill`, and the baseline-honesty borrows
-  `skill-benchmark`'s principle without cloning its `claude -p` mechanics.
+- **Judgment core** (the protocol, the spread, the hybrid rules): confirm every piece *provokes* (forcing questions, the kill step, the forced head-to-head) rather than *substitutes* (no scoring, no classifier, no fill-in fields, no fixed agent count). The "What This Skill Will Not Do" section is the self-check; confirm it is true of the body.
+- **Trust core** (the control discipline + validity check): confirm the machinery is narrow and justified by a real failure (a corrupted control fakes a discovery), and that it is **single-sourced, not copied** — the backstop delegates to `scrutinize-skill`, and the baseline-honesty borrows `skill-benchmark`'s principle without cloning its `claude -p` mechanics.
 
-Tighten any wording where the draft makes the judgment *for* the agent or hedges a forcing function into
-a suggestion. Tighten the `description` only for routing precision if it reads long against close
-neighbors (`design-exploration`, `agent-facing-design`, `skill-benchmark`, `scrutinize-skill`); do not
-pad it. Apply edits inline to the file. Expected outcome: the draft survives with at most wording
-tightening; if the gate demands a structural change (a removed section, a de-scored mechanic), apply it
-and note it in the commit body.
+Tighten any wording where the draft makes the judgment *for* the agent or hedges a forcing function into a suggestion. Tighten the `description` only for routing precision if it reads long against close neighbors (`design-exploration`, `agent-facing-design`, `skill-benchmark`, `scrutinize-skill`); do not pad it. Apply edits inline to the file. Expected outcome: the draft survives with at most wording tightening; if the gate demands a structural change (a removed section, a de-scored mechanic), apply it and note it in the commit body.
 
 ## Task 4 — Structural validation
 
@@ -248,9 +209,7 @@ python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py s
 echo "validator exit: $?"
 ```
 
-Pass condition: exit `0`, reported valid. `skill-squad` uses only `name` + `description`, so the accepted
-`argument-hint`/`disable-model-invocation` "unexpected key" complaint should not appear; any other
-structural error (missing/!malformed frontmatter, name≠dir) is a real failure — fix it and re-run.
+Pass condition: exit `0`, reported valid. `skill-squad` uses only `name` + `description`, so the accepted `argument-hint`/`disable-model-invocation` "unexpected key" complaint should not appear; any other structural error (missing/!malformed frontmatter, name≠dir) is a real failure — fix it and re-run.
 
 Confirm `name` matches the directory and the frontmatter parses as YAML:
 
@@ -274,8 +233,7 @@ git diff --check; echo "diff --check exit: $?"   # expect: exit 0, no output
 git reset -q skills-claude/skill-squad/SKILL.md
 ```
 
-Referenced-path check: the skill references no `references/`, `examples/`, or scripts, so there is no
-path surface to verify. State that explicitly rather than skipping silently.
+Referenced-path check: the skill references no `references/`, `examples/`, or scripts, so there is no path surface to verify. State that explicitly rather than skipping silently.
 
 ## Task 5 — Link into `~/.claude/skills` and verify delivery
 
@@ -286,46 +244,24 @@ ls -la ~/.claude/skills/skill-squad     # expect: symlink -> /Users/jp/.agents/s
 scripts/claude-skills-sync.sh --check; echo "check exit: $?"
 ```
 
-Pass condition: `--link` creates `~/.claude/skills/skill-squad` as a symlink to the repo source; `ls`
-shows the link resolving; `--check` exits `0` (managed-skill invariant holds). The script never deletes;
-if `--check` reports a *pre-existing, unrelated* violation, resolve that separately and do not let it
-block — the skill-squad-specific expectation is that its own link is present and correct.
+Pass condition: `--link` creates `~/.claude/skills/skill-squad` as a symlink to the repo source; `ls` shows the link resolving; `--check` exits `0` (managed-skill invariant holds). The script never deletes; if `--check` reports a *pre-existing, unrelated* violation, resolve that separately and do not let it block — the skill-squad-specific expectation is that its own link is present and correct.
 
 ## Task 6 — Behavior smoke test (forward proof)
 
-Prove a future agent following this contract actually adopts the protocol — structural checks only show
-the file loads. Use `behavior-smoke-test`'s context-isolated subagent proxy. **Authorization:** spawning
-a subagent is a separate permission; if it is not already authorized for the session, ask one permission
-question before spawning. Keep the proxy non-mutating.
+Prove a future agent following this contract actually adopts the protocol — structural checks only show the file loads. Use `behavior-smoke-test`'s context-isolated subagent proxy. **Authorization:** spawning a subagent is a separate permission; if it is not already authorized for the session, ask one permission question before spawning. Keep the proxy non-mutating.
 
-- **Behavior claim (first-move):** Under the `skill-squad` contract, given a request to design a
-  non-trivial new skill plus pressure to "just give me the design quickly," the agent's first move is to
-  (a) flag the cost/authorization stop, (b) set up a blind careful-default control, and (c) frame the
-  deliverable as a discovery-vs-control differential including an honest-null option — rather than
-  directly proposing one design.
+- **Behavior claim (first-move):** Under the `skill-squad` contract, given a request to design a non-trivial new skill plus pressure to "just give me the design quickly," the agent's first move is to (a) flag the cost/authorization stop, (b) set up a blind careful-default control, and (c) frame the deliverable as a discovery-vs-control differential including an honest-null option — rather than directly proposing one design.
 - **Scenario (pressured toward the old behavior):**
-  > "I want a new skill that helps an agent decide when to split a big refactor into multiple PRs vs.
-  > keep it as one. The design space is wide open. Just give me the design quickly — don't overthink it
-  > or spin up a bunch of agents."
-  The pressure ("quickly," "don't spin up agents") pushes toward skipping the squad; the design is
-  genuinely open, so the squad is warranted.
-- **Harness:** context-isolated subagent proxy, `fork_context: false` if supported. Give the proxy the
-  `skill-squad` `SKILL.md` as its contract plus the scenario. Use `behavior-smoke-test`'s default
-  first-move proxy prompt (act, state next action; do not explain, do not grade, do not mutate). Do not
-  tell the proxy the grading claim or the expected answer.
+> "I want a new skill that helps an agent decide when to split a big refactor into multiple PRs vs. keep it as one. The design space is wide open. Just give me the design quickly — don't overthink it or spin up a bunch of agents."
+The pressure ("quickly," "don't spin up agents") pushes toward skipping the squad; the design is genuinely open, so the squad is warranted.
+- **Harness:** context-isolated subagent proxy, `fork_context: false` if supported. Give the proxy the `skill-squad` `SKILL.md` as its contract plus the scenario. Use `behavior-smoke-test`'s default first-move proxy prompt (act, state next action; do not explain, do not grade, do not mutate). Do not tell the proxy the grading claim or the expected answer.
 - **Grade in the parent (the proxy does not grade itself):**
-  - `passed` — the proxy's next move sets up / plans a blind control and frames a differential (incl. the
-    honest-null), and surfaces the cost/authorization stop.
+  - `passed` — the proxy's next move sets up / plans a blind control and frames a differential (incl. the honest-null), and surfaces the cost/authorization stop.
   - `failed` — the proxy just produces a single design with no control and no differential.
   - `not strong enough` — ambiguous, or the proxy only restates the contract.
-- **Proof boundary:** this proves the first-move stance (control + differential + cost-stop), **not** that
-  a full multi-agent run executes or yields a good design. Report in `behavior-smoke-test`'s shape
-  (`Behavior claim`, `Scenario`, `Harness`, `Result`, `Observed behavior`, `Why`, `Structural checks`,
-  `Proof boundary`, `Durable artifact`). The scenario is temporary; persist a `docs/smoke-tests/` artifact
-  only if it caught a failure or the user asks.
+- **Proof boundary:** this proves the first-move stance (control + differential + cost-stop), **not** that a full multi-agent run executes or yields a good design. Report in `behavior-smoke-test`'s shape (`Behavior claim`, `Scenario`, `Harness`, `Result`, `Observed behavior`, `Why`, `Structural checks`, `Proof boundary`, `Durable artifact`). The scenario is temporary; persist a `docs/smoke-tests/` artifact only if it caught a failure or the user asks.
 
-If `passed`, proceed. If `failed` or `not strong enough`, fix the contract (usually a dulled forcing
-function in Task 2's wording), re-gate (Task 3), and re-run.
+If `passed`, proceed. If `failed` or `not strong enough`, fix the contract (usually a dulled forcing function in Task 2's wording), re-gate (Task 3), and re-run.
 
 ## Task 7 — Commit
 
@@ -366,15 +302,13 @@ EOF
 git log -1 --format='%h %s'
 ```
 
-Replace `<RESULT>` with the actual Task 6 result before committing (`passed`, or the honest
-classification). Do not write `passed` unless Task 6 returned it.
+Replace `<RESULT>` with the actual Task 6 result before committing (`passed`, or the honest classification). Do not write `passed` unless Task 6 returned it.
 
 ## Task 8 — Land (user-gated)
 
 Landing and publishing are **not** authorized by this plan. When the user asks to land:
 
-- Route through `closeout-check` (final verification) then `merge-branch` to fast-forward
-  `feature/skill-squad-spec` (carrying both the spec `300a4dc` and the build commits) onto `main`.
+- Route through `closeout-check` (final verification) then `merge-branch` to fast-forward `feature/skill-squad-spec` (carrying both the spec `300a4dc` and the build commits) onto `main`.
 - Pushing `main` is a **separate** explicit authorization — do not push otherwise.
 - This is a local `skills-claude/` skill: there is **no** version bump, Codex republish, or mirror.
 - Optional cleanup after landing: `git branch -d feature/skill-squad-spec` once merged.
@@ -383,21 +317,10 @@ Landing and publishing are **not** authorized by this plan. When the user asks t
 
 ## Self-review
 
-- **Coverage** — every spec requirement maps to a task: the SKILL.md + prose-protocol shape and all
-  settled content (5 moves, ensemble control, hybrid rule, differential output, delegated backstop, cost
-  posture, stops-at-design) → Task 2; `agent-facing-design` gate → Task 3; structural ladder → Task 4;
-  sync `--link`/`--check` → Task 5; `behavior-smoke-test` forward proof → Task 6; commit-by-default →
-  Task 7; FF-merge/land (push gated) → Task 8; single-sourcing + local-skill/no-train → Task 2 content +
-  Task 3 gate + preamble.
-- **Placeholder scan** — no `TBD`/`similar to`/`add error handling`; the full SKILL.md content is inline;
-  the one intentional fill-in (`<RESULT>` in the commit body) is gated on Task 6's real result, with an
-  explicit "do not write passed unless returned" guard.
-- **Consistency** — `skill-squad`, `skills-claude/skill-squad/SKILL.md`, the validator path, and the
-  sync commands are identical across tasks; the SKILL.md's own internal references (`scrutinize-skill`,
-  `skill-benchmark`, `agent-facing-design`, `skill-ux-design`, `behavior-smoke-test`) all name skills
-  that exist in this repo.
+- **Coverage** — every spec requirement maps to a task: the SKILL.md + prose-protocol shape and all settled content (5 moves, ensemble control, hybrid rule, differential output, delegated backstop, cost posture, stops-at-design) → Task 2; `agent-facing-design` gate → Task 3; structural ladder → Task 4; sync `--link`/`--check` → Task 5; `behavior-smoke-test` forward proof → Task 6; commit-by-default → Task 7; FF-merge/land (push gated) → Task 8; single-sourcing + local-skill/no-train → Task 2 content + Task 3 gate + preamble.
+- **Placeholder scan** — no `TBD`/`similar to`/`add error handling`; the full SKILL.md content is inline; the one intentional fill-in (`<RESULT>` in the commit body) is gated on Task 6's real result, with an explicit "do not write passed unless returned" guard.
+- **Consistency** — `skill-squad`, `skills-claude/skill-squad/SKILL.md`, the validator path, and the sync commands are identical across tasks; the SKILL.md's own internal references (`scrutinize-skill`, `skill-benchmark`, `agent-facing-design`, `skill-ux-design`, `behavior-smoke-test`) all name skills that exist in this repo.
 
 ## Handoff
 
-Executor: `execute-plan` (in-session, task-by-task) — execution is a separate authorization not granted
-here. The plan assumes the spec branch `feature/skill-squad-spec`; confirm Task 1 before editing.
+Executor: `execute-plan` (in-session, task-by-task) — execution is a separate authorization not granted here. The plan assumes the spec branch `feature/skill-squad-spec`; confirm Task 1 before editing.
