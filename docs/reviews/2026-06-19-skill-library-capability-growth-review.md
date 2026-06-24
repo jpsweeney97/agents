@@ -155,8 +155,7 @@ All verified `is_dup=false` / `is_settled=false` unless noted.
 | **commit-range-audit** | Decomposes into `git-hygiene` (commit convention) + `implementation-review` (commit-range severity review); its sole novel slice (changelog reconciliation) has no consumer here; premised on a non-existent `release-cut`. |
 | **verifier-fresh-context** | Already fully implemented — `execute-plan/SKILL.md:22,28-31,39` mandates fresh-context verifiers; review-family *is* that role. At most a one-sentence inline-mode tightening. |
 
-Also rejected at the external-idea stage: **git-bisect skill** (already core to `diagnose`), **Oracle/second-opinion subagent** (covered by making-recommendations
-+ review-family + deep-research; harness mechanics not a skill), **project-constitution skill** (gated `AGENTS.md`/charter territory), **standalone decision-log** (duplicates save-handoff/throughline).
+Also rejected at the external-idea stage: **git-bisect skill** (already core to `diagnose`), **Oracle/second-opinion subagent** (covered by making-recommendations + review-family + deep-research; harness mechanics not a skill), **project-constitution skill** (gated `AGENTS.md`/charter territory), **standalone decision-log** (duplicates save-handoff/throughline).
 
 ---
 

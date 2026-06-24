@@ -104,8 +104,7 @@ Recorded so they are not re-litigated. Verification judged these per-skill phras
 
 ## Settled-revisits (3) — confirmed, not reopened
 
-- **The one `critical`-tagged protected-branch cluster → correctly downgraded to `major`.** The `main`-branch hook
-  + always-loaded `AGENTS.md` bound the highest-damage case; all three literal-list skills defer to repo-defined branches first. Residual risk is drift among lower-stakes patterns + the git-hygiene mechanism divergence — real, but `major`. No `critical` stands.
+- **The one `critical`-tagged protected-branch cluster → correctly downgraded to `major`.** The `main`-branch hook + always-loaded `AGENTS.md` bound the highest-damage case; all three literal-list skills defer to repo-defined branches first. Residual risk is drift among lower-stakes patterns + the git-hygiene mechanism divergence — real, but `major`. No `critical` stands.
 - **execute-plan Defensible despite appearing in the gate cluster.** Its gate-at-start-of-work posture is correct per-skill behavior (it's an executor, not a commit-lifecycle gate); only the static prefix list it omits is the shared concern, fixed by single-homing — not by changing execute-plan.
 - **Two opposed commit lifecycles are a correct two-lane policy, not a contradiction.** Lifecycle/trust skills auto-commit a verified scoped result; analysis/exploration skills leave writes uncommitted. The only defect is that the boundary lives in scattered prose rather than one documented decision (P-rank 7).
 

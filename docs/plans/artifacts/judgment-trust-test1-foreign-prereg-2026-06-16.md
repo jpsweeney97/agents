@@ -56,8 +56,7 @@ Scored anchor only if **Claude and Codex independently agreed** on its class (fu
 
 ### DEFEND anchors (19 — calibrated bar predicts DEFEND/SILENT, must NOT substance-cut)
 
-- **Trust structure (LEG-T):** A:QA-1/2/3 (issue templates + body rules), C:MCP-1/2/4/5 (phases, schema reqs, eval XML consumed by a script, quality checklist), D:TCH-1/2 (workspace state scheme
-  + FORMAT files — author self-calibrated against fill-in), G:RRP-1/2 (interview procedure + refactor-plan template).
+- **Trust structure (LEG-T):** A:QA-1/2/3 (issue templates + body rules), C:MCP-1/2/4/5 (phases, schema reqs, eval XML consumed by a script, quality checklist), D:TCH-1/2 (workspace state scheme + FORMAT files — author self-calibrated against fill-in), G:RRP-1/2 (interview procedure + refactor-plan template).
 - **Judgment forcing-functions (LEG-FF) — the OVER-CUT tripwires:** F:DAI-2 (3+ radically different parallel agents), F:DAI-4 (comparison criteria, "prose not tables"), F:DAI-5 (anti-patterns), H:FD-1 (two-pass plan→self-critique), H:FD-3 (anti-default calibration), H:FD-4 (restraint self-critique), A:QA-5 (scope criteria), D:TCH-4 (ZPD/desirable-difficulty pedagogy).
 - **Prediction:** bar-ON DEFENDS/SILENT on all 19. **The Coda-XXI hypothesis lives on the LEG-FF subset:** if bar-ON substance-cuts these judgment forcing-functions, that is the over-cut signal.
 

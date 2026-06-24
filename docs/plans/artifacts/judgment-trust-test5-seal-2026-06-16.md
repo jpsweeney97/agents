@@ -72,7 +72,6 @@ b7c5905f2ae51007d1dce5ed7cc33071366975bf0fb5d00d0486c7e645f2e19a  skills/accepta
 **Operational rule for ALL Codex calls in this run (learned at seal time):** Codex is an agent — a prompt that says "read file X" sends it exploring the filesystem and it HANGS (observed: >24 min on a repo-file read; the no-file "Reply READY" liveness call returned in ~5s). So every Codex call **inlines its content and forbids tool use** ("Do NOT read any files or run any commands; judge only the text below"). The constructor prompts therefore inline `bar-on.md`/`bar-off.md` rather than pointing at the config paths.
 3. Constructor (Codex, white-box, medium effort) cold-builds the §4 ledger of the prereg (8 ΔFN + 1 FN positive control + 4 floor controls for FN-core) as coherent full skills + a hidden intent log (sealed from reviewer/judge). Effort reported in checkable units (realism-reject + retained-draft counts per side).
 4. Blind realism gate (logged, per-specimen) → Codex pre-filter (≥3 reps, non-gating) → HUMAN certifies every FN-arm specimen + PC + escalations.
-5. Reviewers (bar-ON/bar-OFF × 3 reps, hermetic, blind) → blind disposition extraction → blind in-remit
-   + lens-attribution rulings → transcript tell-check → score §§5,8 → results doc citing seal `7869892`.
+5. Reviewers (bar-ON/bar-OFF × 3 reps, hermetic, blind) → blind disposition extraction → blind in-remit + lens-attribution rulings → transcript tell-check → score §§5,8 → results doc citing seal `7869892`.
 
 **No post-hoc rescue (prereg §7):** in-remit scope, defect-type list, gates, and rubric are fixed by the prereg `7869892` and this record. INCONCLUSIVE is a live, likely outcome and must not be upgraded to a soft pass.
