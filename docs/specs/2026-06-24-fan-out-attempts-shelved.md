@@ -12,7 +12,7 @@ The deciding consideration was not a flaw in the design. It was the library stat
 
 ## The job it would own
 
-A reusable agent capability that dispatches N *independent parallel attempts at ONE task*, then selects the single best result by an *objective fan-in signal* — "best-of-N" / parallel solution exploration (~N× token cost for a quality lift on hard, gradeable tasks). Originally proposed in the 2026-06-19 capability-growth review (`docs/reviews/2026-06-19-skill-library-capability-growth-review.md`): "Claude-only v1, PICK-ONE, gate hard on 'objectively gradeable,' cap concurrency, state the ~N× cost before dispatch." No skill owns it: `execute-plan` runs one subagent per *distinct* plan task in sequence (a different shape); `prototype` is one throwaway exploration.
+A reusable agent capability that dispatches N *independent parallel attempts at ONE task*, then selects the single best result by an *objective fan-in signal* — "best-of-N" / parallel solution exploration (~N× token cost for a quality lift on hard, gradeable tasks). Originally proposed in the 2026-06-19 capability-growth review (since superseded by `docs/reviews/2026-06-26-skill-library-capability-growth-review.md`): "Claude-only v1, PICK-ONE, gate hard on 'objectively gradeable,' cap concurrency, state the ~N× cost before dispatch." No skill owns it: `execute-plan` runs one subagent per *distinct* plan task in sequence (a different shape); `prototype` is one throwaway exploration.
 
 ## The crowned design (validity surgery applied)
 
@@ -71,5 +71,5 @@ This run is a clean data point that the **relative head-to-head can over-credit 
 
 - `skill-squad` discovery run: `wf_599a2ab1-5c1` (task `wwjix8tf0`, 17 agents, ~760K tokens). Script persisted at `…/workflows/scripts/design-fan-out-attempts-wf_599a2ab1-5c1.js`; run outputs ephemeral.
 - Dedicated kill: three `general-purpose` skeptics (agent ids `ac8adbcc22ec49305`, `a42bebba862791e8d`, `ae0d1900b4dfd7b1b`).
-- Proposal source: `docs/reviews/2026-06-19-skill-library-capability-growth-review.md` (rows 4, 206; build-order item 4).
+- Proposal source: the 2026-06-19 capability-growth review, rows 4 and 206 / build-order item 4 (superseded by `docs/reviews/2026-06-26-skill-library-capability-growth-review.md`).
 - Neighbor contracts: `skills-claude/skill-squad/SKILL.md`, `skills/execute-plan/SKILL.md`, `skills/prototype/SKILL.md`, `skills/agent-facing-design/SKILL.md`.
