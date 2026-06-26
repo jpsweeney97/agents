@@ -21,6 +21,13 @@ Invoking this skill is not authorization to spawn the squad. A real run is many 
 - Scale the discovery fleet to the design's openness and the budget you have — more genuinely-different approaches for a wide-open skill, fewer for a narrow one. The control ensemble stays fixed (below).
 - If multi-agent orchestration is not already authorized for this session, ask once before launching.
 
+## Launch Preflight
+
+A run authors a *fresh* Workflow script each time, so its first execution is its only test — and the script moves a lot of large prose between stages (the brief, the spine commitments, the designs, the kills). The Workflow tool rejects a *syntax* error at submission for free, but a *data-plumbing* bug is syntactically valid and surfaces only at runtime, after it has already spawned part of an expensive fan-out. Two mechanical guards, because discipline alone has proven insufficient — the cost of a skipped one is a wasted fan-out, not a smaller error:
+
+- **Assert the plumbing on the script's first lines.** Throw immediately unless every large constant is defined and non-empty and every field read from `args` is present, so a data bug fails on line one instead of mid-fan-out. (A run that skipped this once spawned six agents on the literal token `undefined` before crashing.)
+- **Keep large text in the one robust channel: backtick template literals inlined in the script body.** Prefer inlining over `args` for any substantial content — `args` is an easy place to silently lose a large object (in one run a passed object arrived `undefined` in-script) — and never assemble large prose from single-quoted strings, where an apostrophe ends the string early. This is the same instinct as the prose-not-schema rule under *What This Skill Will Not Do*: keep judgment-sized text out of every fragile channel.
+
 ## The Run
 
 Author a fresh Workflow for the design in front of you — do not reach for a fixed pipeline. Five moves; the order matters, the agent counts do not.
