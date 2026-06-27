@@ -19,7 +19,7 @@ A capable agent told "make the case for X" already argues, so steelman earns its
 - `ideate` widens to many un-ranked options; steelman deepens **one**.
 - `design-exploration` shapes and approves a design; steelman neither designs nor decides.
 
-steelman is the constructive-advocacy member of the advisory lane; where they exist, route adversarial attack to `red-team` and prospective failure to `premortem` (neither is built yet — name them only if available).
+steelman is the constructive-advocacy member of the advisory lane; route adversarial attack to `red-team` and prospective accidental failure to `premortem`.
 
 ## Mixed skill — apply the bar per part
 

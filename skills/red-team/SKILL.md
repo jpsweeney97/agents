@@ -1,0 +1,53 @@
+---
+name: red-team
+description: "Use when a system, feature, plan, or asset could be attacked by a motivated adversary and you want attacker-intent modeling from the defender's chair — 'red-team this', 'how would someone abuse this', 'think like an attacker', 'what's the abuse surface'. Names adversaries and goals, traces attack paths (entry → step → payoff), ranks them by ease × payoff, and proposes raise-cost mitigations — no verdict. Not a secret/repo scan or `security-audit` reopen, not an artifact flaw-hunt (`scrutinize`), not a trust-boundary screen (`system-design-review`), not accidental failure (`premortem`)."
+---
+
+# Red Team
+
+Become the adversary who wants this to fail, and find the cheapest path to their payoff — so the abuse surface invisible from the builder's chair gets named while it can still be hardened. Invocation: `/red-team` or `$red-team`.
+
+red-team is the library's one *adversarial-intent* skill. You built it, so you reason from intended use and cannot see the goal-directed attacker; red-team forces the optimizing-adversary posture and asks not "is this boundary well-placed" but "here is the adversary, and here is the cheapest path through it to a payoff." Its product is a ranked field of attack paths, each turned toward a raise-cost mitigation, handed off without a verdict. It is **not a scan**: it reasons about adversary intent and attack economics; it never greps secrets or inspects a repo.
+
+## The owned job (why it is a distinct skill)
+
+A capable agent told "think like an attacker" already speculates, so red-team earns its place two ways: it *guarantees* the optimizing-adversary posture, the up-front threat-scope declaration, and the honest no-coverage close that bare speculation drops, and it is the one owner whose **product is forward, design-time attack-path modeling**. It is defined by inverting its nearest neighbors:
+
+- `system-design-review` screens trust/privilege/sensitive-data boundaries as an architecture-quality sentinel and **explicitly disclaims** threat-modeling and attack-path enumeration (`system-design-review:30-32,42`). red-team owns exactly that disclaimed gap. SDR feeds red-team.
+- `implementation-review` checks trust boundaries and supply-chain in *written code against a spec* — backward-looking, a diff. red-team is forward, design-time abuse modeling, before or beyond the code.
+- `security-audit` (a dormant live park) and the built-in `/security-review` (a branch-diff scan) *scan* a repo for vulnerabilities and secrets. red-team is **non-scan** abuse-modeling. If a real scan is what's needed, name that lane and stop.
+- `scrutinize` attacks an *artifact* for flaws and ends in a verdict. red-team models a real-world *adversary* attacking a system and ends in ranked paths, no verdict.
+- `premortem` models an *indifferent universe* (accident, drift, bad luck); red-team models a *motivated adversary* choosing the cheapest attack. Different debiaser, different mitigation class (raise-cost, not robustness).
+
+## Mixed skill — apply the bar per part
+
+- **Provoked (judgment).** Which adversaries and goals are plausible, which attack paths are real and cheap, which mitigation actually raises the attacker's cost above their payoff. The skill poses the forcing moves; it never fills them in for the agent.
+- **Firm (trust).** The up-front declared threat scope, the no-verdict contract, the ranked-hardening-order (never a complete coverage matrix), the no-certificate close, and the non-scan fence. Their value is a predictable, honest shape; a missing one is a defect — most of all the threat-scope declaration, which is what lets the close bound honestly instead of overclaiming.
+
+## The moves — a rhythm, not a fill-in template
+
+1. **Pin the target; declare the threat scope up front.** Name in one line what is being red-teamed (a system, feature, plan, or asset), and — before generating anything — declare which adversary classes and capabilities you are modeling and which you are treating as out of scope (e.g. "modeling an unauthenticated external attacker and a low-privilege insider; not modeling a nation-state with supply-chain access or physical access"). This declaration is the firm move that makes the honest close possible: the residual is measured against it.
+2. **Name the plausible adversaries and their goals.** Not "a hacker" — concrete actors and the payoff each wants: money, data exfiltration, disruption/denial, competitive advantage, account takeover, or simple griefing. Include the non-obvious within scope: the malicious insider, the competitor, the automated bot, the bored or incentivized user. Drop adversaries outside the declared scope.
+3. **Trace attack paths: entry → step → payoff.** For the cheapest and highest-payoff adversary-goals, walk the concrete path — an entry point, the steps through the system, the payoff at the end. Reason as the attacker *optimizing for the cheapest path*, not as the defender reasoning from intended use; the cheapest real path is the one that matters, not the most sophisticated.
+4. **Order by ease × payoff — a hardening sequence, not a matrix.** Rank the paths you found by how cheap they are to execute against how much they yield, to produce the order to harden in. This is a prioritization of the paths you *found*; it is explicitly **not** a claim that the surface is fully enumerated. Do not present it as a precise or complete likelihood×impact grid.
+5. **Propose raise-cost mitigations aimed at the cheapest paths.** The goal is not "eliminate the risk" but raise the attacker's cost above their payoff — make the cheapest path expensive enough that the economics stop working. Aim mitigations at the top of the hardening order first.
+
+## The close — no verdict, no certificate, no scan
+
+Stop when another pass over the in-scope adversaries yields nothing mechanism-distinct. Then:
+
+- **Render no verdict.** red-team never concludes "the system is secure" or "this is safe." **Finding no path is not proof of safety** — it is the absence of a found path within a declared scope, nothing more.
+- **Close with the residual, anchored to the declared scope.** Name the adversary capability you assumed bounded and what falls outside the threat scope you declared up front — never a self-drawn coverage map presented as exhaustive. The member of this lane most tempted to stamp "attack surface fully enumerated"; that stamp is forbidden.
+- **Route durable hardening items** (owner + date) to `/triage` (or `$triage`), one per finding, by reference. Keep them inline as the weaker fallback if no tracker is reachable.
+- **Stay non-scan.** If the work actually needed is grepping for secrets, scanning dependencies, or auditing a diff, that is `/security-review` or the `security-audit` park — name it and stop; do not improvise a scan.
+
+## When not to red-team
+
+- There is no plausible motivated adversary — the thing fails by accident, not attack → `premortem`.
+- You want a secret/dependency/diff *scan* of a repo → `/security-review` or the `security-audit` park.
+- You want an artifact reviewed for flaws with a readiness verdict → `scrutinize`.
+- You want to know whether a trust boundary is well-placed (architecture quality, not attack paths) → `system-design-review`.
+
+## Build-and-prune note
+
+Chat-first; no artifact beyond the routed `/triage` items by default. Attacker-intent-from-the-defender's-chair fires often in any repo where something is worth attacking (a notch less universal than `premortem` — not every plan has an enemy, but every plan can fail by accident). Watch the no-certificate tightrope in practice: if the ease×payoff order ever drifts into reading as a complete coverage matrix, or the skill slides into a secret/repo scan, fold or sharpen it. The honest differential is the forced adversary posture plus reliability, not a new capability.
