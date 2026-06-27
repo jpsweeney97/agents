@@ -2,6 +2,14 @@
 
 Repo-specific instructions for `/Users/jp/.agents`. This repo is the single source for the skills served to both Codex and Claude Code, plus plugin sources, skill metadata, references, and the personal plugin marketplace manifest. Primary work is day-to-day skill editing.
 
+## What The Skills Are For
+
+The skills here are global artifacts, not tooling for this repo: Codex scans `$HOME/.agents/skills` and Claude Code serves them through `~/.claude/skills`, so each authored skill runs in every session, in any repo. This repo is the workshop; the deployment and judgment surface is the whole environment, not `.agents` itself.
+
+Judge a skill by its merit as a global capability, not by whether it fires in `.agents`. Merit has two independent sources, and either one earns a skill its place. One is leverage where it fires: a distinct job that pays off in the repos that need it — a product or ops repo, this one, or any other. The other is cognitive-offload: a skill is a reusable, high-quality prompt that a token summons to run a complete, careful procedure the same way every time — value that holds even when a capable model could improvise the same work, because "a strong model does this anyway" never proves a skill valueless. So a skill that never triggers here is not thereby weak; its silence in `.agents` is not evidence against it.
+
+Building and keeping a skill are gated on that merit, never on local observability. Whether a skill fires in `.agents` is at most a build-order or prune-fidelity hint — never a reason to build, not-build, keep, or cut it. This restates the build-and-prune model (`docs/agents/charter.md`) at the always-loaded altitude, because the recurring failure is re-imposing "prove it fires here first."
+
 ## Source Authority
 
 - The checked-out working tree is the live skill source for both runtimes. Branch switches, rebase, stash, and bisect mutate the served skills immediately; edits in an isolated worktree go live only when they land on the checked-out branch.
