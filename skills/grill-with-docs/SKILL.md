@@ -93,6 +93,6 @@ If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](
 
 `CONTEXT.md` and `docs/adr/*` are durable repo files. Before the first write, run `git status`; if the worktree is dirty, tell the user your writes will land alongside their uncommitted changes, and never write over unrelated edits in a file you touch. Update incrementally as decisions crystallize, but do not commit — leave the changes for the user to review. When you pause or finish, report which files you created or edited. Proof boundary: you recorded glossary and decision text, not verified implementation.
 
-Note: `CONTEXT-FORMAT.md` and `ADR-FORMAT.md` are also consumed by `improve-codebase-architecture`. If this skill or its format files are renamed, moved, or archived, update that skill's references.
+Note: `CONTEXT-FORMAT.md` and `ADR-FORMAT.md` are also consumed by `improve-codebase-architecture`, and `ADR-FORMAT.md` by `decision-record`. If this skill or its format files are renamed, moved, or archived, update those skills' references.
 
 </supporting-info>
