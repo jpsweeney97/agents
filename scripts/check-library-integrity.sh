@@ -6,10 +6,13 @@
 #
 # OWNED structural checks (the genuinely-uncovered slice):
 #   1. name == directory     — frontmatter `name:` matches the skill's dir name
-#   2. self-referenced paths — every references/ scripts/ examples/ path a
+#   2. cited paths resolve   — every references/ scripts/ examples/ path a
 #                              SKILL.md cites exists, resolved relative to that
 #                              SKILL.md's own dir and honoring ../ prefixes
-#                              (plugin-shared references/ live two levels up)
+#                              (plugin-shared references/ live two levels up),
+#                              falling back to the repo root so a cited root
+#                              path (e.g. scripts/check-library-integrity.sh)
+#                              is not a false dangle
 #   3. orphan support files  — every git-tracked file under a skill's
 #                              references/ scripts/ examples/ is mentioned
 #                              somewhere else in that skill's bundle
@@ -117,13 +120,15 @@ while IFS= read -r d; do
 done < <(skill_dirs)
 [ "$nmismatch" -eq 0 ] && pass "name == directory ($ncount skills)"
 
-# --- 2: self-referenced paths resolve (../-aware, relative to each SKILL.md) ---
+# --- 2: cited paths resolve (../-aware; bundle-relative, else repo-root) ---
 dangling=0 tokens=0
 while IFS= read -r d; do
   while IFS= read -r tok; do
     [ -n "$tok" ] || continue
     tokens=$((tokens + 1))
-    if [ ! -e "$d/$tok" ]; then
+    # Resolve bundle-relative first; fall back to repo-root so a SKILL.md citing
+    # a root path (e.g. scripts/check-library-integrity.sh) is not a false dangle.
+    if [ ! -e "$d/$tok" ] && [ ! -e "$REPO/$tok" ]; then
       bad "dangling ref: $d/SKILL.md -> $tok"
       dangling=$((dangling + 1))
     fi
