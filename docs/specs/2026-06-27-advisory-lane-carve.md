@@ -1,0 +1,93 @@
+---
+type: design-spec
+created: 2026-06-27
+status: settled — unbuilt (hand-author premortem first, then red-team)
+source: Advisory-lane carve-discovery Workflow (run wf_1ec56fb4-f21, 20 agents) + docs/reviews/2026-06-26-skill-library-capability-growth-review.md (§1 item 4, §3 advisory row, §5 item 9)
+---
+
+# The ADVISORY lane — settled carve
+
+The settled design for the library's missing **advisory / divergence** lane — the thought-partner thinking moves the library cannot yet do. Produced design-first as one system before any skill is authored. This is the reference the per-skill builds consume.
+
+## Provenance and honest margin
+
+Derived by a `skill-squad`-rig carve discovery at the lane altitude: a blind careful-default control ensemble (3) vs five genuinely-incompatible carves (four-products / offload-max-two-generative / unified-foresight / durability-seam / aggressive-fold), `scrutinize-skill`-stance adversarial kills (one per carve, FATAL-default), then a crowned synthesis, a dedicated crown re-kill, a swapped blind head-to-head (two judges, A/B flipped), and a validity critic.
+
+Outcome: an **honest MARGINAL / same-shape near-tie**, not a BEAT. The blind control independently reached the *identical* carve (build premortem + red-team, kill risk-register, honor steelman:22, same routes), and was in fact **more accurate** than the squad's crown on one cited authority — the crown's headline overreached to a "four-member lane (ideate + steelman + premortem + red-team)," folding `ideate` in as a lane member it is not; the control read `steelman:22` correctly. The swapped head-to-head was **position-confounded** (both judges picked the same slot regardless of side), so it yields no reliable winner signal; the one substantive divergence favored the control. Per the rig's rule this is MARGINAL.
+
+The real value of the run was **not** a different-shape discovery. It was:
+1. **A five-way adversarial convergence.** Every one of the five incompatible carves, pressure-tested by an independent skeptic, returned `SURVIVES-WITH-FIX`, and all five fixes point at the *same* shape — build premortem + red-team as two distinct skills, kill risk-register, honor steelman:22. Five incompatible starting commitments converging under adversarial pressure on one carve is strong evidence the carve is right.
+2. **The risk-register kill**, on multiple independent grounds (below).
+3. **The keystone subtraction** — the crown over-prescribed an expensive `skill-squad` run for red-team, contradicting build-and-prune; the re-kill cut that to hand-author-first, escalate-only-if-needed.
+
+What this is NOT: behavior-validated. The carve and its per-skill briefs are design judgments; none has fired on un-prompted real work. Both new skills are portable and chat-first; unlike the operate lane, they fire in **any** repo at planning time (high local fire).
+
+## The discovery — five candidates, two builds, one kill
+
+The 2026-06-26 review proposed an "advisory trio" (`steelman`, `risk-register`, `premortem`) plus `red-team` (placement undecided). `steelman` already shipped (Era 43). The carve resolves the remaining three to **two builds and one kill**:
+
+- **Build `premortem` and `red-team`** — the exact two siblings `steelman:22` already names as unbuilt ("route adversarial attack to `red-team` and prospective failure to `premortem`").
+- **Kill `risk-register`** as a standalone skill — it owns a distinct *output* (a durable ledger), not a distinct *job*; its custodial fields (owner, status, last-reviewed, close-when-retired) are `/triage` fields and it earns no fence against `/triage`; its native artifact (a durable likelihood×impact matrix on a review cadence) is the most on-the-nose violation of the lane's no-certificate law, made worse by durability ("we have a register, therefore risk is managed" — exactly where the frame is blindest); and it forces **no stance-flip**, so it fails the very cognitive-offload objective this run optimized for.
+
+The carve adds **two new skills, zero existing-skill expansions, one minor reciprocal trigger edit to `scrutinize`, five one-line inbound routes.** Both live in `skills/` (portable, dual-runtime); the names `premortem` / `red-team` dodge both runtimes' bundled sets.
+
+## The governing spine
+
+This lane's unit of value is a reusable prompt for a **forced stance-flip that commitment momentum actively suppresses** — not a distinct output artifact. `steelman` flips you into advocate for what you doubt; `premortem` flips you into a future where you have already failed; `red-team` flips you into the adversary who wants you to fail. The flip is the offload: a bare careful agent asked to "list the risks" enumerates them from its own chair, and its own chair is exactly where the blind spots are anchored. A candidate earns a skill only if it forces a flip a strong model will not reliably self-administer under bias. `premortem` and `red-team` each do; `risk-register` files and tracks risks already named, from the chair you are already in.
+
+`ideate` (the shipped divergent solution-breadth skill) is **not** an advisory-lane member — it is the sibling divergent skill and the **no-certificate law-giver** the advisory members inherit (`ideate:38`). The advisory stance set is `steelman` + `premortem` + `red-team`.
+
+Offload is the **lens** that argues which moves earn a skill, never a score (Era 34 — do not build an offload metric). The boundary between the two built skills is the cognitive move, not the output flavor: prospective hindsight against an indifferent universe vs adversarial intent against a goal-directed attacker. By `ideate`'s de-cluster test (`ideate:29`) they do **not** "succeed or fail for the same reason" — different debiasers, different failure modes, different mitigation classes, and red-team intrinsically *ranks* where premortem refuses to — so they are two jobs, not one.
+
+## Per skill — trigger, owned job, One-Owner fence, confidence
+
+### `premortem` — *high-confidence* (build first)
+
+- **Trigger.** A plan, design, or decision is settled-or-nearly-settled and committed-to, and the user wants prospective failure-imagination before execution: "premortem this," "imagine it's six months later and this flopped — why," "what could make this fail." Routine, chat-first, high local fire in any repo at planning time. Tokens `/premortem` or `$premortem`.
+- **Owns.** Prospective hindsight on one committed plan: state the failure as accomplished fact ("it is N months later and this failed"), generate the field of past-tense **accidental** causes (an indifferent universe — drift, false assumptions, flaky dependencies, internal contradiction, human error, a market that moved), convert each to a pre-mitigation and, where one is genuinely observable, a dated leading-indicator tripwire, tag each prevention/detection/mitigation, and route the durable owned-dated items to `/triage`. **No verdict** — the plan is already chosen; premortem widens failure-imagination, it does not re-decide go/no-go. The past-tense framing is the debiasing engine: stating failure as already-true loosens what "what are the risks?" leaves stuck under commitment optimism.
+- **Fence.** vs `scrutinize:54-62`: scrutinize's Pre-Mortem is exactly two paths (most-likely + most-damaging-quiet) inside a review that **always** ends in a verdict (`scrutinize:9,79`); premortem is a standalone, routine, no-verdict breadth pass producing many causes and dated tripwires — a no-verdict mode cannot live inside scrutinize's verdict contract. vs `postmortem`: temporal mirror — postmortem is *after* (real incident, real facts) and refuses the before/live moment (`postmortem:26`); premortem owns *before* (imagined failure, no facts yet); the prevention/detection/mitigation tags and `/triage` routing are reused **by reference**, never re-minted. vs `deploy-plan:27`: deploy-plan's abort thresholds are one-ship operational tripwires frozen pre-push; premortem's are strategic leading-indicators across the plan's life (premortem *feeds* deploy-plan at a specific risky ship). vs `ideate`: same divergent DNA, opposite object — ideate widens the solution space, premortem widens the failure space of one already-chosen solution. vs `red-team`: accidental, indifferent causes, never adversarial intent.
+- **No-certificate form.** Stops on a stable field (`ideate`'s halt rule), never "all failure modes captured." Closes with one honest residual line anchored to the plan's own stated assumptions, never a self-drawn coverage map. No likelihood×impact matrix presented as complete. Inherits `ideate:38` verbatim.
+- **Confidence: HIGH.** Canonical debiasing technique (prospective hindsight; the Klein effect), fires in essentially every planning turn in any repo, and owns a container scrutinize's verdict-bound two-path subroutine provably cannot host.
+
+### `red-team` — *high-confidence* (build second; the lane's net-new machinery)
+
+- **Trigger.** A system, feature, plan, or asset an intelligent adversary might attack, and the user wants attacker-intent modeling from the defender's chair: "red-team this," "how would someone abuse this," "think like an attacker," "what's the abuse surface." Tokens `/red-team` or `$red-team`. Not a secret/repo scan, vuln hunt, or `security-audit` reopen.
+- **Owns.** Adversarial intent modeling: name the plausible adversaries and their goals, enumerate attack paths (entry → step → payoff) for the cheapest and highest-payoff ones, order them by ease × payoff as a **hardening sequence** (not a coverage matrix), and propose raise-cost mitigations aimed at the cheapest paths. The debiaser is defender's-chair blindness: you built it, so you reason from intended use and cannot see the goal-directed adversary; red-team forces the optimizing-adversary posture. **No verdict.**
+- **Fence.** vs `system-design-review:30-32,42`: SDR screens trust/privilege/sensitive-data boundaries as an architecture-quality sentinel and **explicitly disclaims** threat-modeling and attack-path enumeration — red-team owns exactly that disclaimed gap (SDR *feeds* red-team). vs `implementation-review:93-114`: IR checks trust boundaries and supply-chain in *written code against a spec*, backward-looking; red-team is forward, design-time abuse modeling, not a diff. vs `security-audit` (live park) and `/security-review` (a branch-diff scan): red-team is **non-scan** abuse-modeling — it reasons about adversary intent and attack economics; it never greps secrets or scans a repo. Placement is **standalone in `skills/`, dual-runtime** — not parked beside the dormant security parks (a high-fire chat-first thinking move filed under a dormant scan is misfiled). vs `scrutinize`: scrutinize attacks an artifact for flaws and ends in a verdict; red-team models a real-world adversary attacking a system and ends in ranked paths, no verdict. vs `premortem`: intentional adversary, not accidental indifference.
+- **No-certificate form.** The lane member most tempted to stamp "attack surface fully enumerated" — forbidden. The ease × payoff ranking is a hardening order, never a coverage matrix presented as complete. It **declares a threat scope up front** (which adversary classes and capabilities it models) and closes with the residual: the adversary capability it assumed bounded and what falls outside that declared scope — never "the system is secure." "Found no path" is not proof of safety. Inherits `ideate:38`.
+- **Confidence: HIGH**, a notch under premortem on fire-frequency only (not every plan has an adversary; every plan can fail by accident). Attacker-intent-from-the-defender's-chair is the canonical hard-under-bias move and genuinely unowned.
+
+## What this deliberately does NOT build, and why
+
+- **`risk-register`, as a standalone skill — killed**, on the multiple independent grounds above (output-not-a-job; unfenced `/triage` collision; durable L×I matrix is the on-the-nose `ideate:38` violation; forces no stance-flip). Its parts decompose cleanly with no cognitive middle left over: generation → `premortem`/`red-team`; durable owned-dated tracking → `/triage` (exactly as `postmortem` already routes its dated items, by reference, never re-minting tracker machinery); the decision-instant read → `making-recommendations`; the one-ship operational gauge → `deploy-plan`.
+- **A unified "adversarial-foresight" engine (premortem + red-team collapsed) — killed.** The unification's central premise — that the two are one cognitive operation differing only in an adversary parameter — is false on the de-cluster test (`ideate:29`): assume-failure generates zero attack paths, adversary-modeling generates zero accident causes; collapsing them lets the louder accidental engine swamp the rarer adversarial one. The split is the design.
+- **Folding `premortem` into `scrutinize` — killed.** scrutinize always terminates in a verdict (`scrutinize:9,79`); a no-verdict divergent breadth mode is a contradictory terminal contract, and it would bury the divergent move inside the library's convergent adjudicator — the exact divergence-vs-convergence separation the lane exists to create.
+- **Folding `red-team` into `premortem` — killed.** They fail the de-cluster test, and red-team intrinsically ranks (ease × payoff) where a no-rank breadth engine refuses — a second tell of two jobs.
+- **Any new "completeness discipline," "monitoring rigor," or "risk-proof discipline" as owned machinery — killed pre-emptively.** That is the inherited no-certificate / evidence-before-claims floor relabeled (the Era-44 second-machinery error). Each built skill obeys the floor; neither owns it.
+
+## Seams / wiring
+
+- **Reciprocal edit (1, minor hygiene).** `scrutinize` relinquishes the standalone "pre-mortem" trigger token to `premortem`, keeping its two-path Pre-Mortem only inside an already-invoked formal stress test ("premortem this plan" → premortem; "stress-test this for readiness" → scrutinize, which internally uses its two-path lens en route to a verdict). The crown re-kill noted this is a within-body sub-trigger, not a loader-level co-owner, so the edit is hygiene at most and droppable if the `premortem` description fences cleanly on its own.
+- **Inbound one-line routes (5).**
+  1. `steelman:22` — flip the live pointer from "neither is built yet" to: route adversarial attack to `red-team`, prospective accidental failure to `premortem`.
+  2. `system-design-review:42` — the attack-path enumeration and adversary modeling SDR disclaims belong to `red-team`.
+  3. `making-recommendations` — accepted residual risks of the chosen option, when they must be watched over time, route to `/triage`; for a fresh failure or abuse pass before commit, to `premortem` / `red-team`.
+  4. `deploy-plan` — accidental plan-level failure → `premortem`; adversarial abuse → `red-team`; durable cross-session tracking of a residual that outlives the bake → `/triage` (deploy-plan keeps its one-ship gauge).
+  5. `postmortem` — the prospective mirror, before the failure and imagined, is `premortem`.
+
+## Single-sourcing — no new machinery; the inherited floor obeyed by all
+
+There is **no** new single-sourced machinery to build. The no-certificate / evidence-before-claims floor is inherited (named at `ideate:38`); both built skills specialize it to their surface (premortem's stable-field halt + plan-anchored residual; red-team's declared-threat-scope + residual) exactly as `postmortem`, `runbook-authoring`, `closeout-check`, and the operate trio already specialize it. Tracker custody is owned by `/triage`, reused by reference (as `postmortem` already does). No coverage certificate, exhaustiveness stamp, or precise likelihood×impact matrix appears in either skill — honest-residual lines anchored to a declared scope replace them.
+
+## The keystone build-method fix (applied)
+
+The crown initially mandated an expensive `skill-squad` run for `red-team`. The dedicated re-kill cut that as an over-prescription against build-and-prune: red-team has as clean a candidate brief as premortem. **Hand-author both skills** against `agent-facing-design` + `ideate:38` + their candidate briefs. red-team carries the most net-new machinery in the lane (adversary/goal naming, entry→step→payoff path tracing, the ease × payoff hardening order, raise-cost economics, the up-front threat-scope declaration, the non-scan fence) and rides the sharpest no-certificate tightrope (provoke prioritization without ever reading as a complete coverage matrix) — that is a reason to **draft it carefully**, and to escalate to a multi-agent `skill-squad` run **only if** a hand-authored draft proves the attack-path engine and the no-certificate close cannot take a clean shape by hand.
+
+## Build sequence and status
+
+1. **`premortem` — hand-author first** (highest fire-frequency, cleanest container, canonical prospective-hindsight). Validate with `quick_validate.py` + a `behavior-smoke-test` that the no-verdict + stable-field-halt + plan-anchored-residual behaviors actually fire (no "all failure modes captured," no verdict).
+2. **`red-team` — hand-author second, draft carefully** (the net-new machinery + the sharpest no-certificate tightrope). Same validation, plus a smoke test that the up-front threat-scope declaration + ranked-hardening-order (not coverage matrix) + non-scan fence fire. Escalate to `skill-squad` only on a proven hand-author failure.
+3. **Apply the reciprocal `scrutinize` edit** (minor) and the five inbound routes (one line each), only after the two skills land and prove they route on their own descriptions — `steelman:22` is the one that must flip (it currently says "neither is built yet").
+4. **No `risk-register` build task, no shared-machinery build task.** Reopen `risk-register` only if a concrete miss shows `/triage` cannot hold watch-conditions-with-tripwires as first-class items — and it must then ship carrying the one fence this carve omits: an explicit fence against `/triage`.
+
+**Watch-items for the build:** `premortem` sliding into a verdict (it must not re-decide go/no-go) or stamping a complete coverage map; `premortem` copying `postmortem`'s beat machinery rather than reusing its tags/routing by reference; `red-team` reading as a complete attack-surface matrix, or drifting into a secret/repo scan (the `security-audit` park boundary); either skill bound to a strict StructuredOutput schema (Era 24/40). The one un-settled joint is the `/triage` routing of standing watch-conditions (a "monitor this leading-indicator over time" unit is not obviously the same shape as a "do this discrete piece of work" issue) — the concrete reopen trigger for `risk-register`.
