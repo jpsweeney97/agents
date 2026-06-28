@@ -13,7 +13,7 @@ red-team is the library's one *adversarial-intent* skill. You built it, so you r
 
 A capable agent told "think like an attacker" already speculates, so red-team earns its place two ways: it *guarantees* the optimizing-adversary posture, the up-front threat-scope declaration, and the honest no-coverage close that bare speculation drops, and it is the one owner whose **product is forward, design-time attack-path modeling**. It is defined by inverting its nearest neighbors:
 
-- `system-design-review` screens trust/privilege/sensitive-data boundaries as an architecture-quality sentinel and **explicitly disclaims** threat-modeling and attack-path enumeration (`system-design-review:30-32,42`). red-team owns exactly that disclaimed gap. SDR feeds red-team.
+- `system-design-review` screens trust/privilege/sensitive-data boundaries as an architecture-quality sentinel; it does not cover threat-modeling or attack-path enumeration (`system-design-review:30-32,42`). red-team owns exactly that gap. SDR feeds red-team.
 - `implementation-review` checks trust boundaries and supply-chain in *written code against a spec* — backward-looking, a diff. red-team is forward, design-time abuse modeling, before or beyond the code.
 - `security-audit` (a dormant live park) and the built-in `/security-review` (a branch-diff scan) *scan* a repo for vulnerabilities and secrets. red-team is **non-scan** abuse-modeling. If a real scan is what's needed, name that lane and stop.
 - `scrutinize` attacks an *artifact* for flaws and ends in a verdict. red-team models a real-world *adversary* attacking a system and ends in ranked paths, no verdict.

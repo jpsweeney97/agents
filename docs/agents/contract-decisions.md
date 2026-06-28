@@ -1,6 +1,6 @@
 # Contract Decisions
 
-Ledger required by the charter's Decision Record section (`charter.md`): one entry per admission, fold, rejection, park, or retirement — date, surface, outcome, evidence pointer, and the reopen trigger for parks. Append new entries; do not rewrite settled ones.
+Ledger required by the charter's Decision Record section (`charter.md`): one entry per **gated** decision — an admission, fold, rejection, park, or retirement of an ambient contract or third-party material — with date, surface, outcome, evidence pointer, and the reopen trigger for parks. Build-and-prune skill/command churn is not ledgered. Append new entries; do not rewrite settled ones.
 
 ## Decisions
 
