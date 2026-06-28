@@ -1,0 +1,4 @@
+interface:
+  display_name: "Working Slice Review"
+  short_description: "Critique overbuilt designs before planning."
+  default_prompt: "Use $working-slice-review to review this design for overbuilding before a working slice exists. Give evidence-grounded critique and a lightweight example build sequence without rewriting the spec or plan."
