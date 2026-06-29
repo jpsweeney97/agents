@@ -44,6 +44,20 @@ A 30-second flaky loop is barely better than no loop. A 2-second deterministic l
 
 The goal is not a clean repro but a **higher reproduction rate**. Loop the trigger 100×, parallelise, add stress, narrow timing windows, inject sleeps. A 50%-flake bug is debuggable; 1% is not — keep raising the rate until it's debuggable.
 
+**Classify the non-determinism before brute-forcing the rate — the cause-class names the knob that raises it and the probe to build.** Blindly looping wastes the budget the rate is supposed to buy you. One call the cause-class does *not* settle: is the *test* non-deterministic (test is wrong, code is correct → fix the test) or the *code* (the test correctly flakes on a real defect → fix the code)? You often can't tell until the rate is up and you've instrumented — so the knobs below are rate-raising **diagnostics first**: isolating, seeding, or clock-freezing the *test* makes a flaky test pass but **masks** a flaky-code defect. Apply a knob as the *fix* only once the evidence says the test, not the code, was wrong.
+
+| Cause-class | Tell | Knob that raises the rate → where the fix lives |
+|---|---|---|
+| **Order / pollution** | Passes alone, fails in-suite (or vice versa) | Shuffle/bisect execution order → isolate the polluting predecessor; reset shared state between cases |
+| **Shared mutable state** | Fails under parallelism or on repeat; passes isolated | Raise parallelism/repeat → give each run a fresh fixture (transaction rollback, temp dir, fresh process) or serialise |
+| **Concurrency / async race** | Rate tracks load, CPU contention, or injected delay | Stress and inject sleeps at the suspected window to *raise* the rate → find the unsynchronised access |
+| **Time / wall-clock** | Fails near midnight, month/DST boundaries, or under another timezone | Freeze or mock the clock; run under the failing TZ |
+| **Unseeded randomness** | Fails a fixed % with no load correlation; differs every run | Seed the RNG; pin hash ordering (e.g. `PYTHONHASHSEED`); assert order-independently |
+| **External / network** | Tracks network conditions; intermittent timeouts | Replay a captured trace or mock the boundary; pin the dependency |
+| **Resource leak / exhaustion** | Fails *later* in a long run, not early; clears after a restart | Run the loop long and watch the resource curve → bisect to the leak site |
+
+Match the bug to a class, then point Phase 1's loop at that class's knob. When two classes are plausible, the next thing to build is the probe that separates them.
+
 ### When you genuinely cannot build a loop
 
 Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. Do **not** proceed to hypothesise without a loop.
@@ -86,7 +100,14 @@ Tool preference:
 
 **Tag every debug log** with a unique prefix, e.g. `[DEBUG-a4f2]`. Cleanup at the end becomes a single grep. Untagged logs survive; tagged logs die.
 
-**Perf branch.** For performance regressions, logs are usually wrong. Instead: establish a baseline measurement (timing harness, `performance.now()`, profiler, query plan), then bisect. Measure first, fix second.
+**Perf branch.** For performance regressions, logs are usually wrong. Establish a baseline measurement (timing harness, `performance.now()`, profiler, query plan) first — measure, don't guess — then bisect. Measure first, fix second.
+
+**Localise before optimising.** A sampling profile or flame graph shows *where* the time actually goes, so you fix the hot path and not the suspected one. Two regression shapes need two lenses, and profiling tells them apart:
+
+- **Work-bound** — an algorithm got slower (O(n²) creep, an N+1 query, a lost cache, a needless re-render). The flame graph names the hot frame; cut the wasted work.
+- **Resource-bound** — something is saturated. Sweep the **USE method**: for each resource (CPU, memory, disk/IO, network, connection pool, locks) check **U**tilisation, **S**aturation (queue depth or wait time), and **E**rrors. The first saturated resource is the bottleneck.
+
+Profile to tell work-bound from resource-bound before reaching for either fix — they have opposite remedies.
 
 ## Phase 5 — Fix + regression test
 
