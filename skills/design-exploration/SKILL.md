@@ -34,6 +34,8 @@ Follow existing patterns. Include targeted improvements only where an existing p
 
 The design is approved only when the user says so. On approval, name the next lane and ask: `implementation-planning` for an executable plan doc, `to-prd` or `to-issues` for tracker publication, or conversational closure when nothing downstream is needed.
 
+When you hand off, carry a compact warm-handoff capsule so the next lane starts from the settled design instead of re-deriving it: the approved approach in brief, what was deliberately deferred or left open, the binding constraints the next lane must respect, and the named next lane. Keep it compact and skip any beat with no real content; a few sentences or a short structured note, whichever fits the design — chat-first like the design itself, written to a doc only when the user approves that step. When the next lane is `implementation-planning`, the capsule orients; it does not replace the full design that lane reads in full.
+
 ## Artifacts
 
 Chat-first by default. Write a design doc only when the user asks or approves; place it per repo convention, asking one path question if no convention is clear. Do not commit automatically.

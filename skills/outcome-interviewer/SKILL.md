@@ -174,6 +174,8 @@ This skill clarifies the outcome; it does not design, decide, critique, or imple
 
 Ask before switching: name the move and let the user decline. A handoff the user did not choose is just the interview ending early.
 
+When the user does accept a handoff, carry the warm-handoff capsule (see Stopping Point) so the next lane starts from the settled shape instead of re-interviewing it.
+
 ## Turn Shape
 
 Use natural conversation. A typical turn contains:
@@ -193,13 +195,28 @@ Read [examples/interaction-examples.md](examples/interaction-examples.md) when t
 
 Continue only while another interview turn is likely to clarify a material uncertainty. For small clarifications, stop once the next useful move is clear or the user has corrected enough of the read to proceed. Do not force every brief field when the user only needed a narrow outcome check.
 
-For larger or muddier topics, continue until the desired outcome, audience or operator, success signs, non-goals, main tradeoff, and any naturally clear next useful move are clear enough that you could fill in the brief below and the user would accept it without correction.
+For larger or muddier topics, continue until the desired outcome, audience or operator, success signs, non-goals, main tradeoff, and any naturally clear next useful move are clear enough that you could write the closure below and the user would accept it without correction.
 
 When stopping, summarize conversationally. Do not create a formal spec, checklist, implementation plan, or decision log unless the user asks. Include a named next useful move only when it is naturally clear from the interview (see Handoffs). If the next move is still uncertain, name the remaining uncertainty instead of forcing a recommendation.
 
-Briefs are chat-only by default. Write, save, ticket, hand off, or create any durable artifact only when the user explicitly asks or approves that lifecycle step.
+Briefs are chat-only by default. Write, save, ticket, hand off, or create any durable artifact only when the user explicitly asks or approves that lifecycle step. A session-resume handoff for a future session is `save-handoff`'s job, not this closure.
 
-A concise brief, when useful, should stay lightweight:
+Match the closure to the situation:
+
+- A narrow outcome-check with no downstream move closes in a sentence or two of plain-language shape.
+- When the interview reaches a handoff point — the user is moving on to a design, a recommendation, or a PRD — close with a *warm-handoff capsule*: the same plain-language closure, but carrying forward what the next lane would otherwise have to re-interview from the transcript.
+
+A warm-handoff capsule covers, in plain prose, only the beats that have real content:
+
+- what is settled — the outcome and any qualities the user has confirmed
+- what is still open — uncertainties the next lane should treat as live, not as decided
+- the direction the user is leaning, if one emerged — omit it rather than invent one
+- the binding constraints and non-goals the next lane must respect
+- the named next move, offered for the user to accept or decline
+
+Keep it prose, not a labeled ledger, and omit any beat with no real content rather than manufacture one. The capsule is the interview's closing read, not a decision log; it does not gain authority the interview never reached.
+
+A lightweight closure, for a narrow check:
 
 ```markdown
 Here is the clarified shape:
@@ -208,4 +225,18 @@ You want <outcome> to feel true for <audience/operator>.
 The experience should feel <qualities>.
 The main thing to avoid is <failure/non-goal>.
 The remaining uncertainty is <question>, or the next useful move is <move>.
+```
+
+A warm-handoff capsule, at a handoff point:
+
+```markdown
+Here is where we landed:
+
+You want support to answer "what changed?" without pinging engineering, and we are
+leaning toward a small read-only status view rather than a full audit log. Still
+open is whether it needs to cover config changes or just deploys. Whatever gets
+built has to stay read-only and load fast enough to check mid-call.
+
+The next useful move is design-exploration to shape that view. Want me to hand off,
+or keep clarifying first?
 ```

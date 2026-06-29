@@ -95,6 +95,24 @@ The next useful move is to sketch the smallest status view that answers that
 question.
 ```
 
+## Warm-Handoff Capsule
+
+When the interview reaches a handoff point, the closure carries forward what the next lane would otherwise re-interview: what is settled, what is still open, the leaning, the binding constraints, and the named next move. Plain prose, only the beats with content, offered for the user to accept or decline.
+
+```markdown
+Here is where we landed:
+
+You want on-call to tell a real outage from the familiar flaky timeout fast enough
+to trust the page, and we are leaning toward a per-alert "seen this before?" signal
+rather than re-tuning thresholds. Still open is whether that lives in the pager or
+the dashboard. It has to work without adding a click during an incident.
+
+The next useful move is making-recommendations, since we now have two real options
+and clear criteria. Want me to hand off, or stay with this?
+```
+
+Omit a beat rather than manufacture one. If no direction emerged, the capsule simply names what is settled, what is open, and the next move — it does not invent a leaning to look complete.
+
 ## Anti-Patterns
 
 Avoid turning the interview into a technical review.
