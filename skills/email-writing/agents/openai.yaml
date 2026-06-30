@@ -1,0 +1,4 @@
+interface:
+  display_name: "Email Writing"
+  short_description: "Draft warm, plain professional emails"
+  default_prompt: "Use $email-writing to draft a warm, plain professional outreach, scheduling, or follow-up email."
