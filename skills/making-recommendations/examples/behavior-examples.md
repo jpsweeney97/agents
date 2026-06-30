@@ -50,7 +50,7 @@ Expected behavior:
 - Treat this as high stakes because reversal is costly and the blast radius is broad.
 - Include `Commitment Point` and `Rollback / Blast Radius`.
 - Name owners, affected users or systems, rollback options, and the cheapest checks that could resolve material unknowns.
-- Use `not enough to recommend yet` if backup validation, rollback rehearsal, incident staffing, or release-window constraints are missing and could flip the decision.
+- Use `not enough to recommend yet` only if the core safety facts — backup validation and rollback rehearsal — are both unconfirmed: without them there is no defensible basis to weigh the risk at all. If those are known and only a secondary fact like incident staffing or the release-window timing is unconfirmed, proceed with that as a stated assumption, name it under `Gaps / What Could Flip`, and mark `decision needed` or `best available` instead.
 - Use `decision needed` when the evidence is clear but the answer depends on business risk tolerance or ownership.
 
 ## Options Not Comparable
@@ -84,6 +84,23 @@ Expected behavior:
 - Do not invent a weak third option just to create a ranking.
 - Recommend the local-only workflow if the offline constraint stands, or name the check that could reveal a second serious option.
 - Mark readiness `best available` unless the offline constraint itself is still unverified or negotiable.
+
+## Partial Information — Rank With Stated Assumptions, Don't Bail
+
+User asks:
+
+```markdown
+We can only ship ONE of these two features this sprint, not both — should we
+build the CSV export or the bulk-delete feature?
+```
+
+Expected behavior:
+
+- Notice that real criteria are available even though the deciding business fact (which feature users actually need most right now) is missing: build effort, risk profile (bulk-delete is destructive and typically needs confirmation/undo/audit-log work; CSV export is usually additive and self-contained), and failure-mode severity.
+- Do not invoke `material missing detail` just because one fact (demand or urgency) is unknown — a defensible ranking is still possible on the criteria that are available, so this is not the "no defensible basis at all" case the exit is reserved for.
+- State the missing fact as an assumption up front, evaluate criterion-by-criterion on what is known, and produce a real `Ranking` and `Recommendation`.
+- Mark readiness `decision needed` (the unresolved factor is a values/priority call a human should make) or `best available` (the named gaps don't block a defensible call), not `not enough to recommend yet`.
+- Name the missing fact in `Gaps / What Could Flip` so the user can override the call with the one piece of information that would change it.
 
 ## Muddy Design Request With Permissioned Handoff
 

@@ -23,7 +23,7 @@ Read [examples/behavior-examples.md](examples/behavior-examples.md) when routing
 
 Before ranking, check whether the decision, serious options, constraints, failure modes, and stakes are clear enough to compare.
 
-- If one missing detail would materially change the recommendation, ask one question and stop.
+- If a missing detail leaves no defensible basis to rank at all, ask one question and stop (`material missing detail`); if a ranking is still possible on stated assumptions, proceed and name the gap instead.
 - If the user asks to be grilled, stress-tested, challenged, or drilled on a decision, name `grill-me` as the better lane and switch only when the same message explicitly asks for that workflow.
 - If the ask needs clarification rather than choice, name `outcome-interviewer` as the better lane, say why, and ask before switching.
 - If the ask needs design exploration before a choice can exist, name `design-exploration` as the better path, say why, and ask before switching.
@@ -35,7 +35,7 @@ Before ranking, check whether the decision, serious options, constraints, failur
 
 Use these exits before the normal workflow. Do not include a full ranking when an exit applies.
 
-- `material missing detail`: A missing fact, constraint, criterion, owner, deadline, or stake would materially change the recommendation. Ask one focused question, mark readiness `not enough to recommend yet`, and stop.
+- `material missing detail`: No defensible ranking is possible at all — a missing fact, constraint, criterion, owner, deadline, or stake removes the basis for comparison entirely, not merely a detail that could flip an otherwise rankable comparison. Ask one focused question, mark readiness `not enough to recommend yet`, and stop. If a ranking is still possible on stated assumptions, proceed instead and name the gap under `decision needed` or `best available`.
 - `options not comparable`: The options optimize for different outcomes or need different criteria. State the mismatch, ask the decision-frame question, mark readiness `options not comparable`, and stop.
 - `only one serious option`: Only one option remains viable after applying the user's constraints. Name the viable option, explain why the other named options are not serious, and do not invent a weak alternative just to rank. You may recommend the viable option with honest readiness, or say what check could reveal a second serious option.
 
@@ -83,7 +83,7 @@ Handoffs are permissioned and non-silent.
 
 - `verifiably best`: option space is complete, material gaps are resolved/non-material, and ranking is stable.
 - `best available`: current information supports the choice, but named gaps or conditions could still flip it.
-- `not enough to recommend yet`: material facts, criteria, or options are missing and one focused check or answer could change the recommendation.
+- `not enough to recommend yet`: no defensible ranking is possible at all — material facts, criteria, or options are missing such that even a stated-assumption ranking would be a guess with no basis.
 - `decision needed`: evidence can frame the trade-off, but a human must choose because values, ownership, policy, product meaning, or risk tolerance controls the answer.
 - `options not comparable`: the options optimize for different outcomes or need different criteria; clarify the decision before ranking.
 
