@@ -33,6 +33,18 @@ After drafting, check the plan against the source material with fresh eyes:
 
 Fix issues inline and move on.
 
+## Outside-View Pass
+
+Self-Review checks the plan against its source material: the inside view, where every requirement maps to a task. But a decomposition that covers the spec still inherits the spec's blind spots — an inside-view plan feels complete and systematically under-scopes, because the spec and the breakdown both omit the work everyone knows but no one wrote down. This is the planning fallacy; the correction is the outside view (reference-class forecasting). After Self-Review, run it.
+
+1. Name the reference class. What *kind* of change is this — a schema migration, an auth-provider integration, a new endpoint, a framework bump? The class, not this specific plan, carries the base rate.
+2. Consult the base rate. Prefer this repo's own track record: find comparable past plans, PRs, or changes and read what they actually required; fall back to general knowledge of how that class behaves. The forcing question: *what do changes of this class reliably require that my decomposition left out?* A plan to add an auth provider, for instance, surfaces the token-refresh path, the migration of existing sessions, and the rate-limit handling that the "add OAuth login" spec never named.
+3. Edit the plan in place. Add the missing tasks, widen the ones scoped too thin, and flag the steps this class reliably balloons — qualitatively; the plan stays a task list, not a schedule, so no clock estimates. The common omissions are a provocation to check against, never a checklist to complete: integration glue, data migration and backfill, config and secrets, error and retry paths, test fixtures and infrastructure, rollback, docs, observability, performance under real load. Which of these the reference class actually demands is the judgment; running the list to feel thorough is not. Whatever you add or widen holds to the same Plan Standards as the rest — exact paths, complete code, no placeholders — so the executor follows the new tasks as exactly as the original ones.
+
+This is the reference-class completeness debias, not failure-imagination: consult what this class of work actually required, not what could newly go wrong. If you find yourself inventing novel, plan-specific failure scenarios or wanting dated tripwires, that is `premortem`, a separate pass — here you fix the plan in place. And it corrects under-scoping toward the base rate, not toward gold-plating: add what the class reliably needs, not every task it might conceivably want.
+
+Close honestly. The reference class is one you drew, and a base rate is a prior, not a guarantee — this debiases the plan, it does not certify it complete. Name the class you compared against; do not stamp the plan comprehensive.
+
 ## Artifact And Handoff
 
 Save the plan to `docs/plans/YYYY-MM-DD-<topic>.md` unless the user or repo convention names another location; state the path. Commit only per repo convention or user request. Then name the executor: `execute-plan` for in-session execution, or `to-issues` when the user wants tracker slices instead of a plan run.
