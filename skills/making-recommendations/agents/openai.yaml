@@ -1,4 +1,4 @@
 interface:
   display_name: "Making Recommendations"
   short_description: "Compare viable options with honest readiness"
-  default_prompt: "Use $making-recommendations to compare viable options, avoid ranking muddy or incomparable choices, recommend only when evidence supports it, and label readiness."
+  default_prompt: "Use $making-recommendations to compare viable options, avoid ranking muddy or incomparable choices, score criteria independently for a reproducible ranking, recommend only when evidence supports it, and label readiness."

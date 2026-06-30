@@ -19,6 +19,23 @@ Expected behavior:
 - Recommend one option if the evidence supports it.
 - Mark readiness `best available` if compatibility or package-state details were not verified.
 
+## Multi-Criteria Comparison With A Tradeoff Matrix
+
+User asks:
+
+```markdown
+Should we use Postgres, MySQL, or SQLite for this new multi-tenant SaaS app?
+Weigh cost, our team's ops familiarity, and scaling headroom.
+```
+
+Expected behavior:
+
+- Score each database on one criterion at a time across all three options (cost first for all three, then ops familiarity for all three, then scaling headroom for all three) before forming any overall impression — do not evaluate Postgres start-to-finish, then MySQL, then SQLite.
+- State the basis for each criterion's scale, such as "ops familiarity scored against this team's current stack experience," so the score is reproducible.
+- Because three criteria are scored, render `Ranking` as a tradeoff matrix: rows are Postgres/MySQL/SQLite, columns are cost/ops familiarity/scaling headroom plus the weighting basis, cells are the per-criterion scores.
+- Name the weighting basis used to turn the matrix into a single ranking (for example, "ops familiarity weighted highest because the team ships faster on familiar tooling"), so the user can see it and reweight if they disagree.
+- Recommend one option only if the weighted ranking is stable; otherwise mark `decision needed` if the weighting itself is a values call the user should make.
+
 ## High-Stakes Decision With Gaps
 
 User asks:
@@ -84,3 +101,20 @@ Expected behavior:
 - Name `design-exploration` if the outcome is clear enough but approaches still need design exploration.
 - Ask before switching lanes, then stop. For example: "This is not ready for a recommendation yet because there are not comparable approaches on the table. `design-exploration` is the better lane to shape those approaches. Do you want me to switch into that?"
 - Use `making-recommendations` only after there are serious approaches to compare, such as server-rendered dashboard, client-heavy dashboard, or embedded analytics surface.
+
+## Descope Request Misread As Ranking
+
+User asks:
+
+```markdown
+We're not going to hit the deadline with everything in this release. What
+should we cut?
+```
+
+Expected behavior:
+
+- Recognize this is not a pick-one ranking among rival options — every feature in the release is a candidate for keep, defer, or cut against the deadline, and more than one can survive.
+- Do not silently rank the features as if only one could "win."
+- Name `scope-cut` as the better lane: it partitions one scope into keep/defer/cut against a binding constraint (here, the deadline) and preserves every cut item with a re-entry condition, instead of forcing a single winner.
+- Ask before switching, then stop. For example: "This reads as a descope under a deadline, not a choice between rival options — `scope-cut` is built for partitioning one scope into keep/defer/cut and keeping a re-entry ledger for what's deferred. Do you want me to switch into that?"
+- Use `making-recommendations` instead only if the real ask turns out to be choosing one approach among genuinely rival options (for example, "should we cut feature A or feature B, not both" when only one slot exists), not partitioning the whole release.
