@@ -11,4 +11,4 @@ Load this only for high-stakes decisions: hard-to-reverse choices, broad blast r
 - For each material unknown, state the cheapest check that could resolve it before commitment.
 - For each non-recommended option, state the smallest realistic change that would make it win.
 - Apply the Pre-Ranking Exits from `SKILL.md` (`options not comparable`, `only one serious option`, `material missing detail`) before ranking — high stakes does not loosen or tighten when they apply; re-read their definitions there rather than relying on a restated threshold here.
-- Mark the result `best available` unless gaps are non-material or resolved; use `not enough to recommend yet`, `decision needed`, or `options not comparable` when the high-stakes facts do not support a recommendation.
+- Mark the result `best available` unless gaps are non-material or resolved; escalate to `not enough to recommend yet` only when no defensible ranking is possible at all (per `SKILL.md`'s Pre-Ranking Exits), to `decision needed` when a human values or ownership call controls the answer, or to `options not comparable` when the options need different criteria.

@@ -92,7 +92,7 @@ Handoffs are permissioned and non-silent.
 Match output weight to stakes and user request.
 
 - Pre-ranking exits: use `Decision`, `Why No Ranking`, `Next Move`, and `Readiness`.
-- Use the fuller packet below whenever any of these hold: stakes are medium/high, 3 or more criteria are scored, or the user asks for depth, a matrix, a table, or a side-by-side comparison — low stakes alone does not override these. Otherwise use a concise shape: usually `Recommendation`, `Why`, `Trade-off`, and `Readiness`, with gaps included only when they matter.
+- Use the fuller packet below whenever any of these hold: stakes are medium/high, 3 or more criteria are scored, or the user asks for depth, a matrix, a table, or a side-by-side comparison — low stakes alone does not override these, but an explicit request to keep it brief at low stakes does: use the concise shape and compress the scored criteria into prose rather than dropping them. Otherwise use a concise shape: usually `Recommendation`, `Why`, `Trade-off`, and `Readiness`, with gaps included only when they matter.
 
 Fuller packet:
 
@@ -100,7 +100,7 @@ Fuller packet:
 2. `Stakes`
 3. `Options Considered`
 4. `Criteria`
-5. `Ranking` — render as a tradeoff matrix (options as rows, criteria as columns plus the weighting basis, cells the per-criterion scores from move 5) when 3 or more criteria are scored or the user asked for a matrix, table, or side-by-side comparison; otherwise a ranked list with one line of reasoning per option is enough.
+5. `Ranking` — render as a tradeoff matrix (options as rows, criteria as columns, cells the per-criterion scores from Workflow step 5, with the weighting basis stated as prose alongside) when 3 or more criteria are scored or the user asked for a matrix, table, or side-by-side comparison; otherwise a ranked list with one line of reasoning per option is enough.
 6. `Recommendation`
 7. `Readiness`
 8. `Gaps / What Could Flip`

@@ -32,7 +32,7 @@ Expected behavior:
 
 - Score each database on one criterion at a time across all three options (cost first for all three, then ops familiarity for all three, then scaling headroom for all three) before forming any overall impression — do not evaluate Postgres start-to-finish, then MySQL, then SQLite.
 - State the basis for each criterion's scale, such as "ops familiarity scored against this team's current stack experience," so the score is reproducible.
-- Because three criteria are scored, render `Ranking` as a tradeoff matrix: rows are Postgres/MySQL/SQLite, columns are cost/ops familiarity/scaling headroom plus the weighting basis, cells are the per-criterion scores.
+- Because three criteria are scored, render `Ranking` as a tradeoff matrix: rows are Postgres/MySQL/SQLite, columns are cost/ops familiarity/scaling headroom, cells are the per-criterion scores.
 - Name the weighting basis used to turn the matrix into a single ranking (for example, "ops familiarity weighted highest because the team ships faster on familiar tooling"), so the user can see it and reweight if they disagree.
 - Recommend one option only if the weighted ranking is stable; otherwise mark `decision needed` if the weighting itself is a values call the user should make.
 
