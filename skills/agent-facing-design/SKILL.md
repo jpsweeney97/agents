@@ -87,7 +87,7 @@ Do not silently become a UX audit, design interview, review report, skill-writin
 
 ## Calibration
 
-Read [references/calibration.md](references/calibration.md) when the case is borderline, the surface has grown, or you are about to add schemas, workflow stages, validators, routers, classifiers, scoring, confidence fields, semantic decision scripts, or hard rules.
+Read [references/calibration.md](references/calibration.md) when the case is borderline, the surface has grown, you are shaping what a tool returns to a calling agent, or you are about to add schemas, workflow stages, validators, routers, classifiers, scoring, confidence fields, semantic decision scripts, or hard rules.
 
 Use the examples for judgment, not checklist compliance.
 

@@ -65,6 +65,15 @@ A skill that offers a checklist as optional calibration is context. A skill that
 
 When a workflow starts feeling disproportionate, ask whether it still helps the agent do the user's work or whether the machinery has become the customer.
 
+### Tool Returns
+
+A tool's response is context the calling agent acts on next, so the same distinction runs on it: return what helps the agent decide, not machinery that decides for it. Read your own response back from the caller's chair — no memory of the call, no human to ask — and see whether the next step falls out of it.
+
+- A return that hands the agent evidence, state, and the identifiers its next call needs is context. A return that hands back a verdict, a mandated next step, or a classification the agent should have made itself has decided for the caller.
+- A raw dump the agent must wade through or decode — the whole result set inline, raw storage rows, internal enums — is heavier than the work; prefer the agent-meaningful view plus a handle to the rest.
+- Silent truncation or a dropped page is a wrong value the agent cannot see; signal what was cut. This is the Keep case on a return: the wrong value degrades the work.
+- An error that names what to try next is context; one that only reports what broke leaves the agent guessing. The repo's `{operation} failed: {reason}. Got: {input!r:.100}` is one such shape, not a required one.
+
 ## Whole-Surface Check
 
 Small additions can accumulate into a rigid surface. Step back when a surface has grown materially, has seen heavy recent change, or makes you hesitate.
