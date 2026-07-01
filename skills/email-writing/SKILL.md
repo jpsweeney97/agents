@@ -34,8 +34,10 @@ Default to one complete draft, not a menu of full variants.
 Include:
 
 1. A plain subject line.
-2. The email body.
+2. The email body, always in a fenced Markdown code block in chat for easy copying.
 3. A short note outside the draft explaining the main style choice or offering one or two alternate phrasings.
+
+Place only the body inside the code block. Keep the subject line and style note outside it. The code block is chat presentation only; if using a mail tool to create or send the message, strip the fences and use only the body text.
 
 Keep the note short. It is there to help JP steer the draft, not to analyze the writing.
 
