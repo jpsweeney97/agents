@@ -58,6 +58,13 @@ This is a lens, not a label. There is no skill class to declare, score, or valid
 
 This section and `scrutinize-skill` are themselves judgment skills: hold any edit to them to the bar above — add a lens, not a score or required section.
 
+## Library Conventions
+
+Two output conventions run through the skill library as practiced but previously unwritten law; they are stated here so a new or edited skill lands on the right side deliberately rather than by drift. Both are context for the designing agent, not a validator.
+
+- **Verdict partition.** Exploratory and adversarial skills (`ideate`, `premortem`, `red-team`, `steelman`) render no verdict: their output is deliberately one-sided or divergent, and a bolted-on verdict gets mistaken for the calibrated call, short-circuiting the owner that should weigh the full picture. Decision-owning skills (`closeout-check`, `deploy-plan`, `outcome-check`) render exactly one. Place a new skill on one side on purpose; a skill that both explores and adjudicates is two skills.
+- **Close packet.** A skill whose output gates a downstream action or chains into another skill closes with a compact labelled field:value shape (`closeout-check`'s verdict block, `deploy-plan`'s bake-read) so the next reader — human or skill — can branch without re-parsing prose. Read-only, exploratory, and dialogic skills keep their native close; forcing a packet on them is waste, not discipline.
+
 ## When Machinery Survives
 
 Keep the surviving machinery narrow. Be able to say plainly:

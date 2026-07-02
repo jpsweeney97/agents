@@ -32,7 +32,7 @@ Follow each task's steps exactly, run every verification as written, and treat t
 
 ## Pace And Stops
 
-Execute continuously; do not pause between tasks to ask whether to continue. Stop only for: a blocker you cannot resolve, repeated verification failure, a plan gap or ambiguity that genuinely prevents progress, or completion. Ask rather than guess.
+Execute continuously; do not pause between tasks to ask whether to continue. Stop only for: a blocker you cannot resolve, repeated verification failure, a plan gap or ambiguity that genuinely prevents progress, or completion. Ask rather than guess. When resuming after an interruption, re-verify the last task's actual state before re-running it: a non-idempotent step — a migration applied, a message sent, a record inserted — double-applies silently if redone, so resume from verified state, not from where the plan says you were.
 
 ## Completion
 
