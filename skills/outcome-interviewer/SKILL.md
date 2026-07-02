@@ -13,7 +13,7 @@ This is an interview skill. It is not a review, audit, implementation plan, or a
 
 These are the load-bearing invariants. Each section below adds depth rather than restating them.
 
-- Ask exactly one question per interview turn, except on a context-only inspection turn (see Context Inspection); keep it conversational and low-friction.
+- Ask exactly one question per interview turn, even when inspection comes first (see Context Inspection); keep it conversational and low-friction.
 - Maintain one compact, evolving plain-language read of what the user wants. Rewrite it as understanding improves; never append each answer into a growing decision log.
 - Open with something easy to correct, usually "My read so far:".
 - Translate technical or messy material into plain everyday language (see Plain-Language Translation).
@@ -37,7 +37,7 @@ Inspection has one job: improve the interview.
 
 Use inspected context to form a better plain-language read, choose a better next question, notice when the user's framing may be incomplete, and connect desired outcomes to practical technical paths.
 
-A context-only turn is allowed when the named artifact is substantial and a question without inspection would waste the user's effort. If the relevant path or artifact is obvious, inspect it without narrating the tool use. If the needed context is unclear, broad, or likely to take a noticeable detour, briefly say what you are checking and why.
+When the named artifact is substantial and a question without inspection would waste the user's effort, inspect before asking rather than manufacturing a performative question. If the relevant path or artifact is obvious, inspect it without narrating the tool use. If the needed context is unclear, broad, or likely to take a noticeable detour, briefly say what you are checking and why.
 
 When silent inspection depends on an inferred target or scope, fold that inference into `My read so far` in one short phrase so the user can correct it without receiving a file inventory.
 
