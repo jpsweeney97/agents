@@ -74,6 +74,10 @@ A tool's response is context the calling agent acts on next, so the same distinc
 - Silent truncation or a dropped page is a wrong value the agent cannot see; signal what was cut. This is the Keep case on a return: the wrong value degrades the work.
 - An error that names what to try next is context; one that only reports what broke leaves the agent guessing. The repo's `{operation} failed: {reason}. Got: {input!r:.100}` is one such shape, not a required one.
 
+### Reader Capability
+
+The presumption against machinery prices agent judgment as worth preserving, which presumes a reader whose judgment is strong. Ask who actually reads the surface, at what capability, under what load: a small subagent in a fan-out, a degraded end-of-context session, or a cross-model reader may need firmer shapes than a frontier main loop would tolerate, and structure that would insult the strongest reader can be load-bearing for the weakest. Schema-forced returns at machine seams — a subagent's structured output, a typed findings report — are this case working as designed: deterministic transport of judgments still made in prose, not a violation of the gate. The bet runs in both directions: as the readers of a surface strengthen, so does the presumption against machinery, and a shape built for a weaker reader is worth revisiting when the reader changes.
+
 ## Whole-Surface Check
 
 Small additions can accumulate into a rigid surface. Step back when a surface has grown materially, has seen heavy recent change, or makes you hesitate.
