@@ -7,7 +7,7 @@ description: "Use when the user wants to stress-test a plan or design against a 
 
 If no plan, design, or decision is already in context, first ask what I want to be grilled on — and orient on any existing `CONTEXT.md`/`CONTEXT-MAP.md` and `docs/adr/` for the area — before starting.
 
-Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer, always in a fenced Markdown code block in chat for easy copying.
 
 Ask the questions one at a time, waiting for feedback on each question before continuing.
 
