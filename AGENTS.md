@@ -46,7 +46,7 @@ Whether to build or keep a skill turns on that merit, never on local observabili
 
 ## Repo Docs
 
-- `docs/agents/charter.md` — contracts charter governing admission, extraction, and retirement of behavior contracts. Skills and commands are build-and-prune and are not charter events (build/prune freely); consult the charter only before the gated events it names: authoring or retiring an always-loaded contract (a rule, an AGENTS.md line, or a hook), installing contract-shipping material, or deciding the fate of third-party material.
+- `docs/agents/charter.md` — contracts charter governing admission, extraction, and retirement of behavior contracts. Skills and commands are build-and-prune and are not charter events (build/prune freely); consult the charter only before the gated events it names: authoring or retiring an always-loaded contract (a rule, an AGENTS.md line, or a hook), authoring a skill that can fire unattended or wields irreversible-effect tools, installing contract-shipping material, or deciding the fate of third-party material.
 - `docs/agents/contract-decisions.md` — the append-only decision ledger the charter requires: one entry per gated charter decision (admission, fold, rejection, park, retirement of an ambient contract or third-party material; build-and-prune skill/command churn is not ledgered) with an evidence pointer. The durable, runtime-neutral record; append, never rewrite settled entries.
 - `docs/agents/issue-tracker.md` — issues are tracked in GitHub Issues for `jpsweeney97/agents`.
 - `docs/agents/triage-labels.md` — the default five-label triage vocabulary.

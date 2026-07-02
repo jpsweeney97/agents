@@ -1,6 +1,6 @@
 # Behavior Contracts Charter
 
-What earns a place in this environment, and on what terms. Skills and commands are build-and-prune and are **not** charter events — build them whenever they seem worth trying, prune them freely when they do not (see Reversibility Class). Consult this only before the events that stay gated: authoring or retiring an always-loaded contract (a rule, an AGENTS.md line, a hook, any ambient instruction), installing anything that ships contract text, or deciding the fate of third-party contract material. Every surface that routes here must name these gated events; a pointer that gates skill or command authoring over-triggers the charter.
+What earns a place in this environment, and on what terms. Skills and commands are build-and-prune and are **not** charter events — build them whenever they seem worth trying, prune them freely when they do not (see Reversibility Class). Consult this only before the events that stay gated: authoring or retiring an always-loaded contract (a rule, an AGENTS.md line, a hook, any ambient instruction), authoring a skill that can fire unattended or wields irreversible-effect tools (see Reversibility Class), installing anything that ships contract text, or deciding the fate of third-party contract material. Every surface that routes here must name these gated events; a pointer that gates ordinary skill or command authoring over-triggers the charter.
 
 ## Scope
 
@@ -19,7 +19,7 @@ How much a contract is gated turns on one thing: whether a bad one is *caught ch
 - **Build-and-prune — skills and commands.** A skill fires *visibly*: both runtimes surface every invocation, including model-initiated ones, so a mis-fire or a stolen fire shows up in the transcript the moment it happens. And it is *modular* — a directory you trash. So build one whenever it seems worth trying, judge it by watching it fire on real work, and prune it freely when it does not earn its place. No observed-friction proof, no admission test, no park, no ledger entry, no archive step. Healthy churn is the design, not a failure — the library is meant to turn over.
 - **Gated — rules, AGENTS.md lines, hooks, any always-loaded instruction.** An ambient contract has *no visible fire*: it shapes every response with no trigger in the transcript, so you cannot watch it mis-fire. And it is *entangled* — woven into surrounding guidance, so removing it has non-local effects you will not reliably notice. You can neither see it go wrong nor cleanly prune it, so it keeps the full Admission and Retirement discipline below.
 
-Infer the class from whether the contract fires visibly and prunes cleanly; this is a lens, not a label to declare. Third-party material is gated regardless of class — its risk is authorship coherence (Thesis), not reversibility.
+Infer the class from whether the contract fires visibly and prunes cleanly; this is a lens, not a label to declare — and it reads on capability, not packaging. A skill that can fire unattended (a cron routine, a remote trigger, a subagent dispatch no human reads at call time) does not fire visibly, and a skill that wields irreversible-effect tools (send, merge, force-push, delete) does not prune cleanly — trashing the directory undoes the instructions, not a sent email or a merged branch. A skill with either property is gated despite its packaging. Third-party material is gated regardless of class — its risk is authorship coherence (Thesis), not reversibility.
 
 ## Thesis
 
@@ -39,7 +39,7 @@ Merit decides, authorship-blind: a better contract is a better contract, whereve
 
 - What work does it own that no existing lane owns? Name the closest existing contract and why this work is not its job.
 - What misroute or failure does it prevent that lighter context — an AGENTS.md line, a reference file in an existing skill — would not?
-- Can it be authored to house standards — Use-when/Do-not-use boundaries, proof-class discipline, availability-conditioned routing, dual-runtime phrasing where it applies? The test applies to the contract as it will land here, not the source's current form.
+- Can it be authored to house standards — Use-when/Do-not-use boundaries, proof-class discipline, availability-conditioned routing, dual-runtime phrasing where it applies — and does it say plainly what an agent who encounters it must do? The test applies to the contract as it will land here, not the source's current form.
 
 Run the test on observed work, not the routing graph. A genuine gap and a non-job both show zero inbound routes, so "nothing routes to that lane" never decides a rejection. Rejecting a candidate takes the same evidence discipline as admitting one: name the friction you looked for — misroutes, repeated corrections, work handled badly ad hoc — and where in observed work you looked without finding it. Rejections are cheap and admissions are paid for; do not let that asymmetry stand in for the merit call.
 
