@@ -1,0 +1,69 @@
+---
+type: review
+created: 2026-07-02
+status: frozen record — a dated challenge adjudication, never edited in place; superseded only by a later challenge or by the evidence programs it commissions
+source: JP-initiated adversarial challenge of the skill framework (2026-07-01 → 02 session), argued prosecution → defense → adjudication by the session agent, deliberately without the framework's own review rigs
+---
+
+# Framework challenge: the skill philosophy adjudicated, and the evidence programs it commissioned
+
+JP: "I want you to really challenge the framework/philosophy/process around skills that this repo has established — it has gone unchallenged for too long and I am starting to feel like there are some real issues." This is the frozen record of that challenge: the prosecution's case, the defense at full strength, the adjudication, the change-set JP approved, and the branch commitments that bind how the commissioned evidence is read. Future capability reviews and prune deliberations should read this document.
+
+## Epistemic status
+
+Single-judge (JP) and single-advocate (one Claude agent arguing both sides), conducted inside the framework's own context after a full throughline read — the circularity critique below applies to this challenge too. The change-set was therefore chosen to be verdict-free: nothing below requires believing the prosecution; every change only makes the value question answerable. The deliberate method choice: no `scrutinize`, no multi-agent Workflow — every prior "challenge" ran on the framework's own rigs with reviewer prompts in its vocabulary, which is part of why it never produced real challenge.
+
+## The prosecution (as adjudicated — not all findings survived)
+
+1. **Self-sealing value theory.** Timeline: Eras 30–31 cross-model test → 6 of 8 tested skills MODEL-HANDLED, 1 counterproductive; Era 32 → cognitive-offload lens promoted to load-bearing; Era 34 → offload metric declared "not constructible," lens-never-score; Era 46 → merit frame installed into always-loaded AGENTS.md including "'I could just do this myself' … is never on its own a reason to discount a skill." Composite: a value theory unfalsifiable by construction, with an ambient prior instructing every future agent away from its main skeptical instinct.
+2. **The experimental record is a null the record never aggregates.** ~14 skill-squad fires; blind careful-default controls reproduced the design shape in essentially all; exactly one genuinely different-shape beat (Era 39). Each null honestly recorded, each reframed as ROI ("the kills"), never summed.
+3. **Build-and-prune is build-and-keep.** Pruning requires a sensor; none existed. Nothing recorded which skills fire on real work. 76 live skills; ~3 early retirements plus one privacy cut; zero skills ever pruned on use evidence. Dozens of named "first-to-prune" watch signals with nothing watching.
+4. **The apparatus became the career repo.** The repo's own diagnosis of `/Users/jp/career` — machinery guarding the thing that was never broken — describes the era apparatus: a 98KB THROUGHLINE.md read in full each session (+40% in two weeks), 125 handoffs, publish trains, canaries, while the actually-unguarded thing (value in use) had no instrumentation.
+5. **Routing surface tax.** ~4,700 words of descriptions (~6k tokens) load into every session; descriptions in an exclusion arms race; fences the records themselves call "n=1 fragile"; 76 tokens exceed human recall.
+6. **The narrative engine selects for building.** Era headlines celebrate shipping; "library N → N+1" reads as a scoreboard; capability reviews over-propose by their own admission; 47 "do not"s in the throughline pre-refute challenge classes; no era's headline is "used the skills, built nothing."
+
+## The defense (at full strength)
+
+1. **The null results are near-tautological.** Squad controls were handed a distilled brief — give a strong model the spec of a skill and it reproduces the skill (Era 50 named the mechanism: "a brief that fully enumerates the kernel pre-loads the control"). Live use has no brief; the skill IS the brief. The data measures design-time convergence, not run-time value.
+2. **Cognitive-offload is probably true and predicts the nulls.** The aviation-checklist analogy: every item model-handled, value in consistency under load — invisible in single-shot mean comparisons because it lives in the variance. A skill pins the high tail of a stochastic model's distribution. Theory-revision-after-falsification is updating, not immunizing — provided the new theory is testable.
+3. **Routing tax is small.** ~3% of a context window; the agent is the index (the user needn't recall 76 tokens); a dictionary isn't indicted by words you can't recall.
+4. **Build-path is not write-path.** The career repo's machinery taxed every artifact write; this apparatus sits in build/resume paths, ships plain prose artifacts, and has demonstrated skill-level antibodies (killed risk-register, collapsed incident-response bookkeeping, refused metrics and certificates). Humans pay minutes; machines pay the rest.
+5. **The counterfactual accounting is unfair.** The repo produced transferable method — blind controls, adversarial verification, mediating assessments, red-team-the-winner, sensitivity analysis — which was pointed at JP's live job-offer decision (2026-07-01) with a genuinely good outcome. Method exports are real payoff independent of inventory.
+
+## Adjudication
+
+- **Finding 5 (routing tax) FALLS** — keep only the description exclusion-arms-race as a crowding watch signal.
+- **Finding 2 TRANSFORMS**: the defense wins the tautology point, at the price of conceding the tests were incapable of measuring live value. The indictment shifts to: after 64 eras and tens of millions of validation tokens, no experiment ever measured the one quantity the enterprise depends on. Every instrument points inward — forward tests measure obedience, squad controls measure design convergence, consistency audits measure coherence; none measures value.
+- **Finding 1 NARROWS and sharpens**: the offload theory itself survives. What stands: (a) Era 34's "metric not constructible" overreached — a variance test (N-rep consistency on messy prompts, with/without skill) and a revealed-preference test (does usage happen unprompted?) are both constructible and were never run; (b) whatever the theory's truth, installing it as an ambient prior degrades the system's ability to notice if it stops being true. Defending the belief does not defend the installation.
+- **Finding 4 SPLITS**: build-path/write-path distinction is real and skill-level antibodies are real, but the antibodies have never operated at the apparatus level — skills get killed and folded; the throughline, era discipline, and publish trains only accrete. The throughline's size discipline concretely failed.
+- **Finding 6 SPLITS**: object-level do-nots with named reopen triggers are legitimate case law; the meta-level fences ("leniency construction is exhausted," "never re-impose prove-it-first under any label") pre-refute whole challenge classes, and the celebration asymmetry (no consumption-headlined era) stands.
+- **Finding 3 SURVIVES FULLY and is the crux**: every successful defense line takes a loan against evidence that doesn't exist — live-fire value (D1), variance and revealed preference (D2), agent-as-index routing (D3), the benefit side of the cost ledger (D4). Both cases route through the same missing sensor. Most damning: the falsification instrument existed — `skill-benchmark` (built Era 12, with/without-skill eval runs, variance across trials) sat in the library through three weeks of validation activity and was pointed at trigger-phrase optimization, never at the value question.
+
+**Verdict**: the library is very likely a valuable core plus an unknown-value tail — neither the bloated failure the prosecution first implied nor the validated success the record's tone implies. The scandal is not the tail's existence (build-and-prune legitimately permits speculative inventory); it is that prune had no sensor, the value theory had no test, and both gaps persisted through 64 eras that possessed the tooling to close them.
+
+## What honestly survives the attack
+
+The handoff/load/throughline resume machinery (demonstrated value, recurring); the honesty discipline (honest nulls, honest-limits ledgers, evidence-before-claims — the framework's best export, and the reason this challenge could be written from its own records); the safety floors; the two cross-model-certified guards (`release-cut`, `gh-address-comments`); the visibly hot working set (see first sensor read); the methodology exports (the 2026-07-01 offer analysis is a live, high-stakes, real-world payoff of framework-developed method).
+
+## The change-set (JP-approved, 2026-07-02)
+
+1. **Prune got its sensor** — `scripts/skill-usage-miner.py` (backfill + re-runnable refresh over `~/.claude/projects` transcripts, main + subagent) and `scripts/skill-usage-hook.py` (user-level PostToolUse hook on the Skill tool, live-validated mid-session), both writing the cumulative deduped ledger at `~/.claude/logs/skill-usage-ledger.jsonl`. Capability tooling, zero agent obligations, zero JP friction. Named consumer: any future capability review and every prune deliberation. Known coverage gaps: Codex-side fires invisible (e.g. `email-writing`'s real athenahealth fire happened outside Claude transcripts); pre-retention history is gone; skills exercised via direct prompting rather than the Skill tool don't register.
+2. **The value test is designed and banked, not run** — see `docs/plans/2026-07-02-skill-value-test-plan.md`. Pre-registration required before running; branch commitments recorded there.
+3. **The ambient line was amended via the charter path** (gated; ledger entry 2026-07-02 in `docs/agents/contract-decisions.md`): AGENTS.md now states global fire is measurable, keep/prune deliberations should consult the ledger, sustained global silence is legitimate prune input — never an automatic verdict — and admission stays ungated by proof. Gate-on-build stays dead; only KEEP is exposed to evidence.
+4. **The throughline went on a diet** — the handoff plugin's `throughline` skill gains a ~32KB size budget with oldest-first compression (SKILL.md Synthesis + references/throughline-format.md Size; handoff plugin 3.1.2 → 3.2.0); the failed claim was load-handoff's "size discipline keeps a full read cheap" at 98KB. The budget takes effect at the next `/throughline` refresh.
+5. **This record** — landed frozen so the challenge has standing against future relitigation.
+
+Deliberately NOT done, with reasons: no mass pruning (no evidence yet; acting on vibe repeats the framework's sin mirrored); no build moratorium (the engineering lane is already deprioritized; measurement outranks speculative building as a prioritization judgment, never an admission gate); no repudiation of the offload theory (probably substantially true; now testable instead of untested); no framework-health apparatus (dashboards, scheduled self-audits, metrics regimes — the disease offering itself as the cure).
+
+## First sensor read (2026-07-02 backfill) and branch commitments
+
+Backfill over 5,893 Claude Code transcripts (~6 weeks retained, which covers most of the library's life; repo began ~2026-06-10): **1,081 skill fires; 36 of 76 roster skills ever fired; 40 never fired; hot core ≈13** (handoff:load 164, handoff:save 147, handoff:throughline 99, agent-facing-design 46, merge-branch 33, scrutinize 26, behavior-smoke-test 22, scrutinize-skill 19, outcome-interviewer 16, making-recommendations 14, skill-squad 13, writing-principles 12 — plus the retired review-reviewer at 34, which out-fired ~90% of the living library). The zero-fire set includes nearly the entire Era-36–58 engineering build wave.
+
+Read honestly against the pre-registered branches: this leans toward the hot-core/dead-zone shape, but does not yet trigger the prune branch — the newest ~20 builds are ≤2 weeks old, the engineering lane was deprioritized by JP on 2026-07-01 (by design, not by failure), and Codex-side fires are invisible to this ledger. **Commitment: re-read the ledger on or after 2026-08-01.** If the zero-fire set is still broadly zero after a month of live hook coverage, tranche-based pruning of never-fired skills begins (oldest and least-storied first, archive not delete); if firing has spread, the tail earns partial vindication and pruning stays light. Either way the data is read as recorded — no post-hoc reframing of the branches.
+
+## Precision refinements carried (ride handoff→throughline, no frozen history edited)
+
+- **Era 34 narrowed**: "cognitive-offload metric not constructible" stands only for offload-as-freed-attention (the prompt never typed — genuinely not scorable non-circularly). It never covered reliability-variance (N-rep consistency, testable via `skill-benchmark`) or revealed preference (testable via the usage ledger). Those were always constructible and are now built or banked.
+- **The prove-it-first fence scoped**: dead as an ADMISSION gate under any label (Eras 4/11/13/19/46 stand); alive as evidence on KEEP — which Era 46's own text already conceded ("an observed mis-fire is valid prune evidence") without an instrument to see one.
+- **Reporting posture**: "forward-tested" is obedience evidence, never value evidence; the record's tone must not stand in for validation status; usage data is a standing input to future capability reviews.
+- **The recurring failure this challenge adds to the anti-pattern list**: instruments that only point inward. When the next validation apparatus is proposed, ask first what it measures — obedience, convergence, coherence, or value — and say so in the artifact.
