@@ -25,7 +25,7 @@ A capable agent told "what could go wrong" already lists risks, so premortem ear
 
 ## The moves — a rhythm, not a fill-in template
 
-1. **Pin the committed plan; confirm it is chosen.** State in one line the plan, design, or decision being premortemed and that it is settled enough to fail. If the plan is *not yet chosen*, premortem is the wrong lane — widening options is `ideate`, picking among them is `making-recommendations`, shaping one is `design-exploration`. If the *goal itself* is too muddy to say what "failed" would mean, hand to `outcome-interviewer`. premortem assumes a commitment and hardens it; it never re-opens the choice.
+1. **Pin the committed plan; confirm it is chosen.** State in one line the plan, design, or decision being premortemed and that it is settled enough to fail. If the plan is *not yet chosen*, premortem is the wrong lane — widening options is `ideate`, picking among them is `making-recommendations`, shaping one is `design-exploration`. If the *goal itself* is too muddy to say what "failed" would mean, hand to `outcome-shaping`. premortem assumes a commitment and hardens it; it never re-opens the choice.
 2. **Assert the failure as accomplished fact — the debiasing engine.** Write it in the past tense, concretely: "it is N months later; this shipped and failed." Pick a horizon that fits the plan (weeks for a launch, months for a strategy). Stating the failure as already-true is the whole mechanism — do not soften it back into "it might not work," which surrenders the prospective-hindsight effect.
 3. **Generate the field of past-tense accidental causes, from rotating provocations.** Work backward: *what had to have gone wrong for this to be the outcome?* Rotate the lenses an eager model skips — a load-bearing assumption turned out false; a dependency drifted, broke, or was slower than assumed; the plan contradicted itself under load; the people changed, left, or were never aligned; the context or market moved; the thing everyone assumed someone else owned; the slow erosion no single day caused. Indifferent universe only — never an attacker (that is `red-team`). Use the provocations that bite; drop the rest.
 4. **De-cluster on mechanism, not clothes.** Two causes collapse to one if they would fire for the same underlying reason — same load-bearing assumption or failed dependency. Where the *whole field* shares one hidden assumption, name it aloud and surface the cause that violates it. A different provocation that produced the same mechanism is still one cause.
@@ -45,7 +45,7 @@ Stop the instant another pass yields nothing mechanism-distinct (the stable-fiel
 - The user wants a go/no-go or readiness verdict, or a formal adversarial stress test → `scrutinize`.
 - The threat is a motivated adversary, not accident → `red-team`.
 - A real incident already happened → `postmortem` (after, with facts), not premortem (before, imagined).
-- The goal is too muddy to say what "failed" means → `outcome-interviewer`.
+- The goal is too muddy to say what "failed" means → `outcome-shaping`.
 
 ## Build-and-prune note
 

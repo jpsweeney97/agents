@@ -7,7 +7,7 @@ description: "Use when intent changed mid-stream and the artifacts it flowed int
 
 When intent changed mid-stream and the artifacts it flowed into — PRD, acceptance map, plan, issues, code — have gone stale against the true current intent, reconcile them: surface each drift, take the human's direction decision, then drive the fix through the owning skills. Invocation: `/spec-drift-reconcile` or `$spec-drift-reconcile`.
 
-The forward chain (`outcome-interviewer → to-prd → acceptance-map → implementation-planning → to-issues → execute-plan`/`tdd`) is generate-once and one-directional. When intent moves, the agent tends to patch the leaf — the code, or one artifact — while everything upstream silently rots. This skill is the reconciliation path that chain lacks.
+The forward chain (`outcome-shaping → to-prd → acceptance-map → implementation-planning → to-issues → execute-plan`/`tdd`) is generate-once and one-directional. When intent moves, the agent tends to patch the leaf — the code, or one artifact — while everything upstream silently rots. This skill is the reconciliation path that chain lacks.
 
 ## The cardinal invariant
 
@@ -29,7 +29,7 @@ A stale spec and a buggy implementation are indistinguishable from the artifacts
 2. **Cluster.** Trace the artifact drifts to the underlying intent change and ask one direction question per intent change, not one per diff. Surface the clustering for correction ("I read these four drifts as one decision — sync vs async — right?").
 3. **Resolve authority — consume `baseline`.** If which artifact even *is* the spec is unclear, invoke `baseline`, take its authority verdict in as evidence, and re-derive no precedence yourself.
 4. **Construct decidability.** For each intent question, assemble both sides' evidence, the coherent candidate directions, and each direction's blast radius (which artifacts change, plus any interface delta → `contract-change-propagation`). Offer a recommended reading, clearly a recommendation. This provokes the decision; it does not make it.
-5. **GATE — elicit and record.** Ask the single direction question; capture the human's true current intent and write the decision record (question, chosen direction, rationale, per-artifact target). Nothing is mutated before this record exists. Run the elicitation in `outcome-interviewer`'s one-question style, but own it — the question is "which of *these* directions, given *this* blast radius."
+5. **GATE — elicit and record.** Ask the single direction question; capture the human's true current intent and write the decision record (question, chosen direction, rationale, per-artifact target). Nothing is mutated before this record exists. Run the elicitation conversationally — one question per intent change — but own it — the question is "which of *these* directions, given *this* blast radius."
 6. **Dispatch along the record, in dependency order** — orchestration only (see Tension 2).
 7. **Reconcile-faithfulness.** After each owner runs, confirm its output matches the recorded direction (the regenerated check now says 202, not "blocks until ready"). This is the skill's own check, not a new test runner.
 8. **Hand off.** Done-ness → `closeout-check`; landing → the protected-branch floor + `git-cycle`. Never commit on a protected branch; re-inline none of that apparatus.
@@ -53,7 +53,7 @@ Each owner keeps its own downstream gate, and they stack with this one: this gat
 
 - Read-only until the gate; orchestrated (or surgically-scoped) mutation after; never commit on a protected branch; landing deferred to `git-cycle`, done-ness to `closeout-check`.
 - Down-route a pure mechanical noun-drift with no bug-vs-intent question (a symbol was unambiguously renamed) to `doc-drift-audit` + `/triage`. Its routed-out behavioral/intent worklist is, conversely, a feed *into* here.
-- Hand a muddy intent the human has not yet formed to `outcome-interviewer`; a direction needing net-new design ("keep it synchronous, solve the timeout another way") to `design-exploration`. This skill reconciles a drift; it does not design the new thing.
+- Hand a muddy intent the human has not yet formed to `outcome-shaping`; a direction needing net-new design ("keep it synchronous, solve the timeout another way") to `design-exploration`. This skill reconciles a drift; it does not design the new thing.
 - The decision record is reconciliation-scoped, not a durable ADR.
 
 ## Fence

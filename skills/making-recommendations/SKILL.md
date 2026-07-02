@@ -1,6 +1,6 @@
 ---
 name: making-recommendations
-description: "Use when the user asks for a recommendation, comparison, trade-off, ranking, or decision between two or more serious options already on the table (`which is better`, `help me decide`, `should I choose X or Y`). Do not use for factual questions, trivial preferences, or partitioning one already-shaped scope into keep/defer/cut under a deadline, risk, or capacity constraint (`scope-cut`); when no concrete options are named yet, clarifying a muddy goal is `outcome-interviewer` and shaping a design is `design-exploration`."
+description: "Use when the user asks for a recommendation, comparison, trade-off, ranking, or decision between two or more serious options already on the table (`which is better`, `help me decide`, `should I choose X or Y`). Do not use for factual questions, trivial preferences, or partitioning one already-shaped scope into keep/defer/cut under a deadline, risk, or capacity constraint (`scope-cut`); when no concrete options are named yet, clarifying a muddy goal is `outcome-shaping` and shaping a design is `design-exploration`."
 ---
 
 # Structured Recommendations
@@ -25,7 +25,7 @@ Before ranking, check whether the decision, serious options, constraints, failur
 
 - If a missing detail leaves no defensible basis to rank at all, ask one question and stop (`material missing detail`); if a ranking is still possible on stated assumptions, proceed and name the gap instead.
 - If the user asks to be grilled, stress-tested, challenged, or drilled on a decision, name `grill-me` as the better lane and switch only when the same message explicitly asks for that workflow.
-- If the ask needs clarification rather than choice, name `outcome-interviewer` as the better lane, say why, and ask before switching.
+- If the ask needs clarification rather than choice, name `outcome-shaping` as the better lane, say why, and ask before switching.
 - If the ask needs design exploration before a choice can exist, name `design-exploration` as the better path, say why, and ask before switching.
 - If the ask is really a constraint-driven descope — partitioning one already-shaped scope into keep/defer/cut under a deadline, risk, or capacity limit — name `scope-cut` as the better lane, say why, and ask before switching instead of ranking "what to cut" as if the cut items were rival options for one slot.
 - If enough is clear to proceed, state any assumptions before evaluating.
@@ -46,7 +46,7 @@ Handoffs are permissioned and non-silent.
 - Do not silently continue under another skill after `making-recommendations` triggers.
 - When another lane is better, name the lane, say why recommendation cannot proceed yet, ask whether to switch, and stop.
 - If the user already explicitly asked for the adjacent workflow in the same message, you may switch after naming the move.
-- Use `outcome-interviewer` when the desired outcome, criteria, or real decision is still muddy.
+- Use `outcome-shaping` when the desired outcome, criteria, or real decision is still muddy.
 - Use `grill-me` when the user wants an interactive pressure test of a decision, not a one-shot recommendation.
 - Use `design-exploration` when the user needs design exploration before serious options exist.
 - Use `scope-cut` when the request partitions one scope into keep/defer/cut against a binding constraint, not a pick-one ranking among rival options.

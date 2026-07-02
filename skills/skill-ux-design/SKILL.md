@@ -26,7 +26,7 @@ Route the primary request elsewhere when the user's main intent is different:
 - Use `writing-principles` for plain instruction clarity, prose quality, or instruction-doc editing not framed as skill UX.
 - Use the relevant review-family or skill-focused scrutiny lane for adversarial review of a skill behavior contract.
 - Use `agent-facing-design` for "should we add machinery?" questions.
-- Use `outcome-interviewer` for open-ended outcome clarification.
+- Use `outcome-shaping` for open-ended outcome clarification.
 - Use `grill-me` for pressure-testing a proposed design.
 
 Inside a `skill-ux-design` run, neighboring concerns may still be inspected as causes of UX friction. Prose quality matters when it changes what the user understands. Trigger scope matters when the user cannot predict invocation. Agent-facing machinery matters when it creates visible rigidity, slowness, noisy reporting, missed context, or over-questioning.

@@ -1,6 +1,6 @@
 ---
 name: design-exploration
-description: "Use when the user wants to explore and settle a design before implementation: shaping a clear-enough outcome into compared approaches and an approved design or spec. Do not use for clarifying a still-muddy outcome (`outcome-interviewer`), choosing between already-comparable options (`making-recommendations`), pressure-testing an existing plan or design (`grill-me`), implementation, prototyping, or PRD/issue publication."
+description: "Use when the user wants to explore and settle a design before implementation: shaping a clear-enough outcome into compared approaches and an approved design or spec. Do not use for clarifying a still-muddy outcome (`outcome-shaping`), choosing between already-comparable options (`making-recommendations`), pressure-testing an existing plan or design (`grill-me`), implementation, prototyping, or PRD/issue publication."
 ---
 
 # Design Exploration
@@ -10,7 +10,7 @@ Turn a clear-enough outcome into an approved design through collaborative explor
 ## Trigger Boundaries
 
 - Use when the desired outcome is clear enough to design against and the user wants approaches explored or a design shaped.
-- If the outcome itself is still muddy, name `outcome-interviewer` and ask before switching.
+- If the outcome itself is still muddy, name `outcome-shaping` and ask before switching.
 - If serious comparable options already exist and the user wants a choice, name `making-recommendations`.
 - If the user wants an adversarial stress test of an existing design, name `grill-me` or the relevant review lane.
 - If a design question is genuinely uncertain in a way only running code can answer, offer `prototype` for that question and fold its answer back into the design.
