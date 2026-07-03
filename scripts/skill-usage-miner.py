@@ -9,7 +9,8 @@ Scans ~/.codex/sessions/**/*.jsonl (Codex rollouts) for skill fires:
 - user-typed: <skill><name>...</name> injection blocks in user-role response_item messages
   (how Codex expands a typed `$skill` token). Codex records carry `runtime: "codex"`;
   records without a runtime field are Claude's. Codex has no live-hook equivalent, so
-  Codex fires land only via re-running this miner.
+  Codex fires land only via re-running this miner; a launchd job (com.jp.skill-usage-miner,
+  source: scripts/com.jp.skill-usage-miner.plist) runs it every ~5 days.
 
 Appends new fire records to the cumulative ledger (JSONL), deduped by a stable key,
 so transcripts pruned by retention stay in the ledger once mined. Re-runnable anytime;

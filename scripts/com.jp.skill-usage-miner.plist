@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!--
+    Scheduled run of scripts/skill-usage-miner.py (~every 5 days) so Codex-side
+    skill fires reach the ledger; the Claude side is live-fed by a PostToolUse hook.
+    Source of truth: /Users/jp/.agents/scripts/com.jp.skill-usage-miner.plist
+    (deliberately not stow-managed: LaunchAgents here follow the plain-file
+    precedent of com.jp.vault-reading-desk, and ~/Library targets cannot be
+    stowed from Claude Code's sandbox).
+
+    Install/update:
+      cp /Users/jp/.agents/scripts/com.jp.skill-usage-miner.plist ~/Library/LaunchAgents/
+      launchctl bootout gui/$(id -u)/com.jp.skill-usage-miner 2>/dev/null
+      launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.jp.skill-usage-miner.plist
+    Run now:    launchctl kickstart gui/$(id -u)/com.jp.skill-usage-miner
+    Uninstall:  launchctl bootout gui/$(id -u)/com.jp.skill-usage-miner
+                trash ~/Library/LaunchAgents/com.jp.skill-usage-miner.plist
+
+    /usr/bin/python3 on purpose: the miner is stdlib-only, and mise install paths
+    are version-keyed (a pinned mise path dies silently on runtime upgrades).
+    Calendar days 1/6/11/16/21/26 approximate an every-5-days cadence; launchd
+    fires missed calendar events on wake, and the miner's dedupe keys make any
+    overlap or catch-up run a no-op.
+  -->
+  <key>Label</key>
+  <string>com.jp.skill-usage-miner</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>/Users/jp/.agents/scripts/skill-usage-miner.py</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Day</key><integer>1</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Day</key><integer>6</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Day</key><integer>11</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Day</key><integer>16</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Day</key><integer>21</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Day</key><integer>26</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>15</integer></dict>
+  </array>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>LowPriorityIO</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/jp/.claude/logs/skill-usage-miner.launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/jp/.claude/logs/skill-usage-miner.launchd.log</string>
+</dict>
+</plist>
