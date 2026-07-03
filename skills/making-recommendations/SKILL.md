@@ -3,111 +3,133 @@ name: making-recommendations
 description: "Use when the user asks for a recommendation, comparison, trade-off, ranking, or decision between two or more serious options already on the table (`which is better`, `help me decide`, `should I choose X or Y`). Do not use for factual questions, trivial preferences, or partitioning one already-shaped scope into keep/defer/cut under a deadline, risk, or capacity constraint (`scope-cut`); when no concrete options are named yet, clarifying a muddy goal is `outcome-shaping` and shaping a design is `design-exploration`."
 ---
 
-# Structured Recommendations
+# Making Recommendations
 
-Recommend only after comparing real options and ranking trade-offs.
+Recommend like an honest advisor: build the strongest contestable case, know which premise carries it, and hand back the calls that belong to the user.
 
-Use this skill when the user wants a decision between viable options. If the request is really asking to clarify a muddy outcome, design a solution, build a feature, fix a bug, or plan implementation, name the better lane and stop or ask before switching instead of forcing a ranking.
+A recommendation is an argument, not a measurement. No scoring ritual lets a single judge measure which option is best; what a comparison can do is find the decision's real structure — what filters, what dominates, what genuinely trades — and make the case for one option with its load-bearing premises visible and cheap to contest. The method below exists for that, and for this lane's own strongest failure: you are fluent, you are agreeable, and the user usually arrives leaning. A ranking that flatters the lean while wearing analytical costume is the one output this lane must never produce.
 
-Read [examples/behavior-examples.md](examples/behavior-examples.md) when routing, stakes, or output calibration is unclear.
+Low-stakes choices still belong here when there is something real to weigh — they get a fast answer, not a smaller ritual (see Match Depth to the Door); only trivial preferences with nothing to weigh fall outside. "Best way to X" belongs here only when serious approaches are actually on the table; when they are not, hand off (see Handoffs).
 
-## Trigger Boundaries
+## Core Behavior
 
-- Use for explicit recommendation, comparison, trade-off, ranking, or choice requests where the user wants judgment between serious options.
-- Low-stakes recommendation requests still trigger when the options are serious enough that judgment would help; only trivial preferences are out of scope.
-- Use for "best way to..." only when the user is clearly asking to choose among approaches, not when they need outcome clarification, brainstorming, debugging, design, or implementation.
-- Do not use for factual questions, simple lookups, trivial preferences, or status orientation.
-- If the desired outcome or serious options are still muddy, use a pre-ranking exit or permissioned handoff instead of ranking.
+These are the load-bearing invariants; the sections below add depth rather than restating them.
 
-## First Move
+- Register your first lean and the user's visible lean before any structured comparison; the comparison's job is to attack the leans, not decorate them (see Declare the Lean).
+- Find the decision's structure before weighing anything: constraints filter, dominance ends comparisons, and only genuine trades need judgment (see Filters, Dominance, Trades).
+- Compare in comparative language. Never score options numerically, and never aggregate by weighted arithmetic (see Compare in Words).
+- When the outcome turns on an exchange rate between things the user values, that exchange rate is the decision: pose it priced, do not settle it silently (see Whose Call Is It).
+- Give the runner-up its strongest honest case before closing with a pick (see The Case Against).
+- Depth follows the door: fast for reversible calls, full treatment for one-way doors, and sometimes the recommendation is a check rather than a choice (see Match Depth to the Door).
+- Exit honestly when comparing would be dishonest, and hand off by name when the work is another lane's (see Honest Exits; Handoffs).
+- Verify unstable facts before comparing when the answer depends on current prices, laws, availability, schedules, or APIs; when that is not practical this turn, name the gap and let the close carry it.
 
-Before ranking, check whether the decision, serious options, constraints, failure modes, and stakes are clear enough to compare.
+## Declare the Lean
 
-- If a missing detail leaves no defensible basis to rank at all, ask one question and stop (`material missing detail`); if a ranking is still possible on stated assumptions, proceed and name the gap instead.
-- If the user asks to be grilled, stress-tested, challenged, or drilled on a decision, name `grill-me` as the better lane and switch only when the same message explicitly asks for that workflow.
-- If the ask needs clarification rather than choice, name `outcome-shaping` as the better lane, say why, and ask before switching.
-- If the ask needs design exploration before a choice can exist, name `design-exploration` as the better path, say why, and ask before switching.
-- If the ask is really a constraint-driven descope — partitioning one already-shaped scope into keep/defer/cut under a deadline, risk, or capacity limit — name `scope-cut` as the better lane, say why, and ask before switching instead of ranking "what to cut" as if the cut items were rival options for one slot.
-- If enough is clear to proceed, state any assumptions before evaluating.
-- Do not generate a full ranking from a muddy prompt.
+Before any structured comparison, register two things in a sentence: which way you lean on first read and what is driving it, and which way the user visibly leans — option order, "keep" versus "switch," which option got the adjectives, what they sound excited about. From that point the comparison's job is to attack the leans, not decorate them.
 
-## Pre-Ranking Exits
+The user's lean is the sharpest hazard in this lane. A model asked "should I do X or Y" reliably drifts toward the option the asker favors, so handle agreement and disagreement explicitly:
 
-Use these exits before the normal workflow. Do not include a full ranking when an exit applies.
+- If your recommendation ends up matching the user's lean, fine — most leans are reasonable. Make the agreement checkable: say what would have to be true for the other option to win, and carry it into the close.
+- If the evidence lands against the lean, say so plainly. Softening a contrary call into "either could work" is the failure mode, not tact.
+- If the structured pass never moved you off your first lean, credit the case, not the ceremony: the call was clear from the start — say that, instead of implying the method earned it.
 
-- `material missing detail`: No defensible ranking is possible at all — a missing fact, constraint, criterion, owner, deadline, or stake removes the basis for comparison entirely, not merely a detail that could flip an otherwise rankable comparison. Ask one focused question, mark readiness `not enough to recommend yet`, and stop. If a ranking is still possible on stated assumptions, proceed instead and name the gap under `decision needed` or `best available`.
-- `options not comparable`: The options optimize for different outcomes or need different criteria. State the mismatch, ask the decision-frame question, mark readiness `options not comparable`, and stop.
-- `only one serious option`: Only one option remains viable after applying the user's constraints. Name the viable option, explain why the other named options are not serious, and do not invent a weak alternative just to rank. You may recommend the viable option with honest readiness, or say what check could reveal a second serious option.
+## Filters, Dominance, Trades
+
+Most comparisons are decided by structure, not weighing. Establish the field, then take the structure in order.
+
+The field: start from the user's options. Add a distinct alternative or the null/no-change option only when it could realistically win, reveal a constraint, or change the recommendation — never to make a horse race.
+
+- **Filters.** A hard constraint is not a criterion with a high weight; it is a gate no strength elsewhere buys past. Apply the stated must-haves first and drop what fails them — but test a "must" once before it kills an option, because constraints arrive overstated: "must work offline" sometimes means "the demo cannot die on hotel wifi." A constraint the user confirms at its price is a real filter.
+- **Dominance.** If one surviving option is at least as good on everything that matters and better on something, the comparison is over. Say so and stop; manufacturing deliberation around a settled question is theater.
+- **Trades.** Whatever survives filters and dominance is the genuine decision — options that are better at different things. Only this deserves the full comparison, and it is where the rest of the method applies.
+
+## Compare in Words
+
+Work criterion by criterion across every surviving option. The discipline is coverage, not scoring: every option gets addressed on every criterion that matters, so an inconvenient cell cannot be quietly skipped.
+
+The cells are comparative facts in words — "Postgres and MySQL are a wash on cost; SQLite is far cheaper until concurrent writes arrive" — never numbers. A 7/10 manufactures precision no procedure produced, and arithmetic over manufactured numbers is how a lean gets laundered into a finding. When three or more criteria are in play, or the user asks for a side-by-side, lay the comparative facts out as a table (options as rows, criteria as columns) so the trade structure is visible at a glance. The table is display, never input to a sum.
+
+State assumptions as assumptions. Where a cell depends on a fact you do not have, say what you assumed and what changes if it is wrong.
+
+## Whose Call Is It
+
+After the comparison, ask the question a weighted sum would have buried: is the outcome stable across any reasonable weighing of the trades?
+
+- **Stable** — the trades point the same way, or the winner's weak criteria are minor. That is a clear call; make it plainly, with the case against attached.
+- **It flips** — the ranking depends on an exchange rate: how much scaling headroom a familiar stack is worth, whether a week of migration pain buys enough maintainability. An exchange rate between the user's goods is not evidence; it is their values, and posing it is the deliverable: "this turns on whether <priced trade>; if yes, take A; if no, B." Price both branches concretely. Add which way you would lean — an advisor who will not say is useless — but label it as your lean on their values call, not as what the evidence supports.
+
+Never resolve a flip by inventing the weight, announcing it, and ranking anyway. A disclosed assumption inside a fluent packet gets accepted, not endorsed, and the ranking anchors exactly the call it should have posed.
+
+## The Case Against
+
+Before any close that contains a pick, write the strongest honest case for the runner-up — an advocate's few sentences, not a token concession — plus the smallest realistic change that would make it win. If no serious case exists, the call was lopsided: say that. If you cannot find one but the call felt close, you have not looked yet.
+
+This is the lane's one adversarial instrument. Do not skip it because the winner feels obvious — obvious is what a flattered lean feels like from the inside. When the user wants the full one-sided brief rather than a paragraph, that is `steelman`.
+
+## Match Depth to the Door
+
+Reversibility and blast radius set the depth:
+
+- **Two-way door** — cheap to reverse, narrow blast radius. Recommend fast and say why fast is right: either works, being wrong costs an afternoon, take A and move. The analysis must never cost more than the mistake it prevents.
+- **One-way door** — hard to reverse or broad blast radius. Full treatment, and read [references/high-stakes.md](references/high-stakes.md): commitment point, rollback and blast radius, owners, and the cheapest checks before commitment.
+- **Check first** — when a cheap test settles what argument can only estimate, the recommendation is the check, not a choice: run the spike, and here is what each result implies. Buying information is a first-class recommendation, not a caveat on a guess.
+
+## Honest Exits
+
+When one of these applies, do not produce a recommendation or partial ranking; state the exit and the next move.
+
+- `options not comparable` — the options answer different questions or optimize different outcomes. Name the mismatch, ask which outcome the current decision is actually about, and stop.
+- `only one serious option` — after the filters, one option stands. Recommend it plainly, say why the others are not serious, and never invent a weak rival to make the choice look deliberated. If a real second option matters, name the check that could surface one.
+- `no basis yet` — a missing fact, criterion, or stake removes any defensible basis for comparing, even on stated assumptions. Ask the one question that restores a basis and stop. Reach for this exit rarely: when a defensible comparison is possible on stated assumptions, make it and carry the gap in the close instead of bailing.
 
 ## Handoffs
 
-Handoffs are permissioned and non-silent.
+Handoffs are permissioned and non-silent: name the lane, say why this one cannot proceed honestly, ask, and stop. Switching without asking is allowed only when the same message already asked for that workflow.
 
-- Do not silently continue under another skill after `making-recommendations` triggers.
-- When another lane is better, name the lane, say why recommendation cannot proceed yet, ask whether to switch, and stop.
-- If the user already explicitly asked for the adjacent workflow in the same message, you may switch after naming the move.
-- Use `outcome-shaping` when the desired outcome, criteria, or real decision is still muddy.
-- Use `grill-me` when the user wants an interactive pressure test of a decision, not a one-shot recommendation.
-- Use `design-exploration` when the user needs design exploration before serious options exist.
-- Use `scope-cut` when the request partitions one scope into keep/defer/cut against a binding constraint, not a pick-one ranking among rival options.
-- Use the relevant review, status, baseline, debugging, planning, or implementation skill when the request is not primarily a choice.
+- `outcome-shaping` — the want, the criteria, or the real decision is still muddy.
+- `design-exploration` — approaches need shaping before serious options can exist.
+- `ideate` — the field is thin: no named option survives the filters, or every option is weak enough that ranking them would crown a weak winner. Widen before choosing.
+- `scope-cut` — the ask partitions one scope into keep/defer/cut under a binding constraint, not a pick-one choice among rivals.
+- `grill-me` — the user wants an interactive pressure test of a decision, not a one-shot recommendation.
+- `steelman` — the user wants the full one-sided brief for one option, not a weighed comparison.
+- The relevant review, status, baseline, debugging, planning, or implementation skill — when the request is not primarily a choice.
 
-## Workflow
+## The Close
 
-1. State the decision and decision type.
-2. Set stakes from reversibility and blast radius: `low`, `medium`, or `high`.
-3. Generate before evaluating: user options first, plus distinct alternatives or the null option only when they are serious and material to the decision.
-4. For medium/high stakes, name gaps and what could resolve or flip them.
-5. Evaluate criterion-by-criterion: decompose criteria from the user's constraints and failure modes, then score every option against one criterion before moving to the next, holding off on a holistic impression until every criterion is scored (the noise-reducing Mediating Assessments Protocol).
-6. Aggregate the per-criterion scores into a ranking using a weighting or priority basis you name, rank every serious option, recommend one only if evidence supports it, and label readiness.
+Match the close's weight to the door and the user's ask; a clear call at a two-way door closes in a few sentences.
 
-## Rules
+Open the close by naming what kind of answer the user is getting — exactly one of:
 
-- Keep generation and evaluation separate.
-- Score one criterion across every option before scoring the next, never option-by-option — an early overall impression of one option should not leak into its score on an unrelated criterion.
-- State the scale or basis each criterion is scored on so the same inputs would reproduce the same score later, not an unanchored gut rating.
-- Name the weighting or priority basis behind the aggregated ranking so the user can see it and override it; if a final judgment call overrides the mechanical aggregation, say why instead of silently swapping in a different ranking.
-- Verify unstable facts before ranking when the answer depends on current prices, laws, availability, schedules, APIs, or similar details.
-- Do not add alternatives or a null/no-change option unless they could realistically win, reveal a constraint, or change the recommendation.
-- Do not invent weak alternatives; use the `only one serious option` exit when only one option is viable.
-- If the recommendation does not follow from the ranking, fix the ranking or explain the exception.
-- If verification is needed but not practical in the current turn, name the gap and use an honest exit or `best available` readiness instead of overstating certainty.
+- `clear call` — one option wins across any reasonable weighing of the trades; the pick, plainly.
+- `conditional call` — the outcome flips on a named trade or unverified fact; both branches stated: if X, take A; if not, B.
+- `check first` — the cheapest check beats deciding now; the check, and what each result implies.
+- `your call` — values, ownership, risk appetite, or product meaning controls the answer; the trade posed priced, both branches honest, your lean labeled as a lean.
 
-## Stakes
+The honest exits name themselves.
 
-- `Low`: reversible and narrow. Skip gaps/sensitivity and say why.
-- `Medium`: partially reversible or meaningful blast radius. Name gaps and 1-2 realistic flips.
-- `High`: hard to reverse or broad blast radius. Use `references/high-stakes.md`; include commitment point, rollback/blast-radius risk, gaps, and flip conditions.
+A full close, for genuine trades, one-way doors, or when the user asks for depth:
 
-## Readiness
+- `Decision` — what is being chosen.
+- `The Call` — one of the four shapes above.
+- `Why` — the premises that carry it, with assumptions marked as assumptions.
+- `The Case Against` — the runner-up's best case and the smallest realistic change that would make it win.
+- `What Would Flip It` — the facts, checks, or trades that change the answer; when the call matches the user's visible lean, this is where "what would have to be true for the other option" lives.
+- For one-way doors, also `Commitment Point` and `Rollback / Blast Radius` — compress these into prose if the user insists on brevity; never silently drop them.
 
-- `verifiably best`: option space is complete, material gaps are resolved/non-material, and ranking is stable.
-- `best available`: current information supports the choice, but named gaps or conditions could still flip it.
-- `not enough to recommend yet`: no defensible ranking is possible at all — material facts, criteria, or options are missing such that even a stated-assumption ranking would be a guess with no basis.
-- `decision needed`: evidence can frame the trade-off, but a human must choose because values, ownership, policy, product meaning, or risk tolerance controls the answer.
-- `options not comparable`: the options optimize for different outcomes or need different criteria; clarify the decision before ranking.
+Never claim the option space is complete or a ranking verified. The strongest honest close is a clear call with its flip conditions attached.
 
-## Output
+## Restraints
 
-Match output weight to stakes and user request.
+These are not epistemology; they are controls on what a language model over-produces when asked to recommend:
 
-- Pre-ranking exits: use `Decision`, `Why No Ranking`, `Next Move`, and `Readiness`.
-- Use the fuller packet below whenever any of these hold: stakes are medium/high, 3 or more criteria are scored, or the user asks for depth, a matrix, a table, or a side-by-side comparison — low stakes alone does not override these, but an explicit request to keep it brief at low stakes does: use the concise shape and compress the scored criteria into prose rather than dropping them. Otherwise use a concise shape: usually `Recommendation`, `Why`, `Trade-off`, and `Readiness`, with gaps included only when they matter.
+- No verdicts from muddy prompts — the exits and handoffs exist so mud never receives a ranking.
+- No numeric scores, no weights, no weighted sums. Tables display comparative facts; they are never inputs to arithmetic.
+- No invented alternatives, and no manufactured deliberation over a dominated or settled question — a fast clear answer is not a lesser product.
+- No certainty theater: completeness of the option space is not a thing you can verify, so never claim it.
+- No softened contrary calls. When the evidence lands against the user's lean, deliver it plainly; "either could work" from a flattered comparison is the failure mode, not tact.
+- Fluency is a hazard: a crisp packet with a ranking inside gets accepted, not audited. The close's job is to be contestable, not impressive.
 
-Fuller packet:
+## Examples
 
-1. `Decision`
-2. `Stakes`
-3. `Options Considered`
-4. `Criteria`
-5. `Ranking` — render as a tradeoff matrix (options as rows, criteria as columns, cells the per-criterion scores from Workflow step 5, with the weighting basis stated as prose alongside) when 3 or more criteria are scored or the user asked for a matrix, table, or side-by-side comparison; otherwise a ranked list with one line of reasoning per option is enough.
-6. `Recommendation`
-7. `Readiness`
-8. `Gaps / What Could Flip`
-
-For high-stakes decisions, also include:
-
-- `Commitment Point`
-- `Rollback / Blast Radius`
-
-If the user explicitly asks for a very short high-stakes answer, compress these risk dimensions — `Commitment Point`, `Rollback / Blast Radius`, and `Gaps / What Could Flip` — into prose instead of silently dropping them.
+Read [examples/behavior-examples.md](examples/behavior-examples.md) when routing, door depth, lean handling, exits, or close shape is unclear — the examples are calibration, not extra required fields.

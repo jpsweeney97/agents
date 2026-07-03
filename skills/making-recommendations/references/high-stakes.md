@@ -1,14 +1,13 @@
 # High-Stakes Recommendations
 
-Load this only for high-stakes decisions: hard-to-reverse choices, broad blast radius, durable decisions, or when the user asks for a deeper recommendation.
+Load this only for one-way doors: hard-to-reverse choices, broad blast radius, durable commitments, or when the user asks for a deeper recommendation.
 
 ## Extra Checks
 
-- For the high-stakes risk sections (`Commitment Point`, `Rollback / Blast Radius`, `Gaps / What Could Flip`) and the rule to compress them into prose rather than silently dropping them in a very short answer, follow the Output section in `SKILL.md`.
-- Define the commitment point: when the decision becomes costly to reverse.
-- Name owners, affected systems or people, and rollback options.
-- Separate must-have constraints from preferences.
-- For each material unknown, state the cheapest check that could resolve it before commitment.
-- For each non-recommended option, state the smallest realistic change that would make it win.
-- Apply the Pre-Ranking Exits from `SKILL.md` (`options not comparable`, `only one serious option`, `material missing detail`) before ranking — high stakes does not loosen or tighten when they apply; re-read their definitions there rather than relying on a restated threshold here.
-- Mark the result `best available` unless gaps are non-material or resolved; escalate to `not enough to recommend yet` only when no defensible ranking is possible at all (per `SKILL.md`'s Pre-Ranking Exits), to `decision needed` when a human values or ownership call controls the answer, or to `options not comparable` when the options need different criteria.
+- Define the commitment point: when the decision becomes costly to reverse — and say what remains reversible after it.
+- Name owners, affected systems or people, and the rollback options that actually exist, not the ones that should.
+- Keep filters and trades separate here especially: a safety must-have is a gate, not a heavily weighted consideration.
+- For each material unknown, state the cheapest check that could resolve it before commitment. When the unknowns are load-bearing and the checks are cheap, `check first` is the call itself, not a caveat on one.
+- Extend the case-against discipline to every serious non-recommended option: the smallest realistic change that would make it win.
+- The honest exits do not loosen or tighten at high stakes; apply them as defined in `SKILL.md`.
+- The close keeps `Commitment Point` and `Rollback / Blast Radius`; when the user insists on brevity, compress them into prose — never silently drop them.

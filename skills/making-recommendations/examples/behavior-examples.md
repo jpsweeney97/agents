@@ -1,8 +1,8 @@
 # Recommendation Behavior Examples
 
-Use these examples to calibrate routing, output shape, and honest exits. They are illustrative, not templates.
+Use these examples to calibrate routing, door depth, lean handling, exits, and close shape. They are illustrative, not templates.
 
-## Normal Comparison
+## Clear Call
 
 User asks:
 
@@ -13,13 +13,12 @@ small docs tool?
 
 Expected behavior:
 
-- Treat this as a recommendation request because the user is choosing between viable options.
-- Include the null option only if it is distinct from the named options and material to the decision.
-- Rank by the user's constraints and obvious failure modes, such as maintenance cost, plugin support, compatibility, and migration risk.
-- Recommend one option if the evidence supports it.
-- Mark readiness `best available` if compatibility or package-state details were not verified.
+- Treat this as a recommendation request between two serious options; add the null option only if it is distinct from "keep the current parser."
+- No filter applies and neither option dominates, so compare in words on what matters: maintenance burden, plugin support, compatibility, migration cost.
+- If the trades point one way across any reasonable weighing, close `clear call` with the pick, the case against the loser, and what would flip it.
+- Name unverified package-state facts (release cadence, open CVEs) as gaps in `What Would Flip It` rather than pretending they were checked.
 
-## Multi-Criteria Comparison With A Tradeoff Matrix
+## The Ranking Flips on a Values Trade
 
 User asks:
 
@@ -30,13 +29,60 @@ Weigh cost, our team's ops familiarity, and scaling headroom.
 
 Expected behavior:
 
-- Score each database on one criterion at a time across all three options (cost first for all three, then ops familiarity for all three, then scaling headroom for all three) before forming any overall impression — do not evaluate Postgres start-to-finish, then MySQL, then SQLite.
-- State the basis for each criterion's scale, such as "ops familiarity scored against this team's current stack experience," so the score is reproducible.
-- Because three criteria are scored, render `Ranking` as a tradeoff matrix: rows are Postgres/MySQL/SQLite, columns are cost/ops familiarity/scaling headroom, cells are the per-criterion scores.
-- Name the weighting basis used to turn the matrix into a single ranking (for example, "ops familiarity weighted highest because the team ships faster on familiar tooling"), so the user can see it and reweight if they disagree.
-- Recommend one option only if the weighted ranking is stable; otherwise mark `decision needed` if the weighting itself is a values call the user should make.
+- Compare criterion by criterion across all three options so no cell is skipped — cost for all three, then ops familiarity for all three, then scaling headroom for all three.
+- With three criteria in play, lay the comparative facts out as a table — cells like "wash between Postgres and MySQL; SQLite far cheaper until concurrent writes arrive," never numeric scores, and no weighted total anywhere.
+- Notice the outcome flips on an exchange rate: how much early scaling headroom the team's familiarity is worth. That is the user's values, not evidence.
+- Close `conditional call` or `your call` with the trade posed priced: "if you would trade early headroom for shipping speed on familiar tooling, take X; if headroom rules, take Y" — adding which way you lean, labeled as a lean.
+- Do not invent a weighting, announce it, and rank anyway.
 
-## High-Stakes Decision With Gaps
+## Two-Way Door
+
+User asks:
+
+```markdown
+New repo, three people, no monorepo: npm or pnpm?
+```
+
+Expected behavior:
+
+- Recognize a cheap, reversible choice: switching later is an afternoon.
+- Recommend fast in a few sentences and say why fast is right — no table, no packet, no manufactured deliberation.
+- Do not run the full close on a decision whose analysis would cost more than the mistake it prevents.
+
+## Check First
+
+User asks:
+
+```markdown
+Should we switch our docs search to the managed vector index, or keep the
+current keyword index? Relevance complaints are up.
+```
+
+Expected behavior:
+
+- Notice the deciding fact is cheaply measurable: an offline relevance comparison over real logged queries settles what argument can only estimate.
+- Close `check first`: recommend the eval, with both branches stated — "if the vector index clearly wins on your real queries, switch; if it is a wash, the switch buys ops cost for nothing."
+- Do not deliver a verdict from guesses when an afternoon of evidence is available.
+
+## The User Is Leaning
+
+User asks:
+
+```markdown
+I'm honestly pretty excited to move our docs off Docusaurus to a custom
+Next.js site — the current thing feels clunky and I want the flexibility.
+It'd take me about three weekends. The docs get maybe 200 visits a month,
+mostly API reference lookups, and search works fine today. Should I do it?
+```
+
+Expected behavior:
+
+- Register the visible lean (excitement, "clunky," flexibility framing) before comparing.
+- Notice the stated facts land against the rewrite: low traffic, lookup-shaped usage, working search, three weekends of cost.
+- Deliver the contrary call plainly — do not soften it into "either could work" because the user sounds invested.
+- Price what would have to be true for the rewrite to win (docs becoming a product surface, concrete customization the current tool blocks) so the disagreement is contestable, not dismissive.
+
+## One-Way Door With Unknowns
 
 User asks:
 
@@ -47,13 +93,27 @@ next release window?
 
 Expected behavior:
 
-- Treat this as high stakes because reversal is costly and the blast radius is broad.
-- Include `Commitment Point` and `Rollback / Blast Radius`.
-- Name owners, affected users or systems, rollback options, and the cheapest checks that could resolve material unknowns.
-- Use `not enough to recommend yet` only if the core safety facts — backup validation and rollback rehearsal — are both unconfirmed: without them there is no defensible basis to weigh the risk at all. If those are known and only a secondary fact like incident staffing or the release-window timing is unconfirmed, proceed with that as a stated assumption, name it under `Gaps / What Could Flip`, and mark `decision needed` or `best available` instead.
-- Use `decision needed` when the evidence is clear but the answer depends on business risk tolerance or ownership.
+- Treat this as a one-way door: reversal is costly and the blast radius is broad. Read `references/high-stakes.md`; the close includes `Commitment Point` and `Rollback / Blast Radius`.
+- If the load-bearing safety facts — backup validation, rollback rehearsal — are unconfirmed, the cheapest checks are the call: close `check first` on confirming them before any date is chosen.
+- If the safety facts are known and the answer is controlled by appetite for weekend risk versus schedule pressure, close `your call` with both branches priced.
+- Never silently drop the risk beats to keep the answer short; compress them into prose if asked for brevity.
 
-## Options Not Comparable
+## Only One Serious Option
+
+User asks:
+
+```markdown
+Should we keep the current local-only workflow, or add a network service, if
+the tool must keep working fully offline?
+```
+
+Expected behavior:
+
+- Test the "must" once — is offline a confirmed constraint at its price, or a preference? — then apply it as a filter.
+- With the constraint confirmed, the network service fails the gate: exit `only one serious option`, recommend the local-only workflow plainly, and say why the rival is not serious.
+- Do not invent a weak third option to make the choice look deliberated; name the check that could surface a real second option (for example, whether a local-first sync layer meets the offline bar).
+
+## Not Comparable
 
 User asks:
 
@@ -64,28 +124,11 @@ reference lookup?
 
 Expected behavior:
 
-- Do not rank the options as if they share one success criterion.
-- State that the options are not comparable because they optimize for different user outcomes.
-- Ask the decision-frame question, such as whether the current decision is about conversion, developer speed, support load, or another outcome.
-- Mark readiness `options not comparable`.
+- Do not rank options that optimize for different outcomes as if they shared one success criterion.
+- Exit `options not comparable`: state the mismatch and ask which outcome the current decision is actually about — conversion, developer speed, support load.
+- Stop; no partial ranking.
 
-## Only One Serious Option
-
-User asks:
-
-```markdown
-Should we keep the current local-only workflow, or add a network service, if the
-tool must keep working fully offline?
-```
-
-Expected behavior:
-
-- Treat the network service as non-serious under the stated offline constraint.
-- Do not invent a weak third option just to create a ranking.
-- Recommend the local-only workflow if the offline constraint stands, or name the check that could reveal a second serious option.
-- Mark readiness `best available` unless the offline constraint itself is still unverified or negotiable.
-
-## Partial Information — Rank With Stated Assumptions, Don't Bail
+## Proceed on Stated Assumptions
 
 User asks:
 
@@ -96,13 +139,26 @@ build the CSV export or the bulk-delete feature?
 
 Expected behavior:
 
-- Notice that real criteria are available even though the deciding business fact (which feature users actually need most right now) is missing: build effort, risk profile (bulk-delete is destructive and typically needs confirmation/undo/audit-log work; CSV export is usually additive and self-contained), and failure-mode severity.
-- Do not invoke `material missing detail` just because one fact (demand or urgency) is unknown — a defensible ranking is still possible on the criteria that are available, so this is not the "no defensible basis at all" case the exit is reserved for.
-- State the missing fact as an assumption up front, evaluate criterion-by-criterion on what is known, and produce a real `Ranking` and `Recommendation`.
-- Mark readiness `decision needed` (the unresolved factor is a values/priority call a human should make) or `best available` (the named gaps don't block a defensible call), not `not enough to recommend yet`.
-- Name the missing fact in `Gaps / What Could Flip` so the user can override the call with the one piece of information that would change it.
+- Notice a defensible comparison exists in words even though the deciding business fact (which feature users need most right now) is missing: build effort, risk shape (bulk-delete is destructive and needs confirmation/undo/audit work; CSV export is additive and self-contained), failure severity.
+- Do not exit `no basis yet` over one missing fact; state the assumption up front and compare on what is known.
+- Close `conditional call` or `your call` — "if demand is roughly even, the export ships more value at less risk; bulk-delete wins only if it is the thing users are blocked on" — with the missing fact in `What Would Flip It`.
 
-## Muddy Design Request With Permissioned Handoff
+## Thin Field
+
+User asks:
+
+```markdown
+CI is flaky. Should we auto-retry every failed test three times, or just delete
+the flaky tests?
+```
+
+Expected behavior:
+
+- Notice both named options are weak: blanket retries mask real failures, deletion buys silence with coverage. Ranking them would crown a weak winner.
+- Say that plainly, name `ideate` (or the owning fix lane, such as `diagnose` for the flakiness itself) to widen the field, and ask before switching.
+- Do not produce a ranking whose winner you would argue against if the user proposed it alone.
+
+## Muddy Design Request
 
 User asks:
 
@@ -112,14 +168,11 @@ What's the best way to build a collaboration dashboard?
 
 Expected behavior:
 
-- Do not force a ranked recommendation from this prompt.
-- Name why `making-recommendations` cannot proceed yet: the prompt asks for design exploration before serious options exist.
-- Name `outcome-shaping` if the user's desired outcome is unclear.
-- Name `design-exploration` if the outcome is clear enough but approaches still need design exploration.
-- Ask before switching lanes, then stop. For example: "This is not ready for a recommendation yet because there are not comparable approaches on the table. `design-exploration` is the better lane to shape those approaches. Do you want me to switch into that?"
-- Use `making-recommendations` only after there are serious approaches to compare, such as server-rendered dashboard, client-heavy dashboard, or embedded analytics surface.
+- Do not force a recommendation from this prompt; there are no serious options on the table yet.
+- Name `outcome-shaping` if the desired outcome is unclear, or `design-exploration` if the outcome is clear but approaches need shaping; say why, ask before switching, and stop.
+- Return here only once there are serious approaches to compare, such as server-rendered dashboard versus client-heavy dashboard versus embedded analytics.
 
-## Descope Request Misread As Ranking
+## Descope Misread as Ranking
 
 User asks:
 
@@ -130,8 +183,6 @@ should we cut?
 
 Expected behavior:
 
-- Recognize this is not a pick-one ranking among rival options — every feature in the release is a candidate for keep, defer, or cut against the deadline, and more than one can survive.
-- Do not silently rank the features as if only one could "win."
-- Name `scope-cut` as the better lane: it partitions one scope into keep/defer/cut against a binding constraint (here, the deadline) and preserves every cut item with a re-entry condition, instead of forcing a single winner.
-- Ask before switching, then stop. For example: "This reads as a descope under a deadline, not a choice between rival options — `scope-cut` is built for partitioning one scope into keep/defer/cut and keeping a re-entry ledger for what's deferred. Do you want me to switch into that?"
-- Use `making-recommendations` instead only if the real ask turns out to be choosing one approach among genuinely rival options (for example, "should we cut feature A or feature B, not both" when only one slot exists), not partitioning the whole release.
+- Recognize this is not a pick-one choice among rivals — every feature is a candidate for keep, defer, or cut against the deadline, and more than one can survive.
+- Name `scope-cut` as the owning lane: it partitions one scope under a binding constraint and preserves every cut item with a re-entry condition. Ask before switching, then stop.
+- Use this lane instead only if the real ask is one slot with genuine rivals ("cut feature A or feature B, not both").
