@@ -1,4 +1,4 @@
 interface:
   display_name: "Writing Principles"
   short_description: "Edit agent instructions by challenging agent obligations"
-  default_prompt: "Use $writing-principles for obligation-only edits or obligation-focused review of this existing or pasted agent instruction document: challenge what future agents must do, route net-new or materially expanded obligations through $agent-facing-design, and return focused edits or findings."
+  default_prompt: "Use $writing-principles for obligation-only edits or obligation-focused review of this existing or pasted agent instruction document: challenge what future agents must do, read the recorded origin before deleting, set the judgment-vs-trust bar per part before concretizing, route net-new or materially expanded obligations through $agent-facing-design, and report deletions and lightenings with what was dropped or the preservation check run."

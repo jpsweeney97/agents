@@ -20,7 +20,7 @@ What does this make a future agent do, decide, avoid, verify, remember, or
 maintain?
 ```
 
-Then ask what user work that obligation protects. Preserve protected user work, not original wording or assumed intent.
+Then ask what user work that obligation protects. Preserve protected user work, not original wording or assumed intent — and where intent is recorded (a commit message, design brief, ledger entry, or linked incident), read it before overriding it rather than assuming it.
 
 ## Scope
 
@@ -66,9 +66,12 @@ Editing false-proof wording in an existing instruction doc stays in this skill w
 
 Challenge before clarifying:
 
-- If no meaningful protected work is visible, delete the obligation.
-- If meaningful protected work is visible, replace the obligation with the lightest form that protects it: a boundary, default, example, precondition, or failure behavior.
-- If the obligation earns its place, make the trigger, action, boundary, evidence, and stop condition concrete enough for a future agent to follow.
+- If no meaningful protected work is visible, take the cheapest origin look before deleting: the line's history, commit message, linked incident, design brief, or ledger entry where the repo keeps them. Absence after the look is real grounds to delete; absence before it is only the editor's first impression. Weigh the reader the obligation protects — a weaker model or foreign runtime may need the guard the strongest reader finds unjustified.
+- If the look still cannot settle whether the work is real — a rare-case guard, a foreign runtime's reader, a domain outside the editor's judgment — say so and hold the edit, naming what evidence or owner could settle it. Deleting on sight and keeping out of superstition are the same failure in opposite directions.
+- If meaningful protected work is visible, replace the obligation with the lightest form that protects it: a boundary, default, example, precondition, failure behavior, or a graded form of a rule too crude for its cases.
+- If the obligation earns its place, make the trigger, action, boundary, evidence, and stop condition concrete enough for a future agent to follow — for trust prose; judgment prose takes the per-part bar below instead.
+
+Set the bar per part before applying remedies, using the judgment-vs-trust lens whose canonical home is `agent-facing-design` (Two Kinds of Skill; do not restate it). Trust prose — lifecycle, safety, proof, routing — takes the full concreteness ladder. Judgment prose — a provoking question, a forced comparison, a framing that organizes thinking — is protected work whose value is the provocation: sharpen it or leave it, never proceduralize it, and treat concreteness that pre-makes the call as damage, not clarity. Open space in judgment prose can be the design; challenge it only when it fails to provoke.
 
 Do not preserve an obligation just because it already exists. Do not polish a bad obligation into a clearer bad obligation.
 
@@ -79,12 +82,13 @@ Stop and ask when the target, requested scope, or required controlling authority
 Use this order as a fast scan, not a report template:
 
 1. **Unjustified**: the obligation does not protect meaningful user work.
-2. **Vague**: it lacks a concrete trigger, action, evidence, boundary, or stop condition.
+2. **Vague**: it lacks a concrete trigger, action, evidence, boundary, or stop condition (trust prose; judgment prose is graded by the per-part bar under Edit Gate).
 3. **Unclear**: a future agent cannot tell exactly what to do or what satisfies the instruction.
 4. **Overbuilt**: lighter context, examples, defaults, or boundaries would do the job without extra machinery.
 5. **Unbounded**: scope, time, lifecycle, ownership, or downstream responsibility spreads farther than the user asked.
 6. **False-proof**: the required evidence does not support the claim, or structural checks are allowed to imply any of the proof classes separated under Output.
 7. **Conflicting**: another authority, skill, workflow, or user request can beat it, but the text does not say how to resolve the conflict.
+8. **Duplicated**: the same rule lives in more than one place — another section, file, or companion surface — and the copies have drifted or are free to. Single-home the rule and point to it, carrying every copy's scope into the home before collapsing any; copies already diverged are the strongest signal.
 
 ## Review-Only
 
@@ -102,12 +106,13 @@ After direct edits, report briefly:
 
 - what obligation changed
 - whether it was deleted, lightened, or clarified
+- for a deletion or lightening, what the old text carried that the new text no longer does, or the preservation check that showed nothing was dropped
 - verification performed
 - remaining risk or proof boundary
 
 After review-only work, report findings first, include the target/scope inspected, state `No edits made`, name the proof boundary, and wait.
 
-Always separate proof classes. Structural source validation proves parsing, shape, references, or static checks only; it does not prove behavior, certification, sync, plugin install, cache, marketplace, hook, distributed-copy, remote, or live runtime, and does not show that a realistic invocation followed the behavior unless one was run. When the edited file is itself the live source, those structural checks are its proof; install, cache, distributed-copy, and other runtime surfaces need their own checks only when that surface is part of the claim.
+Always separate proof classes. Structural source validation proves parsing, shape, references, or static checks only; it does not prove behavior, certification, sync, plugin install, cache, marketplace, hook, distributed-copy, remote, or live runtime, and does not show that a realistic invocation followed the behavior unless one was run. When the edited file is itself the live source, those structural checks are its proof; install, cache, distributed-copy, and other runtime surfaces need their own checks only when that surface is part of the claim. Structural checks also never prove a lightening preserved what it claims to: nothing-lost is a behavior claim, and it takes a preservation walk — one realistic invocation read against the old and new text — or an honest statement of what was dropped.
 
 ## Validation
 
@@ -117,5 +122,7 @@ Validate the exact surfaces edited:
 2. **Skill bundle behavior or trigger changes**: parse edited `SKILL.md` frontmatter, inspect `agents/openai.yaml` alignment even when metadata was not edited, check referenced paths, run the available local skill validator, run whitespace checks, and add a realistic dry run when practical.
 3. **Metadata-only changes such as `agents/openai.yaml`**: parse YAML, compare `display_name`, `short_description`, and `default_prompt` against the current `SKILL.md`, and run whitespace checks.
 4. **Multi-surface or cross-document changes**: validate each changed surface by its own rules, then inspect the combined diff for routing, proof, trigger, and lifecycle consistency.
+
+For any edit claiming nothing was lost — a lightening, narrowing, or de-dup — walk one realistic invocation against the old and new text or name in the report what the new text no longer carries; structural checks pass silent drops.
 
 Do not claim the rewritten instruction works if validation fails or the behavior contract is still ambiguous.
