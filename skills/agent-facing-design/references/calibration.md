@@ -80,6 +80,4 @@ The presumption against machinery prices agent judgment as worth preserving, whi
 
 ## Whole-Surface Check
 
-Small additions can accumulate into a rigid surface. Step back when a surface has grown materially, has seen heavy recent change, or makes you hesitate.
-
-If the surface feels larger than the work it protects, simplify before adding more structure.
+This check now lives in `SKILL.md`'s Core Move, where the gate runs per edit and round by round through a review loop — the place a run of individually justified additions actually accretes. Consult it there; this reference no longer carries it.
