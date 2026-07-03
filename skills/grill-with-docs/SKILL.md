@@ -7,13 +7,17 @@ description: "Use when the user wants to stress-test a plan or design against a 
 
 If no plan, design, or decision is already in context, first ask what I want to be grilled on — and orient on any existing `CONTEXT.md`/`CONTEXT-MAP.md` and `docs/adr/` for the area — before starting.
 
+If I invoke this skill after the decisions are already made, with nothing left to interrogate, say so — capture is not grilling. Record only terms I confirm in this conversation, and route standalone decision capture to `decision-record`, which owns it.
+
 Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer, always in a fenced Markdown code block in chat for easy copying.
 
 Ask the questions one at a time, waiting for feedback on each question before continuing.
 
+A run of answers accepted verbatim is information, not success: the grilling has stopped grilling and become drafting with my consent. Say so plainly, then either ask the question whose recommended answer you are least sure of, or offer to stop.
+
 If a question can be answered by exploring the codebase, explore the codebase instead.
 
-Stop when I say the plan feels solid or ask to stop, or when further questions stop changing the plan. On stopping, give a short conversational summary of the decisions we reached and the single weakest remaining assumption, and report which `CONTEXT.md`/ADR files you created or edited. If a clear next move follows, name it — for example, handing off to `implementation-planning` to turn the hardened plan into tasks.
+Stop when I say the plan feels solid or ask to stop, or when further questions stop changing the plan. On stopping, give a short conversational summary of the decisions we reached and the single weakest remaining assumption, scan those decisions for any that cleared the ADR gate without being offered a record, and report which `CONTEXT.md`/ADR files you created or edited. If a clear next move follows, name it — for example, handing off to `implementation-planning` to turn the hardened plan into tasks. If I pivot or interrupt mid-grilling, still report in one line which files you wrote and the question left open.
 
 </what-to-do>
 
@@ -73,6 +77,8 @@ When domain relationships are being discussed, stress-test them with specific sc
 
 When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible — which is right?"
 
+The same check binds your own recommended answers: before recommending a closed set or a claim about what the code currently does, read the file that could contradict it. A decision settled by assent that the code already contradicted is this skill's worst product.
+
 ### Update CONTEXT.md inline
 
 When a term is resolved, update `CONTEXT.md` right there. Don't batch these up — capture them as they happen. Use the format in [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
@@ -91,7 +97,7 @@ If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](
 
 ### Writing to the repo
 
-`CONTEXT.md` and `docs/adr/*` are durable repo files. Before the first write, run `git status`; if the worktree is dirty, tell the user your writes will land alongside their uncommitted changes, and never write over unrelated edits in a file you touch. Update incrementally as decisions crystallize, but do not commit — leave the changes for the user to review. When you pause or finish, report which files you created or edited. Proof boundary: you recorded glossary and decision text, not verified implementation.
+`CONTEXT.md` and `docs/adr/*` are durable repo files. Before the first write, run `git status`; if the worktree is dirty, tell the user your writes will land alongside their uncommitted changes, and never write over unrelated edits in a file you touch. Update incrementally as decisions crystallize, but do not commit — leave the changes for the user to review. If a governing instruction or the user directs commits mid-session, stage `CONTEXT.md`/ADR changes in their own commits — never folded into unrelated work — and name the skipped review checkpoint when you close. When you pause or finish, report which files you created or edited. These files record this session's assents, not decisions that have survived use; the user's review before commit is the ratification step, so if commits already happened, say the records landed unreviewed. Proof boundary: you recorded glossary and decision text, not verified implementation.
 
 Note: `CONTEXT-FORMAT.md` and `ADR-FORMAT.md` are also consumed by `improve-codebase-architecture`, and `ADR-FORMAT.md` by `decision-record`. If this skill or its format files are renamed, moved, or archived, update those skills' references.
 
