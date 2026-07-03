@@ -11,6 +11,7 @@ Default to strict read-only, chat-only orientation.
 
 - Do not edit files, create artifacts, stage commits, run formatters, install dependencies, run normal verification, or mutate caches.
 - Do not run commands that write local state, such as `git fetch`, package-manager installs, test/lint/build commands, or generated-report commands, unless the user explicitly widens scope.
+- If a claim's freshness or proof state materially depends on a command this contract forbids — a fetch, a checker, a test run — do not run it silently: label the limit and name the exact command that would raise confidence, or ask the user to widen scope for that one command. A freshness label never asserts what this floor kept the pass from verifying.
 - Use read-only inspection commands and tools, such as `pwd`, `ls`, `find`, `rg`, `sed`, `git status --short --branch`, `git branch --show-current`, `git log`, `git remote -v`, `git diff --stat`, and read-only issue/PR/ticket queries when in scope.
 - Write files only in explicit artifact mode, and only after the orientation. Do not edit source code unless the user separately asks for implementation.
 
@@ -80,6 +81,7 @@ Resolve authority by claim type instead of applying one global source order:
 - Branch publication state: current branch, upstream configuration, remote refs, and PR queries if inspected.
 - Intended scope, roadmap, or acceptance state: active/current specs, status docs, roadmap docs, and explicit user direction outrank branch inference.
 - Open work: ticket, issue, and PR systems outrank stale notes; tracked status docs can outrank them only when they explicitly declare current ownership.
+- Active lane and current focus: the user's words, the invocation context, and explicitly loaded handoffs outrank recency inference. An active-lane claim inferred only from recent commits or pushes is stated as inferred in the brief, not asserted as fact.
 - Runtime and install-surface state: live runtime inspection outranks source metadata for runtime claims. Installed cache or copied-surface inspection applies only to plugin, marketplace, distributed-copy, or other install-surface claims. Metadata alone is not runtime or install-surface proof.
 - History and rationale: git log, old plans, status notes, and prior summaries explain why the state changed; they do not prove current state unless re-anchored.
 
@@ -102,7 +104,7 @@ Default chat output starts with a `Status Brief`. The brief must include:
 - `Active Blocker`: current blocker or `None found`.
 - `Confidence / Limits`: what was checked and what could change the conclusion.
 
-Under `Details`, adapt the packet to the size of the request. Broad orientation should use the full packet below. Narrow status checks may compress irrelevant sections, but must still name the target, inspected source classes, source conflicts, and evidence gaps.
+The `Status Brief` is the invariant: it opens every orientation answer, including a corrected or re-issued one. Under `Details`, adapt the packet to the size of the request. Broad orientation should use the full packet below. If the sections are compressed or renamed for any reason, the answer must still name the target, inspected source classes, source conflicts, and evidence gaps.
 
 - `Target`: Identify the target path/name, type, boundary, and source classes inspected.
 - `Current State`: State branch/worktree/status-doc truth and the strongest current-status conclusion.
@@ -121,7 +123,7 @@ If a full-packet section has no evidence, write `None found` or `Not enough evid
 - Prefer exact file paths, branch names, commit hashes, ticket IDs, PR numbers, and dates over vague status language.
 - Read only the latest or explicitly relevant status notes by default. Do not scan broad note archives unless the user asks or the active status trail directly depends on them.
 - Keep the final answer focused on status, blockers, conflicts, and evidence limits. Do not drift into recommendations or implementation planning unless the user asks.
-- If the target is materially ambiguous and multiple reasonable boundaries would change the answer, ask one clarifying question before inspecting broadly.
+- If the target is materially ambiguous and multiple reasonable boundaries would change the answer, ask one clarifying question before inspecting broadly. A bare invocation with no target text over a repo with several live work lanes is exactly this case: confirm which lane is meant instead of inferring it from the most recent activity.
 
 ## Artifact Mode
 
