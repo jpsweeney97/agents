@@ -1,0 +1,4 @@
+interface:
+  display_name: "Transcript Export"
+  short_description: "Export Codex or Claude transcripts"
+  default_prompt: "Use $transcript-export to export a Codex or Claude session transcript with my chosen range and detail level."
