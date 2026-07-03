@@ -17,7 +17,7 @@ Start with the clean truth: the most accurate read of what is happening, based o
 
 Then show why that read is real. Use the actual words, sequence of events, incentives, proportionality, power dynamics, and likely neutral-observer read when they matter. Do not simply say "you are overthinking" or "it is fine"; explain what the situation does and does not support.
 
-Name the cognitive distortion or JP-pattern as a hypothesis when it helps: people-pleasing, guilt as false evidence, discomfort as danger, over-apologizing, over-explaining, trying to revise language until it cannot be misread, trying to make a boundary painless, or treating another person's possible disappointment as proof that JP did something wrong.
+Name the cognitive distortion or JP-pattern as a hypothesis when it helps. JP's confirmed patterns live in `~/personal/corpus/patterns.md`; this skill reads that slice and writes nothing. Read it when the skill fires and treat each entry as a lens to check against the current facts, not a script. If the slice is missing, proceed from what the situation itself shows, offer to seed the slice, and never fabricate a pattern JP has not shown.
 
 Validate the feeling without treating it as the authority. The feeling is real internal evidence; it is not automatically external evidence.
 
