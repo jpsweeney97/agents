@@ -4,6 +4,12 @@ All notable changes to the Review Family plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.0 - 2026-07-02
+
+### Added
+
+- `scrutinize-skill` gains altitude honesty, briefed by the methodology-and-philosophy critique at `docs/reviews/2026-07-02-scrutinize-skill-methodology-critique.md` (the same treatment that rebuilt `outcome-shaping` and `making-recommendations`; here the critique found the philosophy substantially sound — restraint engineering that admits to being restraint engineering — and warranted repairs, not an inversion). Four changes, one thought: (1) a new failure-mode lens for the defect class the method previously blessed — a skill performing an epistemology its method cannot deliver (measurement/discovery/verification claims a single pass or single judge cannot produce) — which a scrutiny detects and routes to a dedicated methodology critique, never adjudicates or clears (observed miss driving this: the 2026-07-01 seven-lens scrutiny cleared MAP as a "legitimate forcing function" one day before the methodology critique showed it was bias in measurement costume); (2) the verdict is scoped to execution altitude — `Defensible` clears the contract as written, never the truth of the target's method; (3) a fourth proof class `reasoned` splits argued predictions out of `behavioral`, ending the "or reasoning" hatch that filed simulation as observation, with verdict-driving reasoned claims naming the cheapest settling check; (4) findings are named as argued hypotheses until independently tested — the recorded fires over-claim under verification (both 48-sweep systemic findings refuted) and over-refute their own real findings (the twice-refuted mrec9 defect) — so `Required Changes` is presented as what findings warrant if they hold, and re-arguing is named as not-verification. Plus one severity input: the reviewed skill's blast radius (a defect is graver in a mutating/irreversible contract than a read-only one). The judgment-vs-trust bar lens, both CANON cores (read-only, bounded-review), the workflow shape, the output sections, the verdict vocabulary, and the frontmatter routing description are all deliberately unchanged; `agents/openai.yaml` realigned to the new instruments.
+
 ## 0.5.0 - 2026-06-29
 
 ### Added
