@@ -76,6 +76,21 @@ Expected behavior:
 - Stay in `skill-ux-design` when the user says "make it easier to steer", "users cannot tell what it will edit", or similar UX framing.
 - In mixed requests, follow the primary framing and mention secondary UX follow-up only when useful.
 
+## Authoring-Time Consultation
+
+User asks (or a build path routes): "Hand-author the new skill against `agent-facing-design` and `skill-ux-design`."
+
+Expected mode: authoring consultation per When The Target Does Not Exist Yet — not the audit workflow.
+
+Why: The target skill does not exist yet, so there is no journey to scan, no edit boundary to classify, and no receipt to write.
+
+Expected behavior:
+
+- Ask the six phases as design questions about the imagined first run and shape the draft's setup visibility, steering, proof boundary, and durable aftermath.
+- Label any named frictions as predicted — no one has used the skill yet.
+- Do not emit mode semantics, coverage ledgers, `Safe UX`/proposal-first tags, or closeout receipts.
+- Deliver a few concrete sentences applying the lens to this draft's actual journey, not an absorbed slogan.
+
 ## Split Safe UX And Proposal-First Fix
 
 User asks: "Users cannot tell when this skill will edit, and I think it should also auto-commit its changes."

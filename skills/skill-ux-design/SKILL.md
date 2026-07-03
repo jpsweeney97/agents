@@ -1,6 +1,6 @@
 ---
 name: skill-ux-design
-description: "Use when the user explicitly asks to design, audit, improve, or apply UX improvements to a Claude or Codex skill or skill support surface, including invocation, steering, output experience, validation trust, recovery, or durable aftermath. Do not use for general skill improvement, instruction prose quality, rigor, validation, correctness, safety, routing cleanup, or adversarial review unless the user frames it as skill UX."
+description: "Use when the user explicitly asks to design, audit, improve, or apply UX improvements to a Claude or Codex skill or skill support surface, including invocation, steering, output experience, validation trust, recovery, or durable aftermath — or when hand-authoring a new skill routes here for its authoring-time UX consult. Do not use for general skill improvement, instruction prose quality, rigor, validation, correctness, safety, routing cleanup, or adversarial review unless the user frames it as skill UX."
 ---
 
 # Skill UX Design
@@ -14,6 +14,7 @@ Use [examples/calibration.md](examples/calibration.md) when routing, edit safety
 ## Trigger Boundaries
 
 - Trigger only when the request is explicitly about UX or a user-facing synonym such as usability, friction, user journey, discovery/invocation, steering, output experience, edit control, validation trust, recovery, durable aftermath, or skill-use experience.
+- Authoring-time consultation is also in-lane without explicit UX framing: when a build path routes here while hand-authoring a new skill, follow When The Target Does Not Exist Yet.
 - Do not trigger for general skill improvement, plain instruction-doc prose quality, general readability, rigor, validation, correctness, safety work, or trigger-boundary cleanup unless the user explicitly ties it to the user's journey through the skill.
 - Once this skill is active, inspect instruction quality and agent execution as explanations for UX friction, not as independent goals.
 
@@ -82,8 +83,19 @@ Plain `audit` means full read-only coverage across the six phases and their mate
 - If the user names a file inside a skill, treat the containing skill directory as the target unless the request is explicitly file-scoped.
 - If the current directory is a skill directory and no target is named, infer it as the target.
 - Inspect `SKILL.md`, `agents/openai.yaml`, and directly referenced examples or references that shape behavior.
+- When the target has recorded real use — skill-usage ledger entries, session transcripts, or a friction the user reports in their own words — read at least one real run before predicting frictions from the text alone. Observed friction is this lane's strongest evidence, and the contract's text is only ever a proxy for the experience it produces.
 - Follow nearby behavior-shaping files only as needed to understand the top likely frictions, unless the user asks for audit or exhaustive coverage.
 - Avoid broad repo scans unless the user asks for a cross-skill UX pass.
+
+## When The Target Does Not Exist Yet
+
+This lane's most common summons is authoring-time consultation: a builder hand-authoring a new skill is routed here (by `agent-facing-design`, `AGENTS.md` or `CLAUDE.md`, or a build plan) while the target skill does not exist yet. That is a legitimate use of this lane, and it is not the audit workflow. What transfers:
+
+- Ask the six phases as design questions about the imagined first run: how the user will find and invoke the skill, what inferred setup it should show, how the user steers and corrects it, what it proves and how honestly it says so, what durable aftermath it leaves, and whether the agent has enough support to deliver that experience reliably.
+- Carry the lane's standing instruments into the new contract: a visible setup line for inferred choices, plain-language steering, an honest proof boundary, and named durable aftermath.
+- Translate the draft contract into likely first-run frictions and fix the draft text that causes them — labeled predicted, since no one has used the skill yet.
+
+Mode semantics, coverage ledgers, `Safe UX`/proposal-first tagging, and the edit closeout receipts do not apply before the target exists: there is no already-existing behavior to clarify and no unauthorized edit to justify. Do not perform them — and do not reduce the consult to an absorbed slogan; a few concrete sentences applying the lens to this draft's actual journey are the deliverable.
 
 ## Safe UX And Proposal-First Boundaries
 
@@ -122,7 +134,7 @@ When a UX fix mixes `Safe UX` and protected behavior, split it. Apply only the s
 1. Identify the target skill and mode: bounded design/edit, read-only, audit, targeted, quick, exhaustive, or apply.
 2. Read enough live context to understand the user's journey through the target skill and the likely sources of friction.
 3. Use the six UX phases as a coverage lens. In default mode, scan broadly enough to find the highest-leverage 1-3 frictions; in audit/exhaustive mode, inspect or explicitly exclude every phase and material sub-surface.
-4. Translate each top issue into concrete user friction: what the user has to guess, decode, correct, wait through, trust, approve, recover from, or follow up on.
+4. Translate each top issue into concrete user friction: what the user has to guess, decode, correct, wait through, trust, approve, recover from, or follow up on. Name each friction's evidence class: observed (a real run, transcript, or the user's own report) or predicted (inferred from reading the contract). A predicted friction is a hypothesis about an experience no one has had yet — present it as one, and let an observed friction outrank it.
 5. Separate direct-edit `Safe UX` fixes from proposal-first protected fixes.
 6. Before editing, re-read the live files, keep changes scoped, and preserve protected surfaces unless the user has explicitly approved the named change.
 7. After edits, validate the edited skill surfaces using the local repo's validation path. At minimum, parse changed YAML/frontmatter, check referenced paths, run the available skill validator when present, run whitespace checks, and do a realistic dry run when practical.
@@ -151,6 +163,7 @@ Coverage: bounded whole-journey scan, not exhaustive surface-by-surface coverage
 Suggested fixes:
 1. <fix>
    Safe UX | Proposal-first
+   Evidence: <observed: run/transcript/user report | predicted from the contract text>
    Why it matters: <user-visible effect>
    Change shape: <concrete patch direction>
    Approval needed: <only if proposal-first>
@@ -173,6 +186,8 @@ Not touched: <protected surfaces intentionally left alone>
 ```
 
 When the skill edits directly without prior approval, the closeout must include one sentence beginning `Safe UX because...`. The sentence must explain why the edit clarified already-existing behavior without changing routing, promise, proof, authority, mutation, external access, persistence, behavior-smoke claims, plugin/runtime claims, or lifecycle expectations. If that sentence is hard to write honestly, the change was proposal-first.
+
+The receipt certifies only in-lane `Safe UX` edits, and fluency is not the test — an edit that changes what the target skill produces (new behavior, new content rules, a different output) is not `Safe UX` and can never carry the receipt, however smoothly the sentence writes. Close such an edit as an approved change with the lifecycle rationale, or route it to the owning lane. Never borrow `Safe UX because...` as closeout language for work this lane does not own.
 
 For approved proposal-first or protected edits, do not use `Safe UX because...` as the edit-path receipt. Close with an approval and lifecycle rationale instead:
 

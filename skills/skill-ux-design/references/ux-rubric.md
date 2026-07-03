@@ -38,6 +38,8 @@ Look for moments where the user may have to:
 
 Useful fixes name the friction directly, then change the skill text that causes it. Prefer exact replacement or addition text over broad advice.
 
+Findings carry the evidence class defined in `SKILL.md`: observed from real use (a run, transcript, or the user's own report) or predicted from the contract text. When the target has recorded real use, read one run before predicting.
+
 ## Visible Setup
 
 Check whether the skill shows important inferred choices when they affect user control:
