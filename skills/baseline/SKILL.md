@@ -5,7 +5,7 @@ description: "Use when the user asks what source of truth or baseline controls a
 
 # Baseline
 
-Resolve what should be trusted for a claim before judging whether anything matches it.
+Resolve what should be trusted for a claim before judging whether anything matches it. Treat the claim as an allegation: verify it against the strongest live source, and say only what the live check showed.
 
 This skill is a source-of-truth resolver. It is not a default audit report, implementation plan, or broad status orientation. Its job is to answer "what do I trust here?" compactly, then show enough evidence for the user to correct or approve the authority boundary.
 
@@ -16,13 +16,13 @@ This skill is a source-of-truth resolver. It is not a default audit report, impl
 - Treat baselines as claim-scoped. One directory can have different baselines for source behavior, public docs, tests, runtime behavior, release state, ownership, policy, and historical compatibility.
 - Answer the likely claim first when context strongly supports one. If the request is broad, ambiguous, or multiple authority surfaces matter, include a compact claim-area map underneath.
 - Name trust gaps explicitly. A trust gap is a specific reason the answer cannot honestly say "this matches the intended truth" yet.
-- When a usable baseline clearly contradicts live state, report a `Baseline contradiction`. Do not turn that into a certified drift audit or imply global cleanliness.
+- When a usable baseline clearly contradicts live state, report a `Baseline contradiction`. Name both sides and stop: the contradiction never says which side is wrong — live divergence may be a bug or deliberate new intent, and that direction call belongs to the human (or to `spec-drift-reconcile` when intent may have moved), never to this skill. Do not turn the report into a certified drift audit or imply global cleanliness.
 
 ## Baseline Statuses
 
 Use these as answer categories, not heavy report machinery:
 
-- `Usable baseline`: safe to rely on for the named claim and scope.
+- `Usable baseline`: safe to rely on for the named claim and scope. It certifies precedence — this source governs the claim — not that live state matches it or that the source is fresh; a usable baseline can itself be the stale thing.
 - `Weak baseline`: useful signal, but incomplete, stale, indirect, or too narrowly scoped to trust alone.
 - `Competing baselines`: two or more plausible authorities conflict and no inspected precedence rule clearly chooses one.
 - `Missing baseline`: no current authority source was found for the claim.
@@ -81,12 +81,14 @@ When the baseline is unknown or weak, help the user move forward:
 Start with a compact answer. Keep supporting detail short unless the user asks for a deeper packet.
 
 ```markdown
-Best current baseline: <path/source, proposed decision, or none found>
+Best current baseline: <path/source, or none found>
 For: <claim area and scope>
 Status: usable baseline|weak baseline|competing baselines|missing baseline|proposed baseline decision|decision needed
 Why trust it: <one to three sentences>
 Decision needed: <none, proposed decision, or exact human decision question>
 ```
+
+The first line's label is part of the claim. When no current authority exists and the answer is a fresh choice, open with `Proposed baseline decision:` or `Decision needed:` instead of `Best current baseline:` — a recommendation must never ship wearing a resolved label.
 
 Then include only sections that add value:
 
