@@ -4,6 +4,12 @@ All notable changes to the Review Family plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.0 - 2026-07-03
+
+### Added
+
+- `scrutinize` gains verdict honesty and the codification of its own best observed behavior, briefed by the methodology-and-philosophy critique at `docs/reviews/2026-07-03-scrutinize-methodology-critique.md` (the arc's ninth hold, on its largest fire corpus — ~200 sessions over two runtimes; the critique found the stance, evidence architecture, floor, and both modes earning their keep, and the defect in the contract's self-understanding: a verdict is a fact about a search, and the text presented it as a fact about the artifact, while the method's dominant real uses — a convergence loop and caller-scoped panels — ran on discipline the text never wrote down). Five repairs, all prose, no new machinery: (1) verdict scope stated inline — `Defensible`/`Ready to Execute` claim serious search exhausted without a disqualifying find, not certified soundness, and expire when the artifact changes — plus the restored founding survives-clause (say why a surviving target survives, then pivot to residual risks; cut at the 05-28 compression, recovered from the 2026-04-02 ur-prompt); (2) a re-scrutiny paragraph codifying the loop's observed folk discipline (re-read live, verify fixes against the artifact and diff never the description, prior findings re-earned as hypotheses, hunt new defects, credit what held); (3) a bounded-review rider extending the discipline to externally-narrowed scope (caller-restricted, assigned lens/panel seat, or sampled) — the CANON bounded core stays byte-identical; (4) the normal verdict enum and severity scale homed in the always-loaded body with token-plus-scoping-gloss blessed (closes the 06-16 kept "verdict-vocab unreachable" defect and brings the layout under the 06-17 inline-vocabulary doctrine; review-format.md keeps the template with a back-pointer); (5) a mode-honesty clause — when the reviewer, not the user, chose the register, say so. Routing, both CANON cores, the premise check, the materiality gate, both mode organs, and `agents/openai.yaml` deliberately unchanged.
+
 ## 0.6.0 - 2026-07-02
 
 ### Added
