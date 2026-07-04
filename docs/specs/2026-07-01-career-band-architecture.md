@@ -1,7 +1,7 @@
 ---
 type: design-spec
 created: 2026-07-01
-status: settled — approved; execution staged (stage 0 now, stage 1 on JP's go after the offer decision, stage 2 when a search looms)
+status: settled — approved; stage 1 executed 2026-07-03 (corpus migration + fleet retirement landed in career + personal); stage 2 deferred until a search looms
 source: outcome-interviewer → design-exploration session (2026-07-01), grounded in a full diagnostic read of /Users/jp/career, skills/reflect/SKILL.md, skills/email-writing/SKILL.md, and docs/specs/2026-07-01-personal-wing-reflect.md
 ---
 
