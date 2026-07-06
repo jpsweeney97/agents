@@ -13,11 +13,11 @@ Chat summary order: Result Brief only, plus the artifact path. Do not reproduce 
 
 Finding id prefixes: `CH`, `AD`, `DP`, `TD`, `OP`, `KN`, `SY`.
 
-Top-call gate: see SKILL.md (Synthesize) — a `Top Debt Calls` entry needs `evidence_corroborated`, two distinct source classes or independently observed signals, and a present-tense cost; singleton evidence may be a finding, watch item, coverage gap, or next probe, but not a top call.
+Top-call gate: see SKILL.md (Synthesize) — a `Top Debt Calls` entry needs `evidence_corroborated`, two distinct source classes or independently observed signals, and a present-tense cost; singleton evidence may be a finding, watch item, coverage gap, or next probe, but not a top call. `evidence_corroborated` here means breadth — distinct source classes read by the same judge — not independence between separate minds; a top call is multiply-sourced, not independently confirmed.
 
 Caps: base depth caps and the truncation rule are in SKILL.md (Output); the raw-vs-canonical ceiling before canonicalization is low /10, medium /18, high /24.
 
-Metrics: raw/canonical findings, merged clusters, corroborated count, contradictions, skipped categories, singleton count, quick wins, strategic items, tradeoffs.
+Metrics: raw/canonical findings, merged clusters, corroborated count, contradictions, skipped categories, singleton count, quick wins, strategic items, tradeoffs. The Metrics packet is local-run synthesis metadata, not durable proof and not audit evidence; the findings' warrant is the Evidence Trail, not these counts.
 
 Sanity: >50% quick-wins means low effort; >30% strategic means high severity; zero high-stakes quick wins needs small-fix pass; >40% watch means observation leakage.
 

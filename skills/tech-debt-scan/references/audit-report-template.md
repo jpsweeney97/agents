@@ -30,7 +30,7 @@ and flip it to:
 Status: complete
 ```
 
-only per the lifecycle rule in SKILL.md (Output) — after synthesis, caps, metrics, coverage limits, and fidelity checks pass. If interrupted or blocked before those checks, leave the status as `draft - incomplete` and record the blocker or next evidence slice in `Coverage Gaps / Next Probes`.
+only per the lifecycle rule in SKILL.md (Output) — after synthesis, caps, metrics, coverage limits, and fidelity checks pass. `Status: complete` is the author's own self-attestation that those checks passed, not an independent certification — a downstream reader still leans on the Evidence Trail, not the stamp (see SKILL.md). If interrupted or blocked before those checks, leave the status as `draft - incomplete` and record the blocker or next evidence slice in `Coverage Gaps / Next Probes`.
 
 ## Authority Order
 
@@ -157,6 +157,8 @@ Artifact Path: docs/audits/YYYY-MM-DD-<target-slug>-debt-scan.md
   found>
 
 ## Metrics
+
+Local-run synthesis metadata, not durable proof and not audit evidence — the findings' warrant is the Evidence Trail, not these counts.
 
 - Raw Findings:
 - Canonical Findings:
