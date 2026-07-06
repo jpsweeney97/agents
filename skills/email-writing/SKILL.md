@@ -88,6 +88,16 @@ Avoid:
 
 Warmth should be natural and specific. It should not add extra praise or repeated gratitude just to soften the message.
 
+## Contextual Warmth
+
+Match the sender's actual energy rather than defaulting to a generic professional baseline. Right-sized does not always mean shorter or flatter; a warm message can need a warmer reply.
+
+Prefer warmth that responds to something real in the thread: a holiday weekend, PTO, a scheduling burden, a specific welcome note, or a concrete next step. Avoid warmth that merely decorates the email.
+
+Do not over-manage future possibilities. If the current reply only needs a social acknowledgment, do not turn it into scheduling logic, status reporting, or an offer to be available.
+
+Check implied referents. Phrases like `nice to come back to` can sound smooth but become wrong if the sender, not JP, was the one returning.
+
 ## Asks, Follow-Ups, And Urgency
 
 For first-time outreach where JP wants something from someone, keep the ask softer and more conversational. Prefer wording like `If you're open to it, I'd be glad to...` or `Would it be possible to...` over a hard call to action.
