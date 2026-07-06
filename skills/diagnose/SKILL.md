@@ -64,7 +64,7 @@ Stop and say so explicitly. List what you tried. Ask the user for: (a) access to
 
 Do not proceed to Phase 2 until you have a loop you believe in.
 
-## Phase 2 — Reproduce
+## Phase 2 — Reproduce + minimise
 
 Run the loop. Watch the bug appear.
 
@@ -74,7 +74,15 @@ Confirm:
 - [ ] The failure is reproducible across multiple runs (or, for non-deterministic bugs, reproducible at a high enough rate to debug against).
 - [ ] You have captured the exact symptom (error message, wrong output, slow timing) so later phases can verify the fix actually addresses it.
 
-Do not proceed until you reproduce the bug.
+### Minimise
+
+Once the loop is red, shrink the repro to the **smallest scenario that still goes red**. Cut inputs, callers, config, data, and steps **one at a time**, re-running the loop after each cut, and keep only what is load-bearing for the failure.
+
+Why bother: a minimal repro shrinks the hypothesis space in Phase 3 — fewer moving parts left to suspect — and becomes the clean regression test in Phase 5.
+
+Done when **every remaining element is load-bearing**: removing any one of them makes the loop go green.
+
+Do not proceed until you have **reproduced and minimised** the bug.
 
 ## Phase 3 — Hypothesise
 
