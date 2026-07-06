@@ -158,6 +158,31 @@ def test_non_git_backup_uses_explicit_backup_root(tmp_path: Path) -> None:
     assert not (artifact / "status.txt").exists()
 
 
+def test_failed_run_leaves_no_artifact_and_reports_real_args(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path)
+    write(repo / "pkg" / "orders.py", "VALUE = 3\n")
+    commit_all(repo)
+    outside = write(tmp_path / "outside.py", "VALUE = 4\n")
+
+    cmd = [
+        sys.executable,
+        str(BACKUP),
+        "--scope-slug",
+        "outside",
+        "--planned-verification",
+        "strong plan",
+        str(outside),
+    ]
+    result = run(cmd, repo, check=False)
+
+    assert result.returncode == 2
+    assert "path is outside root" in result.stderr
+    assert "Got: None" not in result.stderr
+    assert "--scope-slug" in result.stderr
+    backup_root = repo / ".backup"
+    assert not backup_root.exists() or not any(backup_root.iterdir())
+
+
 def test_explicit_subdir_root_still_uses_git_root(tmp_path: Path) -> None:
     repo = init_repo(tmp_path)
     source = write(repo / "app" / "module.py", "VALUE = 2\n")

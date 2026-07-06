@@ -462,10 +462,10 @@ def create_backup(args: argparse.Namespace, cwd: Path) -> tuple[int, dict[str, o
         for path in args.paths
     ]
     scanner_payload = run_scanner(absolute_paths, root)
+    scoped = scoped_files(args.paths, root, scanner_payload, cwd)
     artifact = unique_artifact_path(
         backup_root, branch=branch, scope_slug=args.scope_slug
     )
-    scoped = scoped_files(args.paths, root, scanner_payload, cwd)
     records = [copy_or_exclude(file, artifact) for file in scoped]
 
     write_git_evidence(artifact, root, scoped, state)
@@ -507,11 +507,14 @@ def create_backup(args: argparse.Namespace, cwd: Path) -> tuple[int, dict[str, o
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = parse_args(sys.argv[1:] if argv is None else argv)
+    args_list = sys.argv[1:] if argv is None else argv
+    args = parse_args(args_list)
     try:
         code, payload = create_backup(args, Path.cwd())
     except Exception as exc:
-        sys.stderr.write(f"create simplify backup failed: {exc}. Got: {argv!r:.100}\n")
+        sys.stderr.write(
+            f"create simplify backup failed: {exc}. Got: {args_list!r:.100}\n"
+        )
         return 2
     json.dump(payload, sys.stdout, indent=2, sort_keys=True)
     sys.stdout.write("\n")
