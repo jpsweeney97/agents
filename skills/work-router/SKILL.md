@@ -5,7 +5,7 @@ description: "Use when the user asks which skill, lane, workflow, or next owner 
 
 # Work Router
 
-Choose the skill lane that owns a piece of work, then stop. This skill is a read-only route advisor, not an orchestrator.
+Choose the skill lane that owns a piece of work, then stop. This skill is a read-only route advisor, not an orchestrator. Invoke it with `/work-router` (`$work-router`), or let it fire when a request is itself a routing question.
 
 ## Use
 
@@ -25,7 +25,7 @@ If the user explicitly invokes another skill and asks to execute that skill, do 
 
 ## Process
 
-1. Identify the work item or items to route. If the item is missing or too vague to classify, ask one narrow question or route to the lane that owns outcome clarification.
+1. Identify the work item or items to route. If the item is missing or too vague to classify, ask one narrow question or route to the lane that owns outcome clarification (`outcome-shaping`).
 2. Inspect available skill descriptions first. When the route depends on a boundary, deep-read only the likely overlapping `SKILL.md` files and directly referenced routing examples needed to decide.
 3. Pick one primary owning lane when the evidence supports it. If no current skill owns the work, say so and name the closest fallback or the missing lane.
 4. Name nearby non-routes: the skills that seem plausible but should not own this item, with the reason each loses.
