@@ -101,7 +101,7 @@ To recover before the simplification is accepted, restore each edited file from 
 
 10. Failure/closeout: if verification fails, do root-cause analysis first. Use baseline to separate pre-existing from new failure; fix only with clear cause/path. Follow repo-local commit instructions. If they require a commit, stage only scoped files after successful verification; otherwise leave changes unstaged unless asked.
 
-Closeout: report per SKILL.md `## Closeout` — the five ordered labels (`Simplification Result`, `Behavior Claim`, `Verification`, `Commit Readiness`, `Review Packet`), the first four concise, `Review Packet` as the details section, the fast-lane compact review hook, and the full-safety copy-ready read-only same-machine review prompt with all its listed items. No rollback command.
+Closeout: report per SKILL.md `## Closeout` — the five ordered labels (`Simplification Result`, `Behavior Claim`, `Verification`, `Commit Readiness`, `Review Packet`), the first four concise, `Review Packet` as the details section, the review packet content always fenced in a `markdown` code block for easy copying, the fast-lane compact review hook, and the full-safety copy-ready read-only same-machine review prompt with all its listed items. No rollback command.
 
 ## Script Maintenance
 
