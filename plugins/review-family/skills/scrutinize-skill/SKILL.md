@@ -32,7 +32,7 @@ Review these failure modes first:
 - a judgment skill is so over-ruled — fixed output shapes, exhaustive rules, sections filled to feel done — that the agent performs the contract instead of thinking
 - a judgment skill provokes nothing — no forcing function, no counter-pressure — so it adds nothing over the bare agent, or provokes too weakly — a forcing function present but dulled, hedged, or softened (an adversarial posture reframed as collaborative) so it no longer creates real counter-pressure (the *provoke* half of the bar, failed by absence or by dilution rather than by over-ruling)
 - a trust skill is so rigidly ruled it does the wrong thing in an unforeseen case (a crude gate dead-ending legitimate work), or reimplements machinery copied from siblings instead of sharing it
-- the skill performs an epistemology its method cannot deliver — measurement, discovery, or verification claims that a single pass or a single judge cannot produce, restraints dressed up as a method — a class this review can detect but not adjudicate: raise it and route to a dedicated methodology-and-philosophy critique of the skill rather than clearing the premise
+- the skill performs an epistemology its method cannot deliver — measurement, discovery, or verification claims that a single pass or a single judge cannot produce, restraints dressed up as a method — a class this review can detect but not adjudicate: raise it and route to `methodology-check` — the cheap text-and-census methodology adjudicator, which escalates to the fire-tested `methodology-critique` when how the skill fires in real transcripts is the crux — rather than clearing the premise
 
 Out of scope: routine skill editing, implementation, source sync, installed runtime proof, broad plugin audits, completed-code review, and marketplace publishing unless the user explicitly asks for that separate work.
 
@@ -70,7 +70,7 @@ Do not claim runtime installation, activation, hook behavior, marketplace sync, 
 4. **UX Review** - Review user friction, clarity, pacing, question shape, user effort, challenge level, and closure.
 5. **Composability And Overlap** - Identify overlapping skills and classify each material overlap as `target wins`, `other skill wins`, `routing clarification needed`, `merge candidate`, `split candidate`, or `no material overlap`.
 6. **Validation And Proof** - Separate structural checks from behavior proof and name any false-confidence claims.
-7. **Verdict** - Use `Reject`, `Major revision`, `Minor revision`, or `Defensible`. The verdict grades the behavior contract as written — execution altitude. It does not certify that the skill's underlying method or premise is true: a contract can execute cleanly on a false premise, and structure can pass the provoke test while claiming knowledge the method cannot produce. When the premise itself is the doubt, raise it as a finding and route to a dedicated methodology-and-philosophy critique; do not clear it from a contract pass.
+7. **Verdict** - Use `Reject`, `Major revision`, `Minor revision`, or `Defensible`. The verdict grades the behavior contract as written — execution altitude. It does not certify that the skill's underlying method or premise is true: a contract can execute cleanly on a false premise, and structure can pass the provoke test while claiming knowledge the method cannot produce. When the premise itself is the doubt, raise it as a finding and route to `methodology-check` (which escalates to `methodology-critique` when the crux is behavioral); do not clear it from a contract pass.
 
 ## Output
 

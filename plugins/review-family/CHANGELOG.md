@@ -4,7 +4,11 @@ All notable changes to the Review Family plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## 0.7.0 - 2026-07-03
+## 0.8.0 - 2026-07-07
+
+### Changed
+
+- `scrutinize-skill`'s premise lens now routes detected epistemology/premise doubts to the new `methodology-check` skill — the cheap, dual-runtime, single-agent text-and-census methodology adjudicator — instead of a generic "dedicated methodology-and-philosophy critique." `methodology-check` adjudicates the premise on the skill's text plus a fire census, and itself escalates to the fire-tested `methodology-critique` when how the skill fires in its real transcripts is the load-bearing question. This gives the detect-but-don't-adjudicate lens a real adjudicator to hand to on *both* runtimes: the only methodology treatment previously named was `methodology-critique`, which is Claude-only, so on Codex the route pointed at a skill that does not exist. Two spots changed — the Scope failure-mode bullet and the Verdict clause; both CANON cores (read-only, bounded-review), the routing frontmatter, the materiality gate, and every other organ are unchanged.
 
 ### Added
 

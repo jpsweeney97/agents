@@ -1,6 +1,6 @@
 ---
 name: methodology-critique
-description: "Use when JP commissions the methodology-and-philosophy treatment of a skill in this library: max-effort pressure on the skill's epistemology, stance, and implicit theory of its own method, tested against its full history and recovered fire corpus, adjudicated by JP, then whatever repairs the critique warrants, landed and pushed with a docs/reviews brief. Claude-only, expensive by design — the heavier treatment scrutinize-skill's premise lens routes to. Do not use for execution-altitude skill-contract review (scrutinize-skill), quantitative benchmarking (skill-benchmark), routine skill editing, or targets outside this library."
+description: "Use when JP commissions the methodology-and-philosophy treatment of a skill in this library: max-effort pressure on the skill's epistemology, stance, and implicit theory of its own method, tested against its full history and recovered fire corpus, adjudicated by JP, then whatever repairs the critique warrants, landed and pushed with a docs/reviews brief. Claude-only, expensive by design — the fire-tested treatment methodology-check escalates to when how the target fires in its real transcripts is the crux. Do not use for execution-altitude skill-contract review (scrutinize-skill), the cheap text-and-census methodology pass (methodology-check), quantitative benchmarking (skill-benchmark), routine skill editing, or targets outside this library."
 ---
 
 # Methodology Critique
@@ -9,7 +9,7 @@ The treatment: pressure on a skill's methodology and philosophy — the epistemo
 
 The genre's record lives in `docs/reviews/*-methodology-critique.md`. Read it fresh each run; never carry the tally or the precedents' findings from memory or from this file. A hold and an inversion are equally legitimate results, and the deliverable is an adjudicated written critique that becomes the design brief for same-session repairs.
 
-Run at maximum effort, single register — there is no light mode. The cheap premise check already exists: `scrutinize-skill` detects premise-class doubts at contract altitude and routes them here.
+Run at maximum effort, single register — there is no light mode. The cheaper passes already exist: `scrutinize-skill` detects premise-class doubts at contract altitude and routes them to `methodology-check`, which adjudicates the method on text and a fire census and escalates here when how the target fires in its real transcripts is the load-bearing question.
 
 ## Phase 0 — Commission (seal before evidence)
 
