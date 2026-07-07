@@ -25,7 +25,7 @@ Before any census, in two or three sentences, state and seal:
 
 - the target's **central epistemic claim** in one sentence — what it asserts it can do or know (e.g. "MAP scoring measures option quality"; "grilling a plan against the codebase hardens it beyond bare grilling");
 - your **provisional verdict** on whether that claim holds;
-- which of the target's **named instruments you expect live vs. dead** in real use.
+- which of the target's instruments **the census can adjudicate** — its on-demand surfaces (a `references/*` file, a conditional branch loaded only when its case triggers) — you expect live vs. dead in real use; for an all-body target, predict instead whether the skill genuinely fires at all.
 
 This is your prior, sealed. The verdict must later say where the evidence corrected it — a reversed prior stated in writing is the most honest thing this lane produces, not an embarrassment. If you cannot state the central claim, you are not yet at methodology altitude; read more of the target until you can.
 
@@ -35,7 +35,7 @@ This is your prior, sealed. The verdict must later say where the evidence correc
 
 **Census.** Enumerate the target's real fires cheaply. The census has two layers with different reach:
 
-- *Enumeration (grep — complete for any corpus size).* Pick 2–3 distinctive **body-sentence markers** from the target's `SKILL.md` — never the skill name (roster injection puts the name in every session). Grep them across the Claude usage ledger (`~/.claude/logs/skill-usage-ledger.jsonl`) and the Codex rollouts (`~/.codex/sessions/`). A marker that appears **zero** times across the complete grep proves that instrument dead — you cannot be in-context-but-not-run if you were never in context at all.
+- *Enumeration (grep — complete for any corpus size).* Pick 2–3 distinctive **body-sentence markers** from the target's `SKILL.md` — never the skill name (roster injection puts the name in every session). Grep them across the Claude session transcripts (`~/.claude/projects/`) and the Codex rollouts (`~/.codex/sessions/`) — the two surfaces where skill bodies actually appear in context. A marker that appears **zero** times across the complete grep of both transcript surfaces proves that instrument dead — you cannot be in-context-but-not-run if you were never in context at all.
 - *Classification (skim — sample if the corpus is too big for one pass).* Upgrade "the marker appeared" into "the method genuinely ran." When candidates exceed one pass, bound only this layer: state the sampled subset, read the highest-signal first (user-typed invocations, then recent, then full-cycle runs), mark the rest `unverified`, and never report the genuine-fire count as complete. Grep-proven absence is never downgraded to sampled.
 
 **Grade the census** honestly by what it can carry:
@@ -46,9 +46,10 @@ This is your prior, sealed. The verdict must later say where the evidence correc
 
 **Census confounds — clear every one before resting a finding on the census:**
 
-- The Claude ledger is **invocation-only**: it records that a skill fired, keyed by name, not its body. Its zeros are not deadness evidence — use it for fire *counts*, not marker absence.
+- The Claude ledger (`~/.claude/logs/skill-usage-ledger.jsonl`) is **invocation-only**: it records that a skill fired, keyed by name, not its body, so it is never a marker-grep surface — its zeros say nothing about deadness. Use it for name-keyed fire *counts* alongside the transcript greps, never for marker absence.
 - **Whole-body injection floors body-instruments together.** When a skill fires, its whole `SKILL.md` body enters context, so every body-marker co-occurs at the fire count and *cannot discriminate one body-instrument's deadness from another*. Per-instrument deadness is cheaply probeable only on **on-demand surfaces** — a `references/*` file or conditional branch loaded only when its case triggers, where the *named-vs-loaded* ratio is real signal (a reference named 500 times but loaded 5 times is near-dead). For a body-instrument, say "not cheaply probeable" — do not guess.
 - **Contamination.** A marker that also sits in the skill's roster-injected *description* appears everywhere; drop it. Maintenance, authoring, and review sessions that touch the `SKILL.md` path, and markers shared with a sibling skill, are detection noise, not fires — classify them out.
+- **Marker vintage.** The grep runs the *current* body's sentences against a historical corpus: a sentence added or reworded after a fire greps zero against every transcript from before the edit, manufacturing false deadness. Before resting an absence claim on a marker, find when it entered the body (`git log -S '<marker>'`) and bound the claim to fires after that date; a marker younger than the corpus proves nothing about the older fires.
 
 ## Findings — decide what you can, escalate the rest
 
@@ -67,7 +68,7 @@ Deliver in chat, read-only:
 - the admissible findings with their tags;
 - the graded census;
 - a **verdict bounded to the decided-here set** — say plainly "on text + census," and name what you did not inspect;
-- for every escalate-rider, one scoped recommendation: "to settle whether it fires the right way, commission `methodology-critique` on this axis." **Never invoke `methodology-critique` yourself** — it is JP-commissioned and expensive by design; you recommend, JP decides.
+- for every escalate-rider, one scoped recommendation: "to settle whether it fires the right way, commission `methodology-critique` on this axis." **Never invoke `methodology-critique` yourself** — it is JP-commissioned, Claude-only, and expensive by design; you recommend, JP decides. The recommendation stands even from a runtime where `methodology-critique` is unavailable — JP commissions it from a Claude session.
 
 ## Aftermath
 
@@ -81,4 +82,4 @@ Repairs, the full treatment, and any edit are separate, user-initiated follow-on
 
 - The **default** pass for "is this skill's method sound?" — its premise, epistemology, and whether it does what it claims.
 - `scrutinize-skill` for "will the skill behave well once it triggers" — contract and execution altitude.
-- `methodology-critique` when the crux is how the skill fires in its real transcripts, or when JP commissions the full fire-tested treatment. This lane escalates there; it does not replace it.
+- `methodology-critique` — where available (Claude-only) — when the crux is how the skill fires in its real transcripts, or when JP commissions the full fire-tested treatment. This lane escalates there by recommendation; it does not replace it, and on runtimes without it the recommendation is still the deliverable.
