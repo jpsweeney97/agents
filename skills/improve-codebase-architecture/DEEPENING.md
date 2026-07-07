@@ -4,7 +4,7 @@ How to deepen a cluster of shallow modules safely, given its dependencies. Assum
 
 ## Dependency categories
 
-When assessing a candidate for deepening, classify its dependencies. The category determines how the deepened module is tested across its seam.
+When assessing a candidate for deepening, classify its dependencies. The category determines how the deepened module is tested across its seam. When rendering report cards, use these exact badge labels: `in-process`, `local-substitutable`, `ports & adapters`, `mock`.
 
 ### 1. In-process
 
