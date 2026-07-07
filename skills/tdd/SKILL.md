@@ -46,6 +46,8 @@ RIGHT (vertical):
 
 When exploring the codebase, use the project's domain glossary so that test names and interface vocabulary match the project's language, and respect ADRs in the area you're touching.
 
+**Fixing a known-cause bug?** The first move is different: write ONE failing test that reproduces the defect through the existing public interface - that reproduction is your RED. A bug fix usually keeps the interface and changes behavior behind it, so skip the interface-design and deep-module planning below unless the fix genuinely changes the surface. (Cause not yet understood? Stop - `/diagnose` or `$diagnose` finds it first, then hands the fix back here to lock in test-first.)
+
 Before writing any code:
 
 - [ ] Confirm with user what interface changes are needed
@@ -90,6 +92,8 @@ Rules:
 - Don't anticipate future tests
 - Keep tests focused on observable behavior
 
+**Stuck RED?** If a test won't go green after a few focused attempts and you can't explain why, stop - don't thrash or pile on speculative code to force it. A test failing for a reason you don't understand is a signal the cause needs finding, not more attempts: hand off to `/diagnose` (or `$diagnose`) when the cause is unclear, or step back to a RED you understand. Bounded, deliberate cycles beat a long red thrash.
+
 ### 4. Refactor
 
 After all tests pass, look for [refactor candidates](refactoring.md):
@@ -101,6 +105,14 @@ After all tests pass, look for [refactor candidates](refactoring.md):
 - [ ] Run tests after each refactor step
 
 **Never refactor while RED.** Get to GREEN first.
+
+### 5. Closure
+
+When every planned behavior is implemented, tested, and refactored:
+
+- [ ] Run the FULL suite, not just this cycle's tests, and watch it pass with clean output. Per-cycle runs only prove the behavior you just added; a late refactor can silently break a behavior covered in an earlier cycle, and only the whole suite catches it.
+- [ ] Confirm you built the behaviors the plan named - and nothing speculative crept in.
+- [ ] Don't silently roll on. State that the change is ready, what it covers, and any interface or behavior assumptions you made unattended. Hand off to your completion-check and commit lane (e.g. `/closeout-check` or `$closeout-check`, if available) rather than declaring done yourself.
 
 ## Checklist Per Cycle
 
