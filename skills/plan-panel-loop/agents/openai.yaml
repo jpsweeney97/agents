@@ -1,4 +1,4 @@
 interface:
   display_name: "Plan panel loop"
   short_description: "Patch and re-review plans through an adversarial loop"
-  default_prompt: "Use $plan-panel-loop on this plan. Resolve the target, authority, mutation boundary, loop cap, and proof boundary first. Run a read-only adversarial panel, consolidate supported findings, patch only the named plan artifact or return a patch-shaped replacement, then re-review carried-forward findings. Stop when the inspected scope is defensible, a user decision is needed, the iteration cap is reached, or the plan is not patchable as given."
+  default_prompt: "Use $plan-panel-loop on this plan. Resolve the target, authority, mutation boundary, loop cap, proof boundary, and reviewer containment first; subagents are read-only reviewers only and must not edit files, launch nested panels, or change external state. Run a read-only adversarial panel, audit for unexpected reviewer mutations after each panel, consolidate supported findings, patch only the named plan artifact or return a patch-shaped replacement, then re-review carried-forward findings until a stop condition is reached."

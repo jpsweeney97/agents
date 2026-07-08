@@ -26,6 +26,7 @@ Start by making the setup visible and cheap to correct:
 - Mutation boundary: what may be edited, what must stay untouched, and whether the final output is a file patch or a proposed replacement in chat.
 - Loop cap: default to two review/patch/re-review cycles unless the user explicitly asks for more.
 - Proof boundary: whether panel feedback came from subagents, separate model/tool calls, or a single-agent simulation.
+- Reviewer containment: if subagents are used, state that they are read-only reviewers and may not edit files, launch nested panels, or change external state.
 
 Read the plan in full before designing the panel. Read referenced context only when it can change a finding, patch, or stop decision; do not broaden into implementation research unless the plan itself depends on that authority.
 
@@ -47,6 +48,28 @@ Ask reviewers for stable anchors from the current snapshot. Prefer heading or su
 
 Do not claim an independent panel if you did not actually run one. If no subagent or separate-call mechanism is available, run the lenses yourself, label the result as single-agent simulated panel feedback, and lower the proof claim accordingly.
 
+When using subagents, read [references/subagent-brief.md](references/subagent-brief.md) and include its containment language in every reviewer prompt.
+
+## Subagent Containment
+
+Subagents are reviewers, not co-executors. The main agent alone consolidates findings, decides which findings are accepted, patches the artifact, stages or commits when repository policy requires it, and chooses whether another cycle is needed.
+
+Every subagent reviewer brief must explicitly say:
+
+- READ ONLY: do not edit files, apply patches, stage, commit, push, open PRs, create handoffs, or change external state.
+- Do not launch other agents, panels, recursive reviews, or background workflows.
+- Do not wait on other agents or make the loop depend on another reviewer.
+- Read only the target and relevant authority needed for the assigned lens.
+- Return one bounded review packet with verdict, material findings, evidence anchors, and no-file-change patch suggestions when useful.
+
+Reviewers may reason adversarially, but they must not run `plan-panel-loop`, `review-family:scrutinize`, another adversarial panel, or any other multi-agent workflow inside their review.
+
+Before dispatching subagents, snapshot the target artifact state with `git status --short --branch --untracked-files=all` when in a git worktree and, for file targets, a target-scoped diff command such as `git diff --name-only -- <target>`.
+
+After every panel returns, times out, or is canceled, re-check the worktree and target artifact before consolidating findings. If any reviewer changed files or external state, stop the normal loop, inspect the diff or state change, label it as an unauthorized reviewer mutation, and decide explicitly whether to adopt it as the main patch, replace it, revert it with user approval when required, or ask the user. Do not launch the next panel until the artifact state is normalized.
+
+If a reviewer runs long enough to block the loop, cancel or drop that reviewer, run the mutation audit, and record the missing lens. Continue only if the remaining panel still covers the material risk surfaces; otherwise launch one replacement reviewer with a narrower read-only brief. Do not wait indefinitely for a reviewer whose lens is already covered by other evidence.
+
 ## Loop Contract
 
 1. Resolve the target, authority, mutation boundary, loop cap, and proof boundary.
@@ -56,6 +79,19 @@ Do not claim an independent panel if you did not actually run one. If no subagen
 5. Patch only the named plan artifact. Do not edit authority files, implementation files, tests, tickets, handoffs, or unrelated docs unless the user explicitly expands the mutation boundary.
 6. After patching, re-read the changed plan and re-review every open finding plus any new risk introduced by the patch.
 7. Stop when a stop condition below is reached. Do not keep looping just because another panel could be invented.
+
+## Finding Ledger
+
+Maintain a carried-forward finding ledger during the run. Keep it lightweight, but make every material accepted finding traceable until closed:
+
+- ID
+- lens
+- finding summary
+- accepted, rejected, or needs user decision
+- patch location or rejection evidence
+- re-review status
+
+A later panel's ready verdict is valid only if every accepted ledger item is closed or deliberately rejected with evidence. A new panel may add findings, but it cannot close an older accepted finding merely by omitting it.
 
 ## Patch Safety
 
@@ -83,6 +119,7 @@ Close every run with a compact packet:
 Target: <artifact reviewed and patched>
 Cycles run: <count and cap>
 Panel proof: <subagents | separate model/tool calls | single-agent simulated>
+Reviewer anomalies: <none | canceled/dropped reviewers | unexpected reviewer mutations and disposition>
 Changed: <sections/files changed, or chat replacement only>
 Resolved findings: <accepted findings closed>
 Remaining findings / stop status: <none | needs user decision | iteration cap reached | not patchable as given>

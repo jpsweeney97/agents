@@ -11,6 +11,7 @@ Setup:
 - Mutation boundary: patch `docs/plans/cache-refresh.md` only
 - Loop cap: two cycles
 - Panel proof: subagents if available; otherwise label feedback as single-agent simulated
+- Reviewer containment: subagents are read-only reviewers, may not edit files, and may not launch nested panels
 
 Cycle 1 panel:
 
@@ -42,10 +43,40 @@ Closeout:
 Target: docs/plans/cache-refresh.md
 Cycles run: 1 of 2
 Panel proof: subagents
+Reviewer anomalies: none
 Changed: rollout and validation sections
 Resolved findings: shard rollout mismatch; vague metric gate
 Remaining findings / stop status: none
 Verified: re-read patched sections; git diff --check
 Proof boundary: source and whitespace checks only; no implementation or runtime proof
 Next move: none
+```
+
+## Canceled Reviewer Mutation
+
+This example shows the recovery move when a reviewer violates containment.
+
+Cycle 2 panel setup:
+
+- Before dispatch, the main agent snapshots `git status --short --branch --untracked-files=all` and `git diff --name-only -- docs/plans/cache-refresh.md`.
+- One reviewer is assigned a proof lens with an explicit read-only brief.
+
+Anomaly:
+
+- The reviewer runs long and is canceled.
+- The post-panel mutation audit shows `docs/plans/cache-refresh.md` changed.
+- The main agent stops the normal loop, inspects the target diff, and labels the change as an unauthorized reviewer mutation.
+
+Disposition:
+
+- If the edit is correct and within the named mutation boundary, the main agent may adopt it as the main patch after re-reading the relevant authority and recording the finding it closes.
+- If the edit is wrong, unrelated, outside the mutation boundary, or unsafe to resolve without user authority, the main agent asks before replacing or reverting it.
+- The main agent does not launch another panel until the artifact state is normalized and the carried-forward finding ledger is updated.
+
+Closeout excerpt:
+
+```markdown
+Reviewer anomalies: one canceled reviewer edited the target; inspected diff and replaced it with the main-agent patch
+Verified: post-panel mutation audit; re-read patched sections; git diff --check
+Proof boundary: containment recovery was source-checked only; no implementation or runtime proof
 ```
