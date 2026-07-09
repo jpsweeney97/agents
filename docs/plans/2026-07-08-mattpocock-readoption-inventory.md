@@ -3,7 +3,7 @@ title: "mattpocock/skills Re-adoption Inventory (Era-84)"
 date: 2026-07-08
 branch: feature/mattpocock-readoption-inventory
 source_pin: mattpocock/skills @ d574778
-status: adjudicated + charter consult GO (§7.1); build steps 1–2 rebased + forward-tested and step-3 keep-forks reaffirmed (§7.2) on branch feature/mattpocock-readoption-inventory — unlanded, unledgered (steps 4–5 + consolidated ledger entry + ff-merge remain)
+status: "LANDED + LEDGERED (core batch, steps 1–3) — consult GO (§7.1), rebases + folds + §7.2 keep-fork reaffirmations, one consolidated case-(d) ledger entry (contract-decisions.md 2026-07-08), ff-merged to main. Remaining: Step 5 (resolve-conflicts admit + save-handoff fold) via the plugin path with their own ledger entries; wayfinder parked (now ledgered)"
 scope: upstream-as-base re-adoption, read-only blast-radius inventory
 supersedes_partial: docs/agents/contract-decisions.md 2026-07-05 (ledger line 36, append-only supersession at landing); the 2026-07-08 roadmap wayfinder-PARK and setup-REJECT were never ledgered (last ledgered entry is 2026-07-06), so acting against them is a fresh decision, not a supersession
 ---
