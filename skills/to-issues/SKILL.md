@@ -25,6 +25,8 @@ Work from whatever is already in the conversation context. If the user passes an
 
 If you have not already explored the codebase, do so to understand the current state of the code. Issue titles and descriptions should use the project's domain glossary vocabulary, and respect ADRs in the area you're touching.
 
+Look for opportunities to prefactor the code to make the implementation easier. "Make the change easy, then make the easy change."
+
 ### 3. Draft vertical slices
 
 Break the plan into **tracer bullet** issues. Each issue is a thin vertical slice that cuts through ALL integration layers end-to-end, NOT a horizontal slice of one layer.
@@ -34,7 +36,11 @@ Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an
 <vertical-slice-rules>
 - Each slice delivers a narrow but COMPLETE path through every layer (schema, API, UI, tests)
 - A completed slice is demoable or verifiable on its own
-- Prefer many thin slices over few thick ones </vertical-slice-rules>
+- Each slice is sized to fit in a single fresh context window
+- Prefer many thin slices over few thick ones
+- Any prefactoring should be done first </vertical-slice-rules>
+
+**Wide refactors are the exception to vertical slicing.** A *wide refactor* is one mechanical change — rename a column, retype a shared symbol — whose blast radius fans across the whole codebase, so a single edit breaks call sites everywhere at once and no vertical slice can land green. Don't force it into a tracer bullet: recognize it and route it to the lane that owns the expand–contract machinery — `/migration-campaign` (or `$migration-campaign`) drives the site-by-site application, with `contract-change-propagation` to map the blast radius first and `migration-safety` for a live schema or data change. Slice the *rest* of the work here as normal.
 
 ### 4. Quiz the user
 
@@ -58,7 +64,7 @@ Iterate until the user approves the breakdown.
 
 For each approved slice, publish a new issue to the issue tracker. Use the issue body template below. Apply the triage label that matches the slice's Type: `ready-for-agent` for AFK slices, `ready-for-human` for HITL slices. Do not stamp every slice `ready-for-agent` — an HITL slice mislabeled that way can be grabbed by an autonomous agent that cannot do its human-in-the-loop work. (These canonical roles map to your tracker's label strings via the triage label vocabulary.)
 
-Publish issues in dependency order (blockers first) so you can reference real issue identifiers in the "Blocked by" field.
+Publish issues in dependency order (blockers first) so each dependency edge can reference a real identifier. Where the tracker exposes them natively — GitHub does — record structure as **native relationships** rather than prose: link each slice to its source issue as a **sub-issue** of the parent, and record each "Blocked by" as a **native issue-dependency** (the live, UI-visible gate). Fall back to the text `Parent` / `Blocked by` fields only when the tracker has no native equivalent.
 
 <issue-template>
 ## Parent
