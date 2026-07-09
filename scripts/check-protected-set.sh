@@ -20,6 +20,7 @@ TARGETS=(
   "AGENTS.md"
   "plugins/git-cycle/skills/git-hygiene/SKILL.md"
   "plugins/git-cycle/skills/merge-branch/SKILL.md"
+  "plugins/git-cycle/skills/resolve-conflicts/SKILL.md"
   "plugins/git-cycle/skills/closeout-check/SKILL.md"
   "skills/acceptance-map/SKILL.md"
 )
