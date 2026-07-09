@@ -51,7 +51,7 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEST="$HOME/.claude/skills"
 SOURCES=("$REPO/skills" "$REPO/skills-claude" "$REPO/plugins")
-EXEMPT=()
+EXEMPT=(synapsis)  # managed by the concurrent cross-model project (~/Projects/active/cross-model), not this repo
 
 is_exempt() {
   local name="$1" e
