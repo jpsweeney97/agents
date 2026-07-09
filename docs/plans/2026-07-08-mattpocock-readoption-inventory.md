@@ -3,7 +3,7 @@ title: "mattpocock/skills Re-adoption Inventory (Era-84)"
 date: 2026-07-08
 branch: feature/mattpocock-readoption-inventory
 source_pin: mattpocock/skills @ d574778
-status: inventory / adjudicated 2026-07-08 — recommendations locked, nothing built
+status: inventory / adjudicated + pre-build charter consult confirmed 2026-07-08 — cleared to build, nothing built
 scope: upstream-as-base re-adoption, read-only blast-radius inventory
 supersedes_partial: docs/agents/contract-decisions.md 2026-07-05 (ledger line 36, append-only supersession at landing); the 2026-07-08 roadmap wayfinder-PARK and setup-REJECT were never ledgered (last ledgered entry is 2026-07-06), so acting against them is a fresh decision, not a supersession
 ---
@@ -201,6 +201,35 @@ Gated triggers beyond case-(d), among the roadmap's rejects: two rejected candid
 Landing shape and count: following the 2026-07-05 precedent (one entry batched restore + admit + fold + nine rejects), the whole batch can realistically land as ONE consolidated case-(d) ledger entry with sub-parts — the per-fork rebase supersessions, the ~7 fold notes, a consolidated coverage note for the newly-surfaced rejects and the reaffirm-rejects, and park entries with concrete reopen triggers — EXCEPT the `save-handoff` redaction fold (plugin-distributed, rides the Plugin Layout publish path, §9) and `wayfinder` (a fuller sub-entry if admitted). Every entry needs a durable, replayable pointer (a commit, or this inventory pinned at `d574778`), never a bare session reference (charter.md:66).
 
 Provenance note: §7's dedicated charter/ledger reader completed, but its adversarial verify pass failed the structured-output cap and dropped the whole item from the automated synthesis; the reader's result was recovered from the workflow journal and folded into this section by hand (the Thesis-bound, never-ledgered-07-08, Extraction/Mining-Queue, triple-gated-reject, landing-count, and carve-out-vs-adoption points above). It is therefore the one section carrying a reader finding that did not pass an independent verifier — read its charter-line citations as load-bearing but single-sourced.
+
+### 7.1 Pre-build charter consult record (2026-07-08 — GO)
+
+The pre-build charter consult (the gate §7, §10 step 0, and §12 require before any building) was run on 2026-07-08. It re-verified §7's single-sourced governance facts directly against `docs/agents/charter.md` and `docs/agents/contract-decisions.md`, and it confirms the case-(d) framing for the whole batch. Verdict: **GO** — building may proceed in the §10 dependency order, each landing carrying its ledger obligation.
+
+Governance facts re-confirmed against source (§7 was recovered hand-folded and had not passed an independent verifier):
+
+- The 2026-07-05 reinstall disposition is a *ledgered* decision (`contract-decisions.md` line 36: restore 8 forks incl. `to-issues`/`to-prd`/`triage`/`grill-with-docs`, admit `teach`, fold the diagnose minimise step, reject 9). A landing that changes any part of it *appends* a new entry naming what it supersedes — never a rewrite — on the precedent of the jp-writing-style retirement superseding its own admission (line 24).
+- The 2026-07-08 roadmap's wayfinder-PARK and setup-REJECT are *not* ledgered: the last ledgered decision is the 2026-07-06 markdown-reader routing entry (line 38), and the Parks section (lines 42–50) carries no wayfinder or setup park. So acting against them is a *fresh* charter decision, not a supersession, and the "do not re-litigate settled parks" rule (charter.md:46) does not bind them.
+- The charter-line citations §7 leans on check out: Thesis / nothing-third-party-runs-as-is (24–26), Admission assessed "as it will land" (42), third-party gated regardless of reversibility class (22), Extraction remove-the-original (50–58), append-only durable-pointer Decision Record (64–66), One Owner Per Job (28–32).
+
+Binding constraint (the load-bearing consult finding): the **Thesis ceilings the rebase's "upstream-wins" default.** "Upstream-wins" governs only genuinely non-transform fork content (stale procedure, outdated examples); the house transform — roster rewire, Use-when/Do-not-use, dual-runtime tokens, proof boundaries, `trash`-not-`rm` / close-not-delete, protected-branch awareness, de-brand of mattpocock self-references — is the re-authoring the charter *mandates* (assessed on the contract as it lands, charter.md:42), not preservable cruft a mechanical upstream-wins pass may discard. Dropping the transform in the name of upstream-wins would run third-party material effectively as-is, which the Thesis forbids. This is the charter form of the overcorrection failure mode §1/§2 name.
+
+Gating confirmed, by trigger:
+
+- **Case-(d) (fate of third-party material)** — the rebases (`setup-matt-pocock-skills`, `to-prd`, `to-issues`, `triage`), the folds into existing forks (`to-prd` seam sentence; `to-issues` four folds; the `save-handoff` redaction fold), and the whole-skill admits (`resolve-conflicts`; `wayfinder` if ever built) all require the consult (satisfied by this record) plus an append-only ledger entry at landing.
+- **Trigger #3 (installing contract-shipping material)** also applies to `setup-matt-pocock-skills` (it authors an `## Agent skills` block and `docs/agents/*.md` into consumer repos).
+- **Irreversible-effect carve-out (charter.md:22, ledger line 32)** independently trips only `wayfinder` (`gh issue delete` of live issues, SKILL.md:125); it stays **parked** (§11), so no build now — ledger the park with its reopen trigger. De-gating mitigations (preserve `disable-model-invocation`; close-not-delete override; confirmation gate) lower blast radius but never buy an ungated *adoption* — third-party material is gated regardless of class (charter.md:22).
+- **No adopted action** in this batch trips trigger #1 (always-loaded) or #2 (fires-unattended): those live only on *rejected* candidates (`git-guardrails-claude-code` always-loaded; `claude-handoff` unattended), whose rejects the consolidated entry records for coverage.
+
+Corrections/tightenings surfaced by the consult (none overturns the case-(d) framing or the §11 locks):
+
+1. **`diagnose` is a DECLINE, not a fold.** §7's "Donor-text fold" list predates the §11 lock; §11 governs. At landing the `diagnose` ledger note records the deliberate 07-05 decline (with the `b381e54` / `bc4cf90` git-recheck evidence) and cites the 2026-07-05 entry — it folds nothing. The two mechanical sharpenings stay an optional future upgrade.
+2. **`triage` does not independently trip the carve-out.** Model-invocable ≠ fires-unattended (it fires visibly in-session), and its tracker writes (label/comment/close) are reversible, not the send/merge/force-push/delete class; its mutation-approval guard means nothing mutates without sign-off. Case-(d) already gates the rebase, so the consult + ledger requirement is unchanged — but the reason is third-party fate, not the carve-out. The external-PR fold must forbid `gh issue delete` outright, keeping `triage` in the reversible class.
+3. **Keep-fork ledger treatment.** Pure house-native keeps (`implementation-planning`) need no entry; the *reopened* third-party keep-forks (`grill-with-docs`, `decision-record`) get a reaffirmation sub-part in the consolidated entry, closing the reopened `domain-modeling` question on the record.
+4. **`resolve-conflicts` still owes real Admission evidence at build.** §11's "admit" is direction-of-travel; the charter Admission test (name the friction looked for; rejections take admission-grade evidence, charter.md:44) must genuinely run against the upstream body at build — the lock does not substitute for the merit case.
+5. **Durable pointer / re-pin.** The evidence pointer is this inventory pinned to `d574778` (satisfies charter.md:66's pin-the-external-source rule); land it on `main` (or cite the commit hash) so the pointer survives branch deletion. Re-verify the mattpocock checkout is still at `d574778` before the first build/landing — it is a scratch clone and will drift.
+
+Consolidated-entry shape is charter-compliant: charter.md:64–66's "one entry per gated decision" is satisfied by a single batched case-(d) entry with delineated sub-parts each carrying its own pointer, exactly as the 2026-07-05 entry batched restore + admit + fold + nine rejects — **except** the `save-handoff` fold (own note, plugin publish path) and any future `wayfinder` build (own sub-entry). The consult itself takes no ledger entry (curation machinery is maintained by direct editing, charter.md:13); it is memorialized in this record and in the ledger entry at landing.
 
 ## 8. Cross-library design seams and naming/routing collisions
 
