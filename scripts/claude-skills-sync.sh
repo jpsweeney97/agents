@@ -38,7 +38,13 @@
 #           "timeout": 15, "statusMessage": "Checking Codex plugin cache drift"},
 #          {"type": "command",
 #           "command": "/Users/jp/.agents/scripts/check-protected-set.sh || true",
-#           "timeout": 15, "statusMessage": "Checking protected-set drift"}]}]}}
+#           "timeout": 15, "statusMessage": "Checking protected-set drift"},
+#          {"type": "command",
+#           "command": "/Users/jp/.agents/scripts/check-handoff-paths.sh || true",
+#           "timeout": 15, "statusMessage": "Checking handoff path-set drift"},
+#          {"type": "command",
+#           "command": "/Users/jp/.agents/scripts/check-review-family.sh || true",
+#           "timeout": 15, "statusMessage": "Checking review-family contract drift"}]}]}}
 #   3. The pre-migration backup of ~/.claude/skills (including the retired
 #      exiting-worktrees eval artifacts, which exist nowhere else) lives at
 #      ~/.claude/skills-backup-20260609.tar.gz.

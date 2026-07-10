@@ -16,6 +16,13 @@ Appends new fire records to the cumulative ledger (JSONL), deduped by a stable k
 so transcripts pruned by retention stay in the ledger once mined. Re-runnable anytime;
 the live PostToolUse hook (scripts/skill-usage-hook.py) writes the same ledger between runs.
 
+Raw ledger records are never rewritten: the file is append-ordered (Claude projects, then
+Codex back-mining), NOT time-sorted — consumers must never assume chronology; compute date
+ranges from the `ts` field. All normalization happens at summary time only: typed command
+tokens that alias a canonical skill (e.g. `handoff:load` -> `handoff:load-handoff`) are
+merged via ALIASES, and rows are classified into current-roster / archived / non-roster
+sections by scanning this repo's live skill roots.
+
 Usage: skill-usage-miner.py [--ledger PATH] [--summary-only]
 """
 
@@ -29,6 +36,19 @@ from pathlib import Path
 LEDGER_DEFAULT = Path.home() / ".claude" / "logs" / "skill-usage-ledger.jsonl"
 PROJECTS_DIR = Path.home() / ".claude" / "projects"
 CODEX_SESSIONS_DIR = Path.home() / ".codex" / "sessions"
+REPO = Path(__file__).resolve().parent.parent
+
+# Typed command token -> canonical skill name, exact-token matches only (verified:
+# each token is documented in the target SKILL.md description; no roster dir of the
+# alias name exists). Applied at summary time; raw ledger records stay raw.
+ALIASES = {
+    "load": "load-handoff",
+    "save": "save-handoff",
+    "search": "search-handoffs",
+    "handoff:load": "handoff:load-handoff",
+    "handoff:save": "handoff:save-handoff",
+    "handoff:search": "handoff:search-handoffs",
+}
 COMMAND_RE = re.compile(r"<command-name>([^<]+)</command-name>")
 CODEX_SKILL_RE = re.compile(r"<skill>\s*<name>([^<\n]+)</name>")
 PREFILTER = ('"Skill"', '"SlashCommand"', "<command-name>")
@@ -178,10 +198,40 @@ class SkillStats:
         self.last = ""
 
 
-def summarize(records):
+def roster_names() -> set[str]:
+    """Current skill names: dirs in skills/, skills-claude/, plugins/*/skills/."""
+    roots = [
+        REPO / "skills",
+        REPO / "skills-claude",
+        *sorted((REPO / "plugins").glob("*/skills")),
+    ]
+    names: set[str] = set()
+    for root in roots:
+        if not root.is_dir():
+            raise SystemExit(
+                f"roster scan failed: expected skill root missing. Got: {str(root)!r:.100}"
+            )
+        names.update(p.name for p in root.iterdir() if p.is_dir() and not p.name.startswith("."))
+    return names
+
+
+def archived_names() -> set[str]:
+    root = REPO / "skills-archive"
+    return {p.name for p in root.iterdir() if p.is_dir()} if root.is_dir() else set()
+
+
+def summarize(records: list[dict]) -> None:
+    roster = roster_names()
+    archived = archived_names()
+    for alias in ALIASES:
+        if alias in roster or alias.rsplit(":", 1)[-1] in roster:
+            raise SystemExit(
+                f"alias merge failed: alias key shadows a roster skill. Got: {alias!r:.100}"
+            )
     by_skill: defaultdict[str, SkillStats] = defaultdict(SkillStats)
     for r in records:
-        s = by_skill[r["skill"]]
+        token = str(r["skill"])
+        s = by_skill[ALIASES.get(token, token)]
         s.total += 1
         if r.get("source") == "user":
             s.user += 1
@@ -196,15 +246,40 @@ def summarize(records):
         ts = r.get("ts") or ""
         if ts > s.last:
             s.last = ts
+
+    def section(token: str) -> str:
+        # Full-token roster match first; bare-name fallback covers plugin-qualified
+        # forms like `review-family:scrutinize`. The fallback classifies only —
+        # alias merging is never done on it.
+        if token in roster or token.rsplit(":", 1)[-1] in roster:
+            return "roster"
+        if token in archived or token.rsplit(":", 1)[-1] in archived:
+            return "archived"
+        return "other"
+
     rows = sorted(by_skill.items(), key=lambda kv: -kv[1].total)
+    header = f"{'skill':<42} {'total':>5} {'model':>5} {'user':>5} {'codex':>5} {'subag':>5} {'cwds':>4}  last-fired"
+    counts: dict[str, int] = {}
+    for title, key in (
+        ("current-roster skills", "roster"),
+        ("archived skills (skills-archive/)", "archived"),
+        ("non-roster tokens (built-in commands, plugin-qualified externals, retired/unknown)", "other"),
+    ):
+        sec = [(skill, s) for skill, s in rows if section(skill) == key]
+        counts[key] = len(sec)
+        if not sec:
+            continue
+        print(f"== {title} ==")
+        print(header)
+        for skill, s in sec:
+            print(
+                f"{skill:<42} {s.total:>5} {s.model:>5} {s.user:>5} {s.codex:>5} {s.subagent:>5} {len(s.cwds):>4}  {s.last[:10]}"
+            )
+        print()
     print(
-        f"{'skill':<42} {'total':>5} {'model':>5} {'user':>5} {'codex':>5} {'subag':>5} {'cwds':>4}  last-fired"
+        f"{len(rows)} distinct skills, {len(records)} fires total "
+        f"(roster {counts['roster']}, archived {counts['archived']}, non-roster {counts['other']})"
     )
-    for skill, s in rows:
-        print(
-            f"{skill:<42} {s.total:>5} {s.model:>5} {s.user:>5} {s.codex:>5} {s.subagent:>5} {len(s.cwds):>4}  {s.last[:10]}"
-        )
-    print(f"\n{len(rows)} distinct skills, {len(records)} fires total")
 
 
 def main() -> int:
