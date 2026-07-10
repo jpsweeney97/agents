@@ -35,6 +35,24 @@ test("checkout calls paymentService.process", async () => {
 });
 ```
 
+**Tautological tests**: The assertion recomputes the expected value the way the code computes it, so the test passes by construction and can never disagree with the code.
+
+```typescript
+// BAD: Expected value is recomputed the way the code computes it
+test("calculateTotal sums line items", () => {
+  const items = [{ price: 10 }, { price: 5 }];
+  const expected = items.reduce((sum, i) => sum + i.price, 0);
+  expect(calculateTotal(items)).toBe(expected);
+});
+
+// GOOD: Expected value is an independent, known literal
+test("calculateTotal sums line items", () => {
+  expect(calculateTotal([{ price: 10 }, { price: 5 }])).toBe(15);
+});
+```
+
+Expected values must come from an independent source of truth — a known-good literal, a worked example, the spec. A snapshot derived by hand the same way the code works, or a constant asserted equal to itself, is the same defect in disguise.
+
 Red flags:
 
 - Mocking internal collaborators
@@ -43,6 +61,7 @@ Red flags:
 - Test breaks when refactoring without behavior change
 - Test name describes HOW not WHAT
 - Verifying through external means instead of interface
+- Expected value recomputed by the same algorithm the code uses (passes by construction)
 
 ```typescript
 // BAD: Bypasses interface to verify

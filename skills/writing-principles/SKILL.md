@@ -89,6 +89,7 @@ Use this order as a fast scan, not a report template:
 6. **False-proof**: the required evidence does not support the claim, or structural checks are allowed to imply any of the proof classes separated under Output.
 7. **Conflicting**: another authority, skill, workflow, or user request can beat it, but the text does not say how to resolve the conflict.
 8. **Duplicated**: the same rule lives in more than one place — another section, file, or companion surface — and the copies have drifted or are free to. Single-home the rule and point to it, carrying every copy's scope into the home before collapsing any; copies already diverged are the strongest signal.
+9. **Negated**: the instruction steers by prohibition where a positive instruction would do the work — naming the forbidden behavior drags it into context and makes it more available, not less. Rewrite to state the target behavior; keep a prohibition only as a hard guardrail you cannot phrase positively, and pair it with its positive target. Routing non-use boundaries ("Do not use for...") in descriptions are exempt: they are selection contracts, not behavior steering.
 
 ## Review-Only
 
