@@ -4,6 +4,12 @@ All notable changes to the Review Family plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.9.0 - 2026-07-12
+
+### Added
+
+- `scrutinize-skill` gains a post-review handoff exit: when a review's required changes have been applied and the open claim becomes "the changed contract is now followed," the Output section now routes proving that to `behavior-smoke-test` (`/behavior-smoke-test` or `$behavior-smoke-test` where available) instead of a re-review. One paragraph in the Output section, seeded as part of the skill-use composition data layer (design: `docs/plans/2026-07-11-skill-use-contract-design.md`, §2); both CANON cores, routing frontmatter, verdict vocabulary, and every other organ unchanged. Class-B publish (Codex republish, mirror) deferred until explicitly authorized; until then the Codex cache stays at 0.8.0 and `codex-plugins-sync.sh --check` reporting `NOT-INSTALLED: review-family@0.9.0` is the expected state.
+
 ## 0.8.0 - 2026-07-07
 
 ### Changed

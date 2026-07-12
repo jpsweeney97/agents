@@ -56,6 +56,7 @@ This skill authors the signals; it cannot confirm they actually emit, scrape, or
 - The stack/backend is confirmed, and the pass covers the concerns the target warrants (logs, metrics, traces, alerts — only those it needs), each posed as a per-system judgment rather than filled in with boilerplate.
 - Every footgun is explicitly checked: cardinality bounded, correlation/trace IDs threaded, no PII/secrets in logs, alerts symptom-framed and page-worthy, no hot-path spam, RED/USE complete for the in-scope paths and resources.
 - The output is delivered in the mode the invocation implies (applied edits or recommendations), with the proof boundary stated — what was instrumented, and what stays unverified until it is seen flowing.
+- When the instrumented change ships as a risky rollout, hand forward to `/deploy-plan` (or `$deploy-plan`) — the signals just laid down are the gauge it pre-registers and reads.
 
 ## Build-and-prune note
 

@@ -1,6 +1,6 @@
 ---
 name: making-recommendations
-description: "Use when the user asks for a recommendation, comparison, trade-off, ranking, or decision between two or more serious options already on the table (`which is better`, `help me decide`, `should I choose X or Y`). Do not use for factual questions, trivial preferences, or partitioning one already-shaped scope into keep/defer/cut under a deadline, risk, or capacity constraint (`scope-cut`); when no concrete options are named yet, clarifying a muddy goal is `outcome-shaping` and shaping a design is `design-exploration`."
+description: "Use when the user asks for a recommendation, comparison, trade-off, ranking, or decision between two or more serious options already on the table (`which is better`, `help me decide`, `should I choose X or Y`). Do not use for factual questions, trivial preferences, or partitioning one already-shaped scope into keep/defer/cut under a deadline, risk, or capacity constraint (`scope-cut`); when no concrete options are named yet, clarifying a muddy goal is `outcome-shaping` and shaping a design is `design-exploration`; when the field is too thin to rank — no serious rivals on the table — widening it first is `ideate`."
 ---
 
 # Making Recommendations

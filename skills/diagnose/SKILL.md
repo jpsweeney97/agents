@@ -119,6 +119,8 @@ Profile to tell work-bound from resource-bound before reaching for either fix �
 
 ## Phase 5 — Fix + regression test
 
+The cause is known now, so locking the fix in test-first belongs to `/tdd` (or `$tdd`) — hand it the minimised repro as the RED reproduction; its known-cause bug path picks up exactly here. The steps below are the inline minimum when that handoff is declined or the fix is trivial.
+
 Write the regression test **before the fix** — but only if there is a **correct seam** for it.
 
 A correct seam is one where the test exercises the **real bug pattern** as it occurs at the call site. If the only available seam is too shallow (single-caller test when the bug needs multiple callers, unit test that can't replicate the chain that triggered the bug), a regression test there gives false confidence.

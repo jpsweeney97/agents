@@ -47,7 +47,7 @@ A surviving mutation is a concrete finding: name the mutation and the tests that
 
 A findings list ordered by how badly each finding undermines trust. Every finding carries: its class, file:line, the evidence itself (the test body excerpt, the git log line, the surviving mutation), and one sentence on what the test falsely proves.
 
-No score, no grade, no "trustworthy"/"untrustworthy" verdict — never a trust score or a health grade. The close names what was swept, what was sampled, and what was not inspected: the suite's worst lie may be in the tests nobody read. Route the fixes out: authoring-time fixes to `tdd`; per-finding tracker items to `/triage` (or `$triage`) where available.
+No score, no grade, no "trustworthy"/"untrustworthy" verdict — never a trust score or a health grade. The close names what was swept, what was sampled, and what was not inspected: the suite's worst lie may be in the tests nobody read. Route the fixes out: authoring-time fixes to `tdd`; per-finding tracker items to `/triage` (or `$triage`) where available; and when the sweep shows the suite cannot be trusted to guard an imminent refactor, upgrade, or migration, hand forward to `/characterization-tests` (or `$characterization-tests`) to author the net that work needs first.
 
 ## Modes and scope
 

@@ -111,6 +111,7 @@ After all tests pass, look for [refactor candidates](refactoring.md):
 When every planned behavior is implemented, tested, and refactored:
 
 - [ ] Run the FULL suite, not just this cycle's tests, and watch it pass with clean output. Per-cycle runs only prove the behavior you just added; a late refactor can silently break a behavior covered in an earlier cycle, and only the whole suite catches it.
+- [ ] If the full-suite run is red from your changes and the fix is not simply the current RED→GREEN cycle, hand off to `/keep-green` (or `$keep-green`) to drive it back to green without thrashing.
 - [ ] Confirm you built the behaviors the plan named - and nothing speculative crept in.
 - [ ] Don't silently roll on. State that the change is ready, what it covers, and any interface or behavior assumptions you made unattended. Hand off to your completion-check and commit lane (e.g. `/closeout-check` or `$closeout-check`, if available) rather than declaring done yourself.
 

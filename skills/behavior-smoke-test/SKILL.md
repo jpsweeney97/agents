@@ -124,6 +124,8 @@ Report structural checks separately from behavior proof. If a structural check w
 
 If the proxy prompt reveals the external grading claim or expected answer, the scenario does not force the claim, the harness is only a first-action check for a multi-step claim, or the proxy only explains the contract, classify it as `not strong enough`, not `passed`.
 
+When a passed smoke test raises the quantitative question — pass rates, token or time deltas across repeated trials — that is `skill-benchmark`'s job where available (Claude Code: `/skill-benchmark`); a smoke test proves followership once, never a rate.
+
 ## Output
 
 Default reports summarize the scenario and observed behavior. Do not include the full proxy prompt by default. Include the exact prompt only when prompt leakage, missing context, mutation limits, or ambiguous proxy instructions affect the proof boundary.

@@ -97,6 +97,8 @@ Each finding must include a compact evidence pointer: file/line, command output,
 
 Findings are argued hypotheses until something independent of the arguing tests them; the recorded failures run both directions — raw findings over-claim under independent verification, and a review re-refuting its own finding has killed a real defect. Re-arguing, for a finding or against it, is not verification. Present `Required Changes` as what the findings warrant if they hold, and when one finding carries the verdict, prefer the cheapest disconfirming check over more argument.
 
+When the review's required changes have been applied and the open claim becomes "the changed contract is now followed," proving that is `behavior-smoke-test`'s job (`/behavior-smoke-test` or `$behavior-smoke-test` where available), not a re-review.
+
 Use `Bounded Review Scope` before `Target And Surface` when the target or skill set comparison is too large to inspect completely in one pass. In bounded mode, state the reviewed subset before findings, review the highest-risk surface first, mark omitted areas `unverified`, give the next slice needed for a complete review, and do not issue a full-clearance verdict for the full target (do not use `Defensible`).
 
 ## Guardrails

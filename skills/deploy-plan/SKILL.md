@@ -32,6 +32,7 @@ This skill advises the operator and authors the go/no-go gauge; it never execute
 - **Reachability-gate first** — can you actually read each pre-registered signal from here? Read where readable.
 - **Verdict against the pre-registered thresholds** — `healthy` (within thresholds through the bake window), `abort` (a threshold breached → recommend the rollback path), or `UNVERIFIED` (the signal is unreadable from here → name the exact signal a human must read). Never a green stamp over a signal merely reached for.
 - **Advisory-not-actor** — recommend; the operator executes. On `abort`, point at the characterized rollback path; if prod is actually harmed, route to `incident-response`.
+- **Healthy is not goal-met** — a `healthy` bake-read closes only the technical question; whether the change achieved the goal it shipped for is a later, different read: hand forward to `/outcome-check` (or `$outcome-check`) at the goal's horizon.
 
 ## Proof boundary (the inherited floor)
 

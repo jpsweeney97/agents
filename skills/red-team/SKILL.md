@@ -39,6 +39,7 @@ Stop when another pass over the in-scope adversaries yields nothing mechanism-di
 - **Render no verdict.** red-team never concludes "the system is secure" or "this is safe." **Finding no path is not proof of safety** — it is the absence of a found path within a declared scope, nothing more.
 - **Close with the residual, anchored to the declared scope.** Name the adversary capability you assumed bounded and what falls outside the threat scope you declared up front — never a self-drawn coverage map presented as exhaustive. The member of this lane most tempted to stamp "attack surface fully enumerated"; that stamp is forbidden.
 - **Route durable hardening items** (owner + date) to `/triage` (or `$triage`), one per finding, by reference. Keep them inline as the weaker fallback if no tracker is reachable.
+- **Compose forward when paths land on a designable surface.** Hand attack paths to `/authorization-design` (or `$authorization-design`) as must-deny rows and to `/injection-safe-inputs` (or `$injection-safe-inputs`) as must-block rows — one or both as the findings warrant, sequentially or concurrently; composition is not a license for subagent fan-out.
 - **Stay non-scan.** If the work actually needed is grepping for secrets, scanning dependencies, or auditing a diff, that is `/security-review` or the `security-audit` park — name it and stop; do not improvise a scan.
 
 ## When not to red-team

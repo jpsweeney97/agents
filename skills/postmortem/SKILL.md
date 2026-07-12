@@ -49,6 +49,7 @@ Bad looks like: the cause already woven into the timeline; impact as a vibe ("ma
 
 - Save to `docs/postmortems/YYYY-MM-DD-<slug>.md`, dated by the incident date so the corpus reads chronologically (authoring date only if the incident date is unknown). Create the parent dir if missing; defer to a postmortem location set in the project's `AGENTS.md` or `CLAUDE.md` if one exists.
 - Before writing, if the project is a git repository, run `git status`; if the path or its parent carries unrelated dirty state, surface that instead of writing over it. Leave the artifact uncommitted for the user to review — do not stage or commit it as part of the retrospective.
+- When an action item is an operational procedure someone will re-run — a rollback, restart, failover, alert response — hand authoring it to `/runbook-authoring` (or `$runbook-authoring`) rather than leaving the procedure inline in the doc.
 - File the owned, dated action items to `/triage` (or `$triage`), one issue per finding, and stop. The doc stays the durable record; triage makes the actions trackable.
 - Report the artifact path, the filed issues, and the proof boundary: a written postmortem proves the record and analysis exist, not that any fix has shipped.
 
