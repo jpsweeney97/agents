@@ -1,0 +1,143 @@
+# Skill-use contract census — generated artifact
+# Script: docs/plans/2026-07-11-skill-use-contract-census.py  (repo root: .agents)
+
+## Section 1 — edge census (grep of SKILL.md, FRONTMATTER = description altitude, BODY = exit altitude)
+## Pinned rule: forward edge exists iff the BODY directs the follow-on lane by name;
+## contrast-only or boundary mentions do not count — the design doc records those adjudications.
+
+chain 1: diagnose -> tdd   [skills/diagnose/SKILL.md]
+    3:FRONTMATTER: description: "Use when the user asks to diagnose/debug a bug whose cause is unclear, hard to reproduce, intermittent, spans multiple components, or involves a p
+
+chain 1: tdd -> keep-green   [skills/tdd/SKILL.md]
+    (no mentions at any altitude)
+
+chain 2: test-trust-audit -> characterization-tests   [skills/test-trust-audit/SKILL.md]
+    (no mentions at any altitude)
+
+chain 2: characterization-tests -> simplify-code   [skills/characterization-tests/SKILL.md]
+    14:BODY: This owns **authoring the change-detection net over existing untested code**. No neighbor owns it. `tdd` owns test-first NEW behavior, red before green; `simpli
+    39:BODY: - Tests only. This skill never performs the refactor, upgrade, or migration it enables — hand that to `simplify-code`, `dependency-upgrade`, or the change's own
+
+chain 3: contract-change-propagation -> migration-campaign   [skills/contract-change-propagation/SKILL.md]
+    43:BODY: - **Hand off** — this skill produces the plan; it does not execute it. If the rollout spans many sites, hand the confirmed consumer list to a sharded-execution 
+    53:BODY: - **applying** the change across shards with burndown tracking → `migration-campaign`; either way this skill stops at the plan and never applies the change.
+
+chain 4: red-team -> authorization-design   [skills/red-team/SKILL.md]
+    (no mentions at any altitude)
+
+chain 4: red-team -> injection-safe-inputs   [skills/red-team/SKILL.md]
+    (no mentions at any altitude)
+
+chain 4: authorization-design -> red-team   [skills/authorization-design/SKILL.md]
+    3:FRONTMATTER: description: "Use when designing or vetting the access-control model for one resource, endpoint, or feature — who may do what to which objects: enumerate subjec
+    14:BODY: This owns the **authorization layer of one scoped surface**: the decision table for who may do what to which objects, the model that encodes it, the layer that 
+    65:BODY: - **vs `red-team`.** It models a motivated adversary across a whole system and renders no verdict; this runs a known-class design procedure on one surface and e
+
+chain 4: injection-safe-inputs -> red-team   [skills/injection-safe-inputs/SKILL.md]
+    14:BODY: This owns the **input-handling design of one trust boundary**: the census of sinks the input reaches, the defense chosen per sink, the boundary-side limits, and
+    67:BODY: - **vs `red-team`.** It models a motivated adversary across a whole system and renders no verdict; this runs a known-class design procedure on one boundary and 
+
+chain 5: incident-response -> diagnose   [skills/incident-response/SKILL.md]
+    3:FRONTMATTER: description: "Use when production is breaking right now — an unplanned live incident, harm growing, cause possibly unknown — and the job is to stabilize before 
+    10:BODY: Your trained reflex — and your operator's — is to find the cause first. That reflex is correct in `diagnose` ("Do not proceed to Phase 2 until you have a loop y
+    29:BODY: **Default and exits.** Harm growing + a reversible mitigation exists → advise it now, hand the still-unknown cause to `diagnose` afterward. Hold-and-investigate
+    76:BODY: - 14:14:00 UTC  DECISION: declared STABILIZED — trend flat, 5xx <1% (told), holding; cause unknown → diagnose; timeline → postmortem Beat-1
+    93:BODY: - **Cause still unknown at stabilized → `diagnose`.** Hand over the live timeline plus the mitigated-but-fragile state as the starting symptom. Now that prod is
+    94:BODY: - **The retrospective → `postmortem`.** The live timeline *is* postmortem's Beat-1 raw facts — already timestamped, observed-or-told, `UNVERIFIED`-labeled, and 
+    98:BODY: - **vs `diagnose`.** Loop-first / cause-first (`diagnose:51`) — the opposite reflex. `incident-response` mitigates *before* understanding and exits *into* diagn
+    107:BODY: - The unknown cause (if any) is routed to `diagnose`, and the retrospective to `postmortem`; no production action was taken and no cause was asserted over a sig
+
+chain 5: incident-response -> postmortem   [skills/incident-response/SKILL.md]
+    3:FRONTMATTER: description: "Use when production is breaking right now — an unplanned live incident, harm growing, cause possibly unknown — and the job is to stabilize before 
+    14:BODY: An AI agent usually cannot read prod and must never act on it. You **advise the human operator**; you take no production action — no deploy, traffic shift, roll
+    35:BODY: Rollback is not automatically safe. You may be in this skill precisely because a planned rollback already harmed prod (`deploy-plan:34`); when you arrived that 
+    39:BODY: You are the scribe while the operator firefights: if you do not log, no one does — so record **continuously**. But the record never outranks mitigation: **do no
+    47:BODY: Append-only, one line per event, newest at the bottom, written as events happen and never back-edited. This is the artifact `postmortem` consumes as Beat-1 raw 
+    64:BODY: Firm rules (each is load-bearing and costs ~nothing under fire): one line per event, append-only, never back-edited; an absolute timestamp + timezone on every l
+    76:BODY: - 14:14:00 UTC  DECISION: declared STABILIZED — trend flat, 5xx <1% (told), holding; cause unknown → diagnose; timeline → postmortem Beat-1
+    94:BODY: - **The retrospective → `postmortem`.** The live timeline *is* postmortem's Beat-1 raw facts — already timestamped, observed-or-told, `UNVERIFIED`-labeled, and 
+    99:BODY: - **vs `postmortem`.** It refuses the burning moment ("if it is still burning, this is the wrong moment", `postmortem:26`); `incident-response` owns exactly tha
+    106:BODY: - A live timeline exists — timestamped, provenance-tagged by the default rule, causes excluded, advised-not-acted — ready to hand to `postmortem` as Beat-1.
+    107:BODY: - The unknown cause (if any) is routed to `diagnose`, and the retrospective to `postmortem`; no production action was taken and no cause was asserted over a sig
+
+chain 5: postmortem -> runbook-authoring   [skills/postmortem/SKILL.md]
+    (no mentions at any altitude)
+
+chain 6: observability-instrumentation -> deploy-plan   [skills/observability-instrumentation/SKILL.md]
+    3:FRONTMATTER: description: "Use when adding or improving telemetry in code before incidents — deciding what to log, what metrics and traces to emit, and what to alert on for 
+    14:BODY: This is the **producer** in a library full of telemetry **consumers**. `diagnose` reads signals to find a cause, `deploy-plan` reads them for a ship's go/no-go,
+    44:BODY: This skill authors the signals; it cannot confirm they actually emit, scrape, or render in production — that is a live-signal read (`deploy-plan` / `outcome-che
+    49:BODY: - **vs `deploy-plan` / `outcome-check`.** Both *read* signals that already exist — `deploy-plan` for one ship's health gauge, `outcome-check` for whether a goal
+
+chain 6: observability-instrumentation -> outcome-check   [skills/observability-instrumentation/SKILL.md]
+    3:FRONTMATTER: description: "Use when adding or improving telemetry in code before incidents — deciding what to log, what metrics and traces to emit, and what to alert on for 
+    14:BODY: This is the **producer** in a library full of telemetry **consumers**. `diagnose` reads signals to find a cause, `deploy-plan` reads them for a ship's go/no-go,
+    44:BODY: This skill authors the signals; it cannot confirm they actually emit, scrape, or render in production — that is a live-signal read (`deploy-plan` / `outcome-che
+    49:BODY: - **vs `deploy-plan` / `outcome-check`.** Both *read* signals that already exist — `deploy-plan` for one ship's health gauge, `outcome-check` for whether a goal
+
+chain 6: deploy-plan -> outcome-check   [skills/deploy-plan/SKILL.md]
+    3:FRONTMATTER: description: "Use when a specific risky change is about to ship and needs a rollout decision before push — rollout shape, an explicit go/no-go, pre-registered a
+    48:BODY: - **vs `outcome-check`.** `deploy-plan` watches technical **health** through the bake (minutes-to-hours); `outcome-check` asks whether the **goal** moved (days-
+
+chain 7: skill-squad -> scrutinize-skill   [skills-claude/skill-squad/SKILL.md]
+    3:FRONTMATTER: description: "Use when you want to design a new skill (or materially redesign one) by orchestrating a multi-agent discovery run — fan out genuinely different ap
+    39:BODY: **3 — Try to kill each survivor.** Hand the approaches to independent skeptics — delegate to `scrutinize-skill` for the adversarial read; do not hand-roll a cri
+
+chain 7: skill-squad -> behavior-smoke-test   [skills-claude/skill-squad/SKILL.md]
+    70:BODY: It does not write the skill. Hand the design to hand-authoring against `agent-facing-design` and `skill-ux-design` (this repo keeps no Claude-side constructor b
+
+chain 7: skill-squad -> skill-benchmark   [skills-claude/skill-squad/SKILL.md]
+    3:FRONTMATTER: description: "Use when you want to design a new skill (or materially redesign one) by orchestrating a multi-agent discovery run — fan out genuinely different ap
+    35:BODY: **1 — Set the bar, blind.** Before anything else, an independent arm writes the design a careful agent reaches *with no squad* — the control. Keep it blind: it 
+    70:BODY: It does not write the skill. Hand the design to hand-authoring against `agent-facing-design` and `skill-ux-design` (this repo keeps no Claude-side constructor b
+
+chain 7: scrutinize-skill -> behavior-smoke-test   [plugins/review-family/skills/scrutinize-skill/SKILL.md]
+    (no mentions at any altitude)
+
+chain 7: behavior-smoke-test -> skill-benchmark   [skills/behavior-smoke-test/SKILL.md]
+    (no mentions at any altitude)
+
+chain 8: making-recommendations -> ideate   [skills/making-recommendations/SKILL.md]
+    92:BODY: - `ideate` — the field is thin: no named option survives the filters, or every option is weak enough that ranking them would crown a weak winner. Widen before c
+
+chain 8: ideate -> making-recommendations   [skills/ideate/SKILL.md]
+    3:FRONTMATTER: description: "Use when the user wants to GENERATE a wide field of genuinely different options before any narrowing: brainstorm broadly, widen the solution space
+    10:BODY: ideate is the library's general-purpose *divergent* skill: it widens the solution space itself, where its exploratory siblings (`premortem`, `red-team`, `steelm
+    16:BODY: - `making-recommendations` generates options, but admits only *serious, could-win* ones because it is decision-bound. ideate deliberately admits the **non-serio
+    44:BODY: - **`making-recommendations`** — the user wants to pick among the options now on the table.
+    50:BODY: - The options are already on the table and the user wants a pick → `making-recommendations`.
+
+## Section 2 — ledger recompute (suffix-aware; snapshot labeled by record count, not wall clock)
+ledger: /Users/jp/.claude/logs/skill-usage-ledger.jsonl
+total records: 4434   last record ts: 2026-07-12T03:05:38+00:00
+source split: {'model': 594, 'user': 3840}
+sidechain=true records: 47
+namespaced keys (why exact-name matching is prefix-blind): {'commit-commands:commit': 2, 'git-cycle:closeout-check': 10, 'git-cycle:exiting-worktrees': 1, 'git-cycle:gh-address-comments': 2, 'git-cycle:gh-pr-review-loop': 139, 'git-cycle:git-hygiene': 9, 'git-cycle:merge-branch': 36, 'git-cycle:pr-description': 20, 'github:gh-address-comments': 7, 'github:gh-fix-ci': 5, 'github:github': 1, 'github:yeet': 1, 'gmail:gmail': 1, 'handoff:load': 328, 'handoff:load-handoff': 553, 'handoff:quicksave': 5, 'handoff:save': 171, 'handoff:save-handoff': 374, 'handoff:save-summary': 32, 'handoff:summary': 135, 'handoff:throughline': 215, 'obsidian:defuddle': 1, 'plugin-eval:evaluate-plugin': 4, 'plugin-eval:evaluate-skill': 9, 'plugin-eval:improve-skill': 3, 'plugin-eval:plugin-eval': 1, 'pr-review-toolkit:review-pr': 9, 'review-family:implementation-review': 11, 'review-family:pragmatic-review': 1, 'review-family:request-claude-pr-review': 4, 'review-family:review-reviewer': 131, 'review-family:scrutinize': 77, 'review-family:scrutinize-skill': 36, 'review-family:system-design-review': 6, 'sbonly:skill-benchmark': 1, 'skill-creator:skill-creator': 2, 'superpowers:brainstorming': 9, 'superpowers:executing-plans': 16, 'superpowers:finishing-a-development-branch': 9, 'superpowers:receiving-code-review': 5, 'superpowers:requesting-code-review': 1, 'superpowers:subagent-driven-development': 5, 'superpowers:systematic-debugging': 3, 'superpowers:writing-plans': 12, 'ticket:ticket-review': 1}
+
+per-skill (suffix-aware): records / sessions / model-initiated  [exact-name records when different]
+    making-recommendations: 246 / 126 / 15
+    outcome-shaping: 8 / 8 / 3
+    design-exploration: 20 / 20 / 14
+    ideate: 5 / 5 / 0
+    diagnose: 0 / 0 / 0
+    incident-response: 0 / 0 / 0
+    postmortem: 0 / 0 / 0
+    keep-green: 0 / 0 / 0
+    tdd: 25 / 25 / 23
+    characterization-tests: 0 / 0 / 0
+    contract-change-propagation: 0 / 0 / 0
+    test-trust-audit: 0 / 0 / 0
+    red-team: 1 / 1 / 1
+    skill-squad: 13 / 13 / 11
+    scrutinize-skill: 36 / 24 / 21   [exact-name: 0 — PREFIX-BLIND UNDERCOUNT]
+    behavior-smoke-test: 25 / 13 / 25
+    skill-benchmark: 3 / 3 / 3   [exact-name: 2 — PREFIX-BLIND UNDERCOUNT]
+
+skill-squad sessions: 13
+    session 45432170: post-squad fires: review-family:scrutinize-skill (scrutinize-skill)
+    session 4860b91a: post-squad fires: behavior-smoke-test (behavior-smoke-test)
+    session 5a7a1a1e: post-squad fires: review-family:scrutinize-skill (scrutinize-skill)
+    session ced3c70a: post-squad fires: review-family:scrutinize-skill (scrutinize-skill)
+overlap with scrutinize-skill|behavior-smoke-test — suffix-aware any-order: 4, post-squad: 4, exact-name (the prefix-blind bug): 1
+full chain-7 sessions (squad+scrutinize+smoke+benchmark): 0
+shared making-recommendations+ideate sessions: 5
