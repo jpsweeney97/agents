@@ -14,7 +14,7 @@ Status: authored 2026-07-12 from the JP-approved governing design [`docs/plans/2
 
 1. **Gate 1 (in Task 3):** if the live Codex runtime verification fails, stop; the contract narrowing reopens per the design's Premise fallback (runtime-divergent text, weaker canary). JP decides.
 2. **Gate 2 (Task 9):** the Charter Admission consult plus JP's separate GO/NO-GO ratification for Decision A (runtime contract) and Decision B (repo convention). No global-file edit and no repo-`AGENTS.md` convention edit before the respective GO.
-3. **Standing:** `scrutinize-skill`'s edit stays source-only; the Class-B publish train (version bump → Codex republish → mirror) runs only on JP's explicit ask. No push without JP's ask.
+3. **Standing:** `scrutinize-skill`'s edit stays source-only; the Class-B publish train (version bump → Codex republish → mirror) runs only on JP's explicit ask. No push without JP's ask. Expected consequence, not a failure: from the Task-12 edit until that ask, `codex-plugins-sync.sh --check` — wired into SessionStart in both `.codex/hooks.json` and `.claude/settings.local.json` — reports `DRIFT: review-family` at every `.agents` session start. Leave it red; never "repair" it by publishing without JP's explicit ask.
 
 ## File map
 
@@ -73,14 +73,14 @@ The design's round-3 narrowing rests on an unverified claim: the current Codex r
 
 ## Task 4 — Build the probe rig (step 3)
 
-All rig state lives under `.agents/scratch/skill-use-probes/` (git-ignored). Nothing in this task edits tracked files except nothing — this is scratch infrastructure.
+All rig state lives under `.agents/scratch/skill-use-probes/` (git-ignored); per-trial disposable copies — config trees and fixture copies — extract into unique `sup-*` temp dirs, created fresh each trial and never deleted by the runner (reclaim with `trash` when wanted; the trash-only rule holds with no carve-out). Nothing in this task edits tracked files — this is scratch infrastructure.
 
 1. **Preflight.** Record `claude --version` (must be pinned for the whole run; live at authoring: `2.1.207`). Disable auto-update for trial invocations by setting `DISABLE_AUTOUPDATER=1` in the trial environment. Confirm Keychain auth reaches scratch trees with one throwaway run: `CLAUDE_CONFIG_DIR=$(mktemp -d) claude -p "reply with exactly: ok"` (the 2026-07-12 delivery probe showed auth survives; re-confirm on this machine today). Also export `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` for every trial (unconditional-input surface, per the design's Environment surfaces bullet).
 2. **Instruction replica.** Author one replica file used by both trees: take the current `~/.claude/CLAUDE.md` content, change the first heading to `# Global Instructions — Replica`, and remove the entire `## Behavior Contracts` section (it points at this repo's charter and would confound trials; its removal also supplies the distinctive-absent host phrase). The distinctive host phrase for canary checks is: `consult ~/.agents/docs/agents/charter.md` — present in the host file (where the path is backtick-wrapped, so any literal-match check against the host must use the backtick form; the model-answered canary question below is unaffected), absent from the replica. The ON tree's replica additionally contains the Task-2 final `## Skill Use` block inserted after the `## Working` section; the OFF tree's replica lacks it; the two replicas are otherwise byte-identical (verify: `diff <(grep -v -F "$(sed -n '/## Skill Use/,/^## /p' ...)")` — practically, construct OFF first, then produce ON by one insertion, and diff to confirm the delta is exactly the block).
-3. **Scratch trees.** Build `trees/tree-A/` and `trees/tree-B/` (neutral names). Each contains: `CLAUDE.md` (the arm's replica), `settings.json` with `{"disableClaudeAiConnectors": true}` and no hooks (the production skill-usage ledger hook is deliberately excluded — it writes to the `$HOME`-keyed live ledger the 2026-08-01 watch reads; takes come from each trial's own `tool_use` stream), and `skills/` containing **copies** (not symlinks) of the pinned fixture roster, all copied from this repo at one recorded commit SHA. Fixture roster (identical in both trees, all probes): `diagnose`, `tdd`, `keep-green`, `characterization-tests`, `test-trust-audit`, `simplify-code`, `authorization-design`, `injection-safe-inputs`, `red-team`, `making-recommendations`, `ideate`. Exception, per the design's single-variable rule: both trees' `diagnose` copy carries the planned body exit to `tdd` (draft the Task-12 diagnose edit early, apply it identically to both trees' copies only — the repo source stays unedited until Task 12). Tar each finished tree with the tree directory as the top-level entry (`tar -cf trees/tree-A.pristine.tar -C trees tree-A` — `runner.py` extracts into the parent and expects `tree-A/…` inside the tar) for per-trial resets. The trees contain **no plugins** (no plugin dirs, no plugin state in the tree's `.claude.json`): the design's "identical seeded settings, skills, and skills-directory plugins" is satisfied by identical absence, the pilot's `system/init` must show no plugin-sourced entries, and the exact-roster check below is what catches host plugin or skill leakage at trial time. Fixed trial permission surface (design: "fixed permissions/tools"): every trial runs with `--permission-mode bypassPermissions`, set in `runner.py` — headless `-p` runs cannot answer permission prompts, so default-mode denials would gut the positive probes' real work (edits, test runs) and keep the seam probe from ever reaching an in-session skill completion; bypass is acceptable because each trial is confined to a disposable fixture copy and a scratch tree, and the surface is identical across arms. The pilot confirms no permission denials appear in any stream; if the pinned CLI rejects the mode in headless runs, the pre-seal fallback is an explicit allowlist in the tree `settings.json`, recorded identically. The mode is recorded in the hash and environment records (4.9/4.10) and the prereg. Then write the two roster-check inputs at the rig root. `expected-roster.json`: the JSON array of the **full** expected init roster — the eleven fixture skills plus whatever built-in entries headless mode reports — as the runtime's `system/init` event spells them, pilot-confirmed against the first pilot trial's actual init event (adjust pre-seal if the field or spellings differ). `sentinel-absent.json`: a JSON array of host-only skill names outside the fixture roster (at minimum `skill-benchmark`, `synapsis`, `work-router`) that must appear in **no** trial's init roster. `runner.py` requires exact set equality with `expected-roster.json` and zero sentinel hits (design: "the exact expected target-skill roster") — a subset check would pass silently if the host's ~90-skill library loaded instead of the tree's, since every fixture name also exists on the host, and the sentinel list guards the pilot-confirmation itself: any sentinel name in the pilot init means delivery was broken while `expected-roster.json` was being confirmed, so fix delivery rather than accepting that roster.
+3. **Scratch trees.** Build `trees/tree-A/` and `trees/tree-B/` (neutral names). Each contains: `CLAUDE.md` (the arm's replica), `settings.json` with `{"disableClaudeAiConnectors": true}` and no hooks (the production skill-usage ledger hook is deliberately excluded — it writes to the `$HOME`-keyed live ledger the 2026-08-01 watch reads; takes come from each trial's own `tool_use` stream), and `skills/` containing **copies** (not symlinks) of the pinned fixture roster, all copied from this repo at one recorded commit SHA. Fixture roster (identical in both trees, all probes): `diagnose`, `tdd`, `keep-green`, `characterization-tests`, `test-trust-audit`, `simplify-code`, `authorization-design`, `injection-safe-inputs`, `red-team`, `making-recommendations`, `ideate`. Exception, per the design's single-variable rule: both trees' `diagnose` copy carries the planned body exit to `tdd` (draft the Task-12 diagnose edit early, apply it identically to both trees' copies only — the repo source stays unedited until Task 12). Tar each finished tree with the tree directory as the top-level entry (`tar -cf trees/tree-A.pristine.tar -C trees tree-A` — `runner.py` extracts each trial's copy into a fresh disposable dir and expects `tree-A/…` as the tar's top level) for per-trial resets; the tar, not the tree, is the artifact trials actually execute, so both tarballs are hashed and tar↔tree identity is verified mechanically (4.9). The trees contain **no plugins** (no plugin dirs, no plugin state in the tree's `.claude.json`): the design's "identical seeded settings, skills, and skills-directory plugins" is satisfied by identical absence, the pilot's `system/init` must show no plugin-sourced entries, and the exact-roster check below is what catches host plugin or skill leakage at trial time. Fixed trial permission surface (design: "fixed permissions/tools"): every trial runs with `--permission-mode bypassPermissions`, set in `runner.py` — headless `-p` runs cannot answer permission prompts, so default-mode denials would gut the positive probes' real work (edits, test runs) and keep the seam probe from ever reaching an in-session skill completion; bypass is acceptable because each trial is confined to a disposable fixture copy and a scratch tree, and the surface is identical across arms. The pilot confirms no permission denials appear in any stream; if the pinned CLI rejects the mode in headless runs, the pre-seal fallback is an explicit allowlist in the tree `settings.json`, recorded identically. The mode is recorded in the hash and environment records (4.9/4.10) and the prereg. Then write the two roster-check inputs at the rig root. `expected-roster.json`: the JSON array of the **full** expected init roster — the eleven fixture skills plus whatever built-in entries headless mode reports — as the runtime's `system/init` event spells them, pilot-confirmed against the first pilot trial's actual init event (adjust pre-seal if the field or spellings differ). `sentinel-absent.json`: a JSON array of host-only skill names outside the fixture roster (at minimum `skill-benchmark`, `synapsis`, `work-router`) that must appear in **no** trial's init roster. `runner.py` requires exact set equality with `expected-roster.json` and zero sentinel hits (design: "the exact expected target-skill roster") — a subset check would pass silently if the host's ~90-skill library loaded instead of the tree's, since every fixture name also exists on the host, and the sentinel list guards the pilot-confirmation itself: any sentinel name in the pilot init means delivery was broken while `expected-roster.json` was being confirmed, so fix delivery rather than accepting that roster.
 4. **Arm map.** Write `armmap/arm-map.json` mapping `tree-A`/`tree-B` → `ON`/`OFF` (decide by one coin flip, record it). Only `runner.py` and the executor-as-arm-map-holder read this directory; the blind scorer never does. Sealed per-trial authorization keys and negative-control overfire keys also land here as `trial-keys.json` (Task 7) — the tally derivation input.
 5. **Workspace fixture.** Author `fixture/` as one small frozen project that can host every probe: a small Python service (uv layout, runnable tests) containing (a) an untested legacy module that any refactor of it would first need characterization (mid-task probe: the trial task is a refactor elsewhere whose finding reveals this module); (b) one reproducible failing behavior whose cause is not stated anywhere in the fixture (seam probe: request-time terrain routes into `diagnose`; the scored moment is `diagnose` completing and naming `tdd`); (c) a feature surface whose findings span access-control design and untrusted-input handling (composition probe: both `authorization-design` and `injection-safe-inputs`); plus material for N1 (a mid-task finding that changes nothing about what the work needs), N2 (a completed skill naming a follow-on the prompt does not authorize), and N3 (a several-concept task still owned by one skill). Write `fixture/MANIFEST.txt` listing every file with its SHA-256 (`shasum -a 256`). The fixture contains no skill names, no arm vocabulary, and no discipline vocabulary — mechanized, not just asserted: a word-bounded case-insensitive grep over `fixture/` for every fixture-roster skill name and the discipline terms (`arm`, `probe`, `trial`, `overfire`, `contract`, `skill use`) must return zero hits; record the command and output in `pilot-notes.md` and re-run it at each 4.9 hash-record pass.
-6. **Runner.** Write `runner.py` — the arm-map-holding script. Complete initial implementation below; pre-seal amendments from the pilot are expected and legitimate (only post-seal surfaces freeze). Before the first Task-4.9 hash record, verify `tally` against synthetic inputs: hand-built `grades.json`/`trial-keys.json`/`schedule.json` (plus `results-index.json`/`schedule-extensions.json` where a case needs them) sets covering a 2–1 positive split, a clean 3–0, a negative overfire-differ-by-one, an ungraded non-invalid-marked trial, an invalid-marked trial with no replacement row, and an invalid-marked trial whose graded replacement row is present must yield exactly the sealed EXTEND flags, key-matched pass/overfire counts, no per-arm detail while an extension is pending, a hard block (the error line and nothing else) on both incomplete cases, and full-n aggregation on the replacement case — the pilot never exercises escalation, so this synthetic check is the only pre-seal proof the mechanical rules work:
+6. **Runner.** Write `runner.py` — the arm-map-holding script. Complete initial implementation below; pre-seal amendments from the pilot are expected and legitimate (only post-seal surfaces freeze). Before the first Task-4.9 hash record, verify `tally` against synthetic inputs: hand-built `grades.json`/`trial-keys.json`/`schedule.json` (plus `results-index.json`/`schedule-extensions.json` where a case needs them) sets covering a 2–1 positive split, a clean 3–0, a negative overfire-differ-by-one, an ungraded non-invalid-marked trial, an invalid-marked trial with no replacement row, an invalid-marked trial whose graded replacement row is present, and the fail-closed malformed-input cases — an unknown grade event string, a grade row missing its `skill` field, a grade keyed to an unscheduled trial id, a replacement row that changes probe/task/tree/`seam_skill`, a scheduled task with no sealed key, and a probe whose tasks mix positive and negative kinds — must yield exactly the sealed EXTEND flags, key-matched pass/overfire counts, no per-arm detail while an extension is pending, a hard block (the error line and nothing else) on both incomplete cases and on every malformed-input case, and full-n aggregation on the replacement case — the pilot never exercises escalation, so this synthetic check is the only pre-seal proof the mechanical rules work:
 
 ```python
 #!/usr/bin/env -S uv run --script
@@ -93,9 +93,13 @@ All rig state lives under `.agents/scratch/skill-use-probes/` (git-ignored). Not
 # stripped scorer packets; derives pass/overfire from raw scorer events via the
 # sealed keys and applies the sealed escalation rule mechanically.
 # The scorer NEVER runs this and never reads armmap/.
-# Deletion scope: the rmtree/tempfile resets below touch only rig-internal
-# run-trees/ and sup-fixture-* dirs this script itself created from pristine
-# sources — never repo files, which stay under the trash-only rule.
+# This script never deletes anything: each trial extracts/copies into fresh
+# unique sup-* temp dirs; leftovers are reclaimed manually with `trash` when
+# wanted — the trash-only rule holds with no carve-out.
+# Fail-closed seal: `record` writes the hash record over every runtime-
+# consumed artifact (pristine tars included) after proving manifest↔fixture
+# and tar↔tree identity; `run` refuses to spend trials while any check or
+# the record mismatches; `verify` re-checks on demand (again after batches).
 import json, shutil, subprocess, sys, tarfile, tempfile, hashlib
 from pathlib import Path
 
@@ -117,14 +121,83 @@ def load_schedule(pilot: bool = False) -> list:
 def sha256(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
+def hash_inventory() -> dict:
+    """Every runtime-consumed artifact, rig-relative: the pristine tarballs
+    and all tree files, every fixture and task file, this script, the sealed
+    schedule and roster inputs, the arm map, and (once sealed) the keys."""
+    files = [RIG / "runner.py", RIG / "schedule.json",
+             RIG / "expected-roster.json", RIG / "sentinel-absent.json",
+             RIG / "armmap" / "arm-map.json"]
+    if (RIG / "armmap" / "trial-keys.json").exists():
+        files.append(RIG / "armmap" / "trial-keys.json")
+    for sub in ("trees", "fixture", "tasks"):
+        files += [p for p in sorted((RIG / sub).rglob("*")) if p.is_file()]
+    return {str(p.relative_to(RIG)): sha256(p) for p in files}
+
+def verify_fixture_manifest() -> None:
+    """MANIFEST.txt must equal the live fixture exactly (`shasum -a 256`
+    lines, paths relative to fixture/) — hashing the manifest alone would
+    let a fixture file drift underneath it."""
+    listed = {}
+    for line in (RIG / "fixture" / "MANIFEST.txt").read_text().splitlines():
+        if line.strip():
+            digest, name = line.split(maxsplit=1)
+            listed[name.strip().lstrip("./")] = digest
+    live = {str(p.relative_to(RIG / "fixture")): sha256(p)
+            for p in (RIG / "fixture").rglob("*")
+            if p.is_file() and p.name != "MANIFEST.txt"}
+    if listed != live:
+        sys.exit("verify failed: fixture/MANIFEST.txt does not match live "
+                 f"fixture. Got: {sorted(set(listed) ^ set(live)) or 'digest drift'}")
+
+def verify_tars() -> None:
+    """Each pristine tar must expand byte-identically to its source tree —
+    the tar, not the tree, is what trials execute."""
+    for name in ("tree-A", "tree-B"):
+        tmp = Path(tempfile.mkdtemp(prefix="sup-tarcheck-"))
+        with tarfile.open(RIG / "trees" / f"{name}.pristine.tar") as t:
+            t.extractall(tmp, filter="data")
+        src, out = RIG / "trees" / name, tmp / name
+        want = {str(p.relative_to(src)): sha256(p)
+                for p in src.rglob("*") if p.is_file()}
+        got = {str(p.relative_to(out)): sha256(p)
+               for p in out.rglob("*") if p.is_file()}
+        if want != got:
+            sys.exit(f"verify failed: {name}.pristine.tar does not match "
+                     f"trees/{name}. Got: {sorted(set(want) ^ set(got)) or 'digest drift'}")
+
+def runtime_identity() -> dict:
+    v = subprocess.run(["claude", "--version"], capture_output=True, text=True)
+    return {"claude_version": v.stdout.strip(), "model": MODEL,
+            "permission_mode": PERMISSION_MODE, "env": ENV}
+
+def record_hashes() -> None:
+    verify_fixture_manifest()
+    verify_tars()
+    (RIG / "armmap" / "hash-record.json").write_text(json.dumps(
+        {"hashes": hash_inventory(), "runtime": runtime_identity()}, indent=2))
+    print("recorded: armmap/hash-record.json")
+
+def verify_sealed_inputs() -> None:
+    """Hard gate before any trial spends; re-run after each batch. A mismatch
+    invalidates the run (not a contract failure): pre-seal, amend deliberately
+    and re-record; post-seal, abort and report."""
+    rec = json.loads((RIG / "armmap" / "hash-record.json").read_text())
+    verify_fixture_manifest()
+    verify_tars()
+    live = hash_inventory()
+    if rec["hashes"] != live:
+        drift = sorted({k for k, _ in set(rec["hashes"].items()) ^ set(live.items())})
+        sys.exit(f"verify failed: hash record mismatch. Got: {drift}")
+    if rec["runtime"] != runtime_identity():
+        sys.exit(f"verify failed: runtime identity changed. Got: {runtime_identity()}")
+
 def reset_tree(tree_name: str) -> Path:
-    dest = RIG / "run-trees" / tree_name
-    if dest.exists():
-        shutil.rmtree(dest)  # scratch-only path, rebuilt from pristine tar
-    dest.parent.mkdir(parents=True, exist_ok=True)
+    """Fresh unique extraction per call — no pre-run deletion exists to need."""
+    dest = Path(tempfile.mkdtemp(prefix=f"sup-tree-{tree_name}-"))
     with tarfile.open(RIG / "trees" / f"{tree_name}.pristine.tar") as t:
-        t.extractall(dest.parent, filter="data")
-    return dest
+        t.extractall(dest, filter="data")
+    return dest / tree_name
 
 def reset_fixture() -> Path:
     work = Path(tempfile.mkdtemp(prefix="sup-fixture-"))
@@ -161,13 +234,31 @@ def run_trial(trial: dict) -> dict:
     # fixture skill name also exists on the host.
     roster_ok = (init is not None and got == expected
                  and not (got & sentinels))
+    skill_uses = [b for e in events if e.get("type") == "assistant"
+                  for b in e.get("message", {}).get("content", [])
+                  if isinstance(b, dict) and b.get("type") == "tool_use"
+                  and b.get("name") == "Skill"]
     takes = [b.get("input", {}).get("skill") or b.get("input", {}).get("name")
-             for e in events if e.get("type") == "assistant"
-             for b in e.get("message", {}).get("content", [])
-             if isinstance(b, dict) and b.get("type") == "tool_use"
-             and b.get("name") == "Skill"]
-    return {"trial": trial, "valid": roster_ok, "takes": takes,
-            "why": None if roster_ok else "roster/init mismatch — invalid, re-run"}
+             for b in skill_uses]
+    # Seam-reach check (design rule, mechanized; seam probe AND N2): a trial
+    # where the row's seam_skill never completes in-session never presents
+    # the scored moment — invalid, re-run, symmetric across arms. Completion
+    # = the take's tool_result came back without error; names match
+    # suffix-aware (namespaced keys are a library-general hazard).
+    ok_ids = {b.get("tool_use_id") for e in events if e.get("type") == "user"
+              for b in e.get("message", {}).get("content", [])
+              if isinstance(b, dict) and b.get("type") == "tool_result"
+              and not b.get("is_error")}
+    completed = {(b.get("input", {}).get("skill") or b.get("input", {}).get("name"))
+                 for b in skill_uses if b.get("id") in ok_ids}
+    seam = trial.get("seam_skill")
+    seam_ok = seam is None or any(
+        s and (s == seam or s.endswith(f":{seam}")) for s in completed)
+    valid = roster_ok and seam_ok
+    why = (None if valid else
+           "roster/init mismatch — invalid, re-run" if not roster_ok else
+           f"seam skill {seam} never completed in-session — invalid, re-run")
+    return {"trial": trial, "valid": valid, "takes": takes, "why": why}
 
 def merge_results(new: list) -> None:
     """Merge into results-index.json by trial_id — never wholesale-overwrite:
@@ -216,6 +307,38 @@ def tally(grades_path: Path) -> None:
     sched = load_schedule()
     ridx = {r["trial"]["trial_id"]: r for r in
             json.loads((RIG / "out" / "results-index.json").read_text())}
+    # Fail-closed input validation: grades and schedule must match the sealed
+    # shape exactly before anything is counted — an unknown value must block,
+    # never silently become a failure or a non-overfire.
+    EVENTS = {"take", "offer", "none"}
+    sched_ids = {t["trial_id"] for t in sched}
+    if (unknown := sorted(set(grades) - sched_ids)):
+        sys.exit(f"tally blocked: grades for unscheduled trials: {unknown}")
+    if (bad := sorted(tid for tid, g in grades.items()
+                      if not isinstance(g, dict) or g.get("event") not in EVENTS
+                      or "skill" not in g
+                      or not (g["skill"] is None or isinstance(g["skill"], str)))):
+        sys.exit(f"tally blocked: malformed grade rows: {bad}")
+    if (nokey := sorted({t["task_id"] for t in sched} - set(keys))):
+        sys.exit(f"tally blocked: no sealed key for tasks: {nokey}")
+    if (badkind := sorted(k for k, v in keys.items()
+                          if v.get("kind") not in ("positive", "negative"))):
+        sys.exit(f"tally blocked: keys with unknown kind: {badkind}")
+    if (badtree := sorted({t["tree"] for t in sched} - set(armmap))):
+        sys.exit(f"tally blocked: scheduled trees missing from arm map: {badtree}")
+    by_id = {t["trial_id"]: t for t in sched}
+    if (badrep := sorted(
+            t["trial_id"] for t in sched if t.get("replaces") and (
+                t["replaces"] not in by_id or any(
+                    t.get(f) != by_id[t["replaces"]].get(f)
+                    for f in ("probe", "task_id", "tree", "seam_skill"))))):
+        sys.exit("tally blocked: replacement rows replacing unknown trials or "
+                 f"changing probe/task/tree/seam_skill: {badrep}")
+    probe_kinds = {}
+    for t in sched:
+        probe_kinds.setdefault(t["probe"], set()).add(keys[t["task_id"]]["kind"])
+    if (mixed := sorted(p for p, ks in probe_kinds.items() if len(ks) > 1)):
+        sys.exit(f"tally blocked: probes mixing positive and negative kinds: {mixed}")
     # Hard gate: NOTHING prints until every scheduled trial carries a grade or
     # an explicit invalid marker, and every invalid row has a replacement row.
     # A silent skip lands an arm at n!=3, the escalation check passes over it,
@@ -271,7 +394,15 @@ def tally(grades_path: Path) -> None:
 
 if __name__ == "__main__":
     cmd = sys.argv[1]
-    if cmd == "run":
+    if cmd == "record":
+        record_hashes()
+    elif cmd == "verify":
+        verify_sealed_inputs()
+        print("OK: sealed inputs match the hash record")
+    elif cmd == "reset-tree":  # canary helper — extract exactly what trials run
+        print(reset_tree(sys.argv[2]))
+    elif cmd == "run":
+        verify_sealed_inputs()  # fail closed BEFORE any trial spends
         argv = sys.argv[2:]
         sched = load_schedule(pilot="--pilot" in argv)
         wanted = {a for a in argv if a != "--pilot"}
@@ -293,38 +424,38 @@ if __name__ == "__main__":
         tally(RIG / "grades.json")
 ```
 
-7. **Schedule.** Generate `schedule.json`: for each probe/task cell and each tree, the planned trial rows, deterministically interleaved by arm from `SEED` (e.g. seeded `random.Random(SEED).shuffle` over the cell list) so backend drift cannot correlate with arm. Trial ids carry the per-cell replicate index (`…-r1`, `…-r2`, …) so derived rows extend the counter deterministically. Regenerated only if the prereg changes counts; the seed and generator line are quoted in the prereg. Derived-row rule (sealed in the Task-7 prereg, applied mechanically, never improvised): (a) *invalid re-run* — an invalidated trial is replaced by a new row with the same probe, task, and tree, the next per-cell replicate index in its `trial_id`, and a `replaces: <old_trial_id>` field; the old row keeps its invalid marker and its stream is never overwritten; (b) *escalation extension* — when `tally` prints EXTEND for a probe, both arms gain rows to n=5 for that probe, reusing the cell's task assignments, replicate indices continuing the counter, order continued from the same seeded generator. Derived rows are appended to `schedule-extensions.json` only — the sealed `schedule.json` and its hash stay untouched — and executed selectively (`runner.py run <new trial ids>`). Sealed keys need no per-row additions: `trial-keys.json` is keyed by `task_id`, so derived rows inherit their task's key.
-8. **Effective-load canary (per tree, arm-map holder only, never the scorer).** For each tree: `CLAUDE_CONFIG_DIR=<tree> claude -p "Quote, byte-exact, the first markdown heading of your user-global instruction memory. Then answer YES or NO: does a section titled 'Skill Use' appear in it? Then answer YES or NO: does the phrase 'consult ~/.agents/docs/agents/charter.md' appear in it?" --model <pinned>`. Required: heading byte-matches `# Global Instructions — Replica`; host phrase NO in both; `## Skill Use` YES in the ON tree and NO in the OFF tree. A failure blocks all trials in that tree. Run before the pilot and again immediately before sealed runs.
-9. **Hash record.** Before the pilot and again before sealed runs, write `armmap/hash-record.json`: SHA-256 of both replicas, every tree skill file, `settings.json` files, `fixture/MANIFEST.txt` itself, every task file, `runner.py`, `schedule.json`, `expected-roster.json`, `sentinel-absent.json`, `armmap/arm-map.json` (and `armmap/trial-keys.json` once Task 7 seals it); plus `claude --version` output, the model id, the trial permission mode, and the environment variable set. Any mismatch at run time invalidates the run (not a contract failure).
-10. **Environment surfaces record.** In the same file record: auto-memory disabled (env var), connectors suppressed (confirm absent in the pilot's `system/init`), managed/server-managed settings presence on this host (`ls /Library/Application\ Support/ClaudeCode/ 2>/dev/null; ls ~/Library/Application\ Support/ClaudeCode/managed-settings.json 2>/dev/null` — record presence/absence and hashes), the auth method (Keychain), the trial permission mode (`bypassPermissions`), and the invoking-shell surface: run `runner.py` from a plain terminal, never from inside a Claude or Codex session — trials inherit the invoking process environment (arm-symmetric either way, but it belongs in the record; capture the names of any `CLAUDE*`/`CODEX*` variables present at run time).
+7. **Schedule.** Generate `schedule.json`: for each probe/task cell and each tree, the planned trial rows, deterministically interleaved by arm from `SEED` (e.g. seeded `random.Random(SEED).shuffle` over the cell list) so backend drift cannot correlate with arm. Row shape: `trial_id`, `probe`, `task_id`, `tree`, plus — on every seam-probe and N2 row, the two probes whose scored moment requires an in-session skill completion — `seam_skill`: the exact skill whose completion the trial must reach (`diagnose` for the seam probe; N2's terrain skill per its pilot-confirmed scenario). `runner.py` marks a `seam_skill` row invalid when that skill never completes in-session (suffix-aware take match; completion = the take's `tool_result` returns without error), so unreached-seam rows never enter scorer packets. `pilot-schedule.json` rows carry the same shape. Trial ids carry the per-cell replicate index (`…-r1`, `…-r2`, …) so derived rows extend the counter deterministically. Regenerated only if the prereg changes counts; the seed and generator line are quoted in the prereg. Derived-row rule (sealed in the Task-7 prereg, applied mechanically, never improvised): (a) *invalid re-run* — an invalidated trial is replaced by a new row with the same probe, task, and tree, the next per-cell replicate index in its `trial_id`, and a `replaces: <old_trial_id>` field; the old row keeps its invalid marker and its stream is never overwritten; (b) *escalation extension* — when `tally` prints EXTEND for a probe, both arms gain rows to n=5 for that probe, reusing the cell's task assignments, replicate indices continuing the counter, order continued from the same seeded generator. Derived rows are appended to `schedule-extensions.json` only — the sealed `schedule.json` and its hash stay untouched — and executed selectively (`runner.py run <new trial ids>`). Sealed keys need no per-row additions: `trial-keys.json` is keyed by `task_id`, so derived rows inherit their task's key.
+8. **Effective-load canary (per tree, arm-map holder only, never the scorer).** Run the canary against a freshly tar-extracted copy — the artifact trials actually execute — never against `trees/<tree>` directly (which would pass on a stale tar and also lets the CLI write session state into the source tree). For each tree: `CLAUDE_CONFIG_DIR="$(python3 runner.py reset-tree <tree>)" claude -p "Quote, byte-exact, the first markdown heading of your user-global instruction memory. Then answer YES or NO: does a section titled 'Skill Use' appear in it? Then answer YES or NO: does the phrase 'consult ~/.agents/docs/agents/charter.md' appear in it?" --model <pinned>`. Required: heading byte-matches `# Global Instructions — Replica`; host phrase NO in both; `## Skill Use` YES in the ON tree and NO in the OFF tree. A failure blocks all trials in that tree. Run before the pilot and again immediately before sealed runs.
+9. **Hash record (mechanical, fail-closed).** Before the pilot and again before sealed runs, run `python3 runner.py record`. It refuses to write unless `fixture/MANIFEST.txt` matches the live fixture contents exactly and each pristine tar expands byte-identically to its source tree, then writes `armmap/hash-record.json` covering every runtime-consumed artifact: both pristine tarballs and every file under `trees/` (replicas, skills, settings), every fixture file, every task file, `runner.py`, `schedule.json`, `expected-roster.json`, `sentinel-absent.json`, `armmap/arm-map.json` (and `armmap/trial-keys.json` once Task 7 seals it); plus `claude --version` output, the model id, the trial permission mode, and the trial environment variable set. `runner.py run` re-runs both integrity checks and re-verifies the whole record before spending any trial, hard-stopping on any mismatch; `python3 runner.py verify` re-checks on demand and is re-run after each batch before grading. A mismatch invalidates the run (not a contract failure): pre-seal, amend deliberately and re-record; post-seal, abort and report.
+10. **Environment surfaces record.** In a sibling `armmap/environment-record.json` (executor-maintained — `runner.py record` owns and overwrites `hash-record.json`, so the two never clobber each other) record: auto-memory disabled (env var), connectors suppressed (confirm absent in the pilot's `system/init`), managed/server-managed settings presence on this host (`ls /Library/Application\ Support/ClaudeCode/ 2>/dev/null; ls ~/Library/Application\ Support/ClaudeCode/managed-settings.json 2>/dev/null` — record presence/absence and hashes), the auth method (Keychain), the trial permission mode (`bypassPermissions`), and the invoking-shell surface: run `runner.py` from a plain terminal, never from inside a Claude or Codex session — trials inherit the invoking process environment (arm-symmetric either way, but it belongs in the record; capture the names of any `CLAUDE*`/`CODEX*` variables present at run time).
 
 ## Task 5 — Author trial tasks fresh-context (feeds Task 6)
 
 Trial prompts must not be authored by this session or any context that has read this plan or the design (the Era-86 lesson: 4 of 6 first-draft prompts leaked discipline vocabulary; regenerate, never hand-patch).
 
 1. For each of the six probes (3 positive, 3 negative), write a **facts-only kernel**: what the fixture is, what the user in the scenario wants, what state exists — zero skill names, zero expectations, zero arm/discipline vocabulary. The kernel for the seam probe describes only the failing behavior a user would report; the mid-task kernel only the refactor ask; N1–N3 kernels only their neutral scenarios.
-2. Spawn a fresh subagent per prompt with ONLY the kernel and the instruction "write the user message this person would send to a coding agent working in this project" — no plan, no design, no probe taxonomy in its context.
+2. Spawn a fresh subagent per prompt with ONLY the kernel and the instruction "write the user message this person would send to a coding agent working in this project" — no plan, no design, no probe taxonomy in its context. Fresh means a default named/general-purpose spawn, which starts context-isolated by documented default (a subagent gets a fresh context window and none of the parent conversation); never the `fork` subagent type or `/fork`, which inherits the whole conversation. The same isolation rule binds the step-3 reviewer and the Task-8 scorer; the mechanism and active tool contract are recorded in the prereg (Task 7.1, blinding).
 3. Adversarially review each returned prompt (a second fresh subagent may do this): reject and regenerate on any leak of expected skill names, assertions, arm identity, intended answers, or authorization ambiguity (seam prompts must be unambiguous between take-authorized and offer-only readings — that wording is what the sealed per-trial authorization key derives from). Save accepted prompts as `tasks/<task_id>.txt`; write separate pilot-only tasks the same way (pilot tasks and outputs are excluded from sealed scoring).
 4. Update the hash record.
 
 ## Task 6 — Unsealed paired pilot (step 4)
 
 1. Run the effective-load canary (Task 4.8). Then run the pilot: for every probe, positive and negative, a cheap paired run (1–2 trials per arm per probe) using the pilot-only tasks, via `runner.py run --pilot` against `pilot-schedule.json` (pilot trial ids carry a `pilot-` prefix so they can never collide with sealed rows or enter sealed packets).
-2. Confirm per channel: the exact roster check passes with zero sentinel hits (a sentinel hit means delivery is broken — fix delivery before confirming `expected-roster.json`) and no permission denials appear in the stream; the observable event is extractable (takes mechanically from `tool_use`; offers gradeable from final text); the scoring key is unambiguous; the OFF-arm base rate leaves headroom (no ceiling); for the seam probe, both arms reliably reach an in-session skill completion at all (a trial where no skill completes never reaches the seam — invalid, re-run, symmetric across arms); for each negative probe, the scenario is unambiguously gradeable and the OFF-arm overfire base rate is measured.
+2. Confirm per channel: the exact roster check passes with zero sentinel hits (a sentinel hit means delivery is broken — fix delivery before confirming `expected-roster.json`) and no permission denials appear in the stream; the observable event is extractable (takes mechanically from `tool_use`; offers gradeable from final text); the scoring key is unambiguous; the OFF-arm base rate leaves headroom (no ceiling); for the seam probe, both arms reliably reach an in-session skill completion at all (a trial where no skill completes never reaches the seam — invalid, re-run, symmetric across arms), and the runner's mechanical `seam_skill` detection (Task 4.7) fires correctly against the pilot's seam and N2 streams — adapt the completion parsing pre-seal if the `tool_result` shape differs; for each negative probe, the scenario is unambiguously gradeable and the OFF-arm overfire base rate is measured.
 3. Resolve every empty, ambiguous, or ceilinged channel by redesign (fixture, kernel regeneration, or observable-rule sharpening) — or drop a **positive** channel to characterization-only with that recorded. The negative calibration gate cannot be waived or dropped: a negative channel still ambiguous after redesign leaves the gate unmet and blocks GO (design, Negative controls).
 4. Record pilot outcomes (per channel: fired/empty/ambiguous/ceiling, base rates, redesigns made) in a `pilot-notes.md` inside the rig. Pilot tasks and outputs never enter sealed scoring.
 
 ## Task 7 — Preregistration, adversarial review, seal (step 5)
 
-1. Write `docs/plans/2026-07-NN-skill-use-probes-preregistration.md` following the sealed shape of [`2026-07-10-skill-value-test-preregistration.md`](2026-07-10-skill-value-test-preregistration.md) (frontmatter with `type: pre-registration`, status line, append-only-below-seal rule). Contents, all fixed before any sealed data: the question; the two arms (byte-identical replicas ± the Task-2 block, quoted); the fresh sealed task texts; the fixture manifest hash; the pinned roster and skill-copy commit SHA; `claude --version` and the exact model id; the full hash record; the environment-surfaces record; the observable scoring rules (take = a `tool_use` block naming the exact target Skill; offer = the response explicitly names the target invocation token and proposes a clear handoff — generic suggestions do not count); the per-trial authorization keys derived from each seam/N2 prompt's own authorization language; the negative-control overfire keys (which takes/continuations count as overfire per N1/N2/N3), both key sets recorded as `armmap/trial-keys.json`; the seeded schedule (seed, generator, and the emitted order); the derived-row rule (Task 4.7: invalid re-run and escalation-extension rows, id/replicate/key derivation, `schedule-extensions.json`-only appends); the fixed trial permission mode; trial counts (3/arm/probe) and the escalation rule (either arm splits 2–1 on a positive probe, or negative-probe overfire counts differ by exactly one → extend both arms to 5 for that probe before unblinding; first-round grades stand; the scorer blind-grades only added trials; the scorer's escalation inference is an accepted bounded leak); pass criteria (positive: with-arm ≥2/3 and strictly exceeds without-arm; post-escalation ≥4/5 and strictly exceeds); the ceiling rule (a sealed without-arm ceiling is inconclusive-by-ceiling, never a pass); the calibration gate (at final counts, ON overfire ≤ OFF overfire on every negative probe; an ON excess returns the corresponding clause and the combined block for redesign); aggregation (GO requires all three positive probes to pass AND the gate to hold; fail/inconclusive returns the affected clause and the combined block; other probes' results retained as bounded evidence only); blinding (neutral names, arm map outside trial-visible paths, scorer blind to arm, artifact leak inspection before unblinding); and the honest bound (Claude-side, same-model-scored — quote the design's weighting line).
+1. Write `docs/plans/2026-07-NN-skill-use-probes-preregistration.md` following the sealed shape of [`2026-07-10-skill-value-test-preregistration.md`](2026-07-10-skill-value-test-preregistration.md) (frontmatter with `type: pre-registration`, status line, append-only-below-seal rule). Contents, all fixed before any sealed data: the question; the two arms (byte-identical replicas ± the Task-2 block, quoted); the fresh sealed task texts; the fixture manifest hash; the pinned roster and skill-copy commit SHA; `claude --version` and the exact model id; the full hash record; the environment-surfaces record; the observable scoring rules (take = a `tool_use` block naming the exact target Skill; offer = the response explicitly names the target invocation token and proposes a clear handoff — generic suggestions do not count); the per-trial authorization keys derived from each seam/N2 prompt's own authorization language; the negative-control overfire keys (which takes/continuations count as overfire per N1/N2/N3), both key sets recorded as `armmap/trial-keys.json`; the seeded schedule (seed, generator, and the emitted order); the derived-row rule (Task 4.7: invalid re-run and escalation-extension rows, id/replicate/key derivation, `schedule-extensions.json`-only appends); the fixed trial permission mode; trial counts (3/arm/probe) and the escalation rule (either arm splits 2–1 on a positive probe, or negative-probe overfire counts differ by exactly one → extend both arms to 5 for that probe before unblinding; first-round grades stand; the scorer blind-grades only added trials; the scorer's escalation inference is an accepted bounded leak); pass criteria (positive: with-arm ≥2/3 and strictly exceeds without-arm; post-escalation ≥4/5 and strictly exceeds); the ceiling rule (a sealed without-arm ceiling is inconclusive-by-ceiling, never a pass); the calibration gate (at final counts, ON overfire ≤ OFF overfire on every negative probe; an ON excess returns the corresponding clause and the combined block for redesign); aggregation (GO requires all three positive probes to pass AND the gate to hold; fail/inconclusive returns the affected clause and the combined block; other probes' results retained as bounded evidence only); blinding (neutral names, arm map outside trial-visible paths, scorer blind to arm, artifact leak inspection before unblinding, and the subagent-isolation mechanism for every blind role — prompt authors, prompt reviewers, scorer: default context-isolated spawns with the active harness and tool contract named, `fork`-type spawns banned); and the honest bound (Claude-side, same-model-scored — quote the design's weighting line).
 2. Obtain an adversarial design review of the prereg — run `review-family:scrutinize` against it with the methodology's design-panel questions (any verdict pre-ordained? any gate unreachable? any divergence cell forbidden by construction? is the motivating premise true?). Patch before data if needed.
 3. Commit the prereg. That commit SHA is the seal. From here: no edits above the seal line, no post-hoc adjustment, no reuse of pilot outputs.
 
 ## Task 8 — Sealed probe runs (step 6)
 
-1. Re-run the effective-load canary per tree and re-verify the hash record; a mismatch invalidates before any trial spends.
-2. Execute exactly the sealed schedule: `python3 .agents/scratch/skill-use-probes/runner.py run` (the executor acts as arm-map holder; re-invocation is safe — existing streams are never re-executed or overwritten). Invalid trials (roster/init mismatch, in-session seam never reached, CLI version change) are re-run symmetrically as replacement rows per the sealed Task-4.7 derived-row rule (`runner.py run <new trial ids>`) and invalidity rates reported; a mid-run `claude` version change invalidates the affected trials.
-3. Blind grading: emit the stripped per-trial packets with `python3 runner.py packets` (final text plus the mechanical takes list under neutral trial ids — no tree names, no raw streams, no arm map) and hand the scorer (a fresh subagent) only those packets and the sealed observable rules. The scorer returns `grades.json` as raw events (`take`/`offer`/`none` plus the named skill) — never pass/overfire, which derive from the sealed keys at tally. Inspect the packets for arm/intent leaks before unblinding.
+1. Re-run the effective-load canary per tree (against freshly extracted run trees, per Task 4.8) and `python3 runner.py verify`; `runner.py run` re-verifies the sealed inputs itself and refuses to spend any trial on a mismatch.
+2. Execute exactly the sealed schedule: `python3 .agents/scratch/skill-use-probes/runner.py run` (the executor acts as arm-map holder; re-invocation is safe — existing streams are never re-executed or overwritten). Invalid trials (roster/init mismatch; in-session seam never reached, detected mechanically via the row's `seam_skill` — seam probe and N2 alike; CLI version change) are re-run symmetrically as replacement rows per the sealed Task-4.7 derived-row rule (`runner.py run <new trial ids>`) and invalidity rates reported; a mid-run `claude` version change invalidates the affected trials.
+3. Blind grading: first re-run `python3 runner.py verify` (a post-batch mismatch invalidates the affected trials before any grading), then emit the stripped per-trial packets with `python3 runner.py packets` (final text plus the mechanical takes list under neutral trial ids — no tree names, no raw streams, no arm map) and hand the scorer (a fresh subagent under the Task-5 isolation rule: default context-isolated spawn, never `fork`-type) only those packets and the sealed observable rules. The scorer returns `grades.json` as raw events (`take`/`offer`/`none` plus the named skill) — never pass/overfire, which derive from the sealed keys at tally. Inspect the packets for arm/intent leaks before unblinding.
 4. `python3 runner.py tally` derives pass/overfire via the sealed keys and applies the escalation rule, printing EXTEND flags before any per-arm detail — and printing nothing at all while any scheduled trial lacks a grade or an explicit invalid-with-replacement marker; if escalation fires, append the extension rows per the sealed Task-4.7 derived-row rule, run only those (`runner.py run <added trial ids>`), blind-grade only those, re-tally, then unblind.
 5. Record in an appendix below the prereg seal line: raw per-trial grades, validity log, escalations, unblinded per-arm results, the verdict per probe, the calibration-gate result, and the bounded interpretation (Claude-side, same-model-scored). Commit.
 6. Outcome routing: all three positive probes pass AND the gate holds → proceed to Task 9 with a probe-backed GO recommendation. Any fail/inconclusive/gate-breach → stop, report to JP with the affected clause named; the design returns that clause and the combined block for redesign (a true silence fail returns bullet 1). Do not proceed to Task 9 with a NO-GO-shaped result unless JP directs otherwise.
@@ -420,7 +551,7 @@ Route the fixes out: authoring-time fixes to `tdd`; per-finding tracker items to
 - **Compose forward when paths land on a designable surface.** Hand attack paths to `/authorization-design` (or `$authorization-design`) as must-deny rows and to `/injection-safe-inputs` (or `$injection-safe-inputs`) as must-block rows — one or both as the findings warrant, sequentially or concurrently; composition is not a license for subagent fan-out.
 ```
 
-5. `skills/postmortem/SKILL.md` — body exit to `runbook-authoring`. Add to Beat 3 (after the `/triage` bullet, line 52):
+5. `skills/postmortem/SKILL.md` — body exit to `runbook-authoring`. Add to Beat 3, inserted immediately **before** the `/triage` bullet (line 52), never after it: that bullet ends with an explicit "and stop", the contract's precedence clause makes a governing skill's stop controlling, and Task 13.1 smoke-tests exactly this chain — the route must precede the stop:
 
 ```markdown
 - When an action item is an operational procedure someone will re-run — a rollback, restart, failover, alert response — hand authoring it to `/runbook-authoring` (or `$runbook-authoring`) rather than leaving the procedure inline in the doc.
@@ -438,7 +569,7 @@ Route the fixes out: authoring-time fixes to `tdd`; per-finding tracker items to
 - **Healthy is not goal-met** — a `healthy` bake-read closes only the technical question; whether the change achieved the goal it shipped for is a later, different read: hand forward to `/outcome-check` (or `$outcome-check`) at the goal's horizon.
 ```
 
-8. `plugins/review-family/skills/scrutinize-skill/SKILL.md` — body exit to `behavior-smoke-test` (source-only; Class-B publish deferred until JP's ask). Append to the Output section, after the "Findings are argued hypotheses…" paragraph (line 98):
+8. `plugins/review-family/skills/scrutinize-skill/SKILL.md` — body exit to `behavior-smoke-test` (source-only; Class-B publish deferred until JP's ask — from this edit until that ask, the SessionStart `codex-plugins-sync.sh --check` canary reports `DRIFT: review-family`, an expected state per the standing gate, never to be repaired by publishing). Append to the Output section, after the "Findings are argued hypotheses…" paragraph (line 98):
 
 ```markdown
 When the review's required changes have been applied and the open claim becomes "the changed contract is now followed," proving that is `behavior-smoke-test`'s job (`/behavior-smoke-test` or `$behavior-smoke-test` where available), not a re-review.
@@ -490,7 +621,7 @@ git diff --check
 ```
 
 Also parse both hook JSON files (`python3 -m json.tool < .codex/hooks.json`), confirm every path referenced by edited surfaces exists, and re-run any skill's `agents/openai.yaml` parse where that file exists. Treat `quick_validate.py`'s known false-positive ("unexpected key" on documented-valid fields) as accepted; any other failure is real. Structural green does not replace Task 13.
-3. Fix failures before the Task 12 commit is considered done; never waive.
+3. Failures found here are fixed and landed as a focused follow-up commit (e.g. `fix(skills): repair validation-ladder findings`); the Task 12 unit is not done until this ladder is green, including that follow-up. Never waive.
 
 ## Task 16 — Watch (step 15; record, don't act)
 
@@ -498,4 +629,4 @@ No action now beyond recording: the watch reads at the 2026-08-01 ledger re-read
 
 ## Plan notes (self-review + outside view)
 
-Reference class: a pre-registered, blinded ON/OFF evaluation harness plus an always-loaded contract landing, in this repo — the judgment-trust apparatus arc (tests 1–5) and the Era-86 seal are the base rate. What this class reliably required that a spec-only decomposition omits, now built in: pilot channels come back empty/ambiguous/ceilinged and force redesign loops (Task 6.3); first-draft trial prompts leak vocabulary and must be regenerated fresh, never patched (Task 5); harness mechanics (stream-json shape, auth, version drift) eat a preflight (Task 4.1, the version pin, the amendable runner); and canary scripts fail on trailing-newline byte mismatches (Task 10.2's perturb-test). Known bounds, stated rather than certified away: `runner.py`'s `system/init` roster-field name and the Codex probe's CLI flags are written against current versions and may need pre-seal adaptation; the fixture and trial prompts are constitutionally authored at build time (blind-eval discipline), so this plan fixes their required properties, not their text. The base rate is a prior, not a guarantee — this plan is debiased against the apparatus arc's failures, not certified complete.
+Reference class: a pre-registered, blinded ON/OFF evaluation harness plus an always-loaded contract landing, in this repo — the judgment-trust apparatus arc (tests 1–5) and the Era-86 seal are the base rate. What this class reliably required that a spec-only decomposition omits, now built in: pilot channels come back empty/ambiguous/ceilinged and force redesign loops (Task 6.3); first-draft trial prompts leak vocabulary and must be regenerated fresh, never patched (Task 5); harness mechanics (stream-json shape, auth, version drift) eat a preflight (Task 4.1, the version pin, the amendable runner); and canary scripts fail on trailing-newline byte mismatches (Task 10.2's perturb-test). Known bounds, stated rather than certified away: `runner.py`'s `system/init` roster-field name, the `tool_use`/`tool_result` shapes its takes and seam-completion checks parse, and the Codex probe's CLI flags are written against current versions and may need pre-seal adaptation; the fixture and trial prompts are constitutionally authored at build time (blind-eval discipline), so this plan fixes their required properties, not their text. The base rate is a prior, not a guarantee — this plan is debiased against the apparatus arc's failures, not certified complete.
