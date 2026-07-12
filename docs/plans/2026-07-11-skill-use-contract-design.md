@@ -1,6 +1,6 @@
 # Skill-Use Contract + Composition Data Layer — Design
 
-Status: patched per six review rounds — five on 2026-07-11 (three `review-reviewer` adjudications; the fourth pinned the edge-census method, the fifth generated the census as a committed artifact) plus a sixth adjudicated via `review-reviewer` on 2026-07-12, whose delivery objection was refuted by a live probe (recorded under Controlled delivery) and whose confirmed findings land here: a sealed no-overfire calibration gate, environment-surface enumeration, a sealed trial schedule, an effective-load canary, and a data-layer coverage table (see Review Disposition). Awaiting JP's design approval. This document is also the durable evidence artifact the charter Admission will cite.
+Status: patched per six review rounds — five on 2026-07-11 (three `review-reviewer` adjudications; the fourth pinned the edge-census method, the fifth generated the census as a committed artifact) plus a sixth adjudicated via `review-reviewer` on 2026-07-12, whose delivery objection was refuted by a live probe (recorded under Controlled delivery) and whose confirmed findings land here: a sealed no-overfire calibration gate, environment-surface enumeration, a sealed trial schedule, an effective-load canary, and a data-layer coverage table (see Review Disposition). Design approved by JP 2026-07-12. This document is also the durable evidence artifact the charter Admission will cite.
 
 ## Problem
 
