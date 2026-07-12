@@ -172,3 +172,12 @@ The canonical text (byte-exact source for Tasks 4 ON-tree, 7 prereg hash, and 10
 - When a task or its findings span more than one skill's job, compose the skills rather than stretching one past its boundary. Composition may be sequential or concurrent, but it does not itself authorize subagent fan-out.
 - A governing skill's explicit stop, containment, or sequencing instruction overrides these defaults, and delegated agents follow their brief.
 ```
+
+### Task 3 — Codex request-time terrain verification (2026-07-12; Gate 1: VERIFIED, no stop)
+
+Live runtime: `codex-cli 0.144.1`. Two evidence classes attempted; the stronger (source) fired.
+
+- **Probe (weaker class, partial):** `codex exec --sandbox read-only` asking for verbatim skill-use instructions returned a refusal to quote hidden system instructions, while acknowledging "the skill-selection rules" exist and offering a high-level summary. Recorded as suggestive-only: a refusal is not a quote, and a quoted answer could have been confabulated anyway.
+- **Source (stronger class, fired):** `strings` over the installed vendored native binary (`node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex`, npm-installed via mise node 24.11.1) extracts the request-time matching instruction verbatim: `- Trigger rules: If the user names a skill (with '$SkillName' or plain text) OR the task clearly matches a skill's description shown above, you must use that skill for that turn. Multiple mentions mean use them all. Do not carry skills across turns unless re-mentioned.` Corroborating line in the same prompt assets: `- If multiple skills apply, choose the minimal set that covers the request and state the order you'll use them.`
+
+Decision rule met: the current Codex runtime carries a request-time instruction directing it to use an available matching skill. The design's round-3 narrowing (request-time matching left to fixed runtime terrain; the contract owns the mid-task, seam, and composition moments) stands on verified terrain. The Premise fallback is not invoked.
