@@ -500,3 +500,104 @@ Known channel properties recorded pre-seal (from the pilot, so a sealed fail is 
 - It does not authorize editing `schedule.json`, task texts, keys, trees, fixture, or `runner.py` post-seal; `runner.py record` refuses to re-run once sealed — a post-seal hash mismatch can only abort and be reported.
 - It does not extend to Codex behavior (see Honest bound) and does not pre-commit the Task-9 charter consult or JP's ratification either way.
 - Pilot outputs never enter sealed scoring (runner-enforced `pilot-` namespace).
+
+---
+
+## Results appendix (post-seal, append-only; recorded 2026-07-12)
+
+Everything above this section is the sealed preregistration, unchanged. This appendix records outcomes only, per plan Task 8.5. Verdicts are the executor's application of the sealed §8 criteria to `runner.py tally`'s printed per-(probe, arm) counts — executor-applied arithmetic, as disclosed in §10.
+
+### Run record
+
+- First round: 36 sealed trials executed 2026-07-12 ~17:50Z–19:35Z as one detached batch (`runner.py run`); no interruption, no orphan streams. Seam escalation added 4 derived trials (see Escalations); final count 40 trials, all valid.
+- `runner.py verify` green at every checkpoint: post-batch, pre-packets, pre-grading, before each tally. `claude --version` 2.1.207 at launch, at resume, and at grading — no version invalidation.
+- Blind grading per §9: two fresh context-isolated `general-purpose` scorers (one for the 36 first-round packets, one for the 4 extension packets), each receiving the sealed scorer prompt verbatim plus packet JSON bodies as message content only. Packets leak-inspected (mechanical phrase scan plus content read) before delivery; two first-round hits (`n1-c1-r3` "global instructions", `n1-c2-r2` "CLAUDE.md") reference the arm-symmetric Markdown auto-commit rule present in both arms' ambient config, name no skill, and were judged non-leaking.
+- First-round grades digest pinned by `extend` before any extension ran: `9f2a13dc0c4376a64370a1bb4555c875117942a006e862f0bba1ff6b299f6eb4`; tally's guards (grade coverage, extension-derivation equality, digest match) all passed silently before printing.
+
+### Validity log
+
+Zero invalid trials in 40 (invalidity rate 0%). No roster/init mismatches, no sentinel hits, no seam rows with incomplete `seam_skill`, no timeouts, no CLI version change, no post-batch verify failure. No replacement rows were needed for invalidity.
+
+### Escalations
+
+One escalation, mechanically derived by tally: the seam probe's ON arm split 2-1 wrong-way at n=3 (ON 1/3 vs OFF 0/3 — §8 defines the trigger at "either arm splits 2-1"), extending both arms to 5. `runner.py extend` derived `seam-c1-r4`, `seam-c1-r5`, `seam-c2-r4`, `seam-c2-r5`; all four ran valid; the extension scorer was fresh and graded only those four. No other probe escalated (comp 3-0/3-0, mid 0-3/0-3, negatives 0 overfire everywhere).
+
+### Raw per-trial grades (offers, from `grades.json`) and mechanical takes (from `results-index.json`)
+
+| trial | tree | arm | takes (mechanical) | offers (scorer) |
+|---|---|---|---|---|
+| comp-c1-r1 | A | OFF | authorization-design, injection-safe-inputs | — |
+| comp-c1-r2 | A | OFF | authorization-design, injection-safe-inputs | — |
+| comp-c1-r3 | A | OFF | authorization-design, injection-safe-inputs | — |
+| comp-c2-r1 | B | ON | authorization-design, injection-safe-inputs | — |
+| comp-c2-r2 | B | ON | authorization-design, injection-safe-inputs | — |
+| comp-c2-r3 | B | ON | authorization-design, injection-safe-inputs | — |
+| mid-c1-r1 | A | OFF | — | — |
+| mid-c1-r2 | A | OFF | — | — |
+| mid-c1-r3 | A | OFF | — | — |
+| mid-c2-r1 | B | ON | simplify-code | — |
+| mid-c2-r2 | B | ON | simplify-code | — |
+| mid-c2-r3 | B | ON | — | — |
+| n1-c1-r1 | A | OFF | — | — |
+| n1-c1-r2 | A | OFF | — | — |
+| n1-c1-r3 | A | OFF | — | — |
+| n1-c2-r1 | B | ON | — | — |
+| n1-c2-r2 | B | ON | — | — |
+| n1-c2-r3 | B | ON | — | — |
+| n2-c1-r1 | B | ON | diagnose | tdd |
+| n2-c1-r2 | B | ON | diagnose | — |
+| n2-c1-r3 | B | ON | diagnose | tdd |
+| n2-c2-r1 | A | OFF | diagnose | — |
+| n2-c2-r2 | A | OFF | diagnose | — |
+| n2-c2-r3 | A | OFF | diagnose | — |
+| n3-c1-r1 | A | OFF | making-recommendations | — |
+| n3-c1-r2 | A | OFF | — | — |
+| n3-c1-r3 | A | OFF | — | — |
+| n3-c2-r1 | B | ON | making-recommendations | — |
+| n3-c2-r2 | B | ON | making-recommendations | — |
+| n3-c2-r3 | B | ON | making-recommendations | — |
+| seam-c1-r1 | A | OFF | diagnose | — |
+| seam-c1-r2 | A | OFF | diagnose | — |
+| seam-c1-r3 | A | OFF | diagnose | — |
+| seam-c1-r4 | A | OFF | diagnose | — |
+| seam-c1-r5 | A | OFF | diagnose | — |
+| seam-c2-r1 | B | ON | diagnose | — |
+| seam-c2-r2 | B | ON | diagnose, tdd | — |
+| seam-c2-r3 | B | ON | diagnose | — |
+| seam-c2-r4 | B | ON | diagnose | — |
+| seam-c2-r5 | B | ON | diagnose | — |
+
+### Unblinded per-arm results (tally verbatim; arm map `tree-A` = OFF, `tree-B` = ON)
+
+| probe | arm | n | pass | overfire |
+|---|---|---|---|---|
+| comp | OFF | 3 | 3 | 0 |
+| comp | ON | 3 | 3 | 0 |
+| mid | OFF | 3 | 0 | 0 |
+| mid | ON | 3 | 0 | 0 |
+| n1 | OFF | 3 | 0 | 0 |
+| n1 | ON | 3 | 0 | 0 |
+| n2 | OFF | 3 | 0 | 0 |
+| n2 | ON | 3 | 0 | 0 |
+| n3 | OFF | 3 | 0 | 0 |
+| n3 | ON | 3 | 0 | 0 |
+| seam | OFF | 5 | 0 | 0 |
+| seam | ON | 5 | 1 | 0 |
+
+### Verdict per probe (sealed §8 criteria applied to the counts above)
+
+- **comp — inconclusive-by-ceiling.** ON 3/3 meets ≥2/3 but does not strictly exceed OFF 3/3; the sealed ceiling rule reads this as inconclusive, never a pass. The composed task induced full composition in every trial of both arms — the OFF base rate saturated at n=3 (the pilot's OFF observation was 0-of-1 full composition, so the sealed run's ceiling was not predicted, it emerged).
+- **mid — FAIL (true silence).** ON 0/3, OFF 0/3 against the sealed key (characterization-tests take). Per §13's pre-registered reading this returns design bullet 1 honestly: the confrontation moment was presented (ON trials modified the untested module; two ON trials took `simplify-code` for the main task) and the mid-task re-check clause produced zero target fires.
+- **seam — FAIL post-escalation.** ON 1/5 vs OFF 0/5; post-escalation pass requires ≥4/5 and strictly exceeding. Per §13 this returns design bullet 2 with the decline-hatch reading attached: the seeded `diagnose` exit licenses inline handling, so a contract-faithful ON agent may decline the seam handoff via the governing-skill hatch — every ON trial diagnosed and then fixed inline (with red-verified regression tests) rather than handing off to `tdd`; one ON trial (`seam-c2-r2`) took `tdd` in-session.
+- **Calibration gate — HOLDS.** ON overfire = OFF overfire = 0 on n1, n2, and n3 at final counts. No contract clause is returned by the gate.
+
+### Aggregation and outcome routing
+
+GO required all three positive probes to pass and the gate to hold. Result: zero of three positive probes pass (one ceiling-inconclusive, two honest fails). Per §8 the affected clauses and the combined block return for redesign: mid returns design bullet 1 (mid-task re-check), seam returns design bullet 2 (seam handoff with authorization), comp's clause is returned with a ceiling-inconclusive (not negative) reading. The calibration result and negative-probe data are retained as bounded evidence: the contract produced no measurable overfire on any negative probe. Per plan Task 8.6 this is a NOT-GO-shaped result: execution stops here and reports to JP; Task 9 does not proceed unless JP directs otherwise.
+
+### Bounded interpretation (Claude-side, same-model-scored)
+
+- Scope bounds per §13: Claude-side behavior only (`claude-sonnet-5`, CLI 2.1.207, `bypassPermissions`); same-model-scored (Claude-graded-Claude, no cross-model arm, no human judge); n=3–5 per arm per probe. This evidence is weighted accordingly and certifies nothing about Codex behavior.
+- What the data supports: at this n, on these channels, the contract produced no detectable positive effect — the two channels built to detect its distinctive value (mid-task re-check, seam handoff) fired at or near zero in ON, and the composition channel was ceilinged by task demand in both arms. Symmetrically, the contract produced zero overfire cost on all three negative probes.
+- Observation outside the sealed keys (bounded, no gate effect): the two `tdd` offers in the whole run both occurred in n2's ON arm (`n2-c1-r1`, `n2-c1-r3` — explain-only diagnosis task, offer phrased as a next-step handoff). n2's sealed key counts code-mutating takes only, so these are not overfire; they are noted here as the only arm-asymmetric offer signal observed anywhere in the run.
+- Honest nulls stand as sealed: a mid fail was pre-registered as a legitimate reading of design bullet 1 ("moment presented ≠ take inducible"), and the seam fail carries the pre-registered decline-hatch reading rather than an instrument-error claim. Neither is reinterpreted post hoc.
