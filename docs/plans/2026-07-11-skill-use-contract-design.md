@@ -162,6 +162,14 @@ Both wording gates run on the design §1 draft; both passed with zero changes. T
 - `agent-facing-design` gate: pass. Each bullet read as context (provoking defaults with the semantic call retained by the agent), no smuggled machinery (no fields, statuses, stages, validators, routers, classifiers, or scores). The named flag held: "Composition may be sequential or concurrent" is immediately bounded by "does not itself authorize subagent fan-out" — fan-out authority must come from the request or governing skill, and the block grants none; bullet 4's "delegated agents follow their brief" closes the delegated-context reading. Verdict scope: wording-level only; landing authority stays with Task 9.
 - `writing-principles` gate: pass, review-only, no edits. Concrete triggers and actions throughout; the open terms ("plausibly fits", "authorize continuation") are judgment prose whose open space is the design. The three prohibitions are each the acceptable Negated form — hard guardrails paired with their positive targets stated first in the same bullet. Bullet 4 resolves the Conflicting lens by naming the precedence order. No duplication with either target file.
 
+### Task 8 — Sealed probe results (2026-07-12)
+
+Sealed run complete: 40/40 valid trials (36 first-round + 4 seam escalation rows), zero invalid, `runner.py verify` green at every checkpoint, two fresh context-isolated blind scorers. Result **NOT-GO** under prereg §8: comp inconclusive-by-ceiling (3/3 both arms — task demand saturated the channel), mid true-silence fail (0/3 both arms against the sealed key; design bullet 1's pre-registered reading), seam post-escalation fail (ON 1/5 vs OFF 0/5; the §13 decline-hatch reading), calibration gate holds (zero ON overfire on all three negatives). Full record: the results appendix below the prereg seal (`967d892`; bounded addendum `533d657`).
+
+### Gate 2 — JP disposition (2026-07-12)
+
+The Task-9 Admission consult never ran: per plan Task 8.6 the NOT-GO stopped the landing path, and JP directed park-not-redesign for both decisions (recommendation Option 3): Decision A and Decision B parked with reopen triggers (ledger entry + Parks line, `docs/agents/contract-decisions.md`, 2026-07-12); the §2 data layer built as planned (ten composition-exit edits, commit `a0d3437`; review-family bumped to 0.9.0 source-complete, Class-B publish deferred until JP's ask); Tasks 10 and 11 (global files, canary script, convention line) not executed — their specs remain in the plan for any future reopen. The run's mechanism finding carried into the park entry: governing-skill body text was demonstrably read and obeyed where ambient contract text was inert.
+
 The canonical text (byte-exact source for Tasks 4 ON-tree, 7 prereg hash, and 10 landing + canary CANON):
 
 ```markdown
