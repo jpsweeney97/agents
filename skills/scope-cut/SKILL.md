@@ -7,16 +7,7 @@ description: "Use when an already-shaped scope is too big to ship under a bindin
 
 Take an already-shaped scope that is too big for its constraint and cut it down to a defensible minimal slice — keeping what the goal cannot survive without, and deferring the rest without dropping it. Invocation: `/scope-cut` or `$scope-cut`.
 
-scope-cut is the library's one *constraint-driven descope* skill. It does not rank rival options, it does not critique a design, and it does not widen anything — it partitions a single chosen scope into keep / defer / cut against a binding constraint, and hands back the kept slice plus a ledger of everything it removes. Its debiasing engine is naming the constraint *first*: an explicit budget — a deadline, a risk ceiling, a capacity limit — turns "what do we cut?" from a vibes call into a measurable one, and forces the cut that "let's just keep all of it" quietly refuses.
-
-## Boundaries with neighbors
-
-scope-cut is defined by inverting its nearest neighbors:
-
-- `making-recommendations` picks **one winner** among rival options that optimize for the same outcome, and its own `options not comparable` exit bails when the items are not competing for one slot. scope-cut partitions **complementary pieces of one scope** — a must-have and a deferrable both belong, just in different waves. Partition-many, not pick-one.
-- `working-slice-review` reviews a design *draft* for overbuilding and emits a **read-only, non-binding nudge** keyed to the *learning* loop ("the smallest slice that would teach us whether this direction is right"). scope-cut **drives the cut** on an already-shaped scope keyed to a *binding constraint* (time / risk / capacity) and emits an actionable partition plus a deferral ledger. Learning critique vs constraint decision; read-only nudge vs the cut itself.
-- `ideate` widens the *solution* space; scope-cut narrows a *chosen* one. Opposite direction.
-- `to-issues` slices an already-agreed plan into trackable issues, and `next-steps` sequences supplied findings into a dependency-ordered plan. scope-cut decides what is **in the slice at all**, before either; its deferred list and `next-steps`'s Parked section share an output *shape*, never the job.
+scope-cut does not rank rival options, critique a design, or widen anything — it partitions a single chosen scope into keep / defer / cut against a binding constraint, and hands back the kept slice plus a ledger of everything it removes. Its debiasing engine is naming the constraint *first*: an explicit budget — a deadline, a risk ceiling, a capacity limit — turns "what do we cut?" from a vibes call into a measurable one, and forces the cut that "let's just keep all of it" quietly refuses.
 
 ## The moves — a rhythm, not a fill-in template
 

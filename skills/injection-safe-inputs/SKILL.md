@@ -52,11 +52,11 @@ Never assert a block or pass outcome you did not observe; report only what the e
 
 ## Fences
 
-- **vs `regex-craft`.** It hardens one pattern, engine-first, ending in an executed regex proof; this designs one boundary's handling across every sink. Compose: a validation pattern this skill specifies is handed there for hardening, not re-derived here.
-- **vs `red-team`.** It models a motivated adversary across a whole system and renders no verdict; this runs a known-class design procedure on one boundary and ends in one. Compose them: red-team's attack paths make excellent must-block rows.
-- **vs `implementation-review`** (when `review-family:implementation-review` is available). It reviews a completed change against a spec plus a diff; this designs or vets one boundary's input handling, before or without a diff.
-- **vs repo-wide sweeps.** A vulnerability sweep across a codebase is the parked security-audit — or the bundled `security-review` where the runtime ships one — and a scored debt backlog is `tech-debt-scan`'s job. A sweep finding is a valid trigger; the sweep is not this skill.
-- **LLM prompt injection is deliberately unowned.** Untrusted text reaching a model's context is a real boundary this skill does not cover, and no named neighbor covers it either — say so and stop; do not stretch the sink table over it or invent a routing target.
+- Hardening one validation pattern → `regex-craft`; a pattern this skill specifies is handed there, not re-derived here.
+- Whole-system attacker modeling → `red-team`; its attack paths make good must-block rows here.
+- Reviewing a completed change against a spec plus a diff → `implementation-review` where available.
+- A repo-wide vulnerability sweep → the parked security-audit or a bundled `security-review`; a scored debt backlog → `tech-debt-scan`.
+- LLM prompt injection is deliberately unowned: untrusted text reaching a model's context is a real boundary neither this skill nor any named neighbor covers — say so and stop; do not stretch the sink table over it.
 
 ## Done when
 

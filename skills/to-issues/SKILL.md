@@ -40,7 +40,7 @@ Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an
 - Prefer many thin slices over few thick ones
 - Any prefactoring should be done first </vertical-slice-rules>
 
-**Wide refactors are the exception to vertical slicing.** A *wide refactor* is one mechanical change — rename a column, retype a shared symbol — whose blast radius fans across the whole codebase, so a single edit breaks call sites everywhere at once and no vertical slice can land green. Don't force it into a tracer bullet: recognize it and route it to the lane that owns the expand–contract machinery — `/migration-campaign` (or `$migration-campaign`) drives the site-by-site application, with `contract-change-propagation` to map the blast radius first and `migration-safety` for a live schema or data change. Slice the *rest* of the work here as normal.
+**Wide refactors are the exception to vertical slicing.** One mechanical change whose blast radius fans across the whole codebase (a column rename, a shared-symbol retype) cannot land green as a vertical slice — don't force it into a tracer bullet. Route it instead: `/migration-campaign` (or `$migration-campaign`) for the site-by-site application, `contract-change-propagation` to map the blast radius first, `migration-safety` for a live schema or data change. Slice the *rest* of the work here as normal.
 
 ### 4. Quiz the user
 

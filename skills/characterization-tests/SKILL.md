@@ -29,10 +29,10 @@ The committed net — tests, any golden files, the capture harness — plus a sh
 
 ## Fences
 
-- **vs `tdd`** (the inversion, named). `tdd`'s test discipline forbids expected values derived from the code under test — for NEW behavior, where the claim is correctness and the expectation must come from an independent source of truth. Characterization deliberately inverts this for EXISTING behavior: the running code IS the only authority on what the system currently does, and a characterization test asserts "unchanged", never "correct" — so deriving expectations from execution is not the tautology `tdd` forbids; it is the point. Both rules are right in their lanes; the label rule above keeps a pinned bug from ever reading as a spec.
-- **vs `test-trust-audit`** (when available). It audits an existing suite's honesty; this authors a net where no suite exists. Compose: after this net lands, that audit is how a later reader checks the net hasn't rotted.
-- **vs `verify` / `behavior-smoke-test`** (where available). Those prove one change once; this leaves a durable net that keeps detecting.
-- **vs `acceptance-map`.** It maps INTENDED behavior from a settled spec; this pins ACTUAL behavior from execution — bugs included.
+- New behavior, with expectations from an independent source of truth → `tdd`. Characterization deliberately inverts that rule for existing behavior: the running code is the only authority, and the net asserts "unchanged", never "correct" — execution-derived expectations are the point here, not the tautology `tdd` forbids.
+- Auditing an existing suite's honesty → `test-trust-audit` where available; once this net lands, that audit is how a later reader checks it hasn't rotted.
+- Proving one change once → `verify` / `behavior-smoke-test` where available; this leaves a durable net.
+- Mapping INTENDED behavior from a settled spec → `acceptance-map`; this pins ACTUAL behavior from execution, bugs included.
 
 ## Done when
 

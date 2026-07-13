@@ -72,6 +72,6 @@ The signature ledger is the breadcrumb that gives `diagnose` a warm start.
 
 ## Fence
 
-- vs `closeout-check` (load-bearing): the boundary is work-product, not topic. `closeout-check` owns the done-verdict and the single final commit; keep-green produces neither. `closeout-check`'s repair of change-caused failures is unbounded (no cap, no oscillation guard); keep-green is exactly that missing bounded anti-thrash backstop — the engine `closeout-check` (and `execute-plan`, `migration-campaign`) can delegate to before rendering the verdict and committing. keep-green says *the signal is green*; `closeout-check` says *the work is done* and lands it.
-- vs `tdd`: `tdd`'s red is authored to create new behavior; keep-green's red is incidental on a change already made. keep-green never writes a new test to specify behavior; if a fix exposes missing coverage it reports it as a follow-up.
-- vs `diagnose`: keep-green handles failures with an obvious, confident, change-linked cause. The instant a failure is mysterious, intermittent, or cross-component it escalates — as a loop exit carrying the ledger — rather than becoming `diagnose`.
+- Done-verdict and the single final commit → `closeout-check`; it (and `execute-plan`, `migration-campaign`) can delegate bounded back-to-green repair here before landing.
+- Authoring a test to specify new behavior → `tdd`; keep-green never writes one, and reports coverage a fix exposed as missing as a follow-up.
+- Mysterious, intermittent, or cross-component failures → `diagnose`, via the Escalate stop with the ledger.

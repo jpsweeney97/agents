@@ -64,8 +64,7 @@ Before the first write, run `git status`; the genealogy edit touches an existing
 
 ## Fence
 
-- vs `grill-with-docs` (the closest sibling — it writes the same `docs/adr/` files): it *offers* an ADR as a by-product mid-grilling and does no genealogy. decision-record is the standalone owner of capture-from-any-source *and* supersession maintenance, reusing its format file. A reversal, or capture outside a grilling session, is decision-record's.
-- vs `postmortem`: it captures an *incident* (what went wrong, dated action items). decision-record captures a *decision* (a choice, its rationale, the rejected alternatives) — no incident.
-- vs `research-capture`: it lands *findings* with provenance; decision-record lands a *decision*. Shared provenance discipline, different product.
-- vs `making-recommendations` / `design-exploration` / `ideate`: they *produce* a decision (rank, shape, or widen, then pick). decision-record *captures* one already made; it does not decide.
-- vs `to-prd` and `save-handoff`: a different artifact and destination. The repo's own `docs/agents/contract-decisions.md` is a charter-specific single-log ledger — explicitly not the model for this general skill.
+- An ADR offered as a by-product mid-grilling → `grill-with-docs` (it writes the same `docs/adr/` files, no genealogy); standalone capture from any source, and all supersession maintenance, → decision-record.
+- An incident retrospective with dated action items → `postmortem`; this captures a decision, not an incident.
+- Findings with provenance → `research-capture`; this lands a decision.
+- A source showing deliberation but no settled choice routes to the deciding skills per "Confirm a decision exists" above.

@@ -7,7 +7,7 @@ description: "Use when production is breaking right now — an unplanned live in
 
 Production is breaking right now. The one imperative: **stabilize before you understand why.** Invocation: `/incident-response` or `$incident-response`.
 
-Your trained reflex — and your operator's — is to find the cause first. That reflex is correct in `diagnose` ("Do not proceed to Phase 2 until you have a loop you believe in", `diagnose:51`) and wrong here. Under fire, every minute spent understanding is a minute of harm you could have stopped — and you do not need the cause to stop the bleeding. The standing forcing question everything below answers: **what is the fastest reversible action that shrinks the harm right now?**
+Your trained reflex — and your operator's — is to find the cause first. That reflex is `diagnose`'s law and wrong here. Under fire, every minute spent understanding is a minute of harm you could have stopped — and you do not need the cause to stop the bleeding. The standing forcing question everything below answers: **what is the fastest reversible action that shrinks the harm right now?**
 
 ## Advisory-not-actor (read this before "act now")
 
@@ -25,13 +25,13 @@ An AI agent usually cannot read prod and must never act on it. You **advise the 
 
 ## Move 2 — Rollback vs forward (the sharpest call)
 
-The most common mitigation is "undo the recent change," and the hard call is rollback or fix-forward. Make it as a judgment, in `runbook-authoring`'s **graded / multi-PONR vocabulary by reference** (`runbook-authoring:35`): is there a clean rollback? a lossy-but-available recovery, at what named cost? or are you past a point of no return where forward is the only path? Name each point of no return; never assume there is one. Cause-unknown — the common entry state — argues for rollback: rollback tolerates an unknown cause, fix-forward needs it.
+The most common mitigation is "undo the recent change," and the hard call is rollback or fix-forward. Make it as a judgment, in `runbook-authoring`'s **graded / multi-PONR vocabulary by reference**: is there a clean rollback? a lossy-but-available recovery, at what named cost? or are you past a point of no return where forward is the only path? Name each point of no return; never assume there is one. Cause-unknown — the common entry state — argues for rollback: rollback tolerates an unknown cause, fix-forward needs it.
 
-Rollback is not automatically safe. You may be in this skill precisely because a planned rollback already harmed prod (`deploy-plan:34`); when you arrived that way you are mid-decision — log the harmful rollback as a fresh blast-radius input and **re-run this call** (it is now discredited and likely past its safe PONR). The forks compose; there is no separate "we made it worse" branch. If a rollback runbook exists, **follow it advisory-to-the-operator, step by step — never re-author it under fire** (`runbook-authoring:10`). If none exists, do not stop to write one now; that absence is an input pushing toward forward-fix or escalation, and a `postmortem` action-item to note. Record the call as a `DECISION` entry carrying the PONR map and a one-line reason.
+Rollback is not automatically safe. You may be in this skill precisely because a planned rollback already harmed prod; when you arrived that way you are mid-decision — log the harmful rollback as a fresh blast-radius input and **re-run this call** (it is now discredited and likely past its safe PONR). The forks compose; there is no separate "we made it worse" branch. If a rollback runbook exists, **follow it advisory-to-the-operator, step by step — never re-author it under fire**. If none exists, do not stop to write one now; that absence is an input pushing toward forward-fix or escalation, and a `postmortem` action-item to note. Record the call as a `DECISION` entry carrying the PONR map and a one-line reason.
 
 ## Move 3 — The live timeline (kept as you go, subordinate)
 
-You are the scribe while the operator firefights: if you do not log, no one does — so record **continuously**. But the record never outranks mitigation: **do not stop the bleeding to perfect it.** The timeline is a raw running jot, not a reconciled record; `postmortem` reconciles it (`postmortem:35`). The format below is deliberately cheap, so "record continuously" and "don't stop to perfect it" stop contradicting each other.
+You are the scribe while the operator firefights: if you do not log, no one does — so record **continuously**. But the record never outranks mitigation: **do not stop the bleeding to perfect it.** The timeline is a raw running jot, not a reconciled record; `postmortem` reconciles it. The format below is deliberately cheap, so "record continuously" and "don't stop to perfect it" stop contradicting each other.
 
 ## Move 4 — Comms cadence (thin, advisory)
 
@@ -56,7 +56,7 @@ Five tags — the proof-law made mechanical, collapsed to what is writable one-h
 - `DECISION` — a hard call (the severity read, mitigate-vs-investigate, rollback-vs-forward, declared-stabilized) with the inputs that drove it.
 - `ADVISED` — what you recommended. **There is no action-taken tag** — the agent never acts, so the vocabulary cannot express it.
 
-Firm rules (each is load-bearing and costs ~nothing under fire): one line per event, append-only, never back-edited; an absolute timestamp + timezone on every line (`postmortem:31`); a provenance tag on every fact line by **one default rule, not per-line adjudication** — *write `TOLD` unless you literally read it yourself (then `OBSERVED`); a number you cannot read is `UNVERIFIED`*; **facts only, no causes** ("checkout returning 5xx" is a fact; "…because the migration ran" is a cause — causes are `postmortem` Beat-2, `postmortem:39`). Attribution (who/where) is natural content of a `TOLD` line when you have it, not a gated token; stitching each `ADVISED` to its outcome is reconciliation `postmortem` owns, not bookkeeping you do while prod burns. The provoked part is *what is worth recording* — state changes, decisions, what you observed or were told; do not narrate keystrokes.
+Firm rules (each is load-bearing and costs ~nothing under fire): one line per event, append-only, never back-edited; an absolute timestamp + timezone on every line; a provenance tag on every fact line by **one default rule, not per-line adjudication** — *write `TOLD` unless you literally read it yourself (then `OBSERVED`); a number you cannot read is `UNVERIFIED`*; **facts only, no causes** ("checkout returning 5xx" is a fact; "…because the migration ran" is a cause — causes are `postmortem` Beat-2). Attribution (who/where) is natural content of a `TOLD` line when you have it, not a gated token; stitching each `ADVISED` to its outcome is reconciliation `postmortem` owns, not bookkeeping you do while prod burns. The provoked part is *what is worth recording* — state changes, decisions, what you observed or were told; do not narrate keystrokes.
 
 ```
 ## Incident checkout-5xx — live timeline — opened 14:02:00 UTC
@@ -84,16 +84,16 @@ At stabilized the skill **stops**: it does not hunt cause, retrospect, or author
 
 ## Hand-offs / seams
 
-- **Entry.** Prod is burning. Sometimes arrives via `deploy-plan`'s abort path — a planned rollback that harmed prod (`deploy-plan:34`); handle it by re-running the rollback-vs-forward call (Move 2), no special branch.
-- **Cause still unknown at stabilized → `diagnose`.** Hand over the live timeline plus the mitigated-but-fragile state as the starting symptom. Now that prod is not burning, cause-first is correct again — `diagnose` builds the loop this skill deliberately did not chase (`diagnose:51`).
-- **The retrospective → `postmortem`.** The live timeline *is* postmortem's Beat-1 raw facts — already timestamped, observed-or-told, `UNVERIFIED`-labeled, and cause-free; it reconciles there, not during the fire. For a code bug with unknown cause, `diagnose` runs first, then `postmortem` (`postmortem:72`); a non-code incident can go straight to `postmortem`.
+- **Entry.** Prod is burning. Sometimes arrives via `deploy-plan`'s abort path — a planned rollback that harmed prod; handle it by re-running the rollback-vs-forward call (Move 2), no special branch.
+- **Cause still unknown at stabilized → `diagnose`.** Hand over the live timeline plus the mitigated-but-fragile state as the starting symptom; now that prod is not burning, cause-first is correct again.
+- **The retrospective → `postmortem`.** The live timeline *is* postmortem's Beat-1 raw facts — already timestamped, observed-or-told, `UNVERIFIED`-labeled, and cause-free; it reconciles there, not during the fire. For a code bug with unknown cause, `diagnose` runs first, then `postmortem`; a non-code incident can go straight to `postmortem`.
 
 ## Fences
 
-- **vs `diagnose`.** Loop-first / cause-first (`diagnose:51`) — the opposite reflex. `incident-response` mitigates *before* understanding and exits *into* diagnose once stabilized with the cause still unknown.
-- **vs `postmortem`.** It refuses the burning moment ("if it is still burning, this is the wrong moment", `postmortem:26`); `incident-response` owns exactly that moment, and its live timeline becomes postmortem's Beat-1 facts.
-- **vs `runbook-authoring`.** It authors a procedure and never runs it (`runbook-authoring:10`); `incident-response` *follows* an existing rollback runbook under fire, advisory-to-operator, and never re-authors it.
-- **vs `deploy-plan`.** The planned, pre-push gauge and its bake-read; `incident-response` is the unplanned live-fire moment. A planned abort that harms prod hands off here.
+- Cause-first investigation → `diagnose`; this skill exits into it at stabilized.
+- The retrospective, after the fire → `postmortem`; the live timeline is its Beat-1 input.
+- Authoring a procedure → `runbook-authoring`; under fire, follow the existing runbook (Move 2), never re-author it.
+- A planned ship's gauge and bake-read → `deploy-plan`; a planned abort that harms prod enters here.
 
 ## Done when
 

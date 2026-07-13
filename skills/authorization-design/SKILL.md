@@ -50,12 +50,12 @@ This is the library-wide evidence-before-claims floor specialized to access beha
 
 ## Fences
 
-- **vs authentication.** Login flows, sessions, tokens, MFA, and password policy are out of scope — this skill starts after identity is established and asks only what that identity may do. Authentication design is a neighboring job this skill does not own; say so and hand it back rather than absorbing it.
-- **vs `red-team`.** It models a motivated adversary across a whole system and renders no verdict; this runs a known-class design procedure on one surface and ends in one. Compose them: red-team's attack paths make excellent must-deny rows.
-- **vs `system-design-review`** (when `review-family:system-design-review` is available). It reviews trust boundaries, data authority, and operational ownership at architecture altitude; this designs one surface's decision table below that altitude. An architecture review that flags a fuzzy trust boundary hands the named surface here.
-- **vs `implementation-review`** (when `review-family:implementation-review` is available). It reviews a completed change against a spec plus a diff; this designs or vets one surface's access model, before or without a diff.
-- **vs repo-wide sweeps.** A vulnerability sweep across a codebase is the parked security-audit — or the bundled `security-review` where the runtime ships one — and a scored debt backlog is `tech-debt-scan`'s job. A sweep finding is a valid trigger; the sweep is not this skill.
-- **vs `contract-change-propagation`.** Changing an authorization contract that existing consumers already depend on is a blast-radius job: design the new model here, map the consumers and the rollout there.
+- Login, session, token, MFA, and password mechanics are out of scope — this skill starts after identity is established; hand authentication design back rather than absorbing it.
+- Whole-system attacker modeling → `red-team`; its attack paths make good must-deny rows here.
+- Architecture-altitude review of trust boundaries and data authority → `system-design-review` where available; a review that flags a fuzzy boundary hands the named surface here.
+- Reviewing a completed change against a spec plus a diff → `implementation-review` where available.
+- A repo-wide vulnerability sweep → the parked security-audit or a bundled `security-review`; a scored debt backlog → `tech-debt-scan`.
+- Changing an authorization contract existing consumers depend on → design the new model here, map consumers and rollout via `contract-change-propagation`.
 
 ## Done when
 

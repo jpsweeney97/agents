@@ -45,11 +45,11 @@ This skill authors the plan; it cannot read the live database. It cannot confirm
 
 ## Fences
 
-- **vs `migration-campaign`** (the name collision — check this first). Same word, opposite job. `migration-campaign` drives one mechanical *code* edit (codemod, rename, config-key or path change) across many call sites with a burndown; it carries zero DB/DDL/lock content. This skill sequences one *database* schema/data change against a live system. If the prompt is about applying a code change across many files, it is the other skill.
-- **vs `contract-change-propagation`.** It maps an interface change's blast radius — which consumers break, what semver — read-only, at the call-site altitude, and stops at the plan; it has none of the DB-operational layer. When the migration also changes an interface external code reads, hand the consumer-mapping and the logical expand-contract-for-consumers sequencing to it and reference it; own only the DB-execution safety here. Do not re-derive its consumer/semver work.
-- **vs `deploy-plan`.** Composes, does not fold. `deploy-plan` owns the domain-agnostic go/no-go gauge, abort thresholds, and bake window for a ship; this skill designs the migration sequence that ship carries. A risky schema migration uses both — this for the safe sequence, `deploy-plan` for the go/no-go and bake.
-- **vs `runbook-authoring`.** Complementary. `runbook-authoring` authors a durable, reusable operational runbook (domain-agnostic document authoring); this supplies the schema-migration safety content. For a durable migration/rollback runbook, this skill's plan feeds it. Reuse its graded / multi-PONR reversibility vocabulary by reference; never re-derive the taxonomy.
-- **vs `premortem`.** `premortem` opens a wide field of accidental failure-causes with tripwires and renders no verdict; this runs a specific known-hazard procedure with a prescribed safe sequence. Different shape and altitude — though premorteming a migration is a fine complement.
+- One mechanical *code* edit swept across many call sites → `migration-campaign` (the name collision — zero DB/DDL content there).
+- The migration also changes an interface external code reads → hand the consumer-mapping and semver work to `contract-change-propagation`; own only the DB-execution safety here.
+- The ship's go/no-go gauge, abort thresholds, and bake window → `deploy-plan`; a risky migration uses both.
+- A durable, reusable migration/rollback runbook → `runbook-authoring`, fed by this skill's plan.
+- Wide accidental failure-imagination with tripwires and no verdict → `premortem` — a fine complement, not this procedure.
 
 ## Done when
 

@@ -45,11 +45,11 @@ No score, no grade, no "trustworthy"/"untrustworthy" verdict — never a trust s
 
 ## Fences
 
-- **vs `keep-green`.** A red suite goes there — it drives a just-broken gate back to green and never asks whether green is honest. This skill takes only green suites and asks exactly that.
-- **vs `tdd`.** It prevents these defects at authoring time; this detects them in the suite that already exists. Compose: every authoring-shaped fix this skill finds is `tdd`'s work, not this skill's.
-- **vs `implementation-review`** (when `review-family:implementation-review` is available). It reviews a completed change against a spec plus a diff; this reads a standing suite with no change in flight.
-- **vs `tech-debt-scan`.** It produces a scored, ranked backlog across a repo; this is one suite, evidence-led, deliberately unscored.
-- **vs coverage tooling.** This reads what coverage points at; it never runs coverage to certify a number, and a coverage percentage is never a finding by itself.
+- Red suite → `keep-green`; this skill takes only green suites.
+- Authoring-time prevention, and every authoring-shaped fix found here → `tdd`.
+- A completed change against spec plus diff → `review-family:implementation-review` where available.
+- A scored, ranked repo-wide backlog → `tech-debt-scan`; this is one suite, deliberately unscored.
+- Coverage tooling: this reads what coverage points at, never certifies a number — a percentage is never a finding by itself.
 
 ## Done when
 

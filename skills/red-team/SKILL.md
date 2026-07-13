@@ -7,17 +7,7 @@ description: "Use when a system, feature, plan, or asset could be attacked by a 
 
 Become the adversary who wants this to fail, and find the cheapest path to their payoff — so the abuse surface invisible from the builder's chair gets named while it can still be hardened. Invocation: `/red-team` or `$red-team`.
 
-red-team is the library's one *adversarial-intent* skill. You built it, so you reason from intended use and cannot see the goal-directed attacker; red-team forces the optimizing-adversary posture and asks not "is this boundary well-placed" but "here is the adversary, and here is the cheapest path through it to a payoff." Its product is a ranked field of attack paths, each turned toward a raise-cost mitigation, handed off without a verdict. It is **not a scan**: it reasons about adversary intent and attack economics; it never greps secrets or inspects a repo.
-
-## Boundaries with neighbors
-
-red-team is defined by inverting its nearest neighbors:
-
-- `system-design-review` screens trust/privilege/sensitive-data boundaries as an architecture-quality sentinel; it does not cover threat-modeling or attack-path enumeration (`system-design-review:30-32,42`). red-team owns exactly that gap. SDR feeds red-team.
-- `implementation-review` checks trust boundaries and supply-chain in *written code against a spec* — backward-looking, a diff. red-team is forward, design-time abuse modeling, before or beyond the code.
-- `security-audit` (a dormant live park) and the built-in `/security-review` (a branch-diff scan) *scan* a repo for vulnerabilities and secrets. red-team is **non-scan** abuse-modeling. If a real scan is what's needed, name that lane and stop.
-- `scrutinize` attacks an *artifact* for flaws and ends in a verdict. red-team models a real-world *adversary* attacking a system and ends in ranked paths, no verdict.
-- `premortem` models an *indifferent universe* (accident, drift, bad luck); red-team models a *motivated adversary* choosing the cheapest attack. Different debiaser, different mitigation class (raise-cost, not robustness).
+You built it, so you reason from intended use and cannot see the goal-directed attacker; red-team forces the optimizing-adversary posture and asks not "is this boundary well-placed" but "here is the adversary, and here is the cheapest path through it to a payoff." Its product is a ranked field of attack paths, each turned toward a raise-cost mitigation, handed off without a verdict. It is **not a scan**: it reasons about adversary intent and attack economics; it never greps secrets or inspects a repo.
 
 ## The moves — a rhythm, not a fill-in template
 
@@ -42,4 +32,5 @@ Stop when another pass over the in-scope adversaries yields nothing mechanism-di
 - There is no plausible motivated adversary — the thing fails by accident, not attack → `premortem`.
 - You want a secret/dependency/diff *scan* of a repo → `/security-review` or the `security-audit` park.
 - You want an artifact reviewed for flaws with a readiness verdict → `scrutinize`.
+- You want written code reviewed against a spec and a diff → `implementation-review`.
 - You want to know whether a trust boundary is well-placed (architecture quality, not attack paths) → `system-design-review`.

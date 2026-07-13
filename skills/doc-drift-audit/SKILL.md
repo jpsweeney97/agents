@@ -89,9 +89,7 @@ This artifact uses its **own binary finding shape** — it does **not** import `
 
 ## Fence
 
-- vs `baseline`: `baseline` **resolves** which source-of-truth governs a claim and explicitly declines the systematic sweep; `doc-drift-audit` **presupposes** the referent (code is the projection source) and runs the sweep `baseline` refuses. Unsure code is even the right authority (maybe the doc *is* the spec) → `baseline` first; any contested authority surfaced here routes to it, never adjudicated.
-- vs `spec-drift-reconcile`: it is intent-anchored and **fixes** (drive the downstream change); this is code-anchored and **detects** (existing docs vs current code) and stops at `/triage`.
-- vs `tech-debt-scan`: scored, prioritized debt with a severity rubric; this emits binary reference misses ranked only by reader-harm. "Where's our worst debt?" → `tech-debt-scan`. "Which doc references are factually stale against code?" → here.
-- vs `contract-change-propagation`: it is change-anchored (a proposed interface delta → which consumers break, in what order); this is standing-state (no change supplied, existing docs vs current code).
-- vs `verify` / `behavior-smoke-test`: they execute to check behavior; this never executes — it checks that named references *resolve*, not that the code *behaves* as documented.
+- Scored, prioritized debt with a severity rubric → `tech-debt-scan`; this emits binary reference misses ranked only by reader-harm.
+- A proposed interface delta's blast radius → `contract-change-propagation`; this is standing-state — no change supplied, existing docs vs current code.
+- Unsure code is even the right authority (maybe the doc *is* the spec) → `baseline` first; intent moved and the chain needs fixing → `spec-drift-reconcile`; behavior claims → `verify` / `behavior-smoke-test` (the same routes Boundaries and Scope give, gathered here for selection).
 - In **this** repo: the five SessionStart canaries + `scripts/check-library-integrity.sh` own the structural skill-wiring slice (name==dir, self-referenced paths, orphans, parse); `doc-drift-audit` defers that and audits only content claims (prose vs code).

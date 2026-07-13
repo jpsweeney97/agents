@@ -35,13 +35,13 @@ This is the library-wide evidence-before-claims floor specialized to absorbing f
 
 ## Fences
 
-- **vs `migration-campaign`** (the sharpest collision — its description already claims "framework/API call-site bump"). The line is **change-discovered vs change-supplied**, resolved by **routing the fix by shape**. `migration-campaign` takes the change as supplied and owns the burndown for one *uniform* edit across many like sites; this skill *discovers* what the upgrade requires from upstream notes and hands a uniform sweep to it as a now-supplied change. A bag of *distinct* per-delta fixes is not a campaign — sequence it into a plan and route that to **`execute-plan`**. The loader cannot tell these apart from the prompt alone; the determination is yours after the range read.
-- **vs `contract-change-propagation`.** Inverse direction and mode: it maps *your own proposed* interface change forward, read-only, and stops at a plan. This runs the consumer side of an *already-shipped upstream* change and it *executes*. Borrow its classification technique pointed upstream; do not become it or re-derive it for an in-house change.
-- **vs `tech-debt-scan`.** It flags *which* deps are stale as backlog findings and routes security/CVE signal out; never upgrades. This absorbs a *chosen* one — a scan finding is a valid trigger, the scan is not this skill.
-- **vs `keep-green`.** The bounded back-to-green repair helper this skill delegates to; it owns no change-record read, no resolution, and stops *at* green, where the behavior-proof begins.
-- **vs `migration-safety`.** Name collision only — DB schema/data migrations against a live database, zero package-dependency content. If the prompt is about a database migration, it is the other skill.
-- **vs `deploy-plan` / `release-cut` / `diagnose`.** Hand the rollout go/no-go, abort thresholds, and bake window to `deploy-plan`. `release-cut` bumps *your* package's version and changelog — the producer end of the version relationship, unrelated to consuming a bump. Engage `diagnose` only when a post-bump break has an unclear cause; this owns the upgrade, not the root-cause hunt.
-- **Supply-chain.** The version gate is a narrow pre-pull trust-to-fetch check on the one chosen version, scoped to what is checkable — *not* the parked repo-wide security audit and *not* `red-team`'s attacker-intent modeling.
+- One *uniform* mechanical edit across many like sites, change already supplied → `migration-campaign`; a bag of *distinct* per-delta fixes → a sequenced plan for `execute-plan`. The route-by-shape step above owns this call, made after the range read — the prompt alone cannot settle it.
+- Mapping *your own proposed* interface change forward, read-only → `contract-change-propagation`.
+- Flagging *which* deps are stale as backlog findings → `tech-debt-scan`; a scan finding is a valid trigger, the scan is not this skill.
+- Post-bump red driven back to green → `keep-green`, which stops *at* green, where the behavior-proof begins.
+- Database schema/data migrations against a live system → `migration-safety` (name collision only).
+- Rollout go/no-go, abort thresholds, bake window → `deploy-plan`; bumping *your own* package's version and changelog → `release-cut`; unclear-cause post-bump breakage → `diagnose`.
+- The version gate is a narrow pre-pull trust-to-fetch check on the one chosen version, scoped to what is checkable — not a repo-wide security audit, not `red-team`'s attacker-intent modeling.
 
 ## Done when
 

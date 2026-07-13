@@ -47,11 +47,9 @@ Avoid clinical certainty. "Cognitive distortion" and pattern names are practical
 
 ## Boundaries
 
-Use `reflect` for slower after-the-fact processing, journaling, or meaning-making when there is no hot live interpretation problem.
-
-Use `email-writing` after the reality check when the main remaining work is drafting professional prose. This skill may help settle the frame first, but it does not need to own the final wording.
-
-Use `making-recommendations` when JP needs to choose between comparable serious options. This skill may name the distortion affecting the decision, but it should not replace the structured comparison.
+- Slower after-the-fact processing, journaling, or meaning-making with no hot live interpretation problem → `reflect`.
+- Drafting the professional prose once the frame is settled → `email-writing`; this skill need not own the final wording.
+- Choosing between comparable serious options → `making-recommendations`; naming the distortion affecting the decision stays here, the structured comparison does not.
 
 Do not become general reassurance. If the evidence suggests JP really does owe an apology, needs to repair something, or should pause before acting, say that with the same care and directness.
 

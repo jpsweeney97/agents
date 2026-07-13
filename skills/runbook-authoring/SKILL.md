@@ -49,11 +49,11 @@ Labeled phases (preflight / execute / verify / rollback as sections) appear only
 
 ## Fences
 
-- **vs `implementation-planning` (sharpest).** Both are ordered, executable steps. The line is lifecycle plus irreversibility: implementation-planning builds something *new* once for a context-free executor, is consumed on success, and carries no trigger, no point of no return, no rollback, no freshness stamp; a runbook operates something that *already exists* on live state, re-run by non-authors, defined by exactly those markers. *Build a thing once → implementation-planning; operate a thing repeatedly → runbook-authoring.*
-- **vs `execute-plan`.** That skill *runs* a plan; this authors the procedure and never executes the operation.
-- **vs `postmortem`.** A backward-looking record of an incident that happened; it may *emit* "write a runbook for X" as an action item that feeds here. Different deliverable, opposite time direction.
-- **vs `diagnose`.** It hunts an *unknown* cause; a runbook encodes a *known* response. Unknown cause → `diagnose` first; the stabilized result may then be authored here.
-- **vs `research-capture` / `migration-campaign`.** Findings, not a procedure → `research-capture`. A tracked one-off change driven across many sites → `migration-campaign`; a runbook is the standing procedure, not the campaign.
+- Build a thing once, for a context-free executor → `implementation-planning`; operate a thing that already exists, repeatedly, on live state → this skill. The runbook markers — trigger, points of no return, rollback, freshness stamp — are exactly what a build plan lacks.
+- Running a plan or operation → `execute-plan`; this authors and never executes.
+- The retrospective on an incident that happened → `postmortem`; its action items feed here.
+- Hunting an unknown cause → `diagnose` first; the stabilized known response may then be authored here.
+- Findings, not a procedure → `research-capture`. A tracked one-off change across many sites → `migration-campaign`; a runbook is the standing procedure.
 
 ## Artifact and lifecycle
 

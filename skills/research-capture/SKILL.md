@@ -88,6 +88,6 @@ After writing and verifying, create a default local commit: stage the research d
 
 ## Fence
 
-- vs `markdown-synthesis`: the inverse on every axis — provenance is the deliverable (synthesis strips citations), seams stay visible (synthesis hides them), contradictions are recorded and flagged (synthesis smooths them), the doc is dated and tracks unknowns (synthesis does neither). A clean readable merge that drops sources → `markdown-synthesis`; a traceable record you can revisit → `research-capture`.
-- vs `deep-research` (availability-conditional — it is a global skill, absent from this repo): `deep-research` generates research by searching, fetching, and verifying; `research-capture` does zero searching and takes research already in hand, including a finished deep-research report as feedstock. A missing source becomes a marker or an open question and, where `deep-research` is available, names it and stops.
-- vs `markdown-reformat`: just tidying notes into Markdown with no provenance, freshness, or open-questions → `markdown-reformat`.
+- A clean readable merge that strips citations → `markdown-synthesis`; a dated, source-traced record with visible seams → `research-capture`.
+- Running the research — searching, fetching, verifying → `deep-research` where available; this skill takes research already in hand, including a finished deep-research report as feedstock.
+- Tidying notes into Markdown with no provenance, freshness, or open questions → `markdown-reformat`.

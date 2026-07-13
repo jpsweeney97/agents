@@ -41,10 +41,10 @@ Never assert a match outcome or a timing result you did not run; report only wha
 
 ## Fences
 
-- **vs `implementation-review`** (the fold tension — check this first). Its resource-cap lens reaches ReDoS, but only as one check *inside* a spec-plus-diff review of a change, and it stops without both. This vets one *supplied* regex with no spec and no diff, engine-first, and ends in an executed proof — the same single-artifact-vs-spec+diff carve that keeps a single-query review out of it. Compose: a review that flags a risky regex hands the pattern here.
-- **vs `red-team`.** It models attacker intent across a system and renders no verdict; this runs a known-class hardening procedure on one pattern and ends in a proof. Hand whole-surface abuse modeling to it; own only the one regex here, and do not re-derive its work.
-- **vs `tech-debt-scan` / security-audit.** A repo-wide sweep for *vulnerable* patterns is a security sweep — the parked security-audit — while a scored backlog of regex *debt* is `tech-debt-scan`'s job; either way this hardens one chosen pattern, not the repo. A scan finding is a valid trigger; the scan is not this skill.
-- **vs `diagnose`.** "This regex hangs" with a *known* cause class — catastrophic backtracking — is this skill; an unclear-cause hang that needs a repro to find is `diagnose`. The hazard here is already named, so there is no cause to discover, only a pattern to harden and prove.
+- ReDoS as one lens inside a spec-plus-diff review of a change → `implementation-review`; one supplied regex, no spec, no diff → here. A review that flags a risky regex hands the pattern here.
+- Whole-surface abuse modeling → `red-team`; own only the one regex here.
+- A repo-wide sweep for vulnerable patterns → the parked security-audit; a scored regex-debt backlog → `tech-debt-scan`. A scan finding is a valid trigger; the scan is not this skill.
+- A hang whose cause is unclear and needs a repro → `diagnose`; a named backtracking hazard has no cause to discover, only a pattern to harden and prove.
 
 ## Done when
 

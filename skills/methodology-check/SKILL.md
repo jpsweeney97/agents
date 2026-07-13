@@ -5,7 +5,7 @@ description: "Use when you want a cheap, single-pass read on whether a skill's m
 
 # Methodology Check
 
-The cheap adjudicator of a skill's method. It sits between `scrutinize-skill`, which reviews a skill as a behavior contract and only *detects* premise doubt before routing it away, and `methodology-critique`, which adjudicates the method in full against its recovered fire corpus at maximum effort. This lane renders the methodology verdict `scrutinize-skill` won't, without the fan-out `methodology-critique` needs — one read-only pass over the target's text plus a cheap census of its real fires.
+The cheap adjudicator of a skill's method: one read-only pass over the target's text plus a cheap census of its real fires, rendering the methodology verdict the neighboring lanes don't — above `scrutinize-skill`'s contract altitude, below `methodology-critique`'s fire-tested treatment.
 
 It is dual-runtime and single-agent, and it touches nothing: no edits, no commits, no invocation of other skills. It delivers a verdict and stops.
 
@@ -81,6 +81,5 @@ Repairs, the full treatment, and any edit are separate, user-initiated follow-on
 
 ## Routing
 
-- The **default** pass for "is this skill's method sound?" — its premise, epistemology, and whether it does what it claims.
-- `scrutinize-skill` for "will the skill behave well once it triggers" — contract and execution altitude.
-- `methodology-critique` — where available (Claude-only) — when the crux is how the skill fires in its real transcripts, or when JP commissions the full fire-tested treatment. This lane escalates there by recommendation; it does not replace it, and on runtimes without it the recommendation is still the deliverable.
+- Contract and execution altitude — "will the skill behave well once it triggers" — is `scrutinize-skill`'s.
+- When the crux is how the skill fires in its real transcripts, the lane is `methodology-critique` where available (Claude-only): escalate by recommendation, and on runtimes without it the recommendation is still the deliverable.

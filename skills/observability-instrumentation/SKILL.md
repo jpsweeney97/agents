@@ -34,11 +34,11 @@ This skill authors the signals; it cannot confirm they actually emit, scrape, or
 
 ## Fences
 
-- **vs `diagnose`.** Proactive vs reactive. This lays signals down before the bug; `diagnose` consumes them — or their absence — to find a cause. A "we have no signal here" gap surfaced mid-diagnosis can route back to this skill afterward.
-- **vs `deploy-plan` / `outcome-check`.** Both *read* signals that already exist — `deploy-plan` for one ship's health gauge, `outcome-check` for whether a goal moved. This *creates* the signals they read; it sets no go/no-go and reads no live metric.
-- **vs `incident-response`.** It fights the fire with whatever telemetry exists; this skill is *why* that telemetry exists. Inverse time direction.
-- **vs `runbook-authoring`.** That authors the human *response* to an alert; this authors the *alert and the signal beneath it*.
-- **vs `system-design-review` / `tech-debt-scan`.** They flag that instrumentation is missing or thin; this does the authoring. A review finding "no observability here" is a valid trigger for this skill.
+- Reactively hunting an unknown failure → `diagnose`; a "no signal here" gap surfaced mid-diagnosis routes back here afterward.
+- Reading signals that already exist → `deploy-plan` (one ship's gauge) or `outcome-check` (whether the goal moved); this creates the signals, sets no go/no-go, and reads no live metric.
+- Fighting the live fire → `incident-response`.
+- Authoring the human response to an alert → `runbook-authoring`; this authors the alert and the signal beneath it.
+- Flagging that instrumentation is missing → `system-design-review` / `tech-debt-scan`; their "no observability here" finding is a valid trigger for this skill.
 
 ## Done when
 

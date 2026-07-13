@@ -7,19 +7,7 @@ description: "Use when the user wants the strongest one-sided case FOR a positio
 
 Build the genuine strongest case *for* one position — usually one the user is inclined to dismiss — then stop without picking. Invocation: `/steelman` or `$steelman`.
 
-steelman is the library's one *advocacy* skill. Everything around it refuses a side: `making-recommendations` weighs options evenly and picks a winner, `scrutinize` attacks an artifact, `grill-me` interrogates, `ideate` widens, `design-exploration` shapes a design. steelman runs the other direction — handed a position, it builds the strongest case for it the way its smartest believer would, with the load-bearing joints made visible, then stops without picking. Its value is the one thing a capable both-sidesing agent never volunteers: a committed case for a view the user is about to dismiss, honest enough that they can actually weigh it.
-
-## Boundaries with neighbors
-
-steelman is defined by inverting its nearest neighbors:
-
-- `making-recommendations` is even-handed and ends in a **pick**; steelman develops **one** position and picks **no winner**. The behavioral tell: if you catch yourself comparing the position to a rival to decide which is better, you have left steelman.
-- `scrutinize` / `scrutinize-skill` **attack** an artifact to surface flaws; steelman **builds** a position up. Even "the strongest case *against* my choice" is constructive — it is the best case *for* the alternative, not a flaw-hunt.
-- `grill-me` / `grill-with-docs` **ask** one question at a time; steelman **argues** and delivers a brief.
-- `ideate` widens to many un-ranked options; steelman deepens **one**.
-- `design-exploration` shapes and approves a design; steelman neither designs nor decides.
-
-steelman is the constructive-advocacy member of the advisory lane; route adversarial attack to `red-team` and prospective accidental failure to `premortem`.
+Handed a position, steelman builds the strongest case for it the way its smartest believer would, with the load-bearing joints made visible, then stops without picking. Its value is the one thing a capable both-sidesing agent never volunteers: a committed case for a view the user is about to dismiss, honest enough that they can actually weigh it.
 
 ## The moves — a rhythm, not a fill-in template
 
@@ -46,6 +34,8 @@ The committed strength read is one judgment, not a scoreboard — name calibrati
 
 ## When not to advocate
 
-- The options are already on the table and the user wants a pick → `making-recommendations`.
-- The user wants the artifact torn down, not a case built → `scrutinize`.
+- The options are already on the table and the user wants a pick → `making-recommendations`. The mid-run tell: if you catch yourself comparing the position to a rival to decide which is better, you have left steelman.
+- The user wants the artifact torn down, not a case built → `scrutinize` (`scrutinize-skill` for a skill target). "The strongest case *against* my choice" is still steelman work — build the best case *for* the alternative, not a flaw-hunt.
+- You want interrogation one question at a time → `grill-me`; many un-ranked options → `ideate`; a design shaped and approved → `design-exploration`.
+- The threat model is a motivated adversary → `red-team`; accidental failure imagined from the future → `premortem`.
 - The position needs no defense, or no honest case can be built → say so and stop; do not manufacture advocacy. Knowing when *not* to advocate is part of the skill.

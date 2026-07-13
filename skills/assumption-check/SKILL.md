@@ -7,16 +7,7 @@ description: "Use when a plan, design, or decision is settled enough to act on a
 
 Surface what a settled plan needs to be true before effort is spent on it: enumerate the assumptions the plan is standing on — including the ones it never states — rank them by how load-bearing and how uncertain each is, and attach the cheapest confirm-or-kill probe to each, as a durable artifact. Invocation: `/assumption-check` or `$assumption-check`.
 
-assumption-check is the library's one *forward de-risking* skill. The plan is already chosen; this lane does not critique it, re-decide it, or judge its readiness — it reasons forward from the plan as written and plans confirmations, so the beliefs the plan depends on get tested cheaply before the build tests them expensively.
-
-## Boundaries with neighbors
-
-assumption-check is defined by inverting its nearest neighbors:
-
-- When `review-family:scrutinize` is available, its Assumptions Audit *tags* assumptions adversarially inside a review that always ends in a verdict, and plans no confirmations. assumption-check is non-adversarial, plans a confirmation for every ranked assumption, and never judges the plan.
-- `premortem` reasons backward from an asserted failure ("it is six months later and this flopped — why?"); assumption-check reasons forward from the plan as written. Same committed plan, opposite direction of travel; a good pairing, never a substitute.
-- `red-team` models a motivated adversary choosing the cheapest attack; assumption-check models no adversary at all — only beliefs that might quietly be false.
-- `grill-me` pressure-tests the *author* interactively, one question at a time, and leaves no artifact; assumption-check works the plan text directly and leaves one.
+The plan is already chosen; this lane does not critique it, re-decide it, or judge its readiness — it reasons forward from the plan as written and plans confirmations, so the beliefs the plan depends on get tested cheaply before the build tests them expensively.
 
 ## The moves — a rhythm, not a fill-in template
 

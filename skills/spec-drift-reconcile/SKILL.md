@@ -38,14 +38,14 @@ The minimal case — a single spec↔code pair — is the same shape scaled down
 
 ## Tension 1 — baseline overlap
 
-`baseline` answers "which standing source has authority over this claim?" This skill answers "intent may have *changed* — which way, and how should each artifact follow?" The questions are orthogonal: even after `baseline` certifies the PRD is the authoritative spec, that says nothing about whether the PRD still reflects what the user wants — a usable baseline can itself be the stale thing. So **consume `baseline` for authority, reimplement no precedence, and run the gate even when `baseline` returns a usable baseline.** `baseline`'s own `Decision needed` on a changed-intent claim is a seam *into* this skill, not a contested job.
+Standing authority over a claim → `baseline`, consumed at step 3; reimplement no precedence. A usable baseline does not skip the gate: authority says which artifact governs, not whether intent moved — run the gate regardless, and treat `baseline`'s own `Decision needed` on a changed-intent claim as a seam *into* this skill, not a contested job.
 
 ## Tension 2 — orchestrate, never reimplement
 
 Everything that mutates an artifact is dispatched to its owner; the skill mutates only its own decision record. But the chain was built forward-only, so be honest about where revision is owned and where it is not:
 
 - **In-place owners — dispatch cleanly.** `acceptance-map` updates its artifact in place; code goes through `tdd` then `keep-green`. An interface delta runs through `contract-change-propagation` before the plan is finalized.
-- **Forward-create-only nodes — no revision owner exists.** `to-prd` synthesizes a *new* PRD (no in-place mode), `to-issues` only forward-creates, `implementation-planning` writes a *fresh dated* plan, and `/triage` cannot rewrite a stale issue body. At these nodes, either apply a surgical edit in the owner's format driven by the decision record, or supersede (create the corrected artifact, mark the old one superseded, route tracker state through `/triage`) — whichever fits — and **flag that the forward-only chain lacks revision modes.** Do not grow a general revision engine: that re-collides with the owners and turns this into the content-aware rewriter it must not become.
+- **Forward-create-only nodes — no revision owner exists.** `to-prd` synthesizes a *new* PRD (no in-place mode), `to-issues` only forward-creates, `implementation-planning` writes a *fresh dated* plan, and `/triage` cannot rewrite a stale issue body. At these nodes, either apply a surgical edit in the owner's format driven by the decision record, or supersede (create the corrected artifact, mark the old one superseded, route tracker state through `/triage`) — whichever fits — and **flag that the forward-only chain lacks revision modes.** Do not grow a general revision engine.
 
 Each owner keeps its own downstream gate, and they stack with this one: this gate approves the *direction*; the owners still gate their own publication, commit, or plan approval.
 
@@ -55,13 +55,6 @@ Each owner keeps its own downstream gate, and they stack with this one: this gat
 - Down-route a pure mechanical noun-drift with no bug-vs-intent question (a symbol was unambiguously renamed) to `doc-drift-audit` + `/triage`. Its routed-out behavioral/intent worklist is, conversely, a feed *into* here.
 - Hand a muddy intent the human has not yet formed to `outcome-shaping`; a direction needing net-new design ("keep it synchronous, solve the timeout another way") to `design-exploration`. This skill reconciles a drift; it does not design the new thing.
 - The decision record is reconciliation-scoped, not a durable ADR.
-
-## Fence
-
-- vs `baseline`: it resolves authority and stops, read-only; this acts on changed intent across artifacts and drives the fix.
-- vs `doc-drift-audit`: it is code-anchored, read-only, detects reference drift, asserts "disagreement not direction," routes to `/triage`; this is intent-anchored and reconciles.
-- vs `contract-change-propagation`: it maps one interface delta's blast radius; this reconciles a whole intent change and *calls* it for the interface part.
-- vs `to-prd` / `to-issues` / `implementation-planning`: they author fresh artifacts forward; this reconciles existing ones and dispatches back to them where it can.
 
 ## Done when
 

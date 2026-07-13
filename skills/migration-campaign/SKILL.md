@@ -47,9 +47,9 @@ In scope: applying one mechanical change across many sites with a pilot, a durab
 
 Out of scope — route instead:
 
-- deciding *what* to change, or mapping an interface change's blast radius and consumers → `contract-change-propagation` (it produces the change and consumer list this skill consumes; it stops at the plan, this applies it).
-- executing a plan of **distinct, bespoke tasks**, each a different edit → `execute-plan`. A campaign is the *same* edit across many like sites; a plan is many *different* edits.
-- slicing a feature **vertically** into grabbable tracker issues (schema → API → UI) → `to-issues`. A campaign shards **horizontally** — one change, many like sites.
+- deciding *what* to change, or mapping an interface change's blast radius and consumers → `contract-change-propagation`.
+- executing a plan of **distinct, bespoke tasks**, each a different edit → `execute-plan`.
+- slicing a feature **vertically** into grabbable tracker issues → `to-issues`; a campaign shards **horizontally** — one change, many like sites.
 - a single-target cleanup or refactor → `simplify-code`; a debt audit or backlog → `tech-debt-scan`.
 
 Applies edits to the working tree on a working branch, and stops there. Do not commit to a protected branch, push, open a PR, or publish unless the user explicitly asks. The change is mechanical and supplied — never invent it, and never mark a site done you have not verified.

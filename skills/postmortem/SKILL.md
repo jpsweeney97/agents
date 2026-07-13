@@ -70,5 +70,5 @@ Bad looks like: the cause already woven into the timeline; impact as a vibe ("ma
 
 ## Fence
 
-- **From `diagnose` (load-bearing):** `diagnose` Phase 6 is titled "Cleanup + post-mortem," but its post-mortem is a commit/PR line stating the winning hypothesis plus an optional `improve-codebase-architecture` handoff, scoped to one code bug. This skill is the durable, dated, blameless retrospective for any incident — same word, different deliverable. For a code bug whose cause is unknown, run `/diagnose` first, then `/postmortem`; a non-code incident needs no diagnose and postmortem stands alone.
-- vs `system-design-review` and `tech-debt-scan`: both disclaim incident work — they review a healthy system, not an incident that happened.
+- `diagnose`'s Phase 6 "post-mortem" is a commit/PR line for one code bug — same word, different deliverable; this skill is the durable, dated, blameless retrospective for any incident. Code bug with unknown cause → `/diagnose` first, then `/postmortem`; a non-code incident stands alone here.
+- Reviewing a healthy system → `system-design-review` / `tech-debt-scan`; this skill takes an incident that happened.
