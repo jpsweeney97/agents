@@ -1,6 +1,6 @@
 ---
 name: ideate
-description: "Use when the user wants to GENERATE a wide field of genuinely different options before any narrowing: brainstorm broadly, widen the solution space, get unstuck from one idea, see what is possible. Produces a deliberately un-ranked field and stops there. Do not use to pick among options already on the table (`making-recommendations`), shape or approve one design (`design-exploration`), clarify a still-muddy goal (`outcome-shaping`), or stress-test a settled plan (`grill-me`)."
+description: "Use when the user wants to GENERATE a wide field of genuinely different options before any narrowing: brainstorm broadly, widen the solution space, get unstuck from one idea, see what is possible. Produces a deliberately un-ranked field and stops there. Do not use to develop a fixed sketch-level field to comparable depth (`option-shaping`), pick among options already on the table (`making-recommendations`), shape or approve one design (`design-exploration`), clarify a still-muddy goal (`outcome-shaping`), or stress-test a settled plan (`grill-me`)."
 ---
 
 # Ideate
@@ -29,7 +29,8 @@ Close with **one honest line naming which of the prompt's own fixed points the f
 
 Stop the instant a stable field exists — even when the same message asks "so which?" Crossing into evaluation is the failure this skill exists to prevent. Hand off by naming the lane and stopping, never silently continuing:
 
-- **`making-recommendations`** — the user wants to pick among the options now on the table.
+- **`option-shaping`** — the user wants generated options developed to comparable depth without a pick. Ask them to fix the candidate set before handoff; do not select a promising subset, carry the whole divergent field by default, or predefine its comparison questions.
+- **`making-recommendations`** — the user wants to pick and the options are already serious enough to compare.
 - **`design-exploration`** — the user wants a few approaches shaped and developed toward an approved design.
 - **`outcome-shaping`** — generating revealed the goal itself is too muddy to know what counts as an option.
 

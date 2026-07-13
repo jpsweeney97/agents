@@ -1,6 +1,6 @@
 ---
 name: making-recommendations
-description: "Use when the user asks for a recommendation, comparison, trade-off, ranking, or decision between two or more serious options already on the table (`which is better`, `help me decide`, `should I choose X or Y`). Do not use for factual questions, trivial preferences, or partitioning one already-shaped scope into keep/defer/cut under a deadline, risk, or capacity constraint (`scope-cut`); when no concrete options are named yet, clarifying a muddy goal is `outcome-shaping` and shaping a design is `design-exploration`; when the field is too thin to rank — no serious rivals on the table — widening it first is `ideate`."
+description: "Use when the user asks for a recommendation, comparison, trade-off, ranking, or decision between two or more serious, comparable options. Do not use for factual questions, trivial preferences, or partitioning one scope under a binding constraint (`scope-cut`). When an option is only a handle or materially less developed than its rivals, use `option-shaping` before registering a lean; when the field lacks serious rivals, use `ideate`; when the outcome is muddy or the user wants an approved design, use `outcome-shaping` or `design-exploration`."
 ---
 
 # Making Recommendations
@@ -15,6 +15,7 @@ Low-stakes choices still belong here when there is something real to weigh — t
 
 These are the load-bearing invariants; the sections below add depth rather than restating them.
 
+- Check field readiness before registering a lean. If fixed, meaningfully distinct candidates are too sketch-level or unevenly understood for the same live questions, hand to `option-shaping` instead of completing them here (see Field Readiness).
 - Register your first lean and the user's visible lean before any structured comparison; the comparison's job is to attack the leans, not decorate them (see Declare the Lean).
 - Find the decision's structure before weighing anything: constraints filter, dominance ends comparisons, and only genuine trades need judgment (see Filters, Dominance, Trades).
 - Compare in comparative language. Never score options numerically, and never aggregate by weighted arithmetic (see Compare in Words).
@@ -24,9 +25,15 @@ These are the load-bearing invariants; the sections below add depth rather than 
 - Exit honestly when comparing would be dishonest, and hand off by name when the work is another lane's (see Honest Exits; Handoffs).
 - Verify unstable facts before comparing when the answer depends on current prices, laws, availability, schedules, or APIs; when that is not practical this turn, name the gap and let the close carry it.
 
+## Field Readiness
+
+This lane assumes each candidate is intelligible enough to answer the same decision-specific questions. Treat readiness as a hard stop before registering a lean: if one option has a mechanism, operating consequences, and assumptions while another is only a handle or slogan, the extra resolution is not evidence that the first option is better. A direct request for a pick does not waive this stop.
+
+Do not fill an uneven field from generic knowledge merely because the handles sound familiar; their unresolved operating choices are part of what must be shaped. When an honest comparison would require inventing decision-controlling detail for one candidate, name `option-shaping`, say which options are materially underdeveloped or uneven, ask to develop the entire fixed field first, and stop. Do not treat the detailed option as finished or use its existing detail as the comparison template. Use `ideate` instead only when serious rivals are absent, not when the user has fixed shallow versions of them.
+
 ## Declare the Lean
 
-Before any structured comparison, register two things in a sentence: which way you lean on first read and what is driving it, and which way the user visibly leans — option order, "keep" versus "switch," which option got the adjectives, what they sound excited about. From that point the comparison's job is to attack the leans, not decorate them.
+Only after Field Readiness passes, register two things before any structured comparison: which way you lean on first read and what is driving it, and which way the user visibly leans — option order, "keep" versus "switch," which option got the adjectives, what they sound excited about. From that point the comparison's job is to attack the leans, not decorate them.
 
 The user's lean is the sharpest hazard in this lane. A model asked "should I do X or Y" reliably drifts toward the option the asker favors, so handle agreement and disagreement explicitly:
 
@@ -88,7 +95,8 @@ When one of these applies, do not produce a recommendation or partial ranking; s
 Handoffs are permissioned and non-silent: name the lane, say why this one cannot proceed honestly, ask, and stop. Switching without asking is allowed only when the same message already asked for that workflow.
 
 - `outcome-shaping` — the want, the criteria, or the real decision is still muddy.
-- `design-exploration` — approaches need shaping before serious options can exist.
+- `option-shaping` — named, meaningfully distinct options exist, but their mechanisms, consequences, assumptions, or evidence gaps are too shallow or uneven for an honest comparison. Develop the fixed field without ranking, then return here if the user wants a choice.
+- `design-exploration` — the user wants to converge on and approve one design, not merely prepare a fixed field for comparison.
 - `ideate` — the field is thin: no named option survives the filters, or every option is weak enough that ranking them would crown a weak winner. Widen before choosing.
 - `scope-cut` — the ask partitions one scope into keep/defer/cut under a binding constraint, not a pick-one choice among rivals.
 - `grill-me` — the user wants an interactive pressure test of a decision, not a one-shot recommendation.
