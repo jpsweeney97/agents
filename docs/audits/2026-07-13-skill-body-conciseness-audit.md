@@ -184,7 +184,7 @@ Root cause: the same trust-skill shape doctrine as label-taxonomy, plus receipt 
 
 The rare-but-outsized pattern: reference-grade lookup material carried whole in the body — per-engine behavior matrices, per-sink defense catalogs, diagnostic tables, alias maps, full command protocols with per-runtime variants. Only 10 files, but a top-two word consumer in 9 of them; the affected files include several of the longest in the inventory.
 
-- `skills/migration-safety/SKILL.md`: "a `NOT NULL`-with-default add rewrites the table on PostgreSQL < 11 but not on 11+; MySQL routes large changes through `INSTANT` / `INPLACE` / `COPY` algorithms" — roughly half the skill is engine matrix.
+- `skills/migration-safety/SKILL.md`: "a `NOT NULL`-with-default add rewrites the table on PostgreSQL < 11 but not on 11+; MySQL routes large changes through `INSTANT` / `INPLACE` / `COPY` algorithms" — roughly half the skill is engine matrix. [Correction 2026-07-13: overstated — remeasured during the conciseness campaign, the engine-specific matter is ~60 words woven into the engine-confirm rule and two scan bullets, not half the body; the census classifier evidently counted the whole footgun-scan workflow as matrix. The file was left unoffloaded.]
 - `plugins/git-cycle/skills/exiting-worktrees/SKILL.md`: the full native-vs-ExitWorktree removal protocol, prohibited-actions table, and edge-case table inline (2,274 words, no `references/`).
 - `plugins/review-family/skills/implementation-review/SKILL.md`: nine surface lenses (≈80 words on average, the longest over 200) forming an inline review rubric (3,368 words — the longest body in the inventory).
 
