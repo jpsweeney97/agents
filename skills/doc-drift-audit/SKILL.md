@@ -7,7 +7,7 @@ description: "Use when the user wants to audit whether a documentation set (READ
 
 Audit a documentation set against the code it describes: extract the checkable references prose makes — symbols, paths, signatures, endpoints, config keys, CLI flags — verify each resolves against the current tree at a pinned commit, and report only high-confidence misses. Read-only; it detects drift and routes the fix, never makes it. Invocation: `/doc-drift-audit` or `$doc-drift-audit`.
 
-The cardinal honesty, stated once and repeated every run: **CLEAN means the references resolve, not that the docs are accurate.** This audit verifies that a doc's *nouns exist*, never that its *verbs are true* — a doc can name every symbol correctly and still lie about what the code does. That blind spot is the price of being deterministic and low-false-positive; the mandatory disclaimer below is how it stays honest about it.
+The cardinal honesty, repeated in every run's output: **CLEAN means the references resolve, not that the docs are accurate.** This audit verifies that a doc's *nouns exist*, never that its *verbs are true* — a doc can name every symbol correctly and still lie about what the code does. That blind spot is the price of being deterministic and low-false-positive; the mandatory disclaimer below is how it stays honest about it.
 
 ## Core contract
 
@@ -83,10 +83,9 @@ This artifact uses its **own binary finding shape** — it does **not** import `
 
 ## Done when
 
-- Every extracted checkable reference is a high-confidence miss or is listed under coverage as could-not-verify.
-- Findings are ranked by reader-harm; the artifact carries the header (with `HEAD` SHA), findings, coverage, the mandatory disclaimer, and reproduce.
-- Behavioral/intent claims are surfaced-and-routed, not silently dropped.
-- Actionable drift is routed to `/triage`; nothing was edited, staged, or committed.
+- Every extracted reference is a high-confidence miss or listed as could-not-verify (Core contract).
+- The artifact carries header, findings, coverage, reproduce, and the mandatory disclaimer, ranked by reader-harm (Output).
+- Routed-out claims are surfaced, actionable drift is filed to `/triage`, and nothing was edited, staged, or committed (Boundaries).
 
 ## Fence
 

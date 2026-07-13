@@ -5,9 +5,9 @@ description: "Use when a change you just made broke lint or tests and you want i
 
 # Keep Green
 
-Drive a just-made change back to a green lint+test gate through a bounded fix→re-run loop that repairs only what the change broke and leaves pre-existing red reported-not-touched. It stays this small because every stop is safe: no stop ever commits, masks a failure, or declares the work done — cause-unknown failures escalate to `diagnose`, and the green stop hands to `closeout-check`.
+Drive a just-made change back to a green lint+test gate through a bounded fix→re-run loop that repairs only what the change broke and leaves pre-existing red reported-not-touched. It stays this small because every stop is a safe handoff (the invariant below): cause-unknown failures escalate to `diagnose`, and the green stop hands to `closeout-check`.
 
-Assumes a change was just made on a branch where edits are already permitted. Keep-green edits the working tree only; it inherits, never manages, the repo's branch floor. Invocation: `/keep-green` or `$keep-green`.
+Assumes a change was just made on a branch where edits are already permitted; keep-green inherits, never manages, the repo's branch floor. Invocation: `/keep-green` or `$keep-green`.
 
 ## Freeze the gate
 
@@ -42,7 +42,7 @@ Progress is signature-clearing, never a count. An iteration progresses if at lea
 
 ## The invariant that licenses a tight loop
 
-Every non-green stop is a safe handoff: no stop commits, masks a failure, or declares the work done. Being wrong about a stop costs only an early, evidence-rich handoff — never a bad outcome. That is exactly why the loop can be aggressive and the cap value is non-critical.
+GREEN means "lint and test pass on this tree now," confirmed on a full gate run — never "the work is done." Every stop is a safe handoff: no stop stages, commits, creates a branch, masks a failure, or declares the work done — keep-green edits the working tree only, reports the signal, and leaves declaring the work done and landing it to `closeout-check`. Being wrong about a stop therefore costs only an early, evidence-rich handoff — never a bad outcome — which is exactly why the loop can be aggressive and the cap value is non-critical.
 
 ## Scope discipline
 
@@ -51,10 +51,6 @@ In-scope = failures attributable to the changed files or behavior. Out-of-scope 
 ## Never cheat the gate
 
 Never reach green by disabling, skipping, deleting, or loosening a test, assertion, or lint rule, or by stripping the change's intent. Updating an assertion to match behavior the change **intentionally** altered is legitimate; neutering a test to dodge a real regression is not. If green is reachable only by defeating the signal, that is a stop-and-report, not a fix.
-
-## Green is a signal, not a verdict
-
-GREEN means "lint and test pass on this tree now," confirmed on a full gate run — never "the work is done." Edit the working tree only: no staging, commit, or branch creation. Reporting the signal is keep-green's job; declaring the work done and landing it is `closeout-check`'s.
 
 ## Output
 

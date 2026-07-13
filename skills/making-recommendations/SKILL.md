@@ -117,18 +117,7 @@ A full close, for genuine trades, one-way doors, or when the user asks for depth
 - `What Would Flip It` — the facts, checks, or trades that change the answer; when the call matches the user's visible lean, this is where "what would have to be true for the other option" lives.
 - For one-way doors, also `Commitment Point` and `Rollback / Blast Radius` — compress these into prose if the user insists on brevity; never silently drop them.
 
-Never claim the option space is complete or a ranking verified. The strongest honest close is a clear call with its flip conditions attached.
-
-## Restraints
-
-These are not epistemology; they are controls on what a language model over-produces when asked to recommend:
-
-- No verdicts from muddy prompts — the exits and handoffs exist so mud never receives a ranking.
-- No numeric scores, no weights, no weighted sums. Tables display comparative facts; they are never inputs to arithmetic.
-- No invented alternatives, and no manufactured deliberation over a dominated or settled question — a fast clear answer is not a lesser product.
-- No certainty theater: completeness of the option space is not a thing you can verify, so never claim it.
-- No softened contrary calls. When the evidence lands against the user's lean, deliver it plainly; "either could work" from a flattered comparison is the failure mode, not tact.
-- Fluency is a hazard: a crisp packet with a ranking inside gets accepted, not audited. The close's job is to be contestable, not impressive.
+Never claim the option space is complete or a ranking verified. The strongest honest close is a clear call with its flip conditions attached — its job is to be contestable, not impressive: a crisp packet with a ranking inside gets accepted, not audited.
 
 ## Examples
 
