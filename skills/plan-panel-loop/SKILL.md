@@ -7,7 +7,7 @@ description: "Use when the user explicitly wants an iterative adversarial panel 
 
 Run a bounded plan-improvement loop: resolve the plan target, run a read-only adversarial panel, patch only the named plan, and re-review the patched result against carried-forward findings until the inspected scope is defensible or the loop hits a stop condition.
 
-This is a mixed skill. The panel is a judgment device: it should provoke sharper thinking. The patch loop is a trust workflow: it may mutate a user artifact, so target resolution, edit boundaries, stop conditions, and proof language must be explicit.
+The panel should provoke sharper thinking; the patch loop may mutate a user artifact, so target resolution, edit boundaries, stop conditions, and proof language must be explicit.
 
 ## Trigger Boundary
 

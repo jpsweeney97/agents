@@ -30,7 +30,7 @@ Also pick scan depth before recording findings:
 - `medium` default: normal repo or subsystem scan; cap findings at 8-15.
 - `high`: broad or high-stakes scan; cap findings at 12-20 and name the next evidence slice before deep reading.
 
-Depth controls how much evidence to gather, not the proof bar. If the selected depth cannot cover every relevant category, label the scan truncated and keep uncovered categories in `Coverage Gaps / Next Probes`. On a broad or high-stakes target, name the ceiling plainly: this single capped pass is now the only debt tier the library offers — the multi-agent debt audit it once escalated to has been retired — so a broad high-stakes scan carries that limit, and `Coverage Gaps / Next Probes` must hold whatever one capped pass cannot reach.
+Depth controls how much evidence to gather, not the proof bar. If the selected depth cannot cover every relevant category, label the scan truncated and keep uncovered categories in `Coverage Gaps / Next Probes`. On a broad or high-stakes target, name the ceiling plainly: this single capped pass is the only debt tier the library offers, so a broad high-stakes scan carries that limit, and `Coverage Gaps / Next Probes` must hold whatever one capped pass cannot reach.
 
 For a broad "run a tech debt scan here" request, default to `medium` over the current repo or workspace target. Ask only when multiple plausible target boundaries would materially change findings, or when a high-stakes or broad monorepo scan would mislead without an explicit boundary.
 

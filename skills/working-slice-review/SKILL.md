@@ -7,7 +7,7 @@ description: "Use when reviewing a technical design, spec, plan, or architecture
 
 Review technical drafts for premature completeness before they have a working slice. Use `/working-slice-review` or `$working-slice-review` when the useful critique is not "is every risk covered?" but "what should exist first so the team can learn whether this direction works?"
 
-This is a judgment skill. Its value is a pragmatic lens, not a checklist: preserve foundations that protect the first feedback loop, and challenge machinery that delays learning before the core loop works.
+Apply a pragmatic lens, not a checklist: preserve foundations that protect the first feedback loop, and challenge machinery that delays learning before the core loop works.
 
 ## Core Lens
 

@@ -7,7 +7,7 @@ description: "Use when JP is in a hot live moment and wants help separating an e
 
 Help JP recognize the cognitive distortion he may be experiencing, ground him in reality with level-headed reasoning and reassurance, and understand the right path forward.
 
-This is a hot-moment judgment skill. Its value is not a worksheet or diagnosis; it is a clean, evidence-backed read delivered with care.
+The deliverable is not a worksheet or diagnosis; it is a clean, evidence-backed read delivered with care.
 
 Read [examples/calibration.md](examples/calibration.md) when the tone is hard to calibrate, the moment is emotionally charged, the user asks whether something is harsh or wrong, or the first draft starts sounding either too soothing or too blunt.
 
