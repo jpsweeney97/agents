@@ -4,6 +4,12 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.4.2 - 2026-07-13
+
+### Changed
+
+- Conciseness campaign (2026-07-13 audit dispositions), obligation-preserving refactor. `exiting-worktrees`: each twice-stated edge case single-homed (no-op tool contract in Scope, native commands in the baseline section, branch survival at Exit Procedure step 3, one CWD rationale statement); Edge Cases table pruned 9 → 4 rows with an ownership note, every deleted row's command surviving at its named owning step (2,274 → 2,105 body words; no reference offload — duplication, not payload, was the driver). `gh-address-comments`: the never-push/resolve/re-review invariant single-homed in Boundaries with binding-site pointers. `pr-description` and `release-cut`: Boundaries compressed to one redirect line per sibling; `release-cut` keeps the cutting-is-not-deciding-readiness authority line. No trigger or protected-set changes; frontmatter untouched; `check-protected-set.sh` green. Publish deferred until explicitly authorized; the Codex cache stays at 1.4.1 (`--check` NOT-INSTALLED remains the expected state).
+
 ## 1.4.1 - 2026-07-12
 
 ### Removed
