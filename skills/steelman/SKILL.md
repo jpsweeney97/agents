@@ -9,9 +9,9 @@ Build the genuine strongest case *for* one position — usually one the user is 
 
 steelman is the library's one *advocacy* skill. Everything around it refuses a side: `making-recommendations` weighs options evenly and picks a winner, `scrutinize` attacks an artifact, `grill-me` interrogates, `ideate` widens, `design-exploration` shapes a design. steelman runs the other direction — handed a position, it builds the strongest case for it the way its smartest believer would, with the load-bearing joints made visible, then stops without picking. Its value is the one thing a capable both-sidesing agent never volunteers: a committed case for a view the user is about to dismiss, honest enough that they can actually weigh it.
 
-## The owned job (why it is a distinct skill)
+## Boundaries with neighbors
 
-A capable agent told "make the case for X" already argues, so steelman earns its place two ways: it *guarantees* the honesty behaviors a bare advocacy prompt drops under the pull to either hedge or flatter (below), and it is the one owner whose **product is a committed one-sided case**. It is defined by inverting its nearest neighbors:
+steelman is defined by inverting its nearest neighbors:
 
 - `making-recommendations` is even-handed and ends in a **pick**; steelman develops **one** position and picks **no winner**. The behavioral tell: if you catch yourself comparing the position to a rival to decide which is better, you have left steelman.
 - `scrutinize` / `scrutinize-skill` **attack** an artifact to surface flaws; steelman **builds** a position up. Even "the strongest case *against* my choice" is constructive — it is the best case *for* the alternative, not a flaw-hunt.
@@ -20,11 +20,6 @@ A capable agent told "make the case for X" already argues, so steelman earns its
 - `design-exploration` shapes and approves a design; steelman neither designs nor decides.
 
 steelman is the constructive-advocacy member of the advisory lane; route adversarial attack to `red-team` and prospective accidental failure to `premortem`.
-
-## Mixed skill — apply the bar per part
-
-- **Provoked (judgment).** Which position, its strongest honest form, which arguments are genuinely strongest, what the case truly rests on, the real surviving counter, and whether the position should be advanced at all. The skill poses these; it never fills them in.
-- **Firm (trust).** The mandatory bounded honest close, the one-sided / no-winner contract, the harm gate, and the no-artifact default. Their value is a predictable, honest shape; a missing one is a defect, not a style choice.
 
 ## The moves — a rhythm, not a fill-in template
 
@@ -54,7 +49,3 @@ The committed strength read is one judgment, not a scoreboard — name calibrati
 - The options are already on the table and the user wants a pick → `making-recommendations`.
 - The user wants the artifact torn down, not a case built → `scrutinize`.
 - The position needs no defense, or no honest case can be built → say so and stop; do not manufacture advocacy. Knowing when *not* to advocate is part of the skill.
-
-## Build-and-prune note
-
-Chat-first; no artifact by default. Advocacy against a too-fast dismissal fires often and locally, so this is not first-to-prune — but watch it actually earn its honesty guarantees over a bare "make the case for X," and fold or prune if in practice it only restyles a case a capable agent already produces. The honest differential is reliability plus modest cognitive-offload, not a new capability.

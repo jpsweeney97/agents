@@ -9,20 +9,15 @@ Become the adversary who wants this to fail, and find the cheapest path to their
 
 red-team is the library's one *adversarial-intent* skill. You built it, so you reason from intended use and cannot see the goal-directed attacker; red-team forces the optimizing-adversary posture and asks not "is this boundary well-placed" but "here is the adversary, and here is the cheapest path through it to a payoff." Its product is a ranked field of attack paths, each turned toward a raise-cost mitigation, handed off without a verdict. It is **not a scan**: it reasons about adversary intent and attack economics; it never greps secrets or inspects a repo.
 
-## The owned job (why it is a distinct skill)
+## Boundaries with neighbors
 
-A capable agent told "think like an attacker" already speculates, so red-team earns its place two ways: it *guarantees* the optimizing-adversary posture, the up-front threat-scope declaration, and the honest no-coverage close that bare speculation drops, and it is the one owner whose **product is forward, design-time attack-path modeling**. It is defined by inverting its nearest neighbors:
+red-team is defined by inverting its nearest neighbors:
 
 - `system-design-review` screens trust/privilege/sensitive-data boundaries as an architecture-quality sentinel; it does not cover threat-modeling or attack-path enumeration (`system-design-review:30-32,42`). red-team owns exactly that gap. SDR feeds red-team.
 - `implementation-review` checks trust boundaries and supply-chain in *written code against a spec* — backward-looking, a diff. red-team is forward, design-time abuse modeling, before or beyond the code.
 - `security-audit` (a dormant live park) and the built-in `/security-review` (a branch-diff scan) *scan* a repo for vulnerabilities and secrets. red-team is **non-scan** abuse-modeling. If a real scan is what's needed, name that lane and stop.
 - `scrutinize` attacks an *artifact* for flaws and ends in a verdict. red-team models a real-world *adversary* attacking a system and ends in ranked paths, no verdict.
 - `premortem` models an *indifferent universe* (accident, drift, bad luck); red-team models a *motivated adversary* choosing the cheapest attack. Different debiaser, different mitigation class (raise-cost, not robustness).
-
-## Mixed skill — apply the bar per part
-
-- **Provoked (judgment).** Which adversaries and goals are plausible, which attack paths are real and cheap, which mitigation actually raises the attacker's cost above their payoff. The skill poses the forcing moves; it never fills them in for the agent.
-- **Firm (trust).** The up-front declared threat scope, the no-verdict contract, the ranked-hardening-order (never a complete coverage matrix), the no-certificate close, and the non-scan fence. Their value is a predictable, honest shape; a missing one is a defect — most of all the threat-scope declaration, which is what lets the close bound honestly instead of overclaiming.
 
 ## The moves — a rhythm, not a fill-in template
 
@@ -38,7 +33,7 @@ Stop when another pass over the in-scope adversaries yields nothing mechanism-di
 
 - **Render no verdict.** red-team never concludes "the system is secure" or "this is safe." **Finding no path is not proof of safety** — it is the absence of a found path within a declared scope, nothing more.
 - **Close with the residual, anchored to the declared scope.** Name the adversary capability you assumed bounded and what falls outside the threat scope you declared up front — never a self-drawn coverage map presented as exhaustive. The member of this lane most tempted to stamp "attack surface fully enumerated"; that stamp is forbidden.
-- **Route durable hardening items** (owner + date) to `/triage` (or `$triage`), one per finding, by reference. Keep them inline as the weaker fallback if no tracker is reachable.
+- **Route durable hardening items** (owner + date) to `/triage` (or `$triage`), one per finding, by reference. Keep them inline as the weaker fallback if no tracker is reachable. Chat-first: no artifact beyond these routed items by default.
 - **Compose forward when paths land on a designable surface.** Hand attack paths to `/authorization-design` (or `$authorization-design`) as must-deny rows and to `/injection-safe-inputs` (or `$injection-safe-inputs`) as must-block rows — one or both as the findings warrant, sequentially or concurrently; composition is not a license for subagent fan-out.
 - **Stay non-scan.** If the work actually needed is grepping for secrets, scanning dependencies, or auditing a diff, that is `/security-review` or the `security-audit` park — name it and stop; do not improvise a scan.
 
@@ -48,7 +43,3 @@ Stop when another pass over the in-scope adversaries yields nothing mechanism-di
 - You want a secret/dependency/diff *scan* of a repo → `/security-review` or the `security-audit` park.
 - You want an artifact reviewed for flaws with a readiness verdict → `scrutinize`.
 - You want to know whether a trust boundary is well-placed (architecture quality, not attack paths) → `system-design-review`.
-
-## Build-and-prune note
-
-Chat-first; no artifact beyond the routed `/triage` items by default. Attacker-intent-from-the-defender's-chair fires often in any repo where something is worth attacking (a notch less universal than `premortem` — not every plan has an enemy, but every plan can fail by accident). Watch the no-certificate tightrope in practice: if the ease×payoff order ever drifts into reading as a complete coverage matrix, or the skill slides into a secret/repo scan, fold or sharpen it. The honest differential is the forced adversary posture plus reliability, not a new capability.

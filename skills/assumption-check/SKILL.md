@@ -9,19 +9,14 @@ Surface what a settled plan needs to be true before effort is spent on it: enume
 
 assumption-check is the library's one *forward de-risking* skill. The plan is already chosen; this lane does not critique it, re-decide it, or judge its readiness — it reasons forward from the plan as written and plans confirmations, so the beliefs the plan depends on get tested cheaply before the build tests them expensively.
 
-## The owned job (why it is a distinct skill)
+## Boundaries with neighbors
 
-A capable agent asked "what am I assuming?" already lists assumptions, so assumption-check earns its place two ways: it *guarantees* the moves a bare list drops — the hunt for implicit assumptions, the load-bearing-crossed-with-uncertainty ordering, and a concrete cheapest probe per assumption naming its confirm and kill evidence — and it is pure cognitive-offload: the human otherwise composes the enumerate/rank/probe prompt themselves and then checks nothing was skipped. It is defined by inverting its nearest neighbors:
+assumption-check is defined by inverting its nearest neighbors:
 
 - When `review-family:scrutinize` is available, its Assumptions Audit *tags* assumptions adversarially inside a review that always ends in a verdict, and plans no confirmations. assumption-check is non-adversarial, plans a confirmation for every ranked assumption, and never judges the plan.
 - `premortem` reasons backward from an asserted failure ("it is six months later and this flopped — why?"); assumption-check reasons forward from the plan as written. Same committed plan, opposite direction of travel; a good pairing, never a substitute.
 - `red-team` models a motivated adversary choosing the cheapest attack; assumption-check models no adversary at all — only beliefs that might quietly be false.
 - `grill-me` pressure-tests the *author* interactively, one question at a time, and leaves no artifact; assumption-check works the plan text directly and leaves one.
-
-## Mixed skill — apply the bar per part
-
-- **Provoked (judgment).** Which assumptions are genuinely load-bearing versus decorative; which implicit beliefs the plan silently stands on; how load-bearing crosses with uncertainty in the ordering; what the genuinely cheapest probe is and what evidence would actually kill the assumption. The skill poses these moves; it never fills them in and never hardens into a table completed to feel done.
-- **Firm (trust).** The no-verdict contract, ranking in words rather than numbers, a probe for every ranked assumption, the opt-in probe-execution boundary, and the durable-artifact close. Their value is a predictable, honest shape; a missing one is a defect, not a style choice.
 
 ## The moves — a rhythm, not a fill-in template
 
@@ -49,7 +44,3 @@ The run ends when the artifact is written and every ranked assumption has a prob
 - The threat is a motivated adversary → `red-team`.
 - You want to be interrogated about your plan, one question at a time → `grill-me`.
 - The plan is not settled yet → `design-exploration` (shape it), `making-recommendations` (pick it), or `outcome-shaping` (find the want).
-
-## Build-and-prune note
-
-Artifact-first by design — the register is the deliverable and the human's tracking surface. "What am I assuming?" fires at planning time in any repo, so this is not first-to-prune — but watch it earn its guarantees over a bare assumption list: the honest differential is the implicit-assumption hunt, the reasoned ordering, and the confirm-or-kill probe per item, not a new capability. If in practice it only restyles a risk list, drifts into a verdict, or its probes stop naming kill evidence, fold or prune it.

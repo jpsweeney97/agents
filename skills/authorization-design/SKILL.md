@@ -9,17 +9,6 @@ Design the access-control model for one resource, endpoint, or feature — who m
 
 A forcing pass over one authorization surface — an endpoint being designed, a feature under review, a resource already coded — that enumerates the subject-action-resource decisions, chooses the access model, places enforcement fail-closed, closes the object-level and tenant-isolation gaps, maps privilege escalation, and proves the result with a concrete access matrix: executed where a running surface exists, honestly labeled authored-not-executed where none does. It edits on a working branch when applied; it never pushes, opens a PR, or publishes unless asked.
 
-## The owned job
-
-This owns the **authorization layer of one scoped surface**: the decision table for who may do what to which objects, the model that encodes it, the layer that enforces it, and the deny-side proof that it holds. No neighbor owns it. `red-team` models attacker intent across a whole system and renders no verdict; `system-design-review` (when `review-family:system-design-review` is available) reviews trust boundaries at architecture altitude, not one endpoint's decision table; `implementation-review` (when available) needs a spec plus a diff and reviews a completed change; a repo-wide vulnerability sweep is the parked security-audit's job, or the bundled `security-review` where the runtime ships one. Each composes with this skill; none designs one surface's access model and ends in an executed must-allow/must-deny proof.
-
-Its value is time-asymmetric and high-stakes. The gap that ships unspotted — a role check on the route while any authenticated user reads `/invoices/17` by ID, a query that filters by user but never by tenant, an invite flow that mints admins — costs an account takeover or a cross-tenant data leak at run time, not a cheap fix later. The value is the guaranteed-complete pass over the five hazard classes and the deny rows now, while the human is spared composing the checklist, holding the gap classes in mind, and auditing afterward that no class was skipped.
-
-## Mixed skill — apply the bar per part
-
-- **Fixed (trust).** The five-part hazard scan (model choice, enforcement placement, object-level access, tenant isolation, escalation), the must-allow/must-deny matrix with its two honest states (executed vs authored-not-executed), the fail-closed default, the scoped verdict vocabulary, and the advisory-until-asked stop. These have right/wrong answers and a predictable shape; a skipped hazard class, or a matrix claimed executed when nothing ran, is a defect — the value is the complete, honestly-labeled pass, not a plausible one.
-- **Provoked (judgment).** Which model actually fits this domain's sharing semantics, where enforcement really belongs in this stack, which deny cases are the live bypasses on this surface, whether the role list is quietly encoding relationships. Posed as forcing questions keyed to this surface and this stack; never answered with a generic "add role checks," never hardened into a template filled in to feel done.
-
 ## Shape — a forcing pass over one surface
 
 **Pin the surface and the subjects first.** The one resource, endpoint, or feature under design, and every subject class that can reach it: end users in each role, service accounts, background jobs, admin tooling, cross-service callers — the callers a happy-path list forgets. The unlisted subject is the one nobody checks.
@@ -64,6 +53,7 @@ This is the library-wide evidence-before-claims floor specialized to access beha
 - **vs authentication.** Login flows, sessions, tokens, MFA, and password policy are out of scope — this skill starts after identity is established and asks only what that identity may do. Authentication design is a neighboring job this skill does not own; say so and hand it back rather than absorbing it.
 - **vs `red-team`.** It models a motivated adversary across a whole system and renders no verdict; this runs a known-class design procedure on one surface and ends in one. Compose them: red-team's attack paths make excellent must-deny rows.
 - **vs `system-design-review`** (when `review-family:system-design-review` is available). It reviews trust boundaries, data authority, and operational ownership at architecture altitude; this designs one surface's decision table below that altitude. An architecture review that flags a fuzzy trust boundary hands the named surface here.
+- **vs `implementation-review`** (when `review-family:implementation-review` is available). It reviews a completed change against a spec plus a diff; this designs or vets one surface's access model, before or without a diff.
 - **vs repo-wide sweeps.** A vulnerability sweep across a codebase is the parked security-audit — or the bundled `security-review` where the runtime ships one — and a scored debt backlog is `tech-debt-scan`'s job. A sweep finding is a valid trigger; the sweep is not this skill.
 - **vs `contract-change-propagation`.** Changing an authorization contract that existing consumers already depend on is a blast-radius job: design the new model here, map the consumers and the rollout there.
 
@@ -77,7 +67,3 @@ This is the library-wide evidence-before-claims floor specialized to access beha
 - Escalation is mapped in both directions, and role-management endpoints have their own matrix rows.
 - The matrix is delivered with must-deny rows, each row set honestly labeled executed or authored-not-executed.
 - Exactly one verdict is rendered — enforced-as-proven / designed-not-yet-proven / gap-found-because — scoped to the table, with the residual named. Delivered in the mode the invocation implies, advisory-until-asked, nothing published unless asked.
-
-## Build-and-prune note
-
-Thin in this authoring repo — no multi-user resources live here — and that silence is not evidence against it. The value is portable to every repo that gates objects by identity (broken access control sits atop the OWASP list for a reason), judged by that leverage and its cognitive-offload: the careful, deny-side-proven design pass summoned with one token. First-to-prune on observed mis-fire. Watch two failure shapes: the **fold signal** — if the pass collapses into a generic "add role checks" template and the matrix stops changing outcomes, it has thinned into a review lens that belongs in `implementation-review` (when available); and the **encyclopedia drift** — the moment it accretes a per-framework authorization-syntax reference (every middleware, every policy DSL), it has stopped being a forcing pass. Either is prune evidence to collect, not a reason to withhold the build.

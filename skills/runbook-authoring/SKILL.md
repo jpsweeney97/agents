@@ -9,16 +9,11 @@ Turn a *known* operational procedure into a durable, repeatable runbook: the doc
 
 This skill authors and maintains the document; it never runs the operation.
 
-## What makes a runbook different (the owned job)
+## What makes a runbook different
 
-What separates a runbook from an ordered checklist or a one-time build plan is that some of its steps are *consequential and irreversible* — there is a point past which the operation cannot be cleanly undone. So the work is **hazard-first**: find the irreversible steps before writing anything, and build the document as *proportional* safety scaffolding around them. Reversible steps stay terse; irreversible steps carry the full guard. A document that lists commands but leaves its irreversible steps unfenced has been transcribed, not authored — and that is the one job no neighbor does.
+What separates a runbook from an ordered checklist or a one-time build plan is that some of its steps are *consequential and irreversible* — there is a point past which the operation cannot be cleanly undone. So the work is **hazard-first**: find the irreversible steps before writing anything, and build the document as *proportional* safety scaffolding around them. Reversible steps stay terse; irreversible steps carry the full guard. A document that lists commands but leaves its irreversible steps unfenced has been transcribed, not authored.
 
 When most steps are irreversible (a production failover, a cutover), the guard *is* most of the document; that is correct, not bloat — proportionality buys terseness only when the dangerous core is small.
-
-## Mixed skill — apply the bar per part
-
-- **Firm (trust).** The guard structure, the verification-state tags, the no-secrets and no-fabrication floors, the durable home and lifecycle. Their value is a predictable shape an operator can execute cold under pressure; a missing part is a defect, not a style choice.
-- **Provoked (judgment).** Which steps are irreversible, how reversible each one is, and what actually goes in each step. The skill poses the forcing question; it never answers it for the author, and never hardens into a template filled to feel done.
 
 ## Shape
 
@@ -66,7 +61,3 @@ Labeled phases (preflight / execute / verify / rollback as sections) appear only
 - Before writing, if the project is a git repo, run `git status`; if the path or its parent carries unrelated dirty state, surface that rather than write over it. Leave the artifact **uncommitted** for the user. Never commit on a protected or default branch; landing is deferred to `git-cycle`, done-ness to `closeout-check` — do not re-inline that apparatus.
 - Re-run is the maintenance path and is non-destructive: same operation, file clean → revise in place, re-exercise where possible, refresh `Last validated` and the per-step tags. New operation → create. File dirty, hand-edited, or a slug collision with a *different* operation → ask one path question; do not ask on a clean re-validate.
 - Report the artifact path, the irreversible steps guarded, the verification status, and the proof boundary: **authoring proves the procedure is written and honestly tagged — not that it has been run against production or that its commands work.** Validating that a runbook actually runs is a separate operational act this skill does not perform and must not claim.
-
-## Build-and-prune note
-
-Operational procedures are rare in this repo, so this is **first-to-prune**: watch it fire on a real "turn this into a runbook" request and prune without ceremony if it does not earn its keep. The value is **portable** — operations-heavy repos where deploys, rotations, and failovers need a durable, honestly-validated procedure.

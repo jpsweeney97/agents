@@ -9,19 +9,14 @@ Stand in a future where the committed plan has already failed, and work backward
 
 premortem is the library's one *prospective-failure* skill. It does not re-decide the plan — the plan is already chosen — and it does not adjudicate readiness. Its product is a wide field of how-this-could-die, each turned toward a mitigation, handed off without a verdict. The debiasing engine is the past tense: asserting the failure as *already true* ("it is N months later and this failed") loosens what "what are the risks?" leaves stuck under the momentum of a decision already made.
 
-## The owned job (why it is a distinct skill)
+## Boundaries with neighbors
 
-A capable agent told "what could go wrong" already lists risks, so premortem earns its place two ways: it *guarantees* the prospective-hindsight frame and the honest no-coverage close a bare risk-list drops, and it is the one owner whose **product is a no-verdict field of accidental failure-futures**. It is defined by inverting its nearest neighbors:
+premortem is defined by inverting its nearest neighbors:
 
 - `scrutinize` runs a pre-mortem too, but exactly two paths (most-likely + most-damaging-quiet) inside a review that **always ends in a verdict**. premortem is a standalone, routine, wide breadth pass that renders **no verdict** — it widens failure-imagination, it does not judge whether to proceed. If you catch yourself concluding "so this isn't ready," you have left premortem for `scrutinize`.
 - `postmortem` is the temporal mirror: *after* a real incident, real facts, a blameless record. premortem is *before*, the failure imagined, no facts yet. premortem borrows postmortem's prevention/detection/mitigation tags and `/triage` routing **by reference**, never re-minting them.
 - `red-team` models an *intentional* adversary choosing the cheapest attack. premortem models an *indifferent universe* — drift, false assumptions, bad luck, human error — never a motivated enemy. Different debiaser, different mitigations (robustness, not cost-raising).
 - `ideate` widens the *solution* space; premortem widens the *failure* space of one already-chosen solution.
-
-## Mixed skill — apply the bar per part
-
-- **Provoked (judgment).** Which failure-causes to surface, whether two are genuinely distinct, which pre-mitigation actually addresses a cause, where a leading indicator genuinely leads. The skill poses the forcing moves; it never fills them in and never hardens into a template completed to feel done.
-- **Firm (trust).** The no-verdict contract, the past-tense framing, the stable-field halt, the honest no-certificate close, and the by-reference reuse of postmortem's tags and `/triage` routing. Their value is a predictable, honest shape; a missing one is a defect, not a style choice.
 
 ## The moves — a rhythm, not a fill-in template
 
@@ -36,7 +31,7 @@ A capable agent told "what could go wrong" already lists risks, so premortem ear
 Stop the instant another pass yields nothing mechanism-distinct (the stable-field halt, not a count). Then:
 
 - **Render no verdict.** premortem does not conclude "go," "no-go," "ready," or "not ready" — the plan stays chosen; the deliverable is mitigated failure modes, not a re-decision. A go/no-go or readiness call is `scrutinize`'s execution-readiness review.
-- **Route the durable items.** Owned, dated mitigations and tripwires file to `/triage` (or `$triage`), one issue per finding, exactly as `postmortem` routes its action items — by reference, never re-minting tracker machinery. Keep owner and date inline as the explicitly weaker fallback if no tracker is reachable.
+- **Route the durable items.** Owned, dated mitigations and tripwires file to `/triage` (or `$triage`), one issue per finding, exactly as `postmortem` routes its action items — by reference, never re-minting tracker machinery. Keep owner and date inline as the explicitly weaker fallback if no tracker is reachable. Chat-first: no artifact beyond these routed items by default.
 - **Close with one honest residual line, externally anchored.** Name which of the *plan's own stated assumptions or fixed points* the field still leaves untouched — never a self-drawn coverage map. **Never certify coverage:** no "all failure modes captured," no likelihood×impact matrix presented as complete or precise. A field that looks exhaustive relative to a map you drew is most blind exactly where that map is. The honest signal is the plan-anchored residual, not a box-count.
 
 ## When not to premortem
@@ -46,7 +41,3 @@ Stop the instant another pass yields nothing mechanism-distinct (the stable-fiel
 - The threat is a motivated adversary, not accident → `red-team`.
 - A real incident already happened → `postmortem` (after, with facts), not premortem (before, imagined).
 - The goal is too muddy to say what "failed" means → `outcome-shaping`.
-
-## Build-and-prune note
-
-Chat-first; no artifact beyond the routed `/triage` items by default. Prospective hindsight (the Klein effect) fires often and locally in any repo at planning time, so this is not first-to-prune — but watch it actually earn its guarantees over a bare risk-list: if in practice it only restyles "what could go wrong," or drifts into a verdict or a coverage matrix, fold or prune it. The honest differential is reliability plus the forced past-tense frame, not a new capability.

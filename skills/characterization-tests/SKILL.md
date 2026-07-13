@@ -9,17 +9,6 @@ The safety net you weave BEFORE changing untested code: pin what it actually doe
 
 A pass over one seam of working, untested code that authors a behavior-snapshot net (characterization / golden-master / approval tests): tame nondeterminism first, capture the code's observed behavior as the expected values — bugs included, flagged — run the net green, then prove it detects change by making a deliberate, reverted mutation fail it. The deliverable is the green net plus its proven trigger; the refactor, upgrade, or migration it protects happens after, in its own lane.
 
-## The owned job
-
-This owns **authoring the change-detection net over existing untested code**. No neighbor owns it. `tdd` owns test-first NEW behavior, red before green; `simplify-code` and `dependency-upgrade` both promise behavior preservation, but neither authors the net that would detect a break — this skill is their unstated precondition. Auditing an existing suite's honesty is the neighboring job (route to `test-trust-audit` when available); this skill fires where no suite exists.
-
-Its value: without a net, "the refactor preserved behavior" is an assertion; with one, it is an observation. The human is spared hand-picking the inputs that reach the branches, taming the flakiness that would poison the captures, and remembering the step everyone skips — that a net never seen to fail proves nothing.
-
-## Mixed skill — apply the bar per part
-
-- **Firm (trust).** Expected values captured by RUNNING the current code, never reasoned from intent or docs; the nondeterminism pass ordered before first capture; the pin-bugs-flag-bugs rule; the mandatory mutation proof with restoration proven; the handover naming what the net does and does not cover. A skipped step is a defect — the value is the proven net, not a plausible one.
-- **Provoked (judgment).** Where the seam is — which boundary the imminent change will preserve and is therefore worth pinning; which inputs earn a place in the net (branch-reaching, edge-hitting, not bulk); whether an output difference between runs is nondeterminism to tame or behavior to pin. Posed as forcing questions keyed to this code; never a template filled to feel done.
-
 ## Shape — the pass
 
 - **Pin the seam.** The outermost stable boundary the upcoming change will preserve: a public function, a CLI invocation, an HTTP handler, a file-in/file-out transform. Pin at the seam, not private helpers — a net over internals freezes the implementation and blocks exactly the refactor it exists to enable.
@@ -54,7 +43,3 @@ The committed net — tests, any golden files, the capture harness — plus a sh
 - At least one deliberate mutation was observed to fail the net, restoration was proven, and the net is green again.
 - Pinned bugs are flagged as findings for follow-up, never fixed mid-netting.
 - The handover states the honest boundary; no product-code change survives; nothing pushed.
-
-## Build-and-prune note
-
-Thin in this authoring repo — little legacy product code lives here — and that silence is not evidence against it. The value is portable to every repo with working, untested code in front of a change, judged by that leverage and its cognitive-offload: the full weave-tame-capture-prove procedure summoned with one token. First-to-prune on observed mis-fire. Watch three failure shapes: **pinning internals**, where the net becomes the obstacle to the refactor it was built to enable; **golden bloat**, where snapshots grow past what anyone reviews and the net decays into a rubber stamp; and the **skipped mutation proof**, where the net is handed over green-only — indistinguishable from the assertion-free tests it would otherwise resemble. Each is drift from net to decoration: prune evidence to collect, not a reason to withhold the build.

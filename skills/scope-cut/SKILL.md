@@ -9,19 +9,14 @@ Take an already-shaped scope that is too big for its constraint and cut it down 
 
 scope-cut is the library's one *constraint-driven descope* skill. It does not rank rival options, it does not critique a design, and it does not widen anything — it partitions a single chosen scope into keep / defer / cut against a binding constraint, and hands back the kept slice plus a ledger of everything it removes. Its debiasing engine is naming the constraint *first*: an explicit budget — a deadline, a risk ceiling, a capacity limit — turns "what do we cut?" from a vibes call into a measurable one, and forces the cut that "let's just keep all of it" quietly refuses.
 
-## The owned job (why it is a distinct skill)
+## Boundaries with neighbors
 
-A capable agent told "MVP this" already produces a smaller scope, so scope-cut earns its place two ways: it *guarantees* the two moves a bare cut drops under deadline pressure — naming the **binding constraint first** so the cut is measured against a real budget, and the **deferred-not-dropped ledger** that preserves every cut item with a re-entry condition instead of losing it — and it is the one owner whose **product is a constraint-driven keep/defer/cut partition of a single scope**. It is defined by inverting its nearest neighbors:
+scope-cut is defined by inverting its nearest neighbors:
 
 - `making-recommendations` picks **one winner** among rival options that optimize for the same outcome, and its own `options not comparable` exit bails when the items are not competing for one slot. scope-cut partitions **complementary pieces of one scope** — a must-have and a deferrable both belong, just in different waves. Partition-many, not pick-one.
 - `working-slice-review` reviews a design *draft* for overbuilding and emits a **read-only, non-binding nudge** keyed to the *learning* loop ("the smallest slice that would teach us whether this direction is right"). scope-cut **drives the cut** on an already-shaped scope keyed to a *binding constraint* (time / risk / capacity) and emits an actionable partition plus a deferral ledger. Learning critique vs constraint decision; read-only nudge vs the cut itself.
 - `ideate` widens the *solution* space; scope-cut narrows a *chosen* one. Opposite direction.
 - `to-issues` slices an already-agreed plan into trackable issues, and `next-steps` sequences supplied findings into a dependency-ordered plan. scope-cut decides what is **in the slice at all**, before either; its deferred list and `next-steps`'s Parked section share an output *shape*, never the job.
-
-## Mixed skill — apply the bar per part
-
-- **Provoked (judgment).** Which constraint actually binds; whether an item the goal truly cannot survive without is a real *must* or a disguised *should*; what the minimal *coherent* slice is; the right re-entry condition for a deferral. The MoSCoW-style bucketing is the part a capable model already improvises — the skill poses the forcing moves; it never fills the cut in for the agent and never hardens into a four-bucket form completed to feel done.
-- **Firm (trust).** The constraint-named-first contract, the coherent-slice and budget-fit checks, the deferred-not-dropped ledger with re-entry conditions, the `/triage` routing by reference, and the no-build-verdict boundary. Their value is a predictable, honest shape; a missing one is a defect, not a style choice.
 
 ## The moves — a rhythm, not a fill-in template
 
@@ -35,7 +30,7 @@ A capable agent told "MVP this" already produces a smaller scope, so scope-cut e
 
 Stop once the slice is coherent and every cut item is on the ledger. Then:
 
-- **Render no build/no-build verdict.** scope-cut decides what belongs in the minimal slice, not whether to commit to it — that commitment is the human's, or a downstream `making-recommendations` / `deploy-plan` call. The deliverable is the kept slice plus the deferred ledger.
+- **Render no build/no-build verdict.** scope-cut decides what belongs in the minimal slice, not whether to commit to it — that commitment is the human's, or a downstream `making-recommendations` / `deploy-plan` call. The deliverable is the kept slice plus the deferred ledger. Chat-first: both are delivered in the response — no artifact beyond the routed `/triage` items by default.
 - **Close with one honest line naming what the slice gives up** — the capability or guarantee, anchored to the original scope's *own* stated goals, that the user will notice is missing. Never certify the cut as safe or complete: a slice that looks whole relative to a line you drew is blindest exactly where you drew it. The honest signal is the named tradeoff, not "nothing important was lost."
 
 ## When not to scope-cut
@@ -45,7 +40,3 @@ Stop once the slice is coherent and every cut item is on the ledger. Then:
 - The scope is an unshaped idea, not an enumerable set → shape it first (`design-exploration`).
 - The scope is already cut and agreed, and you want it as trackable issues (`to-issues`) or as an ordered plan with gates and critical path (`next-steps`).
 - The goal itself is too muddy to say what "defensible" means → `outcome-shaping`.
-
-## Build-and-prune note
-
-Chat-first; no artifact beyond the routed `/triage` items by default. Descoping under a deadline fires often and locally at planning time, so this is not first-to-prune — but watch it actually earn its guarantees over a bare "MVP this": the cut core is a must/should/cut/defer call a capable agent already improvises, so the honest differential is reliability plus the constraint-first forcing move and the deferred-not-dropped ledger, not a new capability. If in practice it only restyles a must/should/could list, or drifts into ranking, design critique, or a build verdict, fold or prune it.

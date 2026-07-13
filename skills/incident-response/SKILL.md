@@ -9,14 +9,9 @@ Production is breaking right now. The one imperative: **stabilize before you und
 
 Your trained reflex — and your operator's — is to find the cause first. That reflex is correct in `diagnose` ("Do not proceed to Phase 2 until you have a loop you believe in", `diagnose:51`) and wrong here. Under fire, every minute spent understanding is a minute of harm you could have stopped — and you do not need the cause to stop the bleeding. The standing forcing question everything below answers: **what is the fastest reversible action that shrinks the harm right now?**
 
-## Advisory-not-actor — the inherited floor (read this before "act now")
+## Advisory-not-actor (read this before "act now")
 
-An AI agent usually cannot read prod and must never act on it. You **advise the human operator**; you take no production action — no deploy, traffic shift, rollback execution, or paging. "Reduce harm now" is addressed to the operator *through you*: your speed is in compressing their decision loop, not in touching the system. The live timeline records only what you **observed** or were **told**, never invented telemetry; where blind, label `UNVERIFIED` and name the signal a human must read. This is the library-wide evidence-before-claims floor (`runbook-authoring:45`) on the can't-read-prod surface — this skill obeys it, it does not own it — and it is what keeps `postmortem`'s Beat-1 inputs clean (`postmortem:29-35`).
-
-## Mixed skill — apply the bar per part
-
-- **Firm (trust).** The stop condition (stabilized); the live-timeline shape (timestamped, observed-or-told-or-`UNVERIFIED`, causes excluded, advised-not-acted); and the advisory-not-actor floor. Under pressure a predictable shape *is* the value; a missing firm part is a defect.
-- **Provoked (judgment).** The severity read, the mitigate-vs-investigate call, which mitigation to advise, the rollback-vs-forward decision. The skill poses these as forcing questions; it never answers them and never hardens into a template filled to feel done.
+An AI agent usually cannot read prod and must never act on it. You **advise the human operator**; you take no production action — no deploy, traffic shift, rollback execution, or paging. "Reduce harm now" is addressed to the operator *through you*: your speed is in compressing their decision loop, not in touching the system. The live timeline records only what you **observed** or were **told**, never invented telemetry; where blind, label `UNVERIFIED` and name the signal a human must read. This discipline is what keeps `postmortem`'s Beat-1 inputs clean.
 
 ## Move 1 — Mitigate first (severity folded in)
 
@@ -44,7 +39,7 @@ Cadence **scales with the severity read** (its second consumer): the worse and f
 
 ## The live-timeline format
 
-Append-only, one line per event, newest at the bottom, written as events happen and never back-edited. This is the artifact `postmortem` consumes as Beat-1 raw facts (`postmortem:29-37`).
+Append-only, one line per event, newest at the bottom, written as events happen and never back-edited. This is the artifact `postmortem` consumes as Beat-1 raw facts.
 
 ```
 ## Incident <slug> — live timeline — opened HH:MM:SS TZ
@@ -105,7 +100,3 @@ At stabilized the skill **stops**: it does not hunt cause, retrospect, or author
 - Harm has stopped growing and the operator accepts the state as holding; "declared STABILIZED" is the final `DECISION` entry.
 - A live timeline exists — timestamped, provenance-tagged by the default rule, causes excluded, advised-not-acted — ready to hand to `postmortem` as Beat-1.
 - The unknown cause (if any) is routed to `diagnose`, and the retrospective to `postmortem`; no production action was taken and no cause was asserted over a signal you could not read.
-
-## Build-and-prune note
-
-Live burning-prod moments are rare in this authoring repo, so this is **first-to-prune**; the value is **portable** to ops/product repos. Watch the redirect-and-record fire on a real incident; prune without ceremony if it does not earn its keep — and never let it accrete a generic incident-management framework (ICS, role charts) to justify itself.

@@ -7,19 +7,14 @@ description: "Use when the user wants to GENERATE a wide field of genuinely diff
 
 Widen a clear-enough prompt into a deliberately un-narrowed field of genuinely different options, then stop before any ranking. Invocation: `/ideate` or `$ideate`.
 
-ideate is the library's general-purpose *divergent* skill: it widens the solution space itself, where its exploratory siblings (`premortem`, `red-team`, `steelman`) run divergent or one-sided passes over one already-committed object, under the no-certificate law ideate seeded. The deciding lanes converge — `making-recommendations` ranks, `design-exploration` shapes and approves, the review and grilling lanes adjudicate. ideate runs the other direction: it generates breadth and hands it off un-narrowed. It never ranks, scores, picks, or develops one option into a design.
+ideate is the library's general-purpose *divergent* skill: it widens the solution space itself, where its exploratory siblings (`premortem`, `red-team`, `steelman`) run divergent or one-sided passes over one already-committed object, under the no-certificate law. The deciding lanes converge — `making-recommendations` ranks, `design-exploration` shapes and approves, the review and grilling lanes adjudicate. ideate runs the other direction: it generates breadth and hands it off un-narrowed. It never ranks, scores, picks, or develops one option into a design.
 
-## The owned job (why it is a distinct skill)
+## Boundaries with neighbors
 
-A capable agent told "brainstorm widely" already produces a list, so ideate earns its place two ways: it *guarantees* the behaviors that bare list silently drops under load (below), and it is the one owner whose **product is breadth**. It is defined by inverting its two nearest neighbors, both of which also generate:
+ideate is defined by inverting its two nearest neighbors, both of which also generate:
 
 - `making-recommendations` generates options, but admits only *serious, could-win* ones because it is decision-bound. ideate deliberately admits the **non-serious, won't-win, frame-breaking** option — in this lane breadth is the deliverable, not a means to a pick. ideate is not "making-recommendations with the ranking deleted"; it has the opposite admission rule.
 - `design-exploration` proposes a few genuinely different approaches too, but with **convergent gravity**: it leads with a recommendation and develops one toward an approved design. ideate has the opposite gravity — it widens and refuses to converge, leaving the field un-narrowed for a downstream lane to narrow.
-
-## Mixed skill — apply the bar per part
-
-- **Provoked (judgment).** What options to generate, whether two are genuinely distinct, which frame the prompt smuggles in. The skill poses forcing moves; it never fills them in for the agent and never hardens into a template completed to feel done.
-- **Firm (trust).** The un-ranked output shape, the no-leak hard stop, the boundary, the no-coverage-certificate rule. Their value is a predictable shape the next lane can consume; a missing part is a defect, not a style choice.
 
 ## The moves — a rhythm, not a fill-in template
 
@@ -31,7 +26,7 @@ A capable agent told "brainstorm widely" already produces a list, so ideate earn
 
 ## Output and the no-certificate rule
 
-A flat, **un-ranked** field. Each option: a short handle, a one-line core idea, and the distinct bet or mechanism that sets it apart — descriptive, never evaluative. No per-option "source" or "lens" tag (it manufactures the surface difference the de-cluster exists to strip). No scores, no ordering by quality, no "I'd lean," no developing an option into a design. Generation order is not neutral either: your first instinct generated first, and the first slot reads as the favorite — order by an axis with no quality reading (cluster, or the constraint each option varies) and never lead with your first instinct. Then reread the handles and one-liners: if a reader could reconstruct your lean from wording alone, reword until they cannot — a stated lean is at least contestable; a favorite wearing the best handle is not. Cluster lightly only for scannability; clustering is presentation, never proof of coverage.
+A flat, **un-ranked** field. Each option: a short handle, a one-line core idea, and the distinct bet or mechanism that sets it apart — descriptive, never evaluative. No per-option "source" or "lens" tag (it manufactures the surface difference the de-cluster exists to strip). No scores, no ordering by quality, no "I'd lean," no developing an option into a design. Generation order is not neutral either: your first instinct generated first, and the first slot reads as the favorite — order by an axis with no quality reading (cluster, or the constraint each option varies) and never lead with your first instinct. Then reread the handles and one-liners: if a reader could reconstruct your lean from wording alone, reword until they cannot — a stated lean is at least contestable; a favorite wearing the best handle is not. Cluster lightly only for scannability; clustering is presentation, never proof of coverage. Chat-first: the field is delivered in the response — no artifact by default.
 
 Close with **one honest line naming which of the prompt's own fixed points the field still leaves untouched** — anchored to the prompt's stated constraints, not to axes you drew. That is the only coverage signal allowed.
 
@@ -50,7 +45,3 @@ Stop the instant a stable field exists — even when the same message asks "so w
 - The options are already on the table and the user wants a pick → `making-recommendations`.
 - The goal is still muddy — you cannot say what a good option would even do → `outcome-shaping`.
 - The prompt has one right answer and a wide field is just noise → say so and stop; do not manufacture diversity. Knowing when *not* to widen is part of the skill.
-
-## Build-and-prune note
-
-Chat-first; no artifact by default. Divergent generation fires often and locally, so this is not first-to-prune — but watch it actually earn its four guarantees over a bare brainstorm: the named frame plus a frame-breaking option, both anti-modal options present, mechanism-level distinctness under the de-cluster, and the un-ranked leak-checked field with its untouched-fixed-points close. Fold or prune if in practice it only restyles a list a capable agent already produces. The honest differential is reliability plus modest cognitive-offload, not a new capability.

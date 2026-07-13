@@ -9,17 +9,6 @@ Make a specific database schema or data migration safe to run against a live sys
 
 An advisory pass over one concrete migration — a planned DDL change, a backfill, a column or table reshape — that sequences it to ship without an outage or data loss, scans each statement for the lock and reversibility footguns, and stops at the reviewed plan. It authors or reviews the migration plan; it never runs the migration, the backfill, or the rollback.
 
-## The owned job
-
-This owns the **DB-execution-safety layer** of a schema or data change against a *running* system: the lock class of each DDL statement, the batched-backfill and online-index discipline, the execution ordering that keeps the old app version working through a rolling deploy, and per-step reversibility. No neighbor owns it. `contract-change-propagation` maps an interface change's blast radius — which consumers break, what semver — read-only and at the call-site altitude, and stops at the plan; `migration-campaign` drives one mechanical *code* edit across many sites; `deploy-plan` owns the domain-agnostic go/no-go gauge. Each composes with this skill; none carries the lock/backfill/index/drop-ordering layer that is its heart. This skill does **not** re-derive `contract-change-propagation`'s consumer enumeration, breaking-delta classification, or semver work — when the migration also changes an interface external code reads, hand that to it and reference it.
-
-Its value is **time-asymmetric and high-stakes**. The footgun that ships unspotted — a `NOT NULL` add that rewrites the whole table under an exclusive lock, an index built without `CONCURRENTLY`, an unbatched backfill that starves replication, a column dropped while the old app version still reads it — costs a production outage or irreversible data loss at run time, not a cheap fix later. The value is the guaranteed-complete hazard scan *now*, while there is still time to resequence, and while the human is spared composing the careful migration prompt, holding the engine-specific gotchas in mind, and auditing afterward that none were skipped.
-
-## Mixed skill — apply the bar per part
-
-- **Firm (trust).** The footgun scan (lock class per statement, batched backfills, online/concurrent indexes, drop-last ordering, per-step reversibility), the expand-contract phase discipline, the engine/version-confirm gate, and the advisory-only stop. These have right/wrong answers and a predictable shape; a skipped check is a defect, because the value is the *complete* pass, not a plausible one.
-- **Provoked (judgment).** Whether a given DDL statement is safe *on this engine and version*, and how to order it around *these* deploys. The skill poses these as forcing questions keyed to the migration; it never answers them with a generic "use expand-contract" and never hardens into a template filled to feel done.
-
 ## Shape — a forcing pass over one migration
 
 First, **confirm the engine and version** — a required first step, not a courtesy. The lock verdict for the *same* statement flips on it: a `NOT NULL`-with-default add rewrites the table on PostgreSQL < 11 but not on 11+; MySQL routes large changes through `INSTANT` / `INPLACE` / `COPY` algorithms or `pt-osc` / `gh-ost`; SQL Server and Oracle differ again. Confirm the engine and version before flagging any statement. Where they cannot be confirmed, give the hazard scan *conditioned* on them ("rewrites on PG < 11, safe on 11+ — confirm your version") and flag it loudly; never emit a flat verdict that silently assumes Postgres. A confidently-wrong lock verdict here is an outage, not a style nit.
@@ -50,9 +39,9 @@ Close by **checking the footguns off** explicitly: engine/version confirmed (or 
 - **Applied mode does not dissolve the judgment.** When you author edits, surface each engine/version assumption and each ordering choice as a flagged inline decision, not a default silently baked in. The forcing questions become visible judgment calls in the diff; they do not disappear into rewritten SQL.
 - **One migration.** Default scope is one migration — one change set against one schema. Pointed at a whole migrations directory, narrow to the riskiest pending migration(s) and *say so* — this is a forcing pass, not an audit. A scored backlog of migration debt is `tech-debt-scan`'s job.
 
-## Proof boundary (the inherited floor)
+## Proof boundary
 
-This skill authors the plan; it cannot read the live database. It cannot confirm the real table size, current lock contention, replication topology, row count, or that a backfill actually completed — those are live reads a human or an operational tool must do. State what was assumed (treat the table as large and hot unless told otherwise) and what stays unverified until the live DB is checked: *"sequenced expand-contract with a batched backfill; not confirmed against the real table size or replica lag."* Advisory-only: never run the migration, the backfill, or the rollback. This is the library-wide evidence-before-claims floor specialized to the can't-touch-prod-DB surface; the skill obeys it, it does not own it.
+This skill authors the plan; it cannot read the live database. It cannot confirm the real table size, current lock contention, replication topology, row count, or that a backfill actually completed — those are live reads a human or an operational tool must do. State what was assumed (treat the table as large and hot unless told otherwise) and what stays unverified until the live DB is checked: *"sequenced expand-contract with a batched backfill; not confirmed against the real table size or replica lag."* Advisory-only: never run the migration, the backfill, or the rollback.
 
 ## Fences
 
@@ -68,7 +57,3 @@ This skill authors the plan; it cannot read the live database. It cannot confirm
 - The change is sequenced expand-contract / parallel-change, each phase the migration warrants paired with its deploy step and a reversibility note, with drop-old-last ordering held.
 - Every statement's footguns are scanned and flagged: table-rewriting / long-lock DDL, blocking index builds, unbatched backfills, replication-lag risk, drop/rename ordering, and per-step rollback with each point of no return named.
 - The output is delivered in the mode the invocation implies (applied edits or a reviewed plan), advisory-only, with the proof boundary stated — what was assumed and what stays unverified until the live DB is checked. No verdict beyond *safe-as-sequenced* / *unsafe-here-because*.
-
-## Build-and-prune note
-
-Thin in this authoring repo — there is no production database here; the value is **portable** to backend, service, and data-platform repos with a relational DB and a migrations directory, where these footguns recur and land their cost at run time. First-to-prune locally. Watch it fire on real migration work; prune without ceremony if it never earns more than "looks fine." Never let it accrete into a multi-engine DDL encyclopedia — the moment it stops being a tight, engine-confirmed forcing pass over one migration and becomes a reference of every lock rule for every database, it has become the thing it was built not to be.

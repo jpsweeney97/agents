@@ -9,15 +9,6 @@ For a specific risky change about to ship: choose the rollout shape, set an expl
 
 This skill advises the operator and authors the go/no-go gauge; it never executes a deploy, traffic shift, or rollback.
 
-## The owned job
-
-`deploy-plan` owns the **go/no-go gauge end-to-end** for one risky ship: set the gauge before push, read it after. `release-cut` stops at "push" and explicitly disclaims readiness ("not a release-readiness scorer — there is no go/no-go gauge", `release-cut:70`); `deploy-plan` owns exactly the gauge it refuses. The two moments are one job: owning the decision to abort without owning *how you read whether to abort* is an incomplete instrument — a gauge you cannot read is not a gauge.
-
-## Mixed skill — apply the bar per part
-
-- **Firm (trust).** The pre-registration discipline (the abort thresholds, bake window, and smallest signal set are fixed *before* push and never moved after seeing the data); the bake-read verdict shape (`healthy` / `abort` / `UNVERIFIED` against the pre-registered thresholds); and the proof-law (advisory-not-actor; can't-read-prod → `UNVERIFIED`). A missing threshold, or one moved post-hoc to fit the data, is a defect — the value is that the gauge is honest.
-- **Provoked (judgment).** The rollout shape, what the thresholds should be, which signals are the smallest sufficient set, and the go/no-go call itself. The skill poses these as forcing questions; it never answers them for the operator and never hardens into a template filled to feel done.
-
 ## Shape — two moments, one gauge
 
 **Before push — set the gauge.**
@@ -34,9 +25,9 @@ This skill advises the operator and authors the go/no-go gauge; it never execute
 - **Advisory-not-actor** — recommend; the operator executes. On `abort`, point at the characterized rollback path; if prod is actually harmed, route to `incident-response`.
 - **Healthy is not goal-met** — a `healthy` bake-read closes only the technical question; whether the change achieved the goal it shipped for is a later, different read: hand forward to `/outcome-check` (or `$outcome-check`) at the goal's horizon.
 
-## Proof boundary (the inherited floor)
+## Proof boundary
 
-An AI agent usually cannot read prod. Report only what you actually observed; reachability-gate the named signals first; read where readable; where blind, label `UNVERIFIED` with the exact signal a human must read — never a green stamp over a signal merely reached. Advisory-not-actor: advise the operator; take no production action (no deploy, traffic shift, rollback execution, or paging). This is the library-wide evidence-before-claims floor (`runbook-authoring:45`), specialized to the can't-read-prod surface; the skill obeys it, it does not own it.
+An AI agent usually cannot read prod. Report only what you actually observed; reachability-gate the named signals first; read where readable; where blind, label `UNVERIFIED` with the exact signal a human must read — never a green stamp over a signal merely reached. Advisory-not-actor: advise the operator; take no production action (no deploy, traffic shift, rollback execution, or paging).
 
 ## Persistence
 
@@ -55,7 +46,3 @@ The gauge is pre-registered before push and read after — sometimes in a later 
 - A rollout shape is chosen and justified, and the rollback path is characterized in runbook-authoring's vocabulary by reference.
 - The gauge is pre-registered: the smallest signal set, a per-signal abort threshold, and a bake window — fixed before push.
 - An explicit go/no-go is stated; and (post-push) the bake-read renders `healthy` / `abort` / `UNVERIFIED` against the pre-registered thresholds, advisory-only, naming any signal a human must read.
-
-## Build-and-prune note
-
-Thin and **first-to-prune** — risky ships are rare in this authoring repo; the value is **portable** to ops/product repos. Watch it fire on a real risky ship; prune without ceremony if it never earns more than "read your own gauge."

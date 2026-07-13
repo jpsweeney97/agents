@@ -96,7 +96,3 @@ This artifact uses its **own binary finding shape** — it does **not** import `
 - vs `contract-change-propagation`: it is change-anchored (a proposed interface delta → which consumers break, in what order); this is standing-state (no change supplied, existing docs vs current code).
 - vs `verify` / `behavior-smoke-test`: they execute to check behavior; this never executes — it checks that named references *resolve*, not that the code *behaves* as documented.
 - In **this** repo: the five SessionStart canaries + `scripts/check-library-integrity.sh` own the structural skill-wiring slice (name==dir, self-referenced paths, orphans, parse); `doc-drift-audit` defers that and audits only content claims (prose vs code).
-
-## Build-and-prune note
-
-Locally **first-to-prune**: a skill-library's prose carries few hard code symbols, and the canaries plus `check-library-integrity.sh` already own the structural slice, so content-claim drift is thin here. The real value is **portable** — code-heavy repos with READMEs, API/reference docs, and CLI/config docs that rot against a moving codebase. Build it because it is cheap to try and clean to remove; judge it by whether it fires usefully when pointed at a code-heavy repo, and prune without ceremony if it does not.

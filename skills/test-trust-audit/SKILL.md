@@ -9,17 +9,6 @@ The suite is green; this skill asks whether green means anything — an evidence
 
 A sweep over one existing green suite for the hollow-green patterns: skip and quarantine drift, assertion-free tests, tautological tests, mocks asserting mocks, snapshot rubber-stamping, and coverage that executes without checking — plus an optional, opt-in, strictly contained mutation probe that samples whether the suite catches a deliberate behavior change. The product is a findings list with file:line evidence, ordered by how badly each finding undermines trust. It fixes nothing, scores nothing, and certifies nothing.
 
-## The owned job
-
-This owns the **evidentiary audit of an existing green suite**: whether "tests pass" is proof or noise. No neighbor owns it. `keep-green` drives a suite you just broke back to green — it never asks whether green is honest; `tdd` authors new tests test-first and prevents these defects at writing time; `implementation-review` (when `review-family:implementation-review` is available) reviews a completed change against a spec plus a diff; a scored repo-wide backlog is `tech-debt-scan`'s. Each composes with this skill; none reads the suite you already have and reports what its green actually proves.
-
-Its value is time-asymmetric and high-stakes. A hollow suite silently converts every future "tests pass" into a false proof, and the cost lands exactly when someone leans on it — the refactor shipped on green that checked nothing, the upgrade "verified" by tests that assert mocks. The value is the complete hollow-green sweep now, while the human is spared composing the checklist and reading hundreds of test bodies.
-
-## Mixed skill — apply the bar per part
-
-- **Firm (trust).** The six finding classes swept every run, file:line evidence on every finding, the mutation probe's containment protocol, the no-score/no-certificate close, and the read-only default. These have right/wrong answers and a predictable shape; a skipped class, an evidence-free finding, or a mutation left behind is a defect — the value is the complete, cited pass, not a plausible one.
-- **Provoked (judgment).** Whether a mock boundary is legitimate isolation or the test testing itself; whether a snapshot is a reviewed contract or a rubber stamp; which functions are load-bearing enough to earn a mutation sample. Posed as forcing questions keyed to this suite; never answered with a generic "mocks are bad", never hardened into a checklist filled in to feel done.
-
 ## Shape — the sweep
 
 Six classes, swept every run — each with its detection route and its judgment question:
@@ -41,7 +30,7 @@ Off by default. Run it only when the user opts in AND `git status --short` shows
 4. Run only the covering tests, not the whole suite; record caught or survived.
 5. Restore the site and PROVE restoration with `git diff --exit-code` (or `git checkout -- <file>` followed by that proof) before touching the next site.
 
-A surviving mutation is a concrete finding: name the mutation and the tests that stayed green. Never commit a mutation; never leave one behind on any exit path, including a test-runner failure mid-probe; if restoration cannot be proven, say so as the first line of the report. Probe findings are sampled-and-said: "3 of 5 sampled mutations survived", never "the suite catches N% of bugs".
+A surviving mutation is a concrete finding: name the mutation and the tests that stayed green. Never commit a mutation; never leave one behind on any exit path, including a test-runner failure mid-probe; if restoration cannot be proven, say so as the first line of the report. Probe findings are sampled-and-said: "3 of 5 sampled mutations survived", never "the suite catches N% of bugs". The probe also stays a handful: the moment it wants more than a handful of sampled mutations, that is a mutation-testing framework's job — use a real tool and say so.
 
 ## Output
 
@@ -69,7 +58,3 @@ No score, no grade, no "trustworthy"/"untrustworthy" verdict — never a trust s
 - The probe, if opted in, ran under the full containment protocol with restoration proven per site.
 - The close names the sweep's boundaries — swept, sampled, not inspected — and renders no certificate.
 - Nothing was fixed, committed, or pushed.
-
-## Build-and-prune note
-
-Thin in this authoring repo — its suites are small — and that silence is not evidence against it. The value is portable to every repo with a test suite, judged by that leverage and its cognitive-offload: the complete hollow-green checklist plus the evidence-per-finding discipline, summoned with one token. First-to-prune on observed mis-fire. Watch two failure shapes: drifting into a **scored health grade** — a number is `tech-debt-scan`'s register, and exactly the certificate this skill exists to refuse; and the **probe outgrowing its containment** — the moment it wants more than a handful of sampled mutations, that is a mutation-testing framework's job: use a real tool and say so. Either is prune evidence to collect, not a reason to withhold the build.

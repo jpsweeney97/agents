@@ -7,13 +7,9 @@ description: "Use when a change has been in production a while and you need to c
 
 For a change that shipped a while ago: did it actually move the goal it existed to move? Name the goal, check whether any real-world signal of it is reachable, and render a verdict — closing the loop `outcome-shaping` opens. Invocation: `/outcome-check` or `$outcome-check`.
 
-The agent usually cannot read the goal metric, so the honest modal verdict is `unverifiable-here` with the exact signal a human must read. That is the deliverable, not a failure.
+The agent usually cannot read the goal metric, so the honest modal verdict is `unverifiable-here` with the exact signal a human must read. That is the deliverable, not a failure. Read-only and advisory: it renders a verdict; it takes no action.
 
-## The owned job
-
-`outcome-check` owns the **post-ship goal read**: did the world change the way the change intended? `closeout-check` asks whether *local work* is done (`closeout-check:19`); `implementation-review` asks whether the *code* matches the spec; neither asks whether the *goal* happened. `outcome-check` closes `outcome-shaping`'s loop — the clarified outcome someone set up front, now checked against the world. It is read-only and advisory: it renders a verdict; it takes no action.
-
-## Fail-fast gate (the load-bearing firm part)
+## Fail-fast gate
 
 Before anything else, ask whether **any** real-world signal of the goal is reachable at all. If not, say so in one line — `unverifiable-here: <the exact signal a human must read>` — and stop. Do **not** produce a structured shrug, and do **not** invent a goal so there is something to check. This gate is what keeps the skill honest; without it the skill degrades into either a fabricated all-clear or busywork.
 
@@ -25,9 +21,9 @@ Before anything else, ask whether **any** real-world signal of the goal is reach
 
 When an `acceptance-map` artifact exists, its stable-ID checks are the criteria; render the verdict in `outcome-check`'s own output — no change to `acceptance-map`.
 
-## Proof boundary (the inherited floor)
+## Proof boundary
 
-An AI agent usually cannot read prod or the live goal metric. Report only what you observed; reachability-gate first; where blind, label `unverifiable-here` with the exact signal a human must read — never assert the goal moved over a metric you could not read. This is the library-wide evidence-before-claims floor (`runbook-authoring:45`), specialized to the can't-read-prod surface; the skill obeys it, it does not own it.
+An AI agent usually cannot read prod or the live goal metric. Report only what you observed; reachability-gate first; where blind, label `unverifiable-here` with the exact signal a human must read — never assert the goal moved over a metric you could not read.
 
 ## Fences
 
@@ -42,7 +38,3 @@ An AI agent usually cannot read prod or the live goal metric. Report only what y
 - The goal metric is named (or its absence flagged and routed back to `outcome-shaping`).
 - Reachability is gated before any claim.
 - The verdict is exactly one of `goal-met` / `not-moved` / `unverifiable-here`, carrying either the observation or the exact signal a human must read.
-
-## Build-and-prune note
-
-Thin and heavily proof-bounded — **first-to-prune**; the value is **portable** to product repos that ship to move metrics. Watch it fire on a real "did it work?" question; prune without ceremony if it never earns more than "re-read the acceptance map weeks later."

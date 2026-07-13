@@ -68,7 +68,3 @@ Each owner keeps its own downstream gate, and they stack with this one: this gat
 - Every live drift traces to a recorded human direction decision; nothing was mutated before that record existed.
 - Each stale artifact was driven to the recorded target through its owner — or surgically corrected / superseded where no revision owner exists, with the gap flagged.
 - Faithfulness was checked per owner; landing and done-ness were handed to `git-cycle` / `closeout-check`, not performed here.
-
-## Build-and-prune note
-
-Locally **first-to-prune**: this repo's spec→code chains are thin. The value is **portable** — product repos where a PRD/plan/issue/code chain rots when intent moves mid-stream. Watch it fire on a real intent change; prune without ceremony if it does not earn its keep.
