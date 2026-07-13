@@ -73,6 +73,8 @@ Two output conventions run through the skill library as practiced but previously
 - **Verdict partition.** Exploratory and adversarial skills (`ideate`, `premortem`, `red-team`, `steelman`) render no verdict: their output is deliberately one-sided or divergent, and a bolted-on verdict gets mistaken for the calibrated call, short-circuiting the owner that should weigh the full picture. Decision-owning skills (`closeout-check`, `deploy-plan`, `outcome-check`) render exactly one. Place a new skill on one side on purpose; a skill that both explores and adjudicates is two skills.
 - **Close packet.** A skill whose output gates a downstream action or chains into another skill closes with a compact labelled field:value shape (`closeout-check`'s verdict block, `deploy-plan`'s bake-read) so the next reader — human or skill — can branch without re-parsing prose. Read-only, exploratory, and dialogic skills keep their native close; forcing a packet on them is waste, not discipline.
 
+One surface convention joins them: maintainer-facing lifecycle and merit material — prune conditions and watch-signals, merit arguments, per-part judgment/trust declarations, provenance history — does not belong in a `SKILL.md` body. The body is the fire-time surface an agent reads mid-invocation, in whatever repo the skill fires in, so give it only what changes behavior at fire time; lifecycle and merit context lives in `docs/agents/skill-lifecycle-notes.md` or the repo docs instead.
+
 ## When Machinery Survives
 
 Keep the surviving machinery narrow. Be able to say plainly:
