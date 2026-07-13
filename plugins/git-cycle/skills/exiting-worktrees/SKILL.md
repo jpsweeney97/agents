@@ -39,10 +39,6 @@ When the Claude Code `ExitWorktree` built-in is available (deferred — fetch it
 
 **Branch cleanup:** `ExitWorktree` may not delete the branch (notably with `discard_changes: true`). After it returns, verify with `git branch --list '<branch-pattern>'`; if the branch survives, delete it with `git branch -d <branch-name>`.
 
-## Why This Skill Exists
-
-`ExitWorktree` handles the mechanical removal, but it doesn't know whether your work is safe to delete. This skill ensures you've verified everything landed before calling it — uncommitted changes checked, PR confirmed merged, local main synced.
-
 ## Pre-Exit Checklist
 
 Run these checks in order. Stop and resolve any that fail.

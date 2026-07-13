@@ -4,6 +4,12 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.4.1 - 2026-07-12
+
+### Removed
+
+- `exiting-worktrees`: removed the "Why This Skill Exists" rationale section from the skill body; the Pre-Exit Checklist carries the same obligations operationally. No behavior change.
+
 ## 1.4.0 - 2026-07-09
 
 ### Added
