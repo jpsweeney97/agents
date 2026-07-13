@@ -9,13 +9,12 @@ Review an agent skill as a behavior contract. Ask whether the skill will make th
 
 ## Review-Family Routing
 
-Explicit review-family invocation wins. The plugin-scoped form is `review-family:scrutinize-skill`; `/scrutinize-skill` or `$scrutinize-skill` is accepted shorthand when skill mentions are available in the current surface. When the review target is an agent skill or skill-support file, this skill also wins over generic `scrutinize`, even if the user used natural-language scrutiny wording.
+Explicit review-family invocation wins (`review-family:scrutinize-skill`; `/scrutinize-skill` or `$scrutinize-skill` where skill mentions are available). When the review target is an agent skill or skill-support file — a skill directory, `SKILL.md`, `agents/openai.yaml`, behavior-shaping reference, example, or proposed skill contract — this skill also wins over generic `scrutinize`, even under natural-language scrutiny wording.
 
-- Use this skill for adversarial review of an agent skill, skill directory, `SKILL.md`, `agents/openai.yaml`, behavior-shaping reference, example, or proposed skill contract. This skill wins over `scrutinize` for agent skill behavior-contract review.
-- Use `scrutinize` for broad natural-language adversarial artifact critique, formal stress tests, and execution-readiness reviews when this skill was not invoked.
-- Use `implementation-review` for completed code or artifacts against a plan/spec, and `system-design-review` for architecture or system-boundary review.
-- Use `review-reviewer` for supplied-review adjudication or pasted-claim checks.
-- If this skill is not the right review-family target, name the better skill and switch only when invocation rules allow it; otherwise ask one routing question.
+- Broad adversarial artifact critique, formal stress tests, or execution-readiness reviews where this skill was not invoked → `scrutinize`.
+- Completed code or artifacts against a plan/spec → `implementation-review`; architecture or system-boundary review → `system-design-review`.
+- Supplied-review adjudication or pasted-claim checks → `review-reviewer`.
+- Otherwise-wrong lane: name the better skill; if invocation rules bar switching, ask one routing question.
 
 ## Scope
 

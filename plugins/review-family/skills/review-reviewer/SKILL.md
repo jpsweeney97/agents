@@ -13,19 +13,16 @@ Adjudicate another review without rubber-stamping it. Treat the supplied review 
 - Explicit-only: use this skill only when invoked as `/review-reviewer` or `$review-reviewer`. Do not silently route natural-language requests here while `agents/openai.yaml` has `allow_implicit_invocation: false`.
 - Required input: the supplied review, review claims, or pasted claims. Do not require the user to also provide a target path, PR, spec, or artifact; infer the target from the review, claims, and immediate conversation context when possible.
 - Non-trigger: ordinary critiques, first-pass reviews, implementation reviews, "scrutinize this", "be adversarial", "check whether this review is right" without `/review-reviewer` or `$review-reviewer`, basic claim extraction without evidence checking, or implementation follow-up without a supplied review or claim set to adjudicate.
-- Packet selection: use full review adjudication when the user asks whether a supplied review was reliable, complete, overreaching, underpowered, or historically correct. Use Current Claim Check when the user asks to check these claims, check review claims, or validate pasted claims item by item against current evidence before acting.
+- Packet selection: use full review adjudication when the user asks whether a supplied review was reliable, complete, overreaching, underpowered, stale, or historically correct. Use Current Claim Check when the user asks to check these claims, check review claims, or validate pasted claims item by item against current evidence before acting.
 - Default to read-only. You may inspect files, diffs, git metadata, PR metadata, docs, and run bounded non-mutating checks directly tied to the inferred target, a disputed claim, or a bounded independent or missed issue; do not edit files, stage, commit, push, delete, sync, publish, or implement fixes unless the user explicitly asks for that separate action; the same gate covers installing dependencies, creating tickets, and running broad test suites.
 - Stop after the selected review packet by default. Include terse dispositions and next actions, but do not continue into fixes.
 
 ## Review-Family Routing
 
-Explicit review-family invocation wins, including namespaced plugin forms such as `review-family:review-reviewer`.
+Explicit review-family invocation wins, including namespaced plugin forms such as `review-family:review-reviewer`; this skill runs only when explicitly invoked, and Boundaries owns the explicit-only rule and packet selection.
 
-- Use this skill only when explicitly invoked to adjudicate a supplied review or to check pasted review claims against target evidence.
-- Run Current Claim Check instead of the full adjudication packet when the user asks to check these claims, check review claims, or validate pasted claims item by item against current repo, source, PR, doc, or runtime evidence before acting.
-- Run full review adjudication when the user asks whether the supplied review itself was reliable, complete, overreaching, underpowered, stale, historically correct, or missing issues.
-- Use `implementation-review` for completed code against a plan/spec, `scrutinize` for first-pass adversarial artifact critique, `system-design-review` for architecture tradeoffs, and `scrutinize-skill` for agent skill, `SKILL.md`, or skill-contract targets.
-- If the user asks in natural language whether a review is right without invoking this skill, do not silently run the full packet; answer normally or ask whether they want `/review-reviewer` or `$review-reviewer`.
+- Completed code against a plan/spec → `implementation-review`; first-pass adversarial artifact critique → `scrutinize`; architecture tradeoffs → `system-design-review`; agent skill or skill-contract target → `scrutinize-skill`.
+- A natural-language "is this review right?" without the invocation → do not silently run the full packet; answer normally or ask whether they want `/review-reviewer` or `$review-reviewer`.
 
 ## Full Review Adjudication Workflow
 

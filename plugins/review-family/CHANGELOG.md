@@ -4,6 +4,12 @@ All notable changes to the Review Family plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.9.1 - 2026-07-13
+
+### Changed
+
+- Conciseness campaign (2026-07-13 audit dispositions), obligation-preserving refactor. `implementation-review`: the nine surface-lens protocols move to `references/review-lenses.md` behind a mandatory load trigger at the attack step, leaving a one-line-per-lens index; Evidence Gate items now name and reference their owning sections instead of restating them, and the Ship gate points to Verdict Taxonomy for the `Ship` conditions (body 3,368 → 2,752 words). All five skills compress Review-Family Routing to a wins-statement plus one-line redirects (766 → 490 words family-wide; each deleted bullet's unique scope carried into its surviving home — `review-reviewer`'s packet-selection rule single-homed in Boundaries, gaining "stale"); `scrutinize`'s steelman handoff tightened. No trigger, verdict-vocabulary, CANON-core, or proof-discipline changes; frontmatter untouched; `check-review-family.sh` green. Publish deferred until explicitly authorized; the Codex cache stays at 0.9.0 and `codex-plugins-sync.sh --check` reporting DRIFT is the expected state.
+
 ## 0.9.0 - 2026-07-12
 
 ### Added
