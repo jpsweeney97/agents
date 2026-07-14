@@ -185,6 +185,14 @@ packet-items:
       shape: {status: include}
       recommend: {status: include}
       contest: {status: withhold}
+  - key: composition-provenance
+    label: the explicit invocation and delegation spans evidencing the authorized composition workflow, candidate-free by elision
+    matrix:
+      generate: {status: withhold}
+      prune: {status: withhold}
+      shape: {status: include}
+      recommend: {status: withhold}
+      contest: {status: withhold}
   - key: method
     label: the deliberate-owned Prune or Contest method text
     matrix:
@@ -295,8 +303,8 @@ schemas:
     keys:
       - {key: schema, required: true, const: deliberate-envelope/v1}
       - {key: stage, required: true, enum: [generate, prune, shape, recommend, contest]}
-      - {key: status, required: true, note: "`completed`, the named honest exit, or `failed: <reason>`"}
-      - {key: artifacts, required: true, note: "map carrying exactly the stage's obliged-artifact keys; each value present, `not produced: <reason>`, or (conditional artifacts only) `not applicable`"}
+      - {key: status, required: true, note: "three-class grammar, mechanically enforced: `completed`, `exit: <the named honest exit>`, or `failed: <reason>`"}
+      - {key: artifacts, required: true, note: "map carrying exactly the stage's obliged-artifact keys; each value present, `not produced: <reason>` (never on a completed stage), or (conditional artifacts only) `not applicable`"}
       - {key: retrievals, required: true, note: "`none`, or list of {source, retrieved-at, fact, concerns} — concerns is `candidate-neutral` or the list of every candidate the fact names, evidences, or was retrieved to investigate; capped by bounds.per-stage-retrievals"}
       - {key: encounters, required: true, note: "`none`, or list of {kind: withheld-class | instruction-like, where, note} per the read-isolation rule"}
       - {key: pins, required: true, note: "list of {surface, id} — the constituent and evidence identifiers the stage actually verified; `none` when the stage loaded no pinned surface"}
@@ -310,20 +318,20 @@ schemas:
   deliberate-runstate/v1:
     keys:
       - {key: schema, required: true, const: deliberate-runstate/v1}
-      - {key: kind, required: true, enum: [echo, decomposition, pins, envelope, concerns-amendment, brief-render, terminal-claim, capsule-progress]}
+      - {key: kind, required: true, enum: [echo, decomposition, pins, envelope, brief-render, terminal-claim, capsule-progress, capsule-import]}
       - {key: run, required: true, note: run identifier; every item carries it and must match the echo item's}
       - {key: seq, required: true, note: monotonic write sequence integer; the echo item is seq 0 and the store's first write}
-      - {key: stage, required: false, note: "required for envelope, concerns-amendment, and brief-render items"}
-      - {key: body, required: true, note: keyed payload per kind; fixed top-level key set per body-keys below}
+      - {key: stage, required: false, note: "required for envelope and brief-render items"}
+      - {key: body, required: true, note: keyed payload per kind; fixed top-level key set per body-keys below, each body validated to its nested shape at write}
     body-keys:
       echo: [invocation-wording-initial, directives, fields]   # fields: map of contract fields, each {value, provenance: user-supplied | inferred | default | absent}
-      decomposition: [frame, candidates, stakes, soft-prefs, values]  # candidates: list of {wording, provenance-flag, authority-note: {text, provenance, span} | absent}
+      decomposition: [frame, candidates, stakes, soft-prefs, values, composition-provenance]  # candidates: list of {wording, provenance-flag, authority-note: {text, provenance, span} | absent}; composition-provenance: {invocation-span, delegation-span}, candidate-free by elision
       pins: [constituents, method, evidence, in-packet]        # each: list of {path | name, id | manifest | `no comparable identity`}
-      envelope: [document]                                     # the validated stage envelope as received, byte-preserved
-      concerns-amendment: [amendments]                         # list of {retrieval: {producing-stage, source, retrieved-at}, option} — append-only; producing envelopes never rewritten
+      envelope: [document, amendments]                         # document: the validated stage envelope (value-preserving re-serialization at acceptance; every compared value byte-exact); amendments: the acceptance's owed concerns amendments — list of {retrieval: {producing-stage, source, retrieved-at}, option} — stored atomically with the envelope, producing envelopes never rewritten
       brief-render: [brief-id]                                 # content identifier of the rendered brief, recorded before dispatch
       terminal-claim: [terminal, claim, survivor]              # survivor required on the one-survivor branch, else `not applicable`
       capsule-progress: [capsule]                              # the capsule-in-progress document
+      capsule-import: [capsule]                                # the validated pasted capsule at re-run setup; the renderer reads prior-stage artifacts from it exactly until a re-run envelope supersedes them
 
   # -------------------------------------------------------------------------
   # deliberate-capsule/v1 — the recovery capsule. One paste-able fenced YAML
@@ -339,8 +347,8 @@ schemas:
       - {key: schema, required: true, const: deliberate-capsule/v1}
       - {key: run, required: true}
       - {key: terminal, required: true, note: "the recorded terminal name, or `close rendered` when Recommend's close stands"}
-      - {key: effective-contract, required: true, note: "map: frame, field-mode, constraints, values, soft-prefs, stakes, evidence-inputs, evidence-authorization, evidence-identity, method-identity, survivor-budget, degradation-permission, bounds, invocation-wording: {initial, directives (verbatim within bounds.verbatim-directive-history, older collapsed to content identifiers), source-capsule-id}"}
-      - {key: setup-decomposition, required: true, note: "candidate-free frame, per-candidate authority notes with provenance, stakes"}
+      - {key: effective-contract, required: true, note: "map: frame, field-mode, constraints, values, soft-prefs, stakes, evidence-inputs, evidence-authorization, evidence-identity, method-identity, survivor-budget, degradation-permission, bounds, invocation-wording: {initial, directives (verbatim within bounds.verbatim-directive-history, older collapsed to content identifiers), source-capsule-id}; each contract field carries {value, provenance} so an import restores the exact echo"}
+      - {key: setup-decomposition, required: true, note: "map: frame, candidates (each {wording, provenance-flag, authority-note}), stakes, composition-provenance ({invocation-span, delegation-span})"}
       - {key: recommend-authority-packet, required: true, note: "survivor wordings, ordering with provenance, per-survivor authority notes, any overflow disclosure, stakes/reversibility"}
       - {key: original-field, required: true, note: "complete generated or user-supplied field — present whenever any field was validated; `not produced: <reason>` only on a failure before Generate returned a validated field"}
       - {key: generation-boundary, required: true, note: "untouched-fixed-points line | `Generate not run: closed-to-widening` | not produced"}
@@ -351,7 +359,8 @@ schemas:
       - {key: surface, required: true, note: "Shape's comparison surface, verbatim when produced"}
       - {key: consequences, required: true, note: Shape-recorded constraint consequences}
       - {key: close, required: true, note: "Recommend's close, verbatim when produced"}
-      - {key: terminal-claim, required: true, note: the close-less terminal's claim when one was recorded}
+      - {key: registered-leans, required: true, note: "Recommend's registered leans ({agent-first-lean, user-visible-lean}), verbatim when produced"}
+      - {key: terminal-claim, required: true, note: "the close-less terminal's claim item ({terminal, claim, survivor}) when one was recorded"}
       - {key: exclusion-check, required: true, note: the rendered exclusion check line}
       - {key: provisional-seed, required: true, note: marked unaccepted when present}
       - {key: revival-instructions, required: true}
@@ -404,9 +413,10 @@ stage-brief-template: |
 
   Return one fenced YAML document under the schema `deliberate-envelope/v1`
   (fixed keys: schema, stage, status, artifacts, retrievals, encounters, pins,
-  model; prose values as block scalars). `status` is `completed`, a named
-  honest exit, or `failed: <reason>`. `artifacts` carries exactly these obliged
-  keys, each present or `not produced: <reason>`:
+  model; prose values as block scalars). `status` is exactly one of three
+  forms: `completed`, `exit: <the named honest exit>`, or `failed: <reason>` —
+  any other form fails the stage. `artifacts` carries exactly these obliged
+  keys, each present or `not produced: <reason>` (never on a completed stage):
   {obliged}
   Your envelope is validated mechanically before acceptance; a missing or
   extra key, an over-cap retrievals list, or a record whose `option` wording
@@ -434,14 +444,20 @@ brief-extras:
     it is your complete cutting authority. Never reorder: survivors must be an
     order-preserving subsequence of the input field. Every exclusion is a
     complete record in the labeled key set with `option` byte-identical to the
-    field wording. A budget cut blocked by the value-trade guard is a
-    blocked-cut disclosure riding with the overflow disclosure, never a record.
+    field wording. Your partition is conserved and checked mechanically: every
+    input-field option appears exactly once — as a survivor or as exactly one
+    active exclusion record's option; a dropped option with no record or a
+    record for a surviving option fails the stage. A budget cut blocked by the
+    value-trade guard is a blocked-cut disclosure riding with the overflow
+    disclosure, never a record.
   shape: |
     Read and execute the live `option-shaping` contract at the pinned paths in
     your `pin` packet item, verifying each identifier before use, under its
-    authorized-composition seam: your provenance block below evidences the
-    user's explicit composition invocation and the delegation span covering
-    candidate selection. The supplied survivors are the frozen field. A
+    authorized-composition seam: your `composition-provenance` packet item
+    carries the verbatim spans (candidate and lean language elided by named
+    markers) evidencing the user's explicit composition invocation and the
+    delegation covering candidate selection. The supplied survivors are the
+    frozen field. A
     consequence of an echoed price-confirmed constraint: record it in
     `constraint-consequences`, preserve the candidate — the filter is not
     yours. An unconfirmed or newly inferred constraint: never a cut; exit

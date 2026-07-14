@@ -37,6 +37,7 @@ run-state item absent (the orchestrator maps this to `store failed: read`).
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import io
 import os
@@ -68,7 +69,40 @@ SAFE_TAGS = {
 }
 
 PROVENANCE_FLAGS = {"user-seed", "generated", "revived", "accepted", "adopted"}
+PROVENANCE_LABELS = {"user-supplied", "inferred", "default", "absent"}
 ENCOUNTER_KINDS = {"withheld-class", "instruction-like"}
+PRUNE_BASES = {"constraint", "equivalence", "dominance", "survivor budget"}
+RECOMMEND_BASES = {
+    "post-prune filter",
+    "post-prune dominance",
+    "post-prune collapse",
+    "only-serious-option rival",
+}
+# effective-contract fields that carry {value, provenance} in the capsule
+CAPSULE_CONTRACT_FIELDS = [
+    "frame",
+    "field-mode",
+    "constraints",
+    "values",
+    "soft-prefs",
+    "stakes",
+    "evidence-inputs",
+    "evidence-authorization",
+    "survivor-budget",
+    "degradation-permission",
+]
+PROOF_BOUNDARY_KEYS = {
+    "packet-isolation",
+    "read-isolation",
+    "constituent-pins",
+    "method-identity",
+    "effective-models",
+    "evidence-scope-used",
+    "containment",
+    "store-path",
+    "collapses",
+    "not-proven",
+}
 
 
 class Refusal(Exception):
@@ -166,9 +200,23 @@ def safe_parse(raw: bytes, *, byte_cap: int, depth_cap: int, op: str) -> Any:
         raise fail(op, f"YAML does not parse: {exc}")
 
 
+class _NoAliasDumper(yaml.SafeDumper):
+    """Never emit anchors/aliases: dumped documents must re-parse under this
+    module's own alias-rejecting safe parser, even when a Python object is
+    referenced twice."""
+
+    def ignore_aliases(self, data: object) -> bool:
+        return True
+
+
 def dump_yaml(value: object) -> str:
-    return yaml.safe_dump(
-        value, default_flow_style=False, sort_keys=False, allow_unicode=True, width=88
+    return yaml.dump(
+        value,
+        Dumper=_NoAliasDumper,
+        default_flow_style=False,
+        sort_keys=False,
+        allow_unicode=True,
+        width=88,
     )
 
 
@@ -383,6 +431,188 @@ class Store:
         return path
 
 
+def _require_str(op: str, name: str, value: object) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise fail(op, f"{name} must be a non-empty string", value)
+
+
+def _check_candidates(op: str, candidates: object) -> None:
+    if not isinstance(candidates, list):
+        raise fail(op, "candidates must be a list", candidates)
+    wordings: list[str] = []
+    for candidate in candidates:
+        if not isinstance(candidate, dict) or set(candidate) != {
+            "wording",
+            "provenance-flag",
+            "authority-note",
+        }:
+            raise fail(
+                op,
+                "candidates must be exactly {wording, provenance-flag, authority-note}",
+                candidate,
+            )
+        _require_str(op, "candidate wording", candidate["wording"])
+        if candidate["provenance-flag"] not in PROVENANCE_FLAGS:
+            raise fail(
+                op,
+                f"candidate provenance-flag must be one of {sorted(PROVENANCE_FLAGS)}",
+                candidate["provenance-flag"],
+            )
+        note = candidate["authority-note"]
+        if note != "absent" and not (
+            isinstance(note, dict) and set(note) == {"text", "provenance", "span"}
+        ):
+            raise fail(
+                op,
+                "authority-note must be `absent` or exactly {text, provenance, span}",
+                note,
+            )
+        wordings.append(candidate["wording"])
+    duplicates = {w for w in wordings if wordings.count(w) > 1}
+    if duplicates:
+        raise fail(op, f"duplicate candidate wordings rejected: {sorted(duplicates)}")
+
+
+def _check_composition_provenance(op: str, value: object) -> None:
+    if not isinstance(value, dict) or set(value) != {
+        "invocation-span",
+        "delegation-span",
+    }:
+        raise fail(
+            op,
+            "composition-provenance must be exactly {invocation-span, delegation-span}",
+            value,
+        )
+    _require_str(op, "invocation-span", value["invocation-span"])
+    _require_str(op, "delegation-span", value["delegation-span"])
+
+
+def _check_pin_list(op: str, name: str, value: object) -> None:
+    if not isinstance(value, list):
+        raise fail(op, f"{name} must be a list", value)
+    for entry in value:
+        if not isinstance(entry, dict):
+            raise fail(op, f"{name} entries must be mappings", entry)
+        if not ({"path", "name", "relpath"} & set(entry)) or not (
+            {"id", "manifest"} & set(entry)
+        ):
+            raise fail(
+                op, f"{name} entries must carry a path/name and an id/manifest", entry
+            )
+
+
+def _check_amendments(op: str, value: object) -> None:
+    if not isinstance(value, list):
+        raise fail(op, "amendments must be a list", value)
+    for amendment in value:
+        if not isinstance(amendment, dict) or set(amendment) != {
+            "retrieval",
+            "option",
+        }:
+            raise fail(op, "amendments must be exactly {retrieval, option}", amendment)
+        ref = amendment["retrieval"]
+        if not isinstance(ref, dict) or set(ref) != {
+            "producing-stage",
+            "source",
+            "retrieved-at",
+        }:
+            raise fail(
+                op,
+                "amendment retrieval must be exactly {producing-stage, source, retrieved-at}",
+                ref,
+            )
+        _require_str(op, "amendment option", amendment["option"])
+
+
+def _check_body_echo(op: str, body: dict, contract: Contract) -> None:
+    _require_str(op, "invocation-wording-initial", body["invocation-wording-initial"])
+    directives = body["directives"]
+    if not isinstance(directives, list) or not all(
+        isinstance(d, str) for d in directives
+    ):
+        raise fail(op, "directives must be a list of strings", directives)
+    fields = body["fields"]
+    if not isinstance(fields, dict) or not fields:
+        raise fail(op, "fields must be a non-empty mapping", fields)
+    for name, entry in fields.items():
+        if not isinstance(entry, dict) or set(entry) != {"value", "provenance"}:
+            raise fail(op, f"field {name} must be exactly {{value, provenance}}", entry)
+        if entry["provenance"] not in PROVENANCE_LABELS:
+            raise fail(
+                op,
+                f"field {name} provenance must be one of {sorted(PROVENANCE_LABELS)}",
+                entry["provenance"],
+            )
+
+
+def _check_body_decomposition(op: str, body: dict, contract: Contract) -> None:
+    _require_str(op, "frame", body["frame"])
+    _check_candidates(op, body["candidates"])
+    _require_str(op, "stakes", body["stakes"])
+    if not isinstance(body["soft-prefs"], list):
+        raise fail(op, "soft-prefs must be a list", body["soft-prefs"])
+    if not isinstance(body["values"], list):
+        raise fail(op, "values must be a list", body["values"])
+    _check_composition_provenance(op, body["composition-provenance"])
+
+
+def _check_body_pins(op: str, body: dict, contract: Contract) -> None:
+    constituents = body["constituents"]
+    if not isinstance(constituents, dict):
+        raise fail(op, "constituents must be a mapping", constituents)
+    for name, pins in constituents.items():
+        _check_pin_list(op, f"constituents[{name}]", pins)
+    _check_pin_list(op, "method", body["method"])
+    _check_pin_list(op, "evidence", body["evidence"])
+    _check_pin_list(op, "in-packet", body["in-packet"])
+
+
+def _check_body_envelope(op: str, body: dict, contract: Contract) -> None:
+    validate_envelope_shape(body["document"], contract)
+    _check_amendments(op, body["amendments"])
+
+
+def _check_body_brief_render(op: str, body: dict, contract: Contract) -> None:
+    brief_id = body["brief-id"]
+    if (
+        not isinstance(brief_id, str)
+        or len(brief_id) != 64
+        or any(c not in "0123456789abcdef" for c in brief_id)
+    ):
+        raise fail(op, "brief-id must be a 64-hex content identifier", brief_id)
+
+
+def _check_body_terminal_claim(op: str, body: dict, contract: Contract) -> None:
+    _require_str(op, "terminal", body["terminal"])
+    _require_str(op, "claim", body["claim"])
+    _require_str(op, "survivor", body["survivor"])
+
+
+def _check_body_capsule_progress(op: str, body: dict, contract: Contract) -> None:
+    capsule = body["capsule"]
+    if not isinstance(capsule, (str, dict)) or not capsule:
+        raise fail(op, "capsule-in-progress must be a non-empty string or mapping")
+
+
+def _check_body_capsule_import(op: str, body: dict, contract: Contract) -> None:
+    capsule = body["capsule"]
+    if not isinstance(capsule, dict):
+        raise fail(op, "imported capsule must be a mapping", capsule)
+    validate_capsule_document(capsule, contract)
+
+
+_BODY_CHECKS = {
+    "echo": _check_body_echo,
+    "decomposition": _check_body_decomposition,
+    "pins": _check_body_pins,
+    "envelope": _check_body_envelope,
+    "brief-render": _check_body_brief_render,
+    "terminal-claim": _check_body_terminal_claim,
+    "capsule-progress": _check_body_capsule_progress,
+    "capsule-import": _check_body_capsule_import,
+}
+
+
 def validate_runstate_item(item: object, contract: Contract) -> None:
     op = "run-state item validation"
     schema = contract.schemas[RUNSTATE_SCHEMA]
@@ -401,13 +631,10 @@ def validate_runstate_item(item: object, contract: Contract) -> None:
     kinds = next(e["enum"] for e in schema["keys"] if e["key"] == "kind")
     if item["kind"] not in kinds:
         raise fail(op, f"unknown kind: {item['kind']!r}")
+    _require_str(op, "run", item["run"])
     if not isinstance(item["seq"], int) or item["seq"] < 0:
         raise fail(op, "seq must be a non-negative integer", item["seq"])
-    if item["kind"] in {
-        "envelope",
-        "concerns-amendment",
-        "brief-render",
-    } and not item.get("stage"):
+    if item["kind"] in {"envelope", "brief-render"} and not item.get("stage"):
         raise fail(op, f"kind {item['kind']} requires a stage")
     if item.get("stage") is not None and item["stage"] not in contract.stages:
         raise fail(op, f"unknown stage: {item['stage']!r}")
@@ -422,9 +649,7 @@ def validate_runstate_item(item: object, contract: Contract) -> None:
             f"body keys for kind {item['kind']} must be exactly {sorted(expected)}",
             sorted(actual),
         )
-    if item["kind"] == "envelope":
-        # written envelopes revalidate against the envelope schema shape
-        validate_envelope_shape(body["document"], contract)
+    _BODY_CHECKS[item["kind"]](f"{op} ({item['kind']})", body, contract)
 
 
 # ---------------------------------------------------------------------------
@@ -436,10 +661,9 @@ def _is_not_produced(value: object) -> bool:
     return isinstance(value, str) and value.startswith("not produced:")
 
 
-def _check_record(
-    record: object, contract: Contract, allowed_wordings: list[str], stage: str
-) -> None:
-    op = f"record validation ({stage})"
+def _check_record_shape(record: object, contract: Contract, op: str) -> dict:
+    """Key-set, enum, and evidence-provenance checks shared by stage and
+    capsule records. Returns the record as a validated mapping."""
     if not isinstance(record, dict):
         raise fail(op, "record is not a mapping", record)
     spec = {entry["key"]: entry for entry in contract.record_keys}
@@ -453,30 +677,6 @@ def _check_record(
             raise fail(
                 op, f"record key {key} must be one of {entry['enum']}", record[key]
             )
-    if record["status"] != "active":
-        raise fail(
-            op,
-            "a stage-produced record must have status `active`; `revived` is orchestrator historization only",
-            record["status"],
-        )
-    prune_bases = {"constraint", "equivalence", "dominance", "survivor budget"}
-    recommend_bases = {
-        "post-prune filter",
-        "post-prune dominance",
-        "post-prune collapse",
-        "only-serious-option rival",
-    }
-    basis = record["cut-basis"]
-    if stage == "prune" and basis not in prune_bases:
-        raise fail(op, f"cut basis {basis!r} is not a Prune basis")
-    if stage == "recommend" and basis not in recommend_bases:
-        raise fail(op, f"cut basis {basis!r} is not a Recommend disposition basis")
-    if record["option"] not in allowed_wordings:
-        raise fail(
-            op,
-            "record `option` is not byte-identical to any stored original wording — paraphrase rejected",
-            record["option"],
-        )
     prov = record.get("evidence-provenance")
     if prov is not None:
         if not isinstance(prov, list) or not prov:
@@ -492,6 +692,31 @@ def _check_record(
                     "evidence-provenance entries must be exactly {source, retrieved-at}",
                     ref,
                 )
+    return record
+
+
+def _check_record(
+    record: object, contract: Contract, allowed_wordings: list[str], stage: str
+) -> None:
+    op = f"record validation ({stage})"
+    record = _check_record_shape(record, contract, op)
+    if record["status"] != "active":
+        raise fail(
+            op,
+            "a stage-produced record must have status `active`; `revived` is orchestrator historization only",
+            record["status"],
+        )
+    basis = record["cut-basis"]
+    if stage == "prune" and basis not in PRUNE_BASES:
+        raise fail(op, f"cut basis {basis!r} is not a Prune basis")
+    if stage == "recommend" and basis not in RECOMMEND_BASES:
+        raise fail(op, f"cut basis {basis!r} is not a Recommend disposition basis")
+    if record["option"] not in allowed_wordings:
+        raise fail(
+            op,
+            "record `option` is not byte-identical to any stored original wording — paraphrase rejected",
+            record["option"],
+        )
 
 
 def _check_option_list(value: object, op: str) -> list[dict]:
@@ -511,6 +736,13 @@ def _check_option_list(value: object, op: str) -> list[dict]:
                 f"option provenance must be one of {sorted(PROVENANCE_FLAGS)}",
                 opt.get("provenance"),
             )
+    wordings = [opt["wording"] for opt in value]
+    duplicates = {w for w in wordings if wordings.count(w) > 1}
+    if duplicates:
+        raise fail(
+            op,
+            f"duplicate option wordings rejected — the partition must be well-defined: {sorted(duplicates)}",
+        )
     return value
 
 
@@ -569,8 +801,16 @@ def validate_envelope_shape(document: object, contract: Contract) -> dict:
     if stage not in contract.stages:
         raise fail(op, f"unknown stage: {stage!r}")
     status = document["status"]
-    if not isinstance(status, str) or not status.strip():
-        raise fail(op, "status must be a non-empty string", status)
+    if not isinstance(status, str) or not (
+        status == "completed"
+        or (status.startswith("failed: ") and status[len("failed: ") :].strip())
+        or (status.startswith("exit: ") and status[len("exit: ") :].strip())
+    ):
+        raise fail(
+            op,
+            "status must be `completed`, `exit: <named honest exit>`, or `failed: <reason>`",
+            status,
+        )
     artifacts = document["artifacts"]
     if not isinstance(artifacts, dict):
         raise fail(op, "artifacts must be a mapping", artifacts)
@@ -585,10 +825,10 @@ def validate_envelope_shape(document: object, contract: Contract) -> dict:
     for entry in obliged:
         value = artifacts[entry["key"]]
         if _is_not_produced(value):
-            if status == "completed" and entry["required"] == "always":
+            if status == "completed":
                 raise fail(
                     op,
-                    f"a completed stage cannot mark an always-obliged artifact not produced: {entry['key']}",
+                    f"a completed stage cannot mark an artifact not produced: {entry['key']}",
                 )
             continue
         if value == "not applicable":
@@ -698,30 +938,95 @@ def _check_artifact_shape(entry: dict, value: object, stage: str) -> None:
         raise refuse(op, f"unknown artifact shape in contract data: {shape}")
 
 
+def _imported_capsule(store: Store) -> dict | None:
+    items = store.find("capsule-import")
+    return items[-1]["body"]["capsule"] if items else None
+
+
+def _capsule_value(store: Store, key: str) -> Any:
+    """A real (produced) value from the imported capsule, else None. The
+    renderer reads a prior stage's artifacts from the imported capsule exactly
+    until a re-run envelope for that stage supersedes them."""
+    capsule = _imported_capsule(store)
+    if capsule is None:
+        return None
+    value = capsule.get(key)
+    if _is_not_produced(value) or value == "not applicable":
+        return None
+    return value
+
+
 def _stored_field_wordings(store: Store) -> list[str]:
     """The input field Prune cut from: Generate's validated field, else the
-    supplied candidate set (closed-to-widening)."""
+    imported capsule's original field, else the supplied candidate set
+    (closed-to-widening)."""
     envelopes = store.find("envelope", "generate")
     if envelopes:
         field = envelopes[-1]["body"]["document"]["artifacts"]["field"]
         if isinstance(field, list):
             return [opt["wording"] for opt in field]
+    imported = _capsule_value(store, "original-field")
+    if isinstance(imported, list):
+        return [opt["wording"] for opt in imported]
     decomposition = store.require("decomposition")
     return [c["wording"] for c in decomposition["body"]["candidates"]]
 
 
+def _stored_survivors(store: Store) -> list[dict]:
+    envelopes = store.find("envelope", "prune")
+    if envelopes:
+        survivors = envelopes[-1]["body"]["document"]["artifacts"]["survivors"]
+        if not isinstance(survivors, list):
+            raise StoreReadLoss(
+                "store read failed: prune envelope holds no survivors list"
+            )
+        return survivors
+    imported = _capsule_value(store, "survivors")
+    if isinstance(imported, list):
+        return imported
+    raise StoreReadLoss(
+        "store read failed: required run-state item absent: envelope for stage prune"
+    )
+
+
 def _stored_survivor_wordings(store: Store) -> list[str]:
-    envelope = store.require("envelope", "prune")
-    survivors = envelope["body"]["document"]["artifacts"]["survivors"]
-    if not isinstance(survivors, list):
-        raise StoreReadLoss("store read failed: prune envelope holds no survivors list")
-    return [opt["wording"] for opt in survivors]
+    return [opt["wording"] for opt in _stored_survivors(store)]
+
+
+def _recommend_excluded_options(store: Store) -> set[str]:
+    """Options actively excluded by Recommend: live envelope first, else the
+    imported capsule's recommend-basis active records."""
+    items = store.find("envelope", "recommend")
+    if items:
+        excluded: set[str] = set()
+        for item in items:
+            records = item["body"]["document"]["artifacts"].get("disposition-records")
+            if isinstance(records, list):
+                excluded |= {r["option"] for r in records}
+        return excluded
+    capsule_records = _capsule_value(store, "records") or []
+    return {
+        r["option"]
+        for r in capsule_records
+        if r["status"] == "active" and r["cut-basis"] in RECOMMEND_BASES
+    }
 
 
 def _accepted_retrievals(store: Store) -> list[dict]:
-    """Every accepted retrieval with its effective concerns (amendments applied)."""
+    """Every accepted retrieval with its effective concerns (amendments
+    applied). Imported-capsule retrievals carry effective concerns already and
+    are superseded per producing stage by any re-run envelope."""
     facts: list[dict] = []
-    for item in store.find("envelope"):
+    envelope_items = store.find("envelope")
+    live_stages = {item["stage"] for item in envelope_items}
+    capsule_retrievals = _capsule_value(store, "retrievals")
+    if isinstance(capsule_retrievals, list):
+        facts.extend(
+            dict(entry)
+            for entry in capsule_retrievals
+            if entry["producing-stage"] not in live_stages
+        )
+    for item in envelope_items:
         document = item["body"]["document"]
         retrievals = document["retrievals"]
         if retrievals == "none":
@@ -736,7 +1041,7 @@ def _accepted_retrievals(store: Store) -> list[dict]:
                     "concerns": entry["concerns"],
                 }
             )
-    for item in store.find("concerns-amendment"):
+    for item in envelope_items:
         for amendment in item["body"]["amendments"]:
             ref = amendment["retrieval"]
             for factentry in facts:
@@ -818,13 +1123,20 @@ def validate_envelope_against_store(
     stage = document["stage"]
     artifacts = document["artifacts"]
     if stage == "prune":
+        op = "envelope validation (prune)"
         field = _stored_field_wordings(store)
+        field_duplicates = {w for w in field if field.count(w) > 1}
+        if field_duplicates:
+            raise fail(
+                op,
+                f"duplicate wordings in the stored input field — the partition is ill-defined: {sorted(field_duplicates)}",
+            )
         survivors = artifacts.get("survivors")
         if isinstance(survivors, list):
             wordings = [opt["wording"] for opt in survivors]
             if not _is_order_preserving_subsequence(wordings, list(field)):
                 raise fail(
-                    "envelope validation (prune)",
+                    op,
                     "survivors are not an order-preserving subsequence of the input field — Prune cuts, never reorders",
                     wordings,
                 )
@@ -832,6 +1144,31 @@ def validate_envelope_against_store(
         if isinstance(records, list):
             for record in records:
                 _check_record(record, contract, field, "prune")
+        if isinstance(survivors, list) and isinstance(records, list):
+            survivor_set = {opt["wording"] for opt in survivors}
+            record_options = [r["option"] for r in records]
+            duplicates = {w for w in record_options if record_options.count(w) > 1}
+            if duplicates:
+                raise fail(
+                    op,
+                    f"more than one exclusion record for the same option: {sorted(duplicates)}",
+                )
+            overlap = survivor_set & set(record_options)
+            if overlap:
+                raise fail(
+                    op,
+                    "an option is both a survivor and actively excluded — the partition must be disjoint",
+                    sorted(overlap),
+                )
+            dropped = [
+                w for w in field if w not in survivor_set and w not in record_options
+            ]
+            if dropped:
+                raise fail(
+                    op,
+                    "input option(s) dropped with no exclusion record — every exclusion is ledgered, and the partition must be conserved",
+                    dropped,
+                )
     if stage == "recommend":
         records = artifacts.get("disposition-records")
         if isinstance(records, list):
@@ -861,29 +1198,18 @@ def cmd_validate_envelope(args: argparse.Namespace) -> int:
     store = Store(Path(args.store), contract, readset)
     amendments = validate_envelope_against_store(document, store, contract)
     if args.accept:
-        seq = store.next_seq()
-        run = store.require("echo")["run"]
+        # one atomic write: the envelope and its owed concerns amendments land
+        # in a single item file, so neither is ever visible without the other
         store.write(
             {
                 "schema": RUNSTATE_SCHEMA,
                 "kind": "envelope",
-                "run": run,
-                "seq": seq,
+                "run": store.require("echo")["run"],
+                "seq": store.next_seq(),
                 "stage": document["stage"],
-                "body": {"document": document},
+                "body": {"document": document, "amendments": amendments},
             }
         )
-        if amendments:
-            store.write(
-                {
-                    "schema": RUNSTATE_SCHEMA,
-                    "kind": "concerns-amendment",
-                    "run": run,
-                    "seq": seq + 1,
-                    "stage": document["stage"],
-                    "body": {"amendments": amendments},
-                }
-            )
     print(
         f"envelope valid: stage={document['stage']} status={document['status']!r}"
         + (
@@ -957,10 +1283,13 @@ def _render_packet_item(
     if key == "budget":
         return dump_yaml({"survivor-budget": echo_field("survivor-budget")})
     if key == "seeds":
+        # every non-`generated` provenance flag rides as a seed: user-seed,
+        # revived, accepted, adopted — a user-authorized candidate never
+        # silently drops from regeneration
         seeds = [
             c
             for c in decomposition["candidates"]
-            if c["provenance-flag"] == "user-seed"
+            if c["provenance-flag"] != "generated"
         ]
         return dump_yaml(
             {
@@ -980,6 +1309,17 @@ def _render_packet_item(
                     "fixed-points-line": artifacts["fixed-points-line"],
                 }
             )
+        imported = _capsule_value(store, "original-field")
+        if isinstance(imported, list):
+            capsule = _imported_capsule(store) or {}
+            return dump_yaml(
+                {
+                    "field": imported,
+                    "fixed-points-line": capsule.get(
+                        "generation-boundary", "not produced"
+                    ),
+                }
+            )
         return dump_yaml(
             {
                 "field": [
@@ -990,7 +1330,7 @@ def _render_packet_item(
             }
         )
     if key == "survivors":
-        artifacts = store.require("envelope", "prune")["body"]["document"]["artifacts"]
+        survivors_value = _stored_survivors(store)
         mode = echo_field("field-mode")
         mode_value = mode.get("value") if isinstance(mode, dict) else mode
         provenance = (
@@ -998,9 +1338,7 @@ def _render_packet_item(
             if mode_value == "closed-to-widening"
             else "Generate-produced order — non-evaluative; never evidence of user lean"
         )
-        return dump_yaml(
-            {"survivors": artifacts["survivors"], "order-provenance": provenance}
-        )
+        return dump_yaml({"survivors": survivors_value, "order-provenance": provenance})
     if key == "authority-notes-survivor":
         survivors = _stored_survivor_wordings(store)
         notes = [
@@ -1012,11 +1350,7 @@ def _render_packet_item(
         return dump_yaml({"authority-notes": notes})
     if key == "authority-notes-excluded":
         survivors = set(_stored_survivor_wordings(store))
-        excluded_by_recommend = set()
-        for item in store.find("envelope", "recommend"):
-            records = item["body"]["document"]["artifacts"].get("disposition-records")
-            if isinstance(records, list):
-                excluded_by_recommend |= {r["option"] for r in records}
+        excluded_by_recommend = _recommend_excluded_options(store)
         notes = [
             {"option": c["wording"], "authority-note": c["authority-note"]}
             for c in decomposition["candidates"]
@@ -1025,13 +1359,26 @@ def _render_packet_item(
         ]
         return dump_yaml({"authority-notes": notes})
     if key == "records":
+        # live envelopes supersede the imported capsule per producing stage
         records: list[dict] = []
-        for stage_name in ("prune", "recommend"):
-            for item in store.find("envelope", stage_name):
-                for artifact_key in ("exclusion-records", "disposition-records"):
-                    value = item["body"]["document"]["artifacts"].get(artifact_key)
-                    if isinstance(value, list):
-                        records.extend(r for r in value if r["status"] == "active")
+        capsule_records = _capsule_value(store, "records") or []
+        for stage_name, bases in (
+            ("prune", PRUNE_BASES),
+            ("recommend", RECOMMEND_BASES),
+        ):
+            items = store.find("envelope", stage_name)
+            if items:
+                for item in items:
+                    for artifact_key in ("exclusion-records", "disposition-records"):
+                        value = item["body"]["document"]["artifacts"].get(artifact_key)
+                        if isinstance(value, list):
+                            records.extend(r for r in value if r["status"] == "active")
+            else:
+                records.extend(
+                    r
+                    for r in capsule_records
+                    if r["status"] == "active" and r["cut-basis"] in bases
+                )
         return dump_yaml({"records": records})
     if key == "retrievals":
         facts = _accepted_retrievals(store)
@@ -1041,11 +1388,12 @@ def _render_packet_item(
         return dump_yaml({"retrievals": facts})
     if key == "overflow":
         envelopes = store.find("envelope", "prune")
-        if not envelopes:
-            return None
-        value = envelopes[-1]["body"]["document"]["artifacts"].get(
-            "overflow-disclosure"
-        )
+        if envelopes:
+            value = envelopes[-1]["body"]["document"]["artifacts"].get(
+                "overflow-disclosure"
+            )
+        else:
+            value = _capsule_value(store, "overflow")
         if not isinstance(value, dict):
             return None
         # existence and identity only — Prune's per-cut reasoning never crosses
@@ -1064,38 +1412,56 @@ def _render_packet_item(
             }
         )
     if key == "consequences":
-        artifacts = store.require("envelope", "shape")["body"]["document"]["artifacts"]
-        return dump_yaml(
-            {"constraint-consequences": artifacts["constraint-consequences"]}
-        )
+        envelopes = store.find("envelope", "shape")
+        if envelopes:
+            value = envelopes[-1]["body"]["document"]["artifacts"][
+                "constraint-consequences"
+            ]
+        else:
+            value = _capsule_value(store, "consequences")
+        if value is None:
+            raise StoreReadLoss(
+                "store read failed: required run-state item absent: envelope for stage shape"
+            )
+        return dump_yaml({"constraint-consequences": value})
     if key == "surface":
         envelopes = store.find("envelope", "shape")
-        if stage == "recommend":
-            artifacts = store.require("envelope", "shape")["body"]["document"][
-                "artifacts"
-            ]
-            return dump_yaml({"comparison-surface": artifacts["comparison-surface"]})
-        if not envelopes:
-            return None
-        value = envelopes[-1]["body"]["document"]["artifacts"].get("comparison-surface")
+        if envelopes:
+            value = envelopes[-1]["body"]["document"]["artifacts"].get(
+                "comparison-surface"
+            )
+        else:
+            value = _capsule_value(store, "surface")
         if not isinstance(value, str) or _is_not_produced(value):
+            if stage == "recommend":
+                raise StoreReadLoss(
+                    "store read failed: required run-state item absent: envelope for stage shape"
+                )
             return None
         return dump_yaml({"comparison-surface": value})
     if key == "close":
         envelopes = store.find("envelope", "recommend")
-        if not envelopes:
-            return None
-        value = envelopes[-1]["body"]["document"]["artifacts"].get("close")
+        if envelopes:
+            value = envelopes[-1]["body"]["document"]["artifacts"].get("close")
+        else:
+            value = _capsule_value(store, "close")
         if not isinstance(value, str) or _is_not_produced(value):
             return None
         return dump_yaml({"close": value})
     if key == "terminal-claim":
         items = store.find("terminal-claim")
-        if not items:
-            return None
-        return dump_yaml({"terminal-claim": items[-1]["body"]})
+        if items:
+            return dump_yaml({"terminal-claim": items[-1]["body"]})
+        value = _capsule_value(store, "terminal-claim")
+        if isinstance(value, dict):
+            return dump_yaml({"terminal-claim": value})
+        return None
     if key == "stakes":
         return dump_yaml({"stakes": decomposition["stakes"]})
+    if key == "composition-provenance":
+        return dump_yaml(
+            {"composition-provenance": decomposition["composition-provenance"]}
+        )
     if key == "method":
         return _method_text(stage, contract, readset)
     if key == "pin":
@@ -1127,9 +1493,14 @@ def render_brief(
                 f"off-column packet item(s) requested into the {stage} brief: {off_column} — "
                 f"the {stage} column includes only {column}",
             )
-        keys = [key for key in column if key in requested]
-    else:
-        keys = column
+        missing = [key for key in column if key not in requested]
+        if missing:
+            raise refuse(
+                "brief render",
+                f"partial-column render refused for {stage} — a packet is the complete "
+                f"include column, never a subset; missing: {missing}",
+            )
+    keys = column
     sections = []
     for key in keys:
         content = _render_packet_item(key, stage, store, contract, readset)
@@ -1269,6 +1640,274 @@ def _strip_fences(text: str) -> str:
     return text if text.endswith("\n") else text + "\n"
 
 
+def _check_capsule_record(record: object, contract: Contract) -> None:
+    """Capsule records may be `active` or `revived` and carry any declared cut
+    basis; the key set and enums still bind exactly."""
+    _check_record_shape(record, contract, "capsule record validation")
+
+
+def validate_capsule_document(parsed: object, contract: Contract) -> dict:
+    """Nested capsule validation: key set, per-key shapes, terminal-artifact
+    consistency, and the conservation invariant when field, survivors, and
+    records are all real."""
+    op = "capsule validation"
+    if not isinstance(parsed, dict):
+        raise fail(op, "capsule is not a mapping", parsed)
+    schema = contract.schemas[CAPSULE_SCHEMA]
+    keys = {entry["key"] for entry in schema["keys"]}
+    unknown = set(parsed) - keys
+    if unknown:
+        raise fail(op, f"unknown keys rejected: {sorted(unknown)}")
+    missing = keys - set(parsed)
+    # the terminator is checked at the text layer; a parsed document handed to
+    # the import path has already passed it
+    missing.discard("capsule-complete")
+    if missing:
+        raise fail(op, f"missing required keys: {sorted(missing)}")
+    if parsed["schema"] != CAPSULE_SCHEMA:
+        raise refuse(
+            op,
+            f"unsupported capsule schema version — resumes only through a shipped migration: {parsed['schema']!r}",
+        )
+    _require_str(op, "run", parsed["run"])
+    _require_str(op, "terminal", parsed["terminal"])
+
+    contract_map = parsed["effective-contract"]
+    if not isinstance(contract_map, dict):
+        raise fail(op, "effective-contract must be a mapping", contract_map)
+    expected_contract = set(CAPSULE_CONTRACT_FIELDS) | {
+        "evidence-identity",
+        "method-identity",
+        "bounds",
+        "invocation-wording",
+    }
+    if set(contract_map) != expected_contract:
+        raise fail(
+            op,
+            f"effective-contract keys must be exactly {sorted(expected_contract)}",
+            sorted(contract_map),
+        )
+    for name in CAPSULE_CONTRACT_FIELDS:
+        entry = contract_map[name]
+        if (
+            not isinstance(entry, dict)
+            or set(entry) != {"value", "provenance"}
+            or entry["provenance"] not in PROVENANCE_LABELS
+        ):
+            raise fail(
+                op,
+                f"effective-contract field {name} must be {{value, provenance}} with a valid provenance label",
+                entry,
+            )
+    identity = contract_map["evidence-identity"]
+    if not isinstance(identity, dict) or set(identity) != {"named", "in-packet"}:
+        raise fail(op, "evidence-identity must be exactly {named, in-packet}", identity)
+    _check_pin_list(op, "evidence-identity.named", identity["named"])
+    _check_pin_list(op, "evidence-identity.in-packet", identity["in-packet"])
+    _check_pin_list(op, "method-identity", contract_map["method-identity"])
+    if not isinstance(contract_map["bounds"], dict):
+        raise fail(op, "bounds must be a mapping", contract_map["bounds"])
+    wording = contract_map["invocation-wording"]
+    if not isinstance(wording, dict) or set(wording) != {
+        "initial",
+        "directives",
+        "source-capsule-id",
+    }:
+        raise fail(
+            op,
+            "invocation-wording must be exactly {initial, directives, source-capsule-id}",
+            wording,
+        )
+    if not isinstance(wording["directives"], list):
+        raise fail(op, "invocation-wording directives must be a list")
+
+    decomposition = parsed["setup-decomposition"]
+    if not isinstance(decomposition, dict) or set(decomposition) != {
+        "frame",
+        "candidates",
+        "stakes",
+        "composition-provenance",
+    }:
+        raise fail(
+            op,
+            "setup-decomposition must be exactly {frame, candidates, stakes, composition-provenance}",
+            decomposition,
+        )
+    _require_str(op, "setup-decomposition frame", decomposition["frame"])
+    _check_candidates(op, decomposition["candidates"])
+    _require_str(op, "setup-decomposition stakes", decomposition["stakes"])
+    _check_composition_provenance(op, decomposition["composition-provenance"])
+
+    packet = parsed["recommend-authority-packet"]
+    if not (_is_not_produced(packet) or isinstance(packet, dict)):
+        raise fail(
+            op,
+            "recommend-authority-packet must be a mapping or `not produced: <reason>`",
+            packet,
+        )
+    field = parsed["original-field"]
+    if not _is_not_produced(field):
+        _check_option_list(field, f"{op} (original-field)")
+    _require_str(op, "generation-boundary", parsed["generation-boundary"])
+    survivors = parsed["survivors"]
+    if not _is_not_produced(survivors):
+        _check_option_list(survivors, f"{op} (survivors)")
+    overflow = parsed["overflow"]
+    if not (_is_not_produced(overflow) or overflow == "not applicable"):
+        if not isinstance(overflow, dict) or set(overflow) != {
+            "disclosure",
+            "blocked-cuts",
+        }:
+            raise fail(
+                op, "overflow must be exactly {disclosure, blocked-cuts}", overflow
+            )
+    records = parsed["records"]
+    if not _is_not_produced(records):
+        if not isinstance(records, list):
+            raise fail(op, "records must be a list", records)
+        for record in records:
+            _check_capsule_record(record, contract)
+    retrievals = parsed["retrievals"]
+    if not _is_not_produced(retrievals):
+        if not isinstance(retrievals, list):
+            raise fail(op, "retrievals must be a list", retrievals)
+        for entry in retrievals:
+            if not isinstance(entry, dict) or set(entry) != {
+                "producing-stage",
+                "source",
+                "retrieved-at",
+                "fact",
+                "concerns",
+            }:
+                raise fail(
+                    op,
+                    "capsule retrievals must be exactly {producing-stage, source, retrieved-at, fact, concerns}",
+                    entry,
+                )
+    for key in ("surface", "close", "exclusion-check", "revival-instructions"):
+        value = parsed[key]
+        if not _is_not_produced(value):
+            _require_str(op, key, value)
+    consequences = parsed["consequences"]
+    if not _is_not_produced(consequences) and not isinstance(consequences, list):
+        raise fail(op, "consequences must be a list or `not produced: <reason>`")
+    claim = parsed["terminal-claim"]
+    if not (
+        _is_not_produced(claim)
+        or (isinstance(claim, dict) and set(claim) == {"terminal", "claim", "survivor"})
+    ):
+        raise fail(
+            op,
+            "terminal-claim must be exactly {terminal, claim, survivor} or `not produced: <reason>`",
+            claim,
+        )
+    seed = parsed["provisional-seed"]
+    if not (
+        _is_not_produced(seed)
+        or (
+            isinstance(seed, dict)
+            and set(seed) == {"handle", "core-idea", "distinct-bet"}
+        )
+    ):
+        raise fail(
+            op,
+            "provisional-seed must be exactly {handle, core-idea, distinct-bet} or `not produced: <reason>`",
+            seed,
+        )
+    leans = parsed["registered-leans"]
+    if not (
+        _is_not_produced(leans)
+        or (
+            isinstance(leans, dict)
+            and set(leans) == {"agent-first-lean", "user-visible-lean"}
+        )
+    ):
+        raise fail(
+            op,
+            "registered-leans must be exactly {agent-first-lean, user-visible-lean} or `not produced: <reason>`",
+            leans,
+        )
+    boundary = parsed["proof-boundary"]
+    if not isinstance(boundary, dict) or set(boundary) != PROOF_BOUNDARY_KEYS:
+        raise fail(
+            op,
+            f"proof-boundary keys must be exactly {sorted(PROOF_BOUNDARY_KEYS)}",
+            sorted(boundary) if isinstance(boundary, dict) else boundary,
+        )
+    pins = boundary["constituent-pins"]
+    if not isinstance(pins, dict):
+        raise fail(op, "proof-boundary constituent-pins must be a mapping", pins)
+    for name, pin_list in pins.items():
+        _check_pin_list(op, f"constituent-pins[{name}]", pin_list)
+
+    # terminal-artifact consistency
+    if parsed["terminal"] == "close rendered":
+        for key in (
+            "close",
+            "survivors",
+            "original-field",
+            "surface",
+            "consequences",
+            "exclusion-check",
+            "registered-leans",
+        ):
+            if _is_not_produced(parsed[key]):
+                raise fail(
+                    op,
+                    f"terminal `close rendered` requires a produced {key}",
+                )
+    if not _is_not_produced(parsed["close"]) and _is_not_produced(
+        parsed["exclusion-check"]
+    ):
+        raise fail(op, "a close cannot stand without its exclusion-check line")
+
+    # conservation at capsule grain, when the partition is fully real
+    if (
+        not _is_not_produced(field)
+        and not _is_not_produced(survivors)
+        and isinstance(records, list)
+    ):
+        field_wordings = [opt["wording"] for opt in field]
+        survivor_wordings = {opt["wording"] for opt in survivors}
+        active_prune = [
+            r["option"]
+            for r in records
+            if r["status"] == "active" and r["cut-basis"] in PRUNE_BASES
+        ]
+        overlap = survivor_wordings & set(active_prune)
+        if overlap:
+            raise fail(
+                op,
+                "an option is both a survivor and actively prune-excluded — the partition must be disjoint",
+                sorted(overlap),
+            )
+        dropped = [
+            w
+            for w in field_wordings
+            if w not in survivor_wordings and w not in active_prune
+        ]
+        if dropped:
+            raise fail(
+                op,
+                "field option(s) neither survive nor carry an active exclusion record — the partition must be conserved",
+                dropped,
+            )
+        stray_recommend = [
+            r["option"]
+            for r in records
+            if r["status"] == "active"
+            and r["cut-basis"] in RECOMMEND_BASES
+            and r["option"] not in survivor_wordings
+        ]
+        if stray_recommend:
+            raise fail(
+                op,
+                "recommend disposition record(s) name non-survivors",
+                stray_recommend,
+            )
+    return parsed
+
+
 def validate_capsule_text(text: str, contract: Contract) -> dict:
     op = "capsule validation"
     body = _strip_fences(text)
@@ -1304,29 +1943,14 @@ def validate_capsule_text(text: str, contract: Contract) -> dict:
     parsed = safe_parse(
         raw, byte_cap=cap, depth_cap=contract.bounds["parse-depth"], op=op
     )
-    if not isinstance(parsed, dict):
-        raise fail(op, "capsule is not a mapping", parsed)
-    schema = contract.schemas[CAPSULE_SCHEMA]
-    keys = {entry["key"] for entry in schema["keys"]}
-    unknown = set(parsed) - keys
-    if unknown:
-        raise fail(op, f"unknown keys rejected: {sorted(unknown)}")
-    missing = keys - set(parsed)
-    if missing:
-        raise fail(op, f"missing required keys: {sorted(missing)}")
-    if parsed["schema"] != CAPSULE_SCHEMA:
-        raise refuse(
-            op,
-            f"unsupported capsule schema version — resumes only through a shipped migration: {parsed['schema']!r}",
-        )
-    return parsed
+    return validate_capsule_document(parsed, contract)
 
 
 def cmd_validate_capsule(args: argparse.Namespace) -> int:
     readset = ReadSet()
     contract = load_contract(Path(args.data), readset)
     capsule_path = readset.allow(Path(args.capsule))
-    raw = capsule_path.read_bytes()
+    raw = readset.read_bytes(capsule_path)
     if len(raw) > contract.bounds["capsule-bytes"] + 16:  # fences allowance
         raise refuse(
             "capsule validation",
@@ -1334,6 +1958,191 @@ def cmd_validate_capsule(args: argparse.Namespace) -> int:
         )
     parsed = validate_capsule_text(raw.decode("utf-8"), contract)
     print(f"capsule valid: run={parsed['run']} terminal={parsed['terminal']!r}")
+    return EXIT_PASS
+
+
+# ---------------------------------------------------------------------------
+# Capsule import — the executable resume path
+# ---------------------------------------------------------------------------
+
+
+def import_capsule_into_store(
+    capsule: dict,
+    root: Path,
+    run: str,
+    contract: Contract,
+    readset: ReadSet,
+    revive: list[str] | None = None,
+    constraint_withdrawn: list[str] | None = None,
+    accept_seed_wording: str | None = None,
+    echo_body: dict | None = None,
+) -> Store:
+    """Create the re-run store from a validated capsule: echo (per-field
+    provenance restored), decomposition, pins, and a capsule-import item the
+    renderer reads exactly until a re-run envelope supersedes it. No prior
+    envelope is ever synthesized."""
+    op = "capsule import"
+    capsule = copy.deepcopy(capsule)
+    capsule.pop("capsule-complete", None)
+    revive = revive or []
+    constraint_withdrawn = constraint_withdrawn or []
+    directives_applied: list[str] = []
+
+    for wording in revive:
+        records = capsule.get("records")
+        if not isinstance(records, list):
+            raise fail(op, "revival directive but the capsule carries no records list")
+        matches = [
+            r for r in records if r["option"] == wording and r["status"] == "active"
+        ]
+        if not matches:
+            raise fail(
+                op, f"revival target has no active exclusion record: {wording!r}"
+            )
+        record = matches[0]
+        if record["cut-basis"] == "constraint" and wording not in constraint_withdrawn:
+            raise refuse(
+                op,
+                f"authority conflict — {wording!r} was cut on a constraint the directive does not withdraw or reprice",
+            )
+        record["status"] = "revived"
+        field = capsule.get("original-field")
+        survivors = capsule.get("survivors")
+        if isinstance(field, list) and isinstance(survivors, list):
+            survivor_set = {opt["wording"] for opt in survivors} | {wording}
+            capsule["survivors"] = [
+                opt for opt in field if opt["wording"] in survivor_set
+            ]
+        directives_applied.append(f"revive: {wording}")
+
+    decomposition = capsule["setup-decomposition"]
+    candidates = list(decomposition["candidates"])
+    candidate_wordings = {c["wording"] for c in candidates}
+    for wording in revive:
+        if wording not in candidate_wordings:
+            candidates.append(
+                {
+                    "wording": wording,
+                    "provenance-flag": "revived",
+                    "authority-note": "absent",
+                }
+            )
+            candidate_wordings.add(wording)
+    if accept_seed_wording:
+        seed = capsule.get("provisional-seed")
+        if not isinstance(seed, dict):
+            raise fail(
+                op,
+                "seed acceptance directive but the capsule carries no provisional seed",
+            )
+        if accept_seed_wording not in candidate_wordings:
+            candidates.append(
+                {
+                    "wording": accept_seed_wording,
+                    "provenance-flag": "accepted",
+                    "authority-note": "absent",
+                }
+            )
+        directives_applied.append(f"accept seed: {accept_seed_wording}")
+
+    contract_map = capsule["effective-contract"]
+    if echo_body is None:
+        fields = {
+            name: {
+                "value": contract_map[name]["value"],
+                "provenance": contract_map[name]["provenance"],
+            }
+            for name in CAPSULE_CONTRACT_FIELDS
+        }
+        echo_body = {
+            "invocation-wording-initial": contract_map["invocation-wording"]["initial"],
+            "directives": list(contract_map["invocation-wording"]["directives"])
+            + directives_applied,
+            "fields": fields,
+        }
+
+    soft_prefs = contract_map["soft-prefs"]["value"]
+    values = contract_map["values"]["value"]
+    decomposition_body = {
+        "frame": decomposition["frame"],
+        "candidates": candidates,
+        "stakes": decomposition["stakes"],
+        "soft-prefs": soft_prefs if isinstance(soft_prefs, list) else [],
+        "values": values if isinstance(values, list) else [],
+        "composition-provenance": decomposition["composition-provenance"],
+    }
+    identity = contract_map["evidence-identity"]
+    pins_body = {
+        "constituents": capsule["proof-boundary"]["constituent-pins"],
+        "method": contract_map["method-identity"],
+        "evidence": identity["named"],
+        "in-packet": identity["in-packet"],
+    }
+
+    if root.exists():
+        raise refuse(
+            "store init",
+            f"store path already exists — retire the orphan via `trash` first: {root}",
+        )
+    parent = Path(os.path.realpath(root.parent))
+    readset.allow(parent)
+    root.mkdir(mode=0o700)
+    store = Store(root, contract, readset)
+    for seq, (kind, body) in enumerate(
+        (
+            ("echo", echo_body),
+            ("decomposition", decomposition_body),
+            ("pins", pins_body),
+            ("capsule-import", {"capsule": capsule}),
+        )
+    ):
+        store.write(
+            {
+                "schema": RUNSTATE_SCHEMA,
+                "kind": kind,
+                "run": run,
+                "seq": seq,
+                "body": body,
+            }
+        )
+    return store
+
+
+def cmd_import_capsule(args: argparse.Namespace) -> int:
+    readset = ReadSet()
+    contract = load_contract(Path(args.data), readset)
+    capsule_path = readset.allow(Path(args.capsule))
+    raw = readset.read_bytes(capsule_path)
+    if len(raw) > contract.bounds["capsule-bytes"] + 16:  # fences allowance
+        raise refuse(
+            "capsule import",
+            f"pasted capsule of {len(raw)} bytes exceeds the {contract.bounds['capsule-bytes']}-byte ingest bound",
+        )
+    capsule = validate_capsule_text(raw.decode("utf-8"), contract)
+    echo_body = None
+    if args.echo_body:
+        echo_path = readset.allow(Path(args.echo_body))
+        echo_body = safe_parse(
+            readset.read_bytes(echo_path),
+            byte_cap=contract.bounds["parse-bytes"],
+            depth_cap=contract.bounds["parse-depth"],
+            op="echo body",
+        )
+    store = import_capsule_into_store(
+        capsule,
+        Path(args.store),
+        args.run,
+        contract,
+        readset,
+        revive=args.revive,
+        constraint_withdrawn=args.constraint_withdrawn,
+        accept_seed_wording=args.accept_seed,
+        echo_body=echo_body,
+    )
+    print(
+        f"capsule imported: store={store.root} run={args.run} "
+        f"(echo, decomposition, pins, capsule-import written)"
+    )
     return EXIT_PASS
 
 
@@ -1507,6 +2316,12 @@ def cmd_check_renderings(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 
 
+_FIXTURE_PROVENANCE = {
+    "invocation-span": "/deliberate choose a note-sync approach […candidates and authority language elided: see capsule]",
+    "delegation-span": "field mode seed-and-widen; candidate selection delegated to the run",
+}
+
+
 def _fixture_store(contract: Contract, readset: ReadSet, root: Path) -> Store:
     root.mkdir(mode=0o700)
     store = Store(root, contract, readset)
@@ -1558,10 +2373,21 @@ def _fixture_store(contract: Contract, readset: ReadSet, root: Path) -> Store:
                             "span": "fixture span",
                         },
                     },
+                    {
+                        "wording": "Option D — revived idea",
+                        "provenance-flag": "revived",
+                        "authority-note": "absent",
+                    },
+                    {
+                        "wording": "Option E — accepted idea",
+                        "provenance-flag": "accepted",
+                        "authority-note": "absent",
+                    },
                 ],
                 "stakes": "absent",
                 "soft-prefs": ["ongoing operating burden matters"],
                 "values": [],
+                "composition-provenance": dict(_FIXTURE_PROVENANCE),
             },
         }
     )
@@ -1591,6 +2417,119 @@ def _fixture_store(contract: Contract, readset: ReadSet, root: Path) -> Store:
         }
     )
     return store
+
+
+def _fixture_capsule(contract: Contract) -> dict:
+    """A realistic, fully nested completed-run capsule for roundtrip and
+    import fixtures."""
+    field = [
+        {"wording": "Option A — file sync over Syncthing", "provenance": "user-seed"},
+        {"wording": "Option B — hosted wiki", "provenance": "generated"},
+        {"wording": "Option C — shared git repo", "provenance": "generated"},
+    ]
+    record_c = {
+        "option": "Option C — shared git repo",
+        "status": "active",
+        "delegation": "field narrowing under the echoed budget",
+        "predicate-source": "agent-derived proposition",
+        "cut-basis": "dominance",
+        "epistemic-status": "fact-established at comparable resolution",
+        "reason": "fixture reason",
+        "load-bearing-premise": "fixture premise",
+        "strongest-case": "fixture strongest case, written before the kill",
+        "revive-if": "fixture revival condition",
+    }
+    contract_values: dict[str, object] = {
+        "frame": "choose a note-sync approach for a two-person team",
+        "field-mode": "seed-and-widen",
+        "constraints": [],
+        "values": [],
+        "soft-prefs": ["ongoing operating burden matters"],
+        "stakes": "absent",
+        "evidence-inputs": "none supplied",
+        "evidence-authorization": "default inspection only",
+        "survivor-budget": 4,
+        "degradation-permission": "absent",
+    }
+    pin = [{"path": "references/methods.md", "id": "0" * 64}]
+    return {
+        "schema": CAPSULE_SCHEMA,
+        "run": "fixture-capsule-run",
+        "terminal": "close rendered",
+        "effective-contract": {
+            **{
+                name: {"value": value, "provenance": "default"}
+                for name, value in contract_values.items()
+            },
+            "evidence-identity": {"named": [], "in-packet": []},
+            "method-identity": pin,
+            "bounds": dict(contract.bounds),
+            "invocation-wording": {
+                "initial": "fixture invocation",
+                "directives": [],
+                "source-capsule-id": "none",
+            },
+        },
+        "setup-decomposition": {
+            "frame": "choose a note-sync approach for a two-person team",
+            "candidates": [
+                {
+                    "wording": "Option A — file sync over Syncthing",
+                    "provenance-flag": "user-seed",
+                    "authority-note": {
+                        "text": "user lean: called it 'the obvious one'",
+                        "provenance": "inferred",
+                        "span": "fixture span",
+                    },
+                }
+            ],
+            "stakes": "absent",
+            "composition-provenance": dict(_FIXTURE_PROVENANCE),
+        },
+        "recommend-authority-packet": {"note": "fixture authority packet"},
+        "original-field": field,
+        "generation-boundary": "Untouched fixed points: none reported",
+        "survivors": field[:2],
+        "overflow": "not produced: no overflow disclosed",
+        "records": [record_c],
+        "retrievals": [],
+        "surface": "fixture comparison surface",
+        "consequences": [],
+        "close": "clear call: Option A — fixture close",
+        "registered-leans": {
+            "agent-first-lean": "Option A",
+            "user-visible-lean": "Option A",
+        },
+        "terminal-claim": "not produced: close rendered",
+        "exclusion-check": "Exclusion check: no live recorded challenge found",
+        "provisional-seed": "not produced: none discovered",
+        "revival-instructions": "paste this capsule with a revival directive naming the option",
+        "proof-boundary": {
+            "packet-isolation": "fixture",
+            "read-isolation": "packet-field isolation only; evidence-content encounters: none reported",
+            "constituent-pins": {
+                "ideate": [{"path": "skills/ideate/SKILL.md", "id": "0" * 64}],
+                "option-shaping": [
+                    {"path": "skills/option-shaping/SKILL.md", "id": "0" * 64}
+                ],
+                "making-recommendations": [
+                    {"path": "skills/making-recommendations/SKILL.md", "id": "0" * 64}
+                ],
+            },
+            "method-identity": pin,
+            "effective-models": "unknown",
+            "evidence-scope-used": "none",
+            "containment": "behavioral",
+            "store-path": "fixture",
+            "collapses": "none",
+            "not-proven": "fixture",
+        },
+    }
+
+
+def _capsule_text(document: dict) -> str:
+    body = dump_yaml(document)
+    return body + f"capsule-complete: {sha256_bytes(body.encode('utf-8'))}\n"
 
 
 def _expect(name: str, expected: str, function, results: list) -> None:
@@ -1694,9 +2633,33 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             results,
         )
         _expect(
+            "partial-column render refused (frame-only generate brief)",
+            "block",
+            lambda: render_brief("generate", store, contract, readset, ["frame"]),
+            results,
+        )
+        _expect(
             "in-column generate brief renders",
             "pass",
             lambda: render_brief("generate", store, contract, readset, None),
+            results,
+        )
+
+        def seeds_carriage():
+            brief = render_brief("generate", store, contract, readset, None)
+            if (
+                "Option D — revived idea" not in brief
+                or "Option E — accepted idea" not in brief
+            ):
+                raise fail(
+                    "fixture",
+                    "accepted/revived candidates missing from the rendered seeds item",
+                )
+
+        _expect(
+            "accepted and revived candidates render as collapse-exempt seeds",
+            "pass",
+            seeds_carriage,
             results,
         )
         _expect(
@@ -1717,34 +2680,29 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
 
         _expect("authorized path with spaces hashes", "pass", path_with_spaces, results)
 
-        def reordering_prune():
-            envelope = parse_fixture("must-pass/inert-prose-envelope.yaml")
-            store.write(
-                {
-                    "schema": RUNSTATE_SCHEMA,
-                    "kind": "envelope",
-                    "run": "fixture-run",
-                    "seq": store.next_seq(),
-                    "stage": "generate",
-                    "body": {"document": envelope},
-                }
-            )
-            reordered = {
+        # the generate envelope every prune fixture below validates against
+        store.write(
+            {
+                "schema": RUNSTATE_SCHEMA,
+                "kind": "envelope",
+                "run": "fixture-run",
+                "seq": store.next_seq(),
+                "stage": "generate",
+                "body": {
+                    "document": parse_fixture("must-pass/inert-prose-envelope.yaml"),
+                    "amendments": [],
+                },
+            }
+        )
+
+        def prune_envelope(survivors: list[dict], records: list[dict]) -> dict:
+            return {
                 "schema": ENVELOPE_SCHEMA,
                 "stage": "prune",
                 "status": "completed",
                 "artifacts": {
-                    "survivors": [
-                        {
-                            "wording": "Option B — hosted wiki",
-                            "provenance": "generated",
-                        },
-                        {
-                            "wording": "Option A — file sync over Syncthing",
-                            "provenance": "user-seed",
-                        },
-                    ],
-                    "exclusion-records": [],
+                    "survivors": survivors,
+                    "exclusion-records": records,
                     "overflow-disclosure": "not applicable",
                 },
                 "retrievals": "none",
@@ -1752,29 +2710,107 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
                 "pins": "none",
                 "model": "unknown",
             }
-            validate_envelope_shape(reordered, contract)
-            validate_envelope_against_store(reordered, store, contract)
+
+        def full_record(option: str, basis: str = "dominance") -> dict:
+            return {
+                "option": option,
+                "status": "active",
+                "delegation": "field narrowing under the echoed budget",
+                "predicate-source": "agent-derived proposition",
+                "cut-basis": basis,
+                "epistemic-status": "fact-established at comparable resolution",
+                "reason": "fixture reason",
+                "load-bearing-premise": "fixture premise",
+                "strongest-case": "written before the kill",
+                "revive-if": "fixture revival condition",
+            }
+
+        option_a = {
+            "wording": "Option A — file sync over Syncthing",
+            "provenance": "user-seed",
+        }
+        option_b = {"wording": "Option B — hosted wiki", "provenance": "generated"}
+
+        def check_prune(envelope: dict) -> None:
+            validate_envelope_shape(envelope, contract)
+            validate_envelope_against_store(envelope, store, contract)
 
         _expect(
             "reordering prune envelope rejected (order invariant)",
             "block",
-            reordering_prune,
+            lambda: check_prune(prune_envelope([option_b, option_a], [])),
+            results,
+        )
+        _expect(
+            "silent candidate drop rejected (conservation)",
+            "block",
+            lambda: check_prune(prune_envelope([option_a], [])),
+            results,
+        )
+        _expect(
+            "exclusion record for a surviving option rejected (disjointness)",
+            "block",
+            lambda: check_prune(
+                prune_envelope(
+                    [option_a, option_b],
+                    [full_record("Option A — file sync over Syncthing")],
+                )
+            ),
+            results,
+        )
+        _expect(
+            "conserving prune partition accepted",
+            "pass",
+            lambda: check_prune(
+                prune_envelope([option_a], [full_record("Option B — hosted wiki")])
+            ),
+            results,
+        )
+
+        def duplicate_field_wordings():
+            document = parse_fixture("must-pass/inert-prose-envelope.yaml")
+            document["artifacts"]["field"] = [option_a, dict(option_a)]
+            validate_envelope_shape(document, contract)
+
+        _expect(
+            "duplicate field wordings rejected",
+            "block",
+            duplicate_field_wordings,
+            results,
+        )
+
+        def arbitrary_status():
+            document = prune_envelope([option_a], [])
+            document["status"] = "banana"
+            document["artifacts"] = {
+                key: "not produced: banana" for key in document["artifacts"]
+            }
+            validate_envelope_shape(document, contract)
+
+        _expect(
+            "arbitrary status word rejected (status grammar)",
+            "block",
+            arbitrary_status,
+            results,
+        )
+
+        def exit_status():
+            document = prune_envelope([option_a], [])
+            document["status"] = "exit: authority gap"
+            document["artifacts"] = {
+                key: "not produced: authority gap" for key in document["artifacts"]
+            }
+            validate_envelope_shape(document, contract)
+
+        _expect(
+            "named-exit status form passes (status grammar)",
+            "pass",
+            exit_status,
             results,
         )
 
         def paraphrased_record():
-            record = {
-                "option": "Option A — Syncthing file sync",  # paraphrase of the stored wording
-                "status": "active",
-                "delegation": "field narrowing under the echoed budget",
-                "predicate-source": "agent-derived proposition",
-                "cut-basis": "equivalence",
-                "epistemic-status": "fact-established at comparable resolution",
-                "reason": "shares its mechanism with the seed",
-                "load-bearing-premise": "same sync engine",
-                "strongest-case": "written before the kill",
-                "revive-if": "the mechanisms turn out to differ",
-            }
+            record = full_record("Option A — Syncthing file sync")  # paraphrase
             _check_record(
                 record,
                 contract,
@@ -1786,7 +2822,97 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             "paraphrased record option rejected", "block", paraphrased_record, results
         )
 
-        def capsule_roundtrip():
+        def shape_provenance():
+            store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "envelope",
+                    "run": "fixture-run",
+                    "seq": store.next_seq(),
+                    "stage": "prune",
+                    "body": {
+                        "document": prune_envelope(
+                            [option_a], [full_record("Option B — hosted wiki")]
+                        ),
+                        "amendments": [],
+                    },
+                }
+            )
+            brief = render_brief("shape", store, contract, readset, None)
+            if (
+                "## packet: composition-provenance" not in brief
+                or "invocation-span" not in brief
+            ):
+                raise fail(
+                    "fixture",
+                    "shape brief carries no composition-provenance evidence item",
+                )
+
+        _expect(
+            "shape brief carries the composition-provenance item",
+            "pass",
+            shape_provenance,
+            results,
+        )
+
+        def decomposition_without_provenance():
+            validate_runstate_item(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "decomposition",
+                    "run": "fixture-run",
+                    "seq": 9,
+                    "body": {
+                        "frame": "fixture",
+                        "candidates": [],
+                        "stakes": "absent",
+                        "soft-prefs": [],
+                        "values": [],
+                    },
+                },
+                contract,
+            )
+
+        _expect(
+            "decomposition without composition-provenance rejected",
+            "block",
+            decomposition_without_provenance,
+            results,
+        )
+
+        def garbage_runstate_echo():
+            validate_runstate_item(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "echo",
+                    "run": None,
+                    "seq": 0,
+                    "body": {
+                        "invocation-wording-initial": ["not", "a", "string"],
+                        "directives": 7,
+                        "fields": "just-a-scalar",
+                    },
+                },
+                contract,
+            )
+
+        _expect(
+            "run-state echo with unusable nested state rejected",
+            "block",
+            garbage_runstate_echo,
+            results,
+        )
+
+        _expect(
+            "realistic capsule with terminator validates (nested shapes)",
+            "pass",
+            lambda: validate_capsule_text(
+                _capsule_text(_fixture_capsule(contract)), contract
+            ),
+            results,
+        )
+
+        def garbage_capsule():
             capsule_keys = [
                 entry["key"]
                 for entry in contract.schemas[CAPSULE_SCHEMA]["keys"]
@@ -1794,27 +2920,18 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             ]
             document = {"schema": CAPSULE_SCHEMA}
             for key in capsule_keys:
-                document[key] = (
-                    "not produced: fixture"
-                    if key not in ("run", "terminal")
-                    else "fixture"
-                )
-            body = dump_yaml(document)
-            terminator = sha256_bytes(body.encode("utf-8"))
-            validate_capsule_text(body + f"capsule-complete: {terminator}\n", contract)
+                document[key] = "garbage-scalar"
+            validate_capsule_text(_capsule_text(document), contract)
 
         _expect(
-            "well-formed capsule with terminator validates",
-            "pass",
-            capsule_roundtrip,
+            "capsule of arbitrary scalars rejected (nested shapes)",
+            "block",
+            garbage_capsule,
             results,
         )
 
         def truncated_capsule():
-            document = {"schema": CAPSULE_SCHEMA}
-            for entry in contract.schemas[CAPSULE_SCHEMA]["keys"]:
-                if entry["key"] not in ("schema", "capsule-complete"):
-                    document[entry["key"]] = "fixture"
+            document = _fixture_capsule(contract)
             body = dump_yaml(document)
             terminator = sha256_bytes(body.encode("utf-8"))
             truncated = body[len(body) // 2 :]
@@ -1826,6 +2943,100 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             "truncated capsule fails the completeness terminator",
             "block",
             truncated_capsule,
+            results,
+        )
+
+        def import_contest_recovery():
+            capsule = _fixture_capsule(contract)
+            imported = import_capsule_into_store(
+                capsule,
+                sandbox / "import-contest",
+                "fixture-import-1",
+                contract,
+                readset,
+            )
+            brief = render_brief("contest", imported, contract, readset, None)
+            if (
+                "Option C — shared git repo" not in brief
+                or "## packet: close" not in brief
+            ):
+                raise fail(
+                    "fixture",
+                    "Contest brief from an imported capsule misses the record or close",
+                )
+
+        _expect(
+            "fresh-store Contest recovery renders from an imported capsule",
+            "pass",
+            import_contest_recovery,
+            results,
+        )
+
+        def import_recommend_recovery():
+            capsule = _fixture_capsule(contract)
+            imported = import_capsule_into_store(
+                capsule,
+                sandbox / "import-recommend",
+                "fixture-import-2",
+                contract,
+                readset,
+            )
+            brief = render_brief("recommend", imported, contract, readset, None)
+            if (
+                "fixture comparison surface" not in brief
+                or "## packet: survivors" not in brief
+            ):
+                raise fail(
+                    "fixture",
+                    "Recommend brief from an imported capsule misses the surface or survivors",
+                )
+
+        _expect(
+            "fresh-store Recommend recovery renders from an imported capsule",
+            "pass",
+            import_recommend_recovery,
+            results,
+        )
+
+        def acceptance_atomicity():
+            atomic_store = _fixture_store(contract, readset, sandbox / "atomic-run")
+            item = {
+                "schema": RUNSTATE_SCHEMA,
+                "kind": "envelope",
+                "run": "fixture-run",
+                "seq": atomic_store.next_seq(),
+                "stage": "prune",
+                "body": {
+                    "document": prune_envelope([option_a], []),
+                    "amendments": [],
+                },
+            }
+            real_replace = os.replace
+
+            def injected_failure(src, dst):
+                raise OSError("injected write failure")
+
+            os.replace = injected_failure
+            try:
+                try:
+                    atomic_store.write(item)
+                except OSError:
+                    pass
+            finally:
+                os.replace = real_replace
+            if atomic_store.find("envelope", "prune"):
+                raise fail(
+                    "fixture",
+                    "an envelope became visible after a failed acceptance write",
+                )
+            atomic_store.write(item)
+            if not atomic_store.find("envelope", "prune"):
+                raise fail("fixture", "re-accepted envelope did not land")
+
+        _expect(
+            "acceptance is atomic under a fault-injected write",
+            "pass",
+            acceptance_atomicity,
             results,
         )
 
@@ -1926,6 +3137,37 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--data", required=True)
     p.add_argument("capsule")
     p.set_defaults(func=cmd_validate_capsule)
+
+    p = sub.add_parser(
+        "import-capsule",
+        help="validate a pasted capsule and create the re-run store with typed restart state",
+    )
+    p.add_argument("--data", required=True)
+    p.add_argument("--store", required=True)
+    p.add_argument("--run", required=True)
+    p.add_argument("--capsule", required=True)
+    p.add_argument(
+        "--revive",
+        action="append",
+        default=[],
+        help="revival directive: the option wording, repeatable; refuses `authority conflict` "
+        "on a constraint-basis record unless --constraint-withdrawn names the same wording",
+    )
+    p.add_argument(
+        "--constraint-withdrawn",
+        action="append",
+        default=[],
+        help="asserts the accompanying contract change withdrew or repriced the constraint that cut this wording",
+    )
+    p.add_argument(
+        "--accept-seed",
+        help="accept the capsule's provisional seed as a candidate with this exact wording",
+    )
+    p.add_argument(
+        "--echo-body",
+        help="optional YAML file overriding the reconstructed echo body (the effective re-run contract)",
+    )
+    p.set_defaults(func=cmd_import_capsule)
 
     p = sub.add_parser(
         "check-renderings",

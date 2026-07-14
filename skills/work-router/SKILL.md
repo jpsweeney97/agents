@@ -95,6 +95,7 @@ Use a table only when it is more readable than grouping by owner, such as many s
 ## Routing Boundaries
 
 - Choosing among product, design, or strategy options already on the table is `making-recommendations`; this skill chooses the owning lane, not the winning product option.
+- A whole delegated decision run — generate options, prune on a contestable ledger, shape survivors, recommend, contest the exclusions, autonomously from one invocation — is `deliberate`. It is explicit-token-only (`/deliberate` or `$deliberate`) and hidden from model-side skill lists by design, so name the token in the route; the phase lanes (`ideate`, `option-shaping`, `making-recommendations`) stay right when the user wants a single phase.
 - Dependency-aware sequencing of existing findings with gates and critical path is `next-steps`, and only when explicitly invoked.
 - Evidence gathering and backlog discovery are the audit skill's job, such as `tech-debt-scan`; this skill routes existing items.
 - Current-state orientation is `orient-status`; this skill does not inspect a repo broadly to say where things stand.

@@ -55,8 +55,8 @@ One fenced YAML document per stage return: UTF-8, fixed key set (unknown keys re
 <!-- generated:envelope-keys -->
 - `schema` — required; constant `deliberate-envelope/v1`
 - `stage` — required; one of: generate, prune, shape, recommend, contest
-- `status` — required. `completed`, the named honest exit, or `failed: <reason>`
-- `artifacts` — required. map carrying exactly the stage's obliged-artifact keys; each value present, `not produced: <reason>`, or (conditional artifacts only) `not applicable`
+- `status` — required. three-class grammar, mechanically enforced: `completed`, `exit: <the named honest exit>`, or `failed: <reason>`
+- `artifacts` — required. map carrying exactly the stage's obliged-artifact keys; each value present, `not produced: <reason>` (never on a completed stage), or (conditional artifacts only) `not applicable`
 - `retrievals` — required. `none`, or list of {source, retrieved-at, fact, concerns} — concerns is `candidate-neutral` or the list of every candidate the fact names, evidences, or was retrieved to investigate; capped by bounds.per-stage-retrievals
 - `encounters` — required. `none`, or list of {kind: withheld-class | instruction-like, where, note} per the read-isolation rule
 - `pins` — required. list of {surface, id} — the constituent and evidence identifiers the stage actually verified; `none` when the stage loaded no pinned surface
@@ -69,22 +69,22 @@ Every orchestrator-written run-state store item; helper-validated at write exact
 
 <!-- generated:runstate-keys -->
 - `schema` — required; constant `deliberate-runstate/v1`
-- `kind` — required; one of: echo, decomposition, pins, envelope, concerns-amendment, brief-render, terminal-claim, capsule-progress
+- `kind` — required; one of: echo, decomposition, pins, envelope, brief-render, terminal-claim, capsule-progress, capsule-import
 - `run` — required. run identifier; every item carries it and must match the echo item's
 - `seq` — required. monotonic write sequence integer; the echo item is seq 0 and the store's first write
-- `stage` — optional. required for envelope, concerns-amendment, and brief-render items
+- `stage` — optional. required for envelope and brief-render items
 - `body` — required. keyed payload per kind; fixed top-level key set per body-keys below
 
 Body key sets per kind:
 
 - `echo`: `invocation-wording-initial`, `directives`, `fields`
-- `decomposition`: `frame`, `candidates`, `stakes`, `soft-prefs`, `values`
+- `decomposition`: `frame`, `candidates`, `stakes`, `soft-prefs`, `values`, `composition-provenance`
 - `pins`: `constituents`, `method`, `evidence`, `in-packet`
-- `envelope`: `document`
-- `concerns-amendment`: `amendments`
+- `envelope`: `document`, `amendments`
 - `brief-render`: `brief-id`
 - `terminal-claim`: `terminal`, `claim`, `survivor`
 - `capsule-progress`: `capsule`
+- `capsule-import`: `capsule`
 <!-- /generated:runstate-keys -->
 
 ## deliberate-capsule/v1
@@ -95,8 +95,8 @@ The recovery capsule (and, with `not produced` markers and a recorded failure te
 - `schema` — required; constant `deliberate-capsule/v1`
 - `run` — required
 - `terminal` — required. the recorded terminal name, or `close rendered` when Recommend's close stands
-- `effective-contract` — required. map: frame, field-mode, constraints, values, soft-prefs, stakes, evidence-inputs, evidence-authorization, evidence-identity, method-identity, survivor-budget, degradation-permission, bounds, invocation-wording: {initial, directives (verbatim within bounds.verbatim-directive-history, older collapsed to content identifiers), source-capsule-id}
-- `setup-decomposition` — required. candidate-free frame, per-candidate authority notes with provenance, stakes
+- `effective-contract` — required. map: frame, field-mode, constraints, values, soft-prefs, stakes, evidence-inputs, evidence-authorization, evidence-identity, method-identity, survivor-budget, degradation-permission, bounds, invocation-wording: {initial, directives (verbatim within bounds.verbatim-directive-history, older collapsed to content identifiers), source-capsule-id}; each contract field carries {value, provenance} so an import restores the exact echo
+- `setup-decomposition` — required. map: frame, candidates (each {wording, provenance-flag, authority-note}), stakes, composition-provenance ({invocation-span, delegation-span})
 - `recommend-authority-packet` — required. survivor wordings, ordering with provenance, per-survivor authority notes, any overflow disclosure, stakes/reversibility
 - `original-field` — required. complete generated or user-supplied field — present whenever any field was validated; `not produced: <reason>` only on a failure before Generate returned a validated field
 - `generation-boundary` — required. untouched-fixed-points line | `Generate not run: closed-to-widening` | not produced
@@ -107,7 +107,8 @@ The recovery capsule (and, with `not produced` markers and a recorded failure te
 - `surface` — required. Shape's comparison surface, verbatim when produced
 - `consequences` — required. Shape-recorded constraint consequences
 - `close` — required. Recommend's close, verbatim when produced
-- `terminal-claim` — required. the close-less terminal's claim when one was recorded
+- `registered-leans` — required. Recommend's registered leans ({agent-first-lean, user-visible-lean}), verbatim when produced
+- `terminal-claim` — required. the close-less terminal's claim item ({terminal, claim, survivor}) when one was recorded
 - `exclusion-check` — required. the rendered exclusion check line
 - `provisional-seed` — required. marked unaccepted when present
 - `revival-instructions` — required
