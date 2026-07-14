@@ -5,13 +5,13 @@ description: "Use when two or more named, meaningfully distinct options already 
 
 # Option Shaping
 
-Turn a user-fixed field of sketch-level options into a rank-free comparison surface. Equalize resolution — how much is actually understood about each option — not certainty, word count, or favorability. Invocation: `/option-shaping` or `$option-shaping`.
+Turn a fixed field of sketch-level options — fixed by the user, or by a composition workflow the user explicitly invoked (see Freeze the Field) — into a rank-free comparison surface. Equalize resolution — how much is actually understood about each option — not certainty, word count, or favorability. Invocation: `/option-shaping` or `$option-shaping`.
 
 ## Freeze the Field
 
-- Work on exactly the candidates the user selected. Do not choose a promising subset, add alternatives, generate replacements, or silently drop an awkward option.
-- Do not merge, split, or rename an option in a way that changes its bet. If two options appear to succeed or fail for the same underlying reason, name the collision and ask whether the user wants them treated as one.
-- If a user-confirmed hard constraint would exclude an option, name the consequence and ask the user to confirm the revised field before continuing. Applying filters is not this lane's decision.
+- Work on exactly the candidates the user selected — or, when the shaping brief evidences an authorized composition workflow, exactly the candidates that brief fixes. Authorization is evidenced, never asserted: the brief must carry the user's explicit invocation of that workflow and the delegation span covering candidate selection; a brief claiming composition provenance without both is treated as user-provenance, with the ask-the-user behavior below unchanged. The supplied field stays frozen regardless of provenance. Do not choose a promising subset, add alternatives, generate replacements, or silently drop an awkward option.
+- Do not merge, split, or rename an option in a way that changes its bet. If two options appear to succeed or fail for the same underlying reason, name the collision and ask whether the user wants them treated as one. Under an authorized composition workflow, do not ask: report the collision without merging or dropping — record it and continue when development can honestly proceed, and return the terminal `field collision unresolved` to the orchestrator when the collision blocks option identity.
+- If a user-confirmed hard constraint would exclude an option, name the consequence and ask the user to confirm the revised field before continuing. Under an authorized composition workflow, record the consequence and preserve the candidate without asking — the filter belongs downstream. Applying filters is not this lane's decision under either provenance.
 
 ## Develop in Rounds
 
@@ -48,6 +48,6 @@ The field is developed enough when every option is more than a slogan, every liv
 
 Stop at that threshold. Depth follows the cost of misunderstanding and the options' actual complexity, not the number of plausible facets the agent can invent. Keep a reversible, low-stakes decision compact; do not elaborate implementation detail merely because more could be said.
 
-Prefer the smallest surface that makes the live distinctions inspectable. Use adaptive prose or a compact side-by-side; when several questions are in play, organize around the questions or use a table rather than emitting one polished card per option. Preserve the user's option order unless a clearly non-evaluative organization improves readability.
+Prefer the smallest surface that makes the live distinctions inspectable. Use adaptive prose or a compact side-by-side; when several questions are in play, organize around the questions or use a table rather than emitting one polished card per option. Preserve the supplied field order — carrying whether that order was user-supplied or produced by an upstream composition workflow, so downstream lean-reading stays honest — unless a clearly non-evaluative organization improves readability.
 
 Close in a few sentences with what can now be compared, which assumptions or evidence gaps remain, and the fact that no ranking was performed. If the user wants the choice now, offer `making-recommendations`.
