@@ -57,6 +57,18 @@ Exclusion records (Prune) and disposition records (Recommend) share one key set.
 
 One authored setup document for an initial run. `init-setup` validates it before creating the store, derives the echo and decomposition from it, writes those two items in order, and returns nonzero immediately if either write fails. Candidate-attached language is authored only in an entry's `authority-note`; only its separate candidate-neutral `criteria` values enter `soft-prefs`.
 
+The setup carrier has one load-bearing serialization rule: use a YAML `|-` block scalar for every free-prose value, including initial wording, frame, constraint and price text, stated values, stakes, evidence prose, candidate wordings and attached candidate keys, criteria, authority-note text and span, and both composition-provenance spans. Use plain scalars only for schema names, provenance and mode enums, booleans, numbers, `absent`, and `none`. This is mandatory even when the current text appears colon-free because `init-setup` is the single attempt: a syntax failure stops the run and may not be repaired inline.
+
+```yaml
+composition-provenance:
+  invocation-span: |-
+    Field mode: seed-and-widen; candidate wording elided here.
+  delegation-span: |-
+    Run the complete deliberation now.
+```
+
+Never write `invocation-span: Field mode: seed-and-widen` as a plain scalar; the second colon is YAML syntax, not prose.
+
 <!-- generated:setup-keys -->
 - `schema` — required; constant `deliberate-setup/v1`
 - `invocation-wording-initial` — required
