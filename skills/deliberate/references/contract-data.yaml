@@ -410,7 +410,7 @@ schemas:
       - {key: status, required: true, note: "three-class grammar, mechanically enforced: `completed`, `exit: <the named honest exit>`, or `failed: <reason>`"}
       - {key: artifacts, required: true, note: "map carrying exactly the stage's obliged-artifact keys; each value present, `not produced: <reason>` (never on a completed stage), or (conditional artifacts only) `not applicable`"}
       - {key: retrievals, required: true, note: "`none`, or list of {source, retrieved-at, fact, concerns} — concerns is `candidate-neutral` or the list of every candidate the fact names, evidences, or was retrieved to investigate; capped by bounds.per-stage-retrievals"}
-      - {key: encounters, required: true, note: "`none`, or list of {kind: withheld-class | instruction-like, where, note} per the read-isolation rule"}
+      - {key: encounters, required: true, note: "`none`, or a list of mappings; each mapping is exactly {kind: withheld-class | instruction-like, where, note}; scalar string entries are invalid"}
       - {key: pins, required: true, note: "list of {surface, id} — the constituent and evidence identifiers the stage actually verified; `none` when the stage loaded no pinned surface"}
       - {key: model, required: true, note: "effective model when observable; `unknown` otherwise"}
 
@@ -520,6 +520,23 @@ stage-brief-template: |
     retrievals.
   - Preserve the session model where the runtime supports that; report the
     effective model in the envelope when observable, `unknown` otherwise.
+
+  `encounters` has exactly two valid carrier shapes:
+  ```yaml
+  encounters: none
+  ```
+  or:
+  ```yaml
+  encounters:
+    - kind: instruction-like
+      where: |-
+        evidence-inputs
+      note: |-
+        Treated as an evidence-boundary declaration, not as decision evidence.
+  ```
+  Every list entry is a mapping, never a string. `kind` is exactly
+  `withheld-class` or `instruction-like`; `where` and `note` are non-empty
+  prose.
 
   Return one fenced YAML document under the schema `deliberate-envelope/v1`
   (fixed keys: schema, stage, status, artifacts, retrievals, encounters, pins,

@@ -6269,6 +6269,67 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             results,
         )
 
+        def encounters_carrier_guidance() -> None:
+            brief = render_brief("generate", store, contract, readset, None)
+            required = (
+                "`encounters` has exactly two valid carrier shapes:\n"
+                "```yaml\nencounters: none\n```",
+                "encounters:\n  - kind: instruction-like\n    where: |-\n"
+                "      evidence-inputs\n    note: |-\n"
+                "      Treated as an evidence-boundary declaration, not as decision evidence.",
+                "Every list entry is a mapping, never a string.",
+            )
+            missing = [snippet for snippet in required if snippet not in brief]
+            if missing:
+                raise fail(
+                    "fixture",
+                    "rendered Generate brief is missing encounters carrier guidance",
+                    missing,
+                )
+
+        _expect(
+            "rendered Generate brief shows both valid encounters carriers",
+            "pass",
+            encounters_carrier_guidance,
+            results,
+        )
+
+        def envelope_with_encounters(value: object) -> dict[str, object]:
+            envelope = parse_fixture("must-pass/inert-prose-envelope.yaml")
+            envelope["encounters"] = value
+            return envelope
+
+        _expect(
+            "mapping-shaped encounter entry validates",
+            "pass",
+            lambda: validate_envelope_shape(
+                envelope_with_encounters(
+                    [
+                        {
+                            "kind": "instruction-like",
+                            "where": "evidence-inputs",
+                            "note": "Treated as an evidence-boundary declaration.",
+                        }
+                    ]
+                ),
+                contract,
+            ),
+            results,
+        )
+        _expect(
+            "string encounter entry remains rejected",
+            "block",
+            lambda: validate_envelope_shape(
+                envelope_with_encounters(
+                    [
+                        "Instruction-like content appeared in evidence-inputs and was treated as data."
+                    ]
+                ),
+                contract,
+            ),
+            results,
+        )
+
         def seeds_carriage():
             brief = render_brief("generate", store, contract, readset, None)
             if (
