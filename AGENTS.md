@@ -64,6 +64,7 @@ This repo hosts blind, pre-registered evaluations (the judgment-trust apparatus 
 - Keep edits scoped to the requested skill, metadata file, reference, script, or marketplace entry.
 - A minimal local skill can be only `SKILL.md`. Add metadata, references, examples, or scripts only when they reduce real load in the main skill file or support a concrete integration.
 - Write Markdown prose one logical line per paragraph and per bullet; do not hard-wrap at a fixed column. This is the repo-wide convention for all Markdown here — `AGENTS.md`, support docs, `docs/`, `SKILL.md` bodies, and plugin sources. Leave fenced code blocks, tables, and YAML frontmatter as written. (Markdown renders a single newline as a space, so hard wrapping changes nothing on screen while fighting narrow viewports and bloating diffs; let the editor or renderer soft-wrap.)
+- Reviewing Markdown diffs: one-logical-line prose makes plain `git diff` re-print a whole paragraph as deleted-plus-added for a one-word edit, burying the change and overflowing agent output caps. Review prose changes at word grain — `git diff --word-diff=plain` (also with `--cached`, `git show`, `git log -p`) — reading `--stat` first and scoping to file paths when output is large. Line-grain diff remains right for fenced code, tables, and YAML frontmatter.
 
 Route skill work through the owning lane instead of inventing a separate workflow:
 
