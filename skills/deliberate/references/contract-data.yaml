@@ -14,7 +14,7 @@
 # Editing rule: this file is the authority. After any edit, regenerate the
 # authored renderings (`check-renderings --write`) and rerun the fixtures.
 
-contract-data-version: 3
+contract-data-version: 4
 
 stages: [generate, prune, shape, recommend, contest]
 
@@ -80,11 +80,11 @@ validation:
   insertion-values: [original-field-position, appended-by-rule]
   prune-bases: [constraint, equivalence, dominance, survivor budget]
   recommend-bases: [post-prune filter, post-prune dominance, post-prune collapse, only-serious-option rival]
-  generic-write-kinds: [decomposition, pins, terminal-claim]
-  reserved-write-kinds: [echo, envelope, brief-render, proof-inputs, terminal-state, capsule-progress, capsule-import, restart-plan]
+  generic-write-kinds: [pins, terminal-claim]
+  reserved-write-kinds: [echo, decomposition, envelope, brief-render, proof-inputs, terminal-state, capsule-progress, capsule-import, restart-plan]
   runstate-writers:
-    echo: [init-store, import-capsule]
-    decomposition: [write-item, import-capsule]
+    echo: [init-setup, import-capsule]
+    decomposition: [init-setup, import-capsule]
     pins: [write-item, import-capsule]
     envelope: [validate-envelope]
     brief-render: [render-brief]
@@ -385,6 +385,24 @@ record-keys:
 # prose values as block scalars.
 # ---------------------------------------------------------------------------
 schemas:
+  # -------------------------------------------------------------------------
+  # deliberate-setup/v1 — the single authored source for an initial echo and
+  # setup decomposition. The helper routes candidate-attached language only
+  # through authority-note and flattens only criteria into soft-prefs.
+  # -------------------------------------------------------------------------
+  deliberate-setup/v1:
+    keys:
+      - {key: schema, required: true, const: deliberate-setup/v1}
+      - {key: invocation-wording-initial, required: true}
+      - {key: directives, required: true, note: empty on an initial run}
+      - {key: directives-collapsed, required: true, note: empty on an initial run}
+      - {key: fields, required: true, note: "map of every validation.echo-contract-fields entry except soft-prefs, each {value, provenance}; soft-prefs is derived only from soft-preferences.entries[].criteria"}
+      - {key: candidates, required: true, note: "list of {wording, provenance-flag}; authority notes cannot be authored here"}
+      - {key: soft-preferences, required: true, note: "{provenance, entries}; each entry is exactly {candidate, criteria, authority-note}; candidate is `absent` for a neutral preference and requires authority-note `absent`, or one exact candidate wording with its complete candidate-attached language only in authority-note; only candidate-neutral criteria are flattened into echo and decomposition soft-prefs"}
+      - {key: composition-provenance, required: true, note: "{invocation-span, delegation-span}, candidate-free by elision"}
+      - {key: bounds, required: true, note: exact canonical top-level bounds map}
+      - {key: source-capsule-id, required: true, note: "`none` on an initial run"}
+
   deliberate-envelope/v1:
     keys:
       - {key: schema, required: true, const: deliberate-envelope/v1}
@@ -410,7 +428,7 @@ schemas:
       - {key: stage, required: false, note: "required for envelope and brief-render items"}
       - {key: body, required: true, note: keyed payload per kind; fixed top-level key set per body-keys below, each body validated to its nested shape at write}
     body-keys:
-      echo: [invocation-wording-initial, directives, directives-collapsed, fields, bounds, source-capsule-id]   # fields: map of contract fields, each {value, provenance: user-supplied | inferred | default | absent}; bounds: exact canonical top-level bounds map; source-capsule-id: `none` or full sha256; directives: newest verbatim texts within bounds.verbatim-directive-history after helper-owned compaction; directives-collapsed: older directive texts as content identifiers, oldest first
+      echo: [invocation-wording-initial, directives, directives-collapsed, fields, setup-source, bounds, source-capsule-id]   # fields: map of contract fields, each {value, provenance: user-supplied | inferred | default | absent}; setup-source: the normalized {candidates, soft-preferences, composition-provenance} source from which decomposition is derived; bounds: exact canonical top-level bounds map; source-capsule-id: `none` or full sha256; directives: newest verbatim texts within bounds.verbatim-directive-history after helper-owned compaction; directives-collapsed: older directive texts as content identifiers, oldest first
       decomposition: [frame, candidates, stakes, soft-prefs, values, composition-provenance]  # candidates: list of {wording, provenance-flag, authority-note: {text, provenance, span} | absent}; composition-provenance: {invocation-span, delegation-span}, candidate-free by elision
       pins: [constituents, method, evidence, in-packet]        # constituent/method entries: {path | name, id | manifest}; evidence/in-packet entries additionally require bytes, which pins-body validation sums against the canonical aggregate bound
       envelope: [document, amendments]                         # document: the validated stage envelope (value-preserving re-serialization at acceptance; every compared value byte-exact); amendments: the acceptance's owed concerns amendments — list of {retrieval: {producing-stage, source, retrieved-at}, option} — stored atomically with the envelope, producing envelopes never rewritten
@@ -436,8 +454,8 @@ schemas:
       - {key: schema, required: true, const: deliberate-capsule/v1}
       - {key: run, required: true}
       - {key: terminal, required: true, note: "the non-empty terminal from the store's reserved terminal-state item, normally `close rendered` when Recommend's close stands; every capsule terminal must match one canonical validation.capsule-terminal-classes entry, a failure terminal, or the `constituent exit at <stage>: <named exit>` form over validation.constituent-exit-stages — an unmatched terminal is refused, and artifacts at or after the class frontier must not be produced; receipt-only and echo-only terminals refuse capsule validation; `store failed: write` alone may lack terminal-state under its failed-write exception"}
-      - {key: effective-contract, required: true, note: "map: frame, field-mode, constraints, values, soft-prefs, stakes, evidence-inputs, evidence-authorization, evidence-identity, method-identity, survivor-budget, degradation-permission, bounds, invocation-wording: {initial, directives (newest verbatim texts within bounds.verbatim-directive-history), directives-collapsed (older directive texts as content identifiers, oldest first), source-capsule-id}; fields named by validation.echo-contract-fields each carry {value, provenance}; every named and in-packet evidence identity entry carries its measured bytes for aggregate re-summing; method-identity carries exactly the validation.method-surfaces inventory by normalized path suffix; bounds equals the exact canonical top-level bounds map"}
-      - {key: setup-decomposition, required: true, note: "map: frame, candidates (each {wording, provenance-flag, authority-note}), stakes, composition-provenance ({invocation-span, delegation-span})"}
+      - {key: effective-contract, required: true, note: "map: frame, field-mode, constraints, values, soft-prefs, stakes, evidence-inputs, evidence-authorization, evidence-identity, method-identity, survivor-budget, degradation-permission, bounds, invocation-wording: {initial, directives (newest verbatim texts within bounds.verbatim-directive-history), directives-collapsed (older directive texts as content identifiers, oldest first), source-capsule-id}; fields named by validation.echo-contract-fields each carry {value, provenance}; every named and in-packet evidence identity entry carries its measured bytes for aggregate re-summing and method-identity carries exactly validation.method-surfaces, except an echo-only `store failed: write` capsule uses `not produced: pins not written` for both pin-derived members; bounds equals the exact canonical top-level bounds map"}
+      - {key: setup-decomposition, required: true, note: "map: frame, candidates (each {wording, provenance-flag, authority-note}), stakes, soft-preferences ({provenance, entries} in the normalized setup-source shape), composition-provenance ({invocation-span, delegation-span}); validation re-derives candidates and effective-contract soft-prefs from this source so a pasted capsule cannot relabel candidate-attached language as neutral"}
       - {key: field-order-origin, required: true, note: "`user-supplied` | `generate-produced` when original-field exists; `not produced: <reason>` iff original-field is absent. Latest validated Generate fixes `generate-produced`; otherwise import preserves the prior value; an initial or newly supplied closed field fixes `user-supplied`; prior-full-field adoption preserves `generate-produced`."}
       - {key: recommend-authority-packet, required: true, note: "survivor wordings; order-provenance exactly the label derived from field-order-origin via validation.order-origin-labels; per-option insertion provenance when applicable; per-survivor authority notes; any overflow disclosure; stakes/reversibility"}
       - {key: original-field, required: true, note: "complete generated or user-supplied field — present whenever any field was validated; `not produced: <reason>` only on a failure before Generate returned a validated field"}
@@ -454,7 +472,7 @@ schemas:
       - {key: exclusion-check, required: true, note: the rendered exclusion check line}
       - {key: provisional-seed, required: true, note: "`not produced` or an unaccepted {wording, handle, core-idea, distinct-bet}, every value a non-empty string; acceptance has no free-form wording argument"}
       - {key: revival-instructions, required: true}
-      - {key: proof-boundary, required: true, note: "map: packet-isolation, read-isolation, constituent-pins, method-identity, effective-models, evidence-scope-used, containment, store-path, collapses, not-proven"}
+      - {key: proof-boundary, required: true, note: "map: packet-isolation, read-isolation, constituent-pins, method-identity, effective-models, evidence-scope-used, containment, store-path, collapses, not-proven; an echo-only `store failed: write` capsule uses `not produced: pins not written` for the two pin-derived members"}
       - {key: capsule-complete, required: true, note: final key; content identifier over the document body above it}
 
 # ---------------------------------------------------------------------------

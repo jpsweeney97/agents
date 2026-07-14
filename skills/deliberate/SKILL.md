@@ -38,7 +38,7 @@ Apply every preflight refusal and normalization rule in the mandatory references
 
 Before spending, verify the helper with `shasum -a 256` and run its fixtures if untested this session. A helper that cannot verify or execute is `capability unavailable`; missing fresh-agent isolation is the same exit unless inline degradation was authorized. Create the run-state store only after all other preflight checks pass; failure before its first durable write is `store unavailable`.
 
-Setup decomposition produces the candidate-free frame, candidate set, span-grounded authority notes, stakes, values, soft preferences, and candidate-elided spans proving composition authority. Ambiguity becomes `absent`, never invented lean. Display it with the echo, then pin the full constituent set, evidence and manifests, in-packet bytes, and method identity. Mandatory references own the shapes and read set.
+Setup has one authored source: a `deliberate-setup/v1` document carrying every echo field except derived `soft-prefs`, the candidate set without authority notes, and normalized soft-preference entries. A neutral entry uses `candidate: absent`, an `authority-note` of `absent`, and one or more candidate-free `criteria`; a candidate-attached entry names one exact candidate, carries the complete attached language only in its span-grounded `authority-note`, and carries only separable candidate-neutral `criteria` (possibly none). Ambiguity becomes `absent`, never invented lean. `init-setup` derives both echo and decomposition from that source and writes them in order; never author or write either artifact separately. If `init-setup` returns nonzero, stop setup immediately — do not attempt pins or any later helper call. The store independently refuses pins until decomposition exists. Display the derived echo and decomposition, then pin the full constituent set, evidence and manifests, in-packet bytes, and method identity. Mandatory references own the shapes and read set.
 
 ## The authority model
 
@@ -87,7 +87,7 @@ V=scripts/deliberate-validate.py; D=references/contract-data.yaml   # paths rela
 shasum -a 256 $V
 uv run --script $V fixtures --data $D
 uv run --script $V identity --data $D [--as-evidence | --as-in-packet] <path>...
-uv run --script $V init-store --data $D --store <root>/deliberate-run-live --run <id> --echo-body <echo.yaml>
+uv run --script $V init-setup --data $D --store <root>/deliberate-run-live --run <id> --setup <setup.yaml>
 uv run --script $V render-brief --data $D --store <store> --stage <stage>
 uv run --script $V validate-envelope --data $D --store <store> --stage <stage> --accept <envelope.yaml>
 uv run --script $V record-proof-inputs --data $D --store <store> <proof-inputs.yaml>
@@ -97,7 +97,7 @@ uv run --script $V validate-capsule --data $D --store <store> <failure-capsule.y
 uv run --script $V import-capsule --data $D --store <root>/deliberate-run-live --run <id> --capsule <capsule.yaml> --pins-body <current-pins.yaml> [--file-capsule] [--echo-body <echo.yaml>] [--directive-manifest <manifest.yaml>] [--invalidate-from <stage>] [--revive <wording>] [--constraint-withdrawn <wording>] [--accept-seed] [--field-base <prior-seeds|prior-full-field|new> [--closed-field <wordings.yaml>]]
 ```
 
-Use command `--help` and the mandatory references for complete syntax, including generic setup writes and storeless ingest validation. The store root is the fixed `deliberate-run-live/` directly under the runtime's ambient session-scoped temporary root. No detectable root → `store unavailable`. Exit codes: 0 pass, 1 validation failure, 2 refusal, 4 store read loss.
+Use command `--help` and the mandatory references for complete syntax, including dedicated setup initialization, the remaining store writes, and storeless ingest validation. The store root is the fixed `deliberate-run-live/` directly under the runtime's ambient session-scoped temporary root. No detectable root → `store unavailable`. Exit codes: 0 pass, 1 validation failure, 2 refusal, 4 store read loss.
 
 ## v1 boundaries
 

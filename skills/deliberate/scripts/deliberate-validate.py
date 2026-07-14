@@ -41,6 +41,7 @@ import copy
 import hashlib
 import io
 import os
+import re
 import stat
 import subprocess
 import sys
@@ -56,8 +57,10 @@ EXIT_REFUSE = 2
 EXIT_STORE_READ = 4
 
 ENVELOPE_SCHEMA = "deliberate-envelope/v1"
+SETUP_SCHEMA = "deliberate-setup/v1"
 RUNSTATE_SCHEMA = "deliberate-runstate/v1"
 CAPSULE_SCHEMA = "deliberate-capsule/v1"
+PINS_NOT_PRODUCED = "not produced: pins not written"
 
 SAFE_TAGS = {
     "tag:yaml.org,2002:map",
@@ -263,7 +266,7 @@ def validate_contract_data(data: object) -> None:
     }
     if not isinstance(data, dict) or set(data) != top_keys:
         raise refuse(op, f"top-level keys must be exactly {sorted(top_keys)}", data)
-    if data["contract-data-version"] != 3:
+    if data["contract-data-version"] != 4:
         raise refuse(
             op,
             "unsupported contract-data-version",
@@ -492,13 +495,17 @@ def validate_contract_data(data: object) -> None:
 
     schemas = data["schemas"]
     if not isinstance(schemas, dict) or set(schemas) != {
+        SETUP_SCHEMA,
         ENVELOPE_SCHEMA,
         RUNSTATE_SCHEMA,
         CAPSULE_SCHEMA,
     }:
         raise refuse(
-            op, "schemas must define the three supported document schemas", schemas
+            op, "schemas must define the four supported document schemas", schemas
         )
+    setup = schemas[SETUP_SCHEMA]
+    if not isinstance(setup, dict) or set(setup) != {"keys"}:
+        raise refuse(op, "setup schema must define keys", setup)
     runstate = schemas[RUNSTATE_SCHEMA]
     if not isinstance(runstate, dict) or set(runstate) != {"keys", "body-keys"}:
         raise refuse(op, "run-state schema must define keys and body-keys", runstate)
@@ -907,28 +914,18 @@ class Store:
                 )
         elif kind == "decomposition":
             echo = self.require("echo")["body"]
-            fields = echo["fields"]
-            expected = {
-                "frame": fields["frame"]["value"],
-                "stakes": fields["stakes"]["value"],
-                "soft-prefs": (
-                    fields["soft-prefs"]["value"]
-                    if isinstance(fields["soft-prefs"]["value"], list)
-                    else []
-                ),
-                "values": (
-                    fields["values"]["value"]
-                    if isinstance(fields["values"]["value"], list)
-                    else []
-                ),
-            }
-            for name, value in expected.items():
-                if item["body"][name] != value:
-                    raise fail(
-                        "store write",
-                        f"decomposition {name} differs from the store echo",
-                        item["body"][name],
-                    )
+            expected = _decomposition_from_echo(echo, self.contract)
+            if item["body"] != expected:
+                raise fail(
+                    "store write",
+                    "decomposition differs from the helper-normalized store echo",
+                    item["body"],
+                )
+        elif kind == "pins":
+            if not self.find("decomposition"):
+                raise StoreReadLoss(
+                    "store read failed: pins require a stored setup decomposition"
+                )
         elif kind == "terminal-claim":
             _validate_terminal_claim_against_store(item["body"], self)
         elif kind == "proof-inputs":
@@ -1374,6 +1371,324 @@ def _check_contract_fields(
     return fields
 
 
+def _check_setup_source(op: str, source: object, contract: Contract) -> dict:
+    """Validate the candidate/soft-preference source shared by echo and decomposition."""
+    expected = {"candidates", "soft-preferences", "composition-provenance"}
+    if not isinstance(source, dict) or set(source) != expected:
+        raise fail(
+            op,
+            f"setup-source must be exactly {sorted(expected)}",
+            source,
+        )
+
+    candidates = source["candidates"]
+    if not isinstance(candidates, list):
+        raise fail(op, "setup-source candidates must be a list", candidates)
+    candidate_wordings: list[str] = []
+    for candidate in candidates:
+        if not isinstance(candidate, dict) or set(candidate) != {
+            "wording",
+            "provenance-flag",
+        }:
+            raise fail(
+                op,
+                "setup-source candidates must be exactly {wording, provenance-flag}",
+                candidate,
+            )
+        _require_str(op, "setup-source candidate wording", candidate["wording"])
+        if candidate["provenance-flag"] not in contract.provenance_flags:
+            raise fail(
+                op,
+                f"setup-source candidate provenance-flag must be one of {sorted(contract.provenance_flags)}",
+                candidate["provenance-flag"],
+            )
+        candidate_wordings.append(candidate["wording"])
+    duplicates = {
+        wording
+        for wording in candidate_wordings
+        if candidate_wordings.count(wording) > 1
+    }
+    if duplicates:
+        raise fail(
+            op,
+            f"duplicate setup-source candidate wordings rejected: {sorted(duplicates)}",
+        )
+
+    preferences = source["soft-preferences"]
+    if not isinstance(preferences, dict) or set(preferences) != {
+        "provenance",
+        "entries",
+    }:
+        raise fail(
+            op,
+            "soft-preferences must be exactly {provenance, entries}",
+            preferences,
+        )
+    if preferences["provenance"] not in contract.provenance_labels:
+        raise fail(
+            op,
+            f"soft-preferences provenance must be one of {sorted(contract.provenance_labels)}",
+            preferences["provenance"],
+        )
+    entries = preferences["entries"]
+    if not isinstance(entries, list):
+        raise fail(op, "soft-preferences entries must be a list", entries)
+    attached: set[str] = set()
+    criterion_count = 0
+    known_candidates = set(candidate_wordings)
+    for entry in entries:
+        if not isinstance(entry, dict) or set(entry) != {
+            "candidate",
+            "criteria",
+            "authority-note",
+        }:
+            raise fail(
+                op,
+                "soft-preference entries must be exactly {candidate, criteria, authority-note}",
+                entry,
+            )
+        candidate = entry["candidate"]
+        criteria = _require_str_list(op, "soft-preference criteria", entry["criteria"])
+        criterion_count += len(criteria)
+        note = entry["authority-note"]
+        if candidate == "absent":
+            if note != "absent":
+                raise fail(
+                    op,
+                    "candidate-neutral soft preference must have authority-note `absent`",
+                    entry,
+                )
+            if not criteria:
+                raise fail(
+                    op,
+                    "candidate-neutral soft preference must carry at least one criterion",
+                    entry,
+                )
+            continue
+        if candidate not in known_candidates:
+            raise fail(
+                op,
+                "candidate-attached soft preference must name one exact setup candidate wording",
+                candidate,
+            )
+        if candidate in attached:
+            raise fail(
+                op,
+                "a candidate may have only one candidate-attached soft-preference entry",
+                candidate,
+            )
+        attached.add(candidate)
+        if note == "absent":
+            raise fail(
+                op,
+                "candidate-attached soft preference requires its complete language in authority-note",
+                entry,
+            )
+        _check_authority_note(op, note, contract)
+        normalized_candidate = " ".join(re.findall(r"[\w]+", candidate.casefold()))
+        normalized_note = " ".join(re.findall(r"[\w]+", note["text"].casefold()))
+        for criterion in criteria:
+            normalized_criterion = " ".join(re.findall(r"[\w]+", criterion.casefold()))
+            if normalized_candidate and (
+                f" {normalized_candidate} " in f" {normalized_criterion} "
+            ):
+                raise fail(
+                    op,
+                    "candidate-neutral criterion repeats the attached candidate wording",
+                    criterion,
+                )
+            if normalized_note and (
+                f" {normalized_note} " in f" {normalized_criterion} "
+            ):
+                raise fail(
+                    op,
+                    "candidate-neutral criterion repeats the candidate-attached authority note",
+                    criterion,
+                )
+    if preferences["provenance"] == "absent" and criterion_count:
+        raise fail(
+            op,
+            "soft-preferences provenance cannot be absent when criteria are present",
+        )
+    _check_composition_provenance(op, source["composition-provenance"])
+    return source
+
+
+def _soft_preferences_from_source(source: dict) -> list[str]:
+    return [
+        criterion
+        for entry in source["soft-preferences"]["entries"]
+        for criterion in entry["criteria"]
+    ]
+
+
+def _candidates_from_source(source: dict) -> list[dict]:
+    notes = {
+        entry["candidate"]: copy.deepcopy(entry["authority-note"])
+        for entry in source["soft-preferences"]["entries"]
+        if entry["candidate"] != "absent"
+    }
+    return [
+        {
+            "wording": candidate["wording"],
+            "provenance-flag": candidate["provenance-flag"],
+            "authority-note": notes.get(candidate["wording"], "absent"),
+        }
+        for candidate in source["candidates"]
+    ]
+
+
+def _decomposition_from_echo(echo: dict, contract: Contract) -> dict:
+    source = _check_setup_source("setup normalization", echo["setup-source"], contract)
+    fields = echo["fields"]
+    return {
+        "frame": fields["frame"]["value"],
+        "candidates": _candidates_from_source(source),
+        "stakes": fields["stakes"]["value"],
+        "soft-prefs": _soft_preferences_from_source(source),
+        "values": (
+            fields["values"]["value"]
+            if isinstance(fields["values"]["value"], list)
+            else []
+        ),
+        "composition-provenance": copy.deepcopy(source["composition-provenance"]),
+    }
+
+
+def _setup_source_from_artifacts(
+    candidates: list[dict],
+    soft_prefs: list[str],
+    soft_prefs_provenance: str,
+    composition_provenance: dict,
+) -> dict:
+    """Reconstruct a normalized source for capsule import without inventing attachment."""
+    entries = [
+        {
+            "candidate": "absent",
+            "criteria": [preference],
+            "authority-note": "absent",
+        }
+        for preference in soft_prefs
+    ]
+    entries.extend(
+        {
+            "candidate": candidate["wording"],
+            "criteria": [],
+            "authority-note": copy.deepcopy(candidate["authority-note"]),
+        }
+        for candidate in candidates
+        if candidate["authority-note"] != "absent"
+    )
+    return {
+        "candidates": [
+            {
+                "wording": candidate["wording"],
+                "provenance-flag": candidate["provenance-flag"],
+            }
+            for candidate in candidates
+        ],
+        "soft-preferences": {
+            "provenance": soft_prefs_provenance,
+            "entries": entries,
+        },
+        "composition-provenance": copy.deepcopy(composition_provenance),
+    }
+
+
+def normalize_setup_document(document: object, contract: Contract) -> tuple[dict, dict]:
+    """Derive the echo and decomposition from one authored setup document."""
+    op = "setup normalization"
+    schema = contract.schemas[SETUP_SCHEMA]
+    if not isinstance(document, dict):
+        raise fail(op, "setup document is not a mapping", document)
+    expected = {entry["key"] for entry in schema["keys"]}
+    if set(document) != expected:
+        raise fail(
+            op,
+            f"setup document keys must be exactly {sorted(expected)}",
+            sorted(document),
+        )
+    if document["schema"] != SETUP_SCHEMA:
+        raise refuse(op, f"unsupported schema version: {document['schema']!r}")
+    _require_str(
+        op, "invocation-wording-initial", document["invocation-wording-initial"]
+    )
+    directives = _require_str_list(op, "directives", document["directives"])
+    bounds = _check_bounds(op, document["bounds"], contract)
+    if len(directives) > bounds["verbatim-directive-history"]:
+        raise fail(
+            op,
+            f"directives exceed the history bound of {bounds['verbatim-directive-history']}",
+        )
+    collapsed = document["directives-collapsed"]
+    if not isinstance(collapsed, list) or not all(
+        _is_sha256(entry) for entry in collapsed
+    ):
+        raise fail(
+            op,
+            "directives-collapsed must be a list of 64-hex content identifiers",
+            collapsed,
+        )
+    source_id = document["source-capsule-id"]
+    if source_id != "none" and not _is_sha256(source_id):
+        raise fail(
+            op,
+            "source-capsule-id must be `none` or a 64-hex identifier",
+            source_id,
+        )
+
+    source = _check_setup_source(
+        op,
+        {
+            "candidates": copy.deepcopy(document["candidates"]),
+            "soft-preferences": copy.deepcopy(document["soft-preferences"]),
+            "composition-provenance": copy.deepcopy(document["composition-provenance"]),
+        },
+        contract,
+    )
+    input_fields = document["fields"]
+    expected_input_fields = set(contract.echo_contract_fields) - {"soft-prefs"}
+    if not isinstance(input_fields, dict) or set(input_fields) != expected_input_fields:
+        raise fail(
+            op,
+            f"setup fields must be exactly {sorted(expected_input_fields)}",
+            sorted(input_fields) if isinstance(input_fields, dict) else input_fields,
+        )
+    normalized_fields: dict[str, dict] = {}
+    for name in contract.echo_contract_fields:
+        if name == "soft-prefs":
+            normalized_fields[name] = {
+                "value": _soft_preferences_from_source(source),
+                "provenance": source["soft-preferences"]["provenance"],
+            }
+            continue
+        entry = input_fields[name]
+        if not isinstance(entry, dict) or set(entry) != {"value", "provenance"}:
+            raise fail(op, f"field {name} must be exactly {{value, provenance}}", entry)
+        if entry["provenance"] not in contract.provenance_labels:
+            raise fail(
+                op,
+                f"field {name} provenance must be one of {sorted(contract.provenance_labels)}",
+                entry["provenance"],
+            )
+        _check_contract_field_value(op, name, entry["value"], contract, bounds)
+        normalized_fields[name] = copy.deepcopy(entry)
+
+    echo = {
+        "invocation-wording-initial": document["invocation-wording-initial"],
+        "directives": copy.deepcopy(directives),
+        "directives-collapsed": copy.deepcopy(collapsed),
+        "fields": normalized_fields,
+        "setup-source": source,
+        "bounds": copy.deepcopy(bounds),
+        "source-capsule-id": source_id,
+    }
+    _check_body_echo(op, echo, contract)
+    decomposition = _decomposition_from_echo(echo, contract)
+    _check_body_decomposition(op, decomposition, contract)
+    return echo, decomposition
+
+
 def _check_bounds(op: str, value: object, contract: Contract) -> dict:
     if not isinstance(value, dict) or set(value) != set(contract.bounds):
         raise fail(
@@ -1414,6 +1729,17 @@ def _check_body_echo(op: str, body: dict, contract: Contract) -> None:
         contract,
         effective_bounds=effective_bounds,
     )
+    source = _check_setup_source(op, body["setup-source"], contract)
+    expected_soft_prefs = {
+        "value": _soft_preferences_from_source(source),
+        "provenance": source["soft-preferences"]["provenance"],
+    }
+    if body["fields"]["soft-prefs"] != expected_soft_prefs:
+        raise fail(
+            op,
+            "echo soft-prefs must be derived exactly from setup-source criteria",
+            body["fields"]["soft-prefs"],
+        )
     source_id = body["source-capsule-id"]
     if source_id != "none" and not _is_sha256(source_id):
         raise fail(
@@ -1483,7 +1809,13 @@ def _check_body_terminal_claim(op: str, body: dict, contract: Contract) -> None:
     _require_str(op, "survivor", body["survivor"])
 
 
-def _check_proof_boundary_shape(op: str, body: object, contract: Contract) -> dict:
+def _check_proof_boundary_shape(
+    op: str,
+    body: object,
+    contract: Contract,
+    *,
+    allow_unproduced_pins: bool = False,
+) -> dict:
     if not isinstance(body, dict) or set(body) != contract.proof_boundary_keys:
         raise fail(
             op,
@@ -1491,22 +1823,33 @@ def _check_proof_boundary_shape(op: str, body: object, contract: Contract) -> di
             sorted(body) if isinstance(body, dict) else body,
         )
     pins = body["constituent-pins"]
-    if not isinstance(pins, dict) or set(pins) != contract.constituent_names:
-        raise fail(
-            op,
-            f"proof-boundary constituent-pins must map exactly {sorted(contract.constituent_names)}",
-            pins,
+    method_identity = body["method-identity"]
+    missing_pins = _is_not_produced(pins) or _is_not_produced(method_identity)
+    if missing_pins:
+        if not allow_unproduced_pins:
+            raise fail(op, "proof-boundary pin identity cannot be unproduced")
+        if not (_is_not_produced(pins) and _is_not_produced(method_identity)):
+            raise fail(
+                op,
+                "proof-boundary constituent and method pins must be produced or unproduced together",
+            )
+    else:
+        if not isinstance(pins, dict) or set(pins) != contract.constituent_names:
+            raise fail(
+                op,
+                f"proof-boundary constituent-pins must map exactly {sorted(contract.constituent_names)}",
+                pins,
+            )
+        for name, pin_list in pins.items():
+            _check_pin_list(
+                op,
+                f"constituent-pins[{name}]",
+                pin_list,
+                require_nonempty=True,
+            )
+        _check_method_pin_inventory(
+            op, "proof-boundary method-identity", method_identity, contract
         )
-    for name, pin_list in pins.items():
-        _check_pin_list(
-            op,
-            f"constituent-pins[{name}]",
-            pin_list,
-            require_nonempty=True,
-        )
-    _check_method_pin_inventory(
-        op, "proof-boundary method-identity", body["method-identity"], contract
-    )
     for key in (
         "packet-isolation",
         "read-isolation",
@@ -3042,36 +3385,62 @@ def cmd_render_brief(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 
 
-def cmd_init_store(args: argparse.Namespace) -> int:
-    readset = ReadSet()
-    contract = load_contract(Path(args.data), readset)
-    root = Path(args.store)
+def _initialize_setup_store(
+    root: Path,
+    run: str,
+    setup_document: object,
+    contract: Contract,
+    readset: ReadSet,
+) -> Store:
+    """Create one store and persist helper-derived echo then decomposition."""
+    echo, decomposition = normalize_setup_document(setup_document, contract)
     if root.exists():
         raise refuse(
             "store init",
             f"store path already exists — retire the orphan via `trash` first: {root}",
         )
-    body_raw = readset.allow(Path(args.echo_body))
-    body = safe_parse(
-        readset.read_bytes(body_raw),
-        byte_cap=contract.bounds["parse-bytes"],
-        depth_cap=contract.bounds["parse-depth"],
-        op="echo body",
-    )
-    item = {
-        "schema": RUNSTATE_SCHEMA,
-        "kind": "echo",
-        "run": args.run,
-        "seq": 0,
-        "body": body,
-    }
-    validate_runstate_item(item, contract)
     parent = Path(os.path.realpath(root.parent))
     readset.allow(parent)
     root.mkdir(mode=0o700)
     store = Store(root, contract, readset)
-    store.write(item, writer="init-store")
-    print(f"store initialized: {root} (echo seq 0, run {args.run})")
+    store.write(
+        {
+            "schema": RUNSTATE_SCHEMA,
+            "kind": "echo",
+            "run": run,
+            "seq": 0,
+            "body": echo,
+        },
+        writer="init-setup",
+    )
+    store.write(
+        {
+            "schema": RUNSTATE_SCHEMA,
+            "kind": "decomposition",
+            "run": run,
+            "seq": 1,
+            "body": decomposition,
+        },
+        writer="init-setup",
+    )
+    return store
+
+
+def cmd_init_setup(args: argparse.Namespace) -> int:
+    readset = ReadSet()
+    contract = load_contract(Path(args.data), readset)
+    root = Path(args.store)
+    setup_path = readset.allow(Path(args.setup))
+    setup_document = safe_parse(
+        readset.read_bytes(setup_path),
+        byte_cap=contract.bounds["parse-bytes"],
+        depth_cap=contract.bounds["parse-depth"],
+        op="setup document",
+    )
+    _initialize_setup_store(root, args.run, setup_document, contract, readset)
+    print(
+        f"setup initialized: {root} (echo seq 0, decomposition seq 1, run {args.run})"
+    )
     return EXIT_PASS
 
 
@@ -3714,25 +4083,41 @@ def validate_capsule_document(
         effective_bounds=effective_bounds,
     )
     identity = contract_map["evidence-identity"]
-    if not isinstance(identity, dict) or set(identity) != {"named", "in-packet"}:
-        raise fail(op, "evidence-identity must be exactly {named, in-packet}", identity)
-    _check_pin_list(
-        op,
-        "evidence-identity.named",
-        identity["named"],
-        byte_cap=effective_bounds["named-evidence-expanded-bytes"],
+    method_identity = contract_map["method-identity"]
+    unproduced_contract_pins = _is_not_produced(identity) or _is_not_produced(
+        method_identity
     )
-    _check_pin_list(
-        op,
-        "evidence-identity.in-packet",
-        identity["in-packet"],
-        allow_no_comparable_identity=True,
-        allow_manifest=False,
-        byte_cap=effective_bounds["in-packet-evidence-bytes"],
-    )
-    _check_method_pin_inventory(
-        op, "method-identity", contract_map["method-identity"], contract
-    )
+    if unproduced_contract_pins:
+        if parsed["terminal"] != "store failed: write":
+            raise fail(
+                op,
+                "pin-derived effective-contract members may be unproduced only on store failed: write",
+            )
+        if not (_is_not_produced(identity) and _is_not_produced(method_identity)):
+            raise fail(
+                op,
+                "evidence and method identity must be produced or unproduced together",
+            )
+    else:
+        if not isinstance(identity, dict) or set(identity) != {"named", "in-packet"}:
+            raise fail(
+                op, "evidence-identity must be exactly {named, in-packet}", identity
+            )
+        _check_pin_list(
+            op,
+            "evidence-identity.named",
+            identity["named"],
+            byte_cap=effective_bounds["named-evidence-expanded-bytes"],
+        )
+        _check_pin_list(
+            op,
+            "evidence-identity.in-packet",
+            identity["in-packet"],
+            allow_no_comparable_identity=True,
+            allow_manifest=False,
+            byte_cap=effective_bounds["in-packet-evidence-bytes"],
+        )
+        _check_method_pin_inventory(op, "method-identity", method_identity, contract)
     wording = contract_map["invocation-wording"]
     if not isinstance(wording, dict) or set(wording) != {
         "initial",
@@ -3775,17 +4160,48 @@ def validate_capsule_document(
         "frame",
         "candidates",
         "stakes",
+        "soft-preferences",
         "composition-provenance",
     }:
         raise fail(
             op,
-            "setup-decomposition must be exactly {frame, candidates, stakes, composition-provenance}",
+            "setup-decomposition must be exactly {frame, candidates, stakes, soft-preferences, composition-provenance}",
             decomposition,
         )
     _require_str(op, "setup-decomposition frame", decomposition["frame"])
     _check_candidates(op, decomposition["candidates"], contract)
     _require_str(op, "setup-decomposition stakes", decomposition["stakes"])
     _check_composition_provenance(op, decomposition["composition-provenance"])
+    decomposition_source = _check_setup_source(
+        op,
+        {
+            "candidates": [
+                {
+                    "wording": candidate["wording"],
+                    "provenance-flag": candidate["provenance-flag"],
+                }
+                for candidate in decomposition["candidates"]
+            ],
+            "soft-preferences": decomposition["soft-preferences"],
+            "composition-provenance": decomposition["composition-provenance"],
+        },
+        contract,
+    )
+    if decomposition["candidates"] != _candidates_from_source(decomposition_source):
+        raise fail(
+            op,
+            "setup-decomposition candidates differ from its normalized preference source",
+        )
+    expected_capsule_soft_prefs = {
+        "value": _soft_preferences_from_source(decomposition_source),
+        "provenance": decomposition_source["soft-preferences"]["provenance"],
+    }
+    if contract_map["soft-prefs"] != expected_capsule_soft_prefs:
+        raise fail(
+            op,
+            "effective-contract soft-prefs differ from normalized setup-decomposition criteria",
+            contract_map["soft-prefs"],
+        )
     if decomposition["frame"] != contract_map["frame"]["value"]:
         raise fail(op, "setup-decomposition frame must equal effective-contract frame")
     if decomposition["stakes"] != contract_map["stakes"]["value"]:
@@ -3942,9 +4358,19 @@ def validate_capsule_document(
         op=op,
     )
     boundary = parsed["proof-boundary"]
-    _check_proof_boundary_shape(op, boundary, contract)
+    _check_proof_boundary_shape(
+        op,
+        boundary,
+        contract,
+        allow_unproduced_pins=parsed["terminal"] == "store failed: write",
+    )
     if boundary["method-identity"] != contract_map["method-identity"]:
         raise fail(op, "proof-boundary method-identity must equal effective-contract")
+    if _is_not_produced(boundary["constituent-pins"]) != unproduced_contract_pins:
+        raise fail(
+            op,
+            "proof-boundary and effective-contract pin state must be produced or unproduced together",
+        )
     if not restart_state:
         _validate_capsule_partition(
             field,
@@ -4109,14 +4535,17 @@ def validate_capsule_against_store(
     decomposition_items = store.find("decomposition")
     if decomposition_items:
         body = decomposition_items[-1]["body"]
-        expected_decomposition = {
-            "frame": body["frame"],
-            "candidates": body["candidates"],
-            "stakes": body["stakes"],
-            "composition-provenance": body["composition-provenance"],
-        }
-        if capsule["setup-decomposition"] != expected_decomposition:
-            raise fail(op, "setup-decomposition differs from store")
+    else:
+        body = _decomposition_from_echo(echo, contract)
+    expected_decomposition = {
+        "frame": body["frame"],
+        "candidates": body["candidates"],
+        "stakes": body["stakes"],
+        "soft-preferences": copy.deepcopy(echo["setup-source"]["soft-preferences"]),
+        "composition-provenance": body["composition-provenance"],
+    }
+    if capsule["setup-decomposition"] != expected_decomposition:
+        raise fail(op, "setup-decomposition differs from normalized store authority")
 
     pins_items = store.find("pins")
     if pins_items:
@@ -4133,6 +4562,18 @@ def validate_capsule_against_store(
             raise fail(op, "proof-boundary constituent pins differ from store")
         if boundary["method-identity"] != pins["method"]:
             raise fail(op, "proof-boundary method identity differs from store")
+    else:
+        missing_pin_members = (
+            capsule_contract["evidence-identity"],
+            capsule_contract["method-identity"],
+            capsule["proof-boundary"]["constituent-pins"],
+            capsule["proof-boundary"]["method-identity"],
+        )
+        if not all(_is_not_produced(value) for value in missing_pin_members):
+            raise fail(
+                op,
+                "capsule carries pin-derived state but no pins item exists in the store",
+            )
     if capsule["proof-boundary"]["store-path"] != str(store.root):
         raise fail(op, "proof-boundary store-path differs from the live store root")
 
@@ -4446,14 +4887,25 @@ def import_capsule_into_store(
         )
     directives_applied: list[str] = []
     contract_map = capsule["effective-contract"]
+    decomposition = capsule["setup-decomposition"]
     identity = contract_map["evidence-identity"]
-    prior_pins = {
-        "constituents": capsule["proof-boundary"]["constituent-pins"],
-        "method": contract_map["method-identity"],
-        "evidence": identity["named"],
-        "in-packet": identity["in-packet"],
-    }
-    current_pins = copy.deepcopy(prior_pins if current_pins is None else current_pins)
+    prior_pins_missing = _is_not_produced(identity)
+    prior_pins = None
+    if not prior_pins_missing:
+        prior_pins = {
+            "constituents": capsule["proof-boundary"]["constituent-pins"],
+            "method": contract_map["method-identity"],
+            "evidence": identity["named"],
+            "in-packet": identity["in-packet"],
+        }
+    if current_pins is None:
+        if prior_pins is None:
+            raise fail(
+                op,
+                "a capsule without prior setup pins requires freshly resolved current pins",
+            )
+        current_pins = prior_pins
+    current_pins = copy.deepcopy(current_pins)
     _check_body_pins(op, current_pins, contract)
     new_directive_texts: list[str] = []
     if echo_body is None:
@@ -4473,6 +4925,19 @@ def import_capsule_into_store(
             "bounds": copy.deepcopy(contract_map["bounds"]),
             "source-capsule-id": source_capsule_id,
             "fields": fields,
+            "setup-source": {
+                "candidates": [
+                    {
+                        "wording": candidate["wording"],
+                        "provenance-flag": candidate["provenance-flag"],
+                    }
+                    for candidate in decomposition["candidates"]
+                ],
+                "soft-preferences": copy.deepcopy(decomposition["soft-preferences"]),
+                "composition-provenance": copy.deepcopy(
+                    decomposition["composition-provenance"]
+                ),
+            },
         }
     else:
         echo_body = copy.deepcopy(echo_body)
@@ -4541,7 +5006,13 @@ def import_capsule_into_store(
     _check_import_directive_manifest(
         op, directive_manifest, new_directive_texts, applied_actions, contract
     )
-    pin_stages, pin_reasons = _pin_change_frontiers(prior_pins, current_pins, contract)
+    if prior_pins is None:
+        pin_stages = ["generate"]
+        pin_reasons = ["prior setup pins were not produced"]
+    else:
+        pin_stages, pin_reasons = _pin_change_frontiers(
+            prior_pins, current_pins, contract
+        )
     constraints_changed = (
         echo_body["fields"]["constraints"] != old_fields["constraints"]
     )
@@ -4560,7 +5031,6 @@ def import_capsule_into_store(
             "constraint-withdrawn requires an actual effective-contract constraint change",
         )
     field_mode = echo_body["fields"]["field-mode"]["value"]
-    decomposition = capsule["setup-decomposition"]
     candidates = list(decomposition["candidates"])
     field = capsule.get("original-field")
     prior_mode = old_fields["field-mode"]["value"]
@@ -4804,10 +5274,22 @@ def import_capsule_into_store(
     ):
         capsule["surface"] = "not produced: invalidated by rerun directive"
         capsule["consequences"] = "not produced: invalidated by rerun directive"
-    _check_body_echo(op, echo_body, contract)
     decomposition["candidates"] = candidates
     decomposition["frame"] = echo_body["fields"]["frame"]["value"]
     decomposition["stakes"] = echo_body["fields"]["stakes"]["value"]
+    soft_prefs = echo_body["fields"]["soft-prefs"]["value"]
+    if not isinstance(soft_prefs, list):
+        soft_prefs = []
+    echo_body["setup-source"] = _setup_source_from_artifacts(
+        candidates,
+        soft_prefs,
+        echo_body["fields"]["soft-prefs"]["provenance"],
+        decomposition["composition-provenance"],
+    )
+    decomposition["soft-preferences"] = copy.deepcopy(
+        echo_body["setup-source"]["soft-preferences"]
+    )
+    _check_body_echo(op, echo_body, contract)
     for name in contract.echo_contract_fields:
         contract_map[name] = copy.deepcopy(echo_body["fields"][name])
     contract_map["bounds"] = copy.deepcopy(echo_body["bounds"])
@@ -4874,16 +5356,7 @@ def import_capsule_into_store(
         "directives": plan_directives,
     }
 
-    soft_prefs = echo_body["fields"]["soft-prefs"]["value"]
-    values = echo_body["fields"]["values"]["value"]
-    decomposition_body = {
-        "frame": echo_body["fields"]["frame"]["value"],
-        "candidates": candidates,
-        "stakes": echo_body["fields"]["stakes"]["value"],
-        "soft-prefs": soft_prefs if isinstance(soft_prefs, list) else [],
-        "values": values if isinstance(values, list) else [],
-        "composition-provenance": decomposition["composition-provenance"],
-    }
+    decomposition_body = _decomposition_from_echo(echo_body, contract)
     validate_capsule_document(capsule, contract, restart_state=True)
     import_items = [
         {
@@ -5116,6 +5589,7 @@ GENERATED_BLOCKS = {
     ],
     "schemas.md": [
         "record-keys",
+        "setup-keys",
         "envelope-keys",
         "runstate-keys",
         "capsule-keys",
@@ -5131,6 +5605,8 @@ def generate_block(name: str, contract: Contract) -> str:
         return gen_checklist(contract, name.removeprefix("checklist-"))
     if name == "record-keys":
         return gen_record_keys(contract)
+    if name == "setup-keys":
+        return gen_schema_keys(contract, SETUP_SCHEMA)
     if name == "envelope-keys":
         return gen_schema_keys(contract, ENVELOPE_SCHEMA)
     if name == "runstate-keys":
@@ -5208,6 +5684,100 @@ def _fixture_method_pins(contract: Contract) -> list[dict]:
     return [{"path": surface, "id": "0" * 64} for surface in contract.method_surfaces]
 
 
+def _fixture_pins_body(contract: Contract) -> dict:
+    return {
+        "constituents": {
+            "ideate": [{"path": "skills/ideate/SKILL.md", "id": "0" * 64}],
+            "option-shaping": [
+                {"path": "skills/option-shaping/SKILL.md", "id": "0" * 64}
+            ],
+            "making-recommendations": [
+                {
+                    "path": "skills/making-recommendations/SKILL.md",
+                    "id": "0" * 64,
+                }
+            ],
+        },
+        "method": _fixture_method_pins(contract),
+        "evidence": [],
+        "in-packet": [],
+    }
+
+
+def _fixture_setup_document(
+    contract: Contract, *, transition_seeds: bool = True
+) -> dict:
+    candidates = [
+        {
+            "wording": "Option A — file sync over Syncthing",
+            "provenance-flag": "user-seed",
+        }
+    ]
+    if transition_seeds:
+        candidates.extend(
+            [
+                {
+                    "wording": "Option D — revived idea",
+                    "provenance-flag": "revived",
+                },
+                {
+                    "wording": "Option E — accepted idea",
+                    "provenance-flag": "accepted",
+                },
+            ]
+        )
+    return {
+        "schema": SETUP_SCHEMA,
+        "invocation-wording-initial": "fixture invocation",
+        "directives": [],
+        "directives-collapsed": [],
+        "fields": {
+            "frame": {
+                "value": "choose a note-sync approach for a two-person team",
+                "provenance": "user-supplied",
+            },
+            "field-mode": {"value": "seed-and-widen", "provenance": "default"},
+            "constraints": {
+                "value": [{"constraint": "must run offline", "price": "no cloud sync"}],
+                "provenance": "user-supplied",
+            },
+            "values": {"value": [], "provenance": "absent"},
+            "stakes": {"value": "absent", "provenance": "absent"},
+            "evidence-inputs": {
+                "value": "none supplied",
+                "provenance": "absent",
+            },
+            "evidence-authorization": {
+                "value": "supplied evidence inputs and named paths may be inspected by default; no additional sources, web research, or probes are authorized",
+                "provenance": "default",
+            },
+            "survivor-budget": {"value": 4, "provenance": "default"},
+            "degradation-permission": {
+                "value": "absent",
+                "provenance": "absent",
+            },
+        },
+        "candidates": candidates,
+        "soft-preferences": {
+            "provenance": "inferred",
+            "entries": [
+                {
+                    "candidate": "Option A — file sync over Syncthing",
+                    "criteria": ["ongoing operating burden matters"],
+                    "authority-note": {
+                        "text": "user lean: mentioned twice, called it 'the obvious one'",
+                        "provenance": "inferred",
+                        "span": "fixture span",
+                    },
+                }
+            ],
+        },
+        "composition-provenance": dict(_FIXTURE_PROVENANCE),
+        "bounds": dict(contract.bounds),
+        "source-capsule-id": "none",
+    }
+
+
 def _fixture_store(
     contract: Contract,
     readset: ReadSet,
@@ -5215,98 +5785,12 @@ def _fixture_store(
     *,
     transition_seeds: bool = True,
 ) -> Store:
-    root.mkdir(mode=0o700)
-    store = Store(root, contract, readset)
-    store.write(
-        {
-            "schema": RUNSTATE_SCHEMA,
-            "kind": "echo",
-            "run": "fixture-run",
-            "seq": 0,
-            "body": {
-                "invocation-wording-initial": "fixture invocation",
-                "directives": [],
-                "directives-collapsed": [],
-                "bounds": dict(contract.bounds),
-                "source-capsule-id": "none",
-                "fields": {
-                    "frame": {
-                        "value": "choose a note-sync approach for a two-person team",
-                        "provenance": "user-supplied",
-                    },
-                    "field-mode": {"value": "seed-and-widen", "provenance": "default"},
-                    "constraints": {
-                        "value": [
-                            {"constraint": "must run offline", "price": "no cloud sync"}
-                        ],
-                        "provenance": "user-supplied",
-                    },
-                    "values": {"value": [], "provenance": "absent"},
-                    "soft-prefs": {
-                        "value": ["ongoing operating burden matters"],
-                        "provenance": "inferred",
-                    },
-                    "stakes": {"value": "absent", "provenance": "absent"},
-                    "evidence-inputs": {
-                        "value": "none supplied",
-                        "provenance": "absent",
-                    },
-                    "evidence-authorization": {
-                        "value": "supplied evidence inputs and named paths may be inspected by default; no additional sources, web research, or probes are authorized",
-                        "provenance": "default",
-                    },
-                    "survivor-budget": {"value": 4, "provenance": "default"},
-                    "degradation-permission": {
-                        "value": "absent",
-                        "provenance": "absent",
-                    },
-                },
-            },
-        },
-        writer="init-store",
-    )
-    store.write(
-        {
-            "schema": RUNSTATE_SCHEMA,
-            "kind": "decomposition",
-            "run": "fixture-run",
-            "seq": 1,
-            "body": {
-                "frame": "choose a note-sync approach for a two-person team",
-                "candidates": [
-                    {
-                        "wording": "Option A — file sync over Syncthing",
-                        "provenance-flag": "user-seed",
-                        "authority-note": {
-                            "text": "user lean: mentioned twice, called it 'the obvious one'",
-                            "provenance": "inferred",
-                            "span": "fixture span",
-                        },
-                    },
-                ]
-                + (
-                    [
-                        {
-                            "wording": "Option D — revived idea",
-                            "provenance-flag": "revived",
-                            "authority-note": "absent",
-                        },
-                        {
-                            "wording": "Option E — accepted idea",
-                            "provenance-flag": "accepted",
-                            "authority-note": "absent",
-                        },
-                    ]
-                    if transition_seeds
-                    else []
-                ),
-                "stakes": "absent",
-                "soft-prefs": ["ongoing operating burden matters"],
-                "values": [],
-                "composition-provenance": dict(_FIXTURE_PROVENANCE),
-            },
-        },
-        writer="write-item",
+    store = _initialize_setup_store(
+        root,
+        "fixture-run",
+        _fixture_setup_document(contract, transition_seeds=transition_seeds),
+        contract,
+        readset,
     )
     store.write(
         {
@@ -5314,23 +5798,7 @@ def _fixture_store(
             "kind": "pins",
             "run": "fixture-run",
             "seq": 2,
-            "body": {
-                "constituents": {
-                    "ideate": [{"path": "skills/ideate/SKILL.md", "id": "0" * 64}],
-                    "option-shaping": [
-                        {"path": "skills/option-shaping/SKILL.md", "id": "0" * 64}
-                    ],
-                    "making-recommendations": [
-                        {
-                            "path": "skills/making-recommendations/SKILL.md",
-                            "id": "0" * 64,
-                        }
-                    ],
-                },
-                "method": _fixture_method_pins(contract),
-                "evidence": [],
-                "in-packet": [],
-            },
+            "body": _fixture_pins_body(contract),
         },
         writer="write-item",
     )
@@ -5421,6 +5889,25 @@ def _fixture_capsule(contract: Contract) -> dict:
                 }
             ],
             "stakes": "absent",
+            "soft-preferences": {
+                "provenance": "default",
+                "entries": [
+                    {
+                        "candidate": "absent",
+                        "criteria": ["ongoing operating burden matters"],
+                        "authority-note": "absent",
+                    },
+                    {
+                        "candidate": "Option A — file sync over Syncthing",
+                        "criteria": [],
+                        "authority-note": {
+                            "text": "user lean: called it 'the obvious one'",
+                            "provenance": "inferred",
+                            "span": "fixture span",
+                        },
+                    },
+                ],
+            },
             "composition-provenance": dict(_FIXTURE_PROVENANCE),
         },
         "recommend-authority-packet": {
@@ -5476,6 +5963,70 @@ def _fixture_capsule(contract: Contract) -> dict:
             "store-path": "fixture",
             "collapses": "none",
             "not-proven": "fixture",
+        },
+    }
+
+
+def _fixture_setup_failure_capsule(store: Store, contract: Contract) -> dict:
+    """Return an echo-only setup-write failure capsule with no invented pins."""
+    echo = store.require("echo")["body"]
+    decomposition = _decomposition_from_echo(echo, contract)
+    not_produced = "not produced: setup decomposition write failed"
+    return {
+        "schema": CAPSULE_SCHEMA,
+        "run": store.require("echo")["run"],
+        "terminal": "store failed: write",
+        "effective-contract": {
+            **{
+                name: copy.deepcopy(echo["fields"][name])
+                for name in contract.echo_contract_fields
+            },
+            "evidence-identity": PINS_NOT_PRODUCED,
+            "method-identity": PINS_NOT_PRODUCED,
+            "bounds": copy.deepcopy(echo["bounds"]),
+            "invocation-wording": {
+                "initial": echo["invocation-wording-initial"],
+                "directives": copy.deepcopy(echo["directives"]),
+                "directives-collapsed": copy.deepcopy(echo["directives-collapsed"]),
+                "source-capsule-id": echo["source-capsule-id"],
+            },
+        },
+        "setup-decomposition": {
+            "frame": decomposition["frame"],
+            "candidates": decomposition["candidates"],
+            "stakes": decomposition["stakes"],
+            "soft-preferences": copy.deepcopy(echo["setup-source"]["soft-preferences"]),
+            "composition-provenance": decomposition["composition-provenance"],
+        },
+        "field-order-origin": not_produced,
+        "recommend-authority-packet": not_produced,
+        "original-field": not_produced,
+        "generation-boundary": not_produced,
+        "survivors": not_produced,
+        "overflow": not_produced,
+        "records": not_produced,
+        "retrievals": not_produced,
+        "surface": not_produced,
+        "consequences": not_produced,
+        "close": not_produced,
+        "registered-leans": not_produced,
+        "terminal-claim": not_produced,
+        "exclusion-check": not_produced,
+        "provisional-seed": not_produced,
+        "revival-instructions": (
+            "Paste this failure capsule unchanged in a new deliberate invocation."
+        ),
+        "proof-boundary": {
+            "packet-isolation": "No stage was dispatched.",
+            "read-isolation": "packet-field isolation only; no stage dispatched",
+            "constituent-pins": PINS_NOT_PRODUCED,
+            "method-identity": PINS_NOT_PRODUCED,
+            "effective-models": "No stage was dispatched.",
+            "evidence-scope-used": "Setup echo only.",
+            "containment": "No stage was dispatched.",
+            "store-path": str(store.root),
+            "collapses": "none",
+            "not-proven": "No stage behavior or isolation is proven.",
         },
     }
 
@@ -6040,6 +6591,208 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             lambda: check_prune(
                 prune_envelope([option_a], [full_record("Option B — hosted wiki")])
             ),
+            results,
+        )
+
+        def candidate_attached_preference_is_split_and_withheld():
+            favorite = (
+                "Twelve structured interviews plus a clickable prototype, "
+                "with no live workflow use."
+            )
+            survivor = (
+                "Five-team design-partner cohort using a rough working prototype "
+                "in a real weekly workflow."
+            )
+            second_survivor = (
+                "Instrument the current manual workaround across three partner "
+                "teams without building a new UI."
+            )
+            lean = (
+                "The user currently leans toward Twelve structured interviews plus "
+                "a clickable prototype, with no live workflow use because it is easy "
+                "to coordinate and should produce clean qualitative synthesis."
+            )
+            criterion = (
+                "Coordination ease and clean qualitative synthesis are soft "
+                "comparison criteria."
+            )
+            setup = _fixture_setup_document(contract, transition_seeds=False)
+            setup["fields"]["frame"] = {
+                "value": "choose a six-week validation strategy",
+                "provenance": "user-supplied",
+            }
+            setup["candidates"] = [
+                {"wording": favorite, "provenance-flag": "user-seed"},
+                {"wording": survivor, "provenance-flag": "user-seed"},
+                {"wording": second_survivor, "provenance-flag": "user-seed"},
+            ]
+            setup["soft-preferences"] = {
+                "provenance": "user-supplied",
+                "entries": [
+                    {
+                        "candidate": "absent",
+                        "criteria": ["Reusable onboarding material is preferred."],
+                        "authority-note": "absent",
+                    },
+                    {
+                        "candidate": favorite,
+                        "criteria": [criterion],
+                        "authority-note": {
+                            "text": lean,
+                            "provenance": "user-supplied",
+                            "span": lean,
+                        },
+                    },
+                ],
+            }
+            unsplit = copy.deepcopy(setup)
+            unsplit["soft-preferences"]["entries"][1]["criteria"] = [lean]
+            try:
+                normalize_setup_document(unsplit, contract)
+            except ValidationFailure:
+                pass
+            else:
+                raise fail(
+                    "fixture",
+                    "candidate-attached preference was accepted as a neutral criterion",
+                )
+            lean_store = _initialize_setup_store(
+                sandbox / "candidate-attached-preference-store",
+                "candidate-attached-preference-run",
+                setup,
+                contract,
+                readset,
+            )
+            lean_store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "pins",
+                    "run": "candidate-attached-preference-run",
+                    "seq": lean_store.next_seq(),
+                    "body": _fixture_pins_body(contract),
+                },
+                writer="write-item",
+            )
+            echo = lean_store.require("echo")["body"]
+            decomposition = lean_store.require("decomposition")["body"]
+            soft_prefs = echo["fields"]["soft-prefs"]["value"]
+            if lean in soft_prefs or favorite in dump_yaml(soft_prefs):
+                raise fail(
+                    "fixture",
+                    "candidate-attached preference leaked into normalized soft-prefs",
+                )
+            favorite_note = next(
+                candidate["authority-note"]
+                for candidate in decomposition["candidates"]
+                if candidate["wording"] == favorite
+            )
+            if favorite_note["text"] != lean or criterion not in soft_prefs:
+                raise fail(
+                    "fixture",
+                    "setup normalizer did not preserve the authority note and neutral criterion",
+                )
+
+            generated = [
+                {"wording": favorite, "provenance": "user-seed"},
+                {"wording": survivor, "provenance": "user-seed"},
+                {"wording": second_survivor, "provenance": "user-seed"},
+            ]
+            _fixture_record_brief(lean_store, "generate", contract, readset)
+            lean_store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "envelope",
+                    "run": "candidate-attached-preference-run",
+                    "seq": lean_store.next_seq(),
+                    "stage": "generate",
+                    "body": {
+                        "document": {
+                            "schema": ENVELOPE_SCHEMA,
+                            "stage": "generate",
+                            "status": "completed",
+                            "artifacts": {
+                                "field": generated,
+                                "fixed-points-line": "Untouched fixed points: supplied seeds",
+                            },
+                            "retrievals": "none",
+                            "encounters": "none",
+                            "pins": "none",
+                            "model": "unknown",
+                        },
+                        "amendments": [],
+                    },
+                },
+                writer="validate-envelope",
+            )
+            _fixture_record_brief(lean_store, "prune", contract, readset)
+            lean_store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "envelope",
+                    "run": "candidate-attached-preference-run",
+                    "seq": lean_store.next_seq(),
+                    "stage": "prune",
+                    "body": {
+                        "document": prune_envelope(
+                            [
+                                {"wording": survivor, "provenance": "user-seed"},
+                                {
+                                    "wording": second_survivor,
+                                    "provenance": "user-seed",
+                                },
+                            ],
+                            [full_record(favorite)],
+                        ),
+                        "amendments": [],
+                    },
+                },
+                writer="validate-envelope",
+            )
+            _fixture_record_brief(lean_store, "shape", contract, readset)
+            lean_store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "envelope",
+                    "run": "candidate-attached-preference-run",
+                    "seq": lean_store.next_seq(),
+                    "stage": "shape",
+                    "body": {
+                        "document": {
+                            "schema": ENVELOPE_SCHEMA,
+                            "stage": "shape",
+                            "status": "completed",
+                            "artifacts": {
+                                "comparison-surface": "Compare observed repeat use and setup burden.",
+                                "constraint-consequences": [],
+                            },
+                            "retrievals": "none",
+                            "encounters": "none",
+                            "pins": "none",
+                            "model": "unknown",
+                        },
+                        "amendments": [],
+                    },
+                },
+                writer="validate-envelope",
+            )
+            recommend_brief = render_brief(
+                "recommend", lean_store, contract, readset, None
+            )
+            if favorite in recommend_brief or lean in recommend_brief:
+                raise fail(
+                    "fixture",
+                    "excluded candidate identity reached Recommend through setup-controlled state",
+                )
+            if criterion not in recommend_brief:
+                raise fail(
+                    "fixture",
+                    "candidate-neutral criterion did not reach Recommend",
+                )
+
+        _expect(
+            "candidate-attached preference splits and excluded identity cannot reach Recommend",
+            "pass",
+            candidate_attached_preference_is_split_and_withheld,
             results,
         )
 
@@ -6832,6 +7585,137 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             results,
         )
 
+        setup_failure_authority: dict[str, Store] = {}
+
+        def failed_setup_decomposition_leaves_echo_only():
+            root = sandbox / "failed-setup-decomposition"
+            setup = _fixture_setup_document(contract, transition_seeds=False)
+            real_write = Store.write
+
+            def reject_decomposition(self, item: dict, *, writer: str):
+                if item["kind"] == "decomposition":
+                    raise fail("store write", "injected decomposition rejection")
+                return real_write(self, item, writer=writer)
+
+            Store.write = reject_decomposition
+            try:
+                try:
+                    _initialize_setup_store(
+                        root,
+                        "failed-setup-run",
+                        setup,
+                        contract,
+                        readset,
+                    )
+                except ValidationFailure:
+                    pass
+                else:
+                    raise fail(
+                        "fixture", "injected decomposition rejection did not fire"
+                    )
+            finally:
+                Store.write = real_write
+            failed_store = Store(root, contract, readset)
+            kinds = [item["kind"] for item in failed_store.items()]
+            if kinds != ["echo"]:
+                raise fail(
+                    "fixture",
+                    "failed setup decomposition left run-state beyond the echo",
+                    kinds,
+                )
+            try:
+                failed_store.write(
+                    {
+                        "schema": RUNSTATE_SCHEMA,
+                        "kind": "pins",
+                        "run": "failed-setup-run",
+                        "seq": failed_store.next_seq(),
+                        "body": _fixture_pins_body(contract),
+                    },
+                    writer="write-item",
+                )
+            except StoreReadLoss:
+                pass
+            else:
+                raise fail(
+                    "fixture",
+                    "pins write remained possible after decomposition rejection",
+                )
+            setup_failure_authority["store"] = failed_store
+
+        _expect(
+            "failed setup decomposition leaves only echo and makes pins impossible",
+            "pass",
+            failed_setup_decomposition_leaves_echo_only,
+            results,
+        )
+
+        def setup_failure_capsule_excludes_post_failure_state():
+            failed_store = setup_failure_authority["store"]
+            capsule = _fixture_setup_failure_capsule(failed_store, contract)
+            validate_capsule_document(capsule, contract)
+            validate_capsule_against_store(
+                capsule,
+                failed_store,
+                contract,
+                allow_unrecorded_write_failure=True,
+            )
+            marker = "post-failure-pin-marker"
+            if marker in dump_yaml(capsule):
+                raise fail(
+                    "fixture", "clean setup-failure capsule retained post-failure state"
+                )
+            imported = import_capsule_into_store(
+                capsule,
+                sandbox / "setup-failure-capsule-import",
+                "setup-failure-capsule-import-run",
+                contract,
+                readset,
+                current_pins=_fixture_pins_body(contract),
+            )
+            generate_brief = render_brief("generate", imported, contract, readset, None)
+            if "## packet: seeds" not in generate_brief:
+                raise fail(
+                    "fixture",
+                    "echo-only setup failure capsule did not resume at Generate",
+                )
+
+            tainted = copy.deepcopy(capsule)
+            tainted["effective-contract"]["evidence-identity"] = {
+                "named": [{"path": marker, "id": "9" * 64, "bytes": 1}],
+                "in-packet": [],
+            }
+            tainted["effective-contract"]["method-identity"] = _fixture_method_pins(
+                contract
+            )
+            tainted["proof-boundary"]["constituent-pins"] = _fixture_pins_body(
+                contract
+            )["constituents"]
+            tainted["proof-boundary"]["method-identity"] = _fixture_method_pins(
+                contract
+            )
+            validate_capsule_document(tainted, contract)
+            try:
+                validate_capsule_against_store(
+                    tainted,
+                    failed_store,
+                    contract,
+                    allow_unrecorded_write_failure=True,
+                )
+            except ValidationFailure:
+                return
+            raise fail(
+                "fixture",
+                "store comparison accepted pin-derived state written after setup failure",
+            )
+
+        _expect(
+            "setup failure capsule contains no state after the triggering failure",
+            "pass",
+            setup_failure_capsule_excludes_post_failure_state,
+            results,
+        )
+
         def acceptance_atomicity():
             atomic_store = _fixture_store(contract, readset, sandbox / "atomic-run")
             survivors = [
@@ -6907,7 +7791,7 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
 
         def inconsistent_writer_contract():
             data = copy.deepcopy(contract.data)
-            data["validation"]["runstate-writers"]["decomposition"] = ["import-capsule"]
+            data["validation"]["runstate-writers"]["pins"] = ["import-capsule"]
             validate_contract_data(data)
 
         _expect(
@@ -7213,6 +8097,12 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
                     name: copy.deepcopy(contract_map[name])
                     for name in contract.echo_contract_fields
                 },
+                "setup-source": _setup_source_from_artifacts(
+                    capsule["setup-decomposition"]["candidates"],
+                    contract_map["soft-prefs"]["value"],
+                    contract_map["soft-prefs"]["provenance"],
+                    capsule["setup-decomposition"]["composition-provenance"],
+                ),
             }
 
         def changed_frame_restarts_generate():
@@ -8517,15 +9407,18 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_identity)
 
     p = sub.add_parser(
-        "init-store", help="create the run-state store and write the echo item (seq 0)"
+        "init-setup",
+        help="normalize one setup document and write echo then decomposition",
     )
     p.add_argument("--data", required=True)
     p.add_argument("--store", required=True)
     p.add_argument("--run", required=True)
     p.add_argument(
-        "--echo-body", required=True, help="path to a YAML file with the echo body"
+        "--setup",
+        required=True,
+        help="path to one deliberate-setup/v1 document",
     )
-    p.set_defaults(func=cmd_init_store)
+    p.set_defaults(func=cmd_init_setup)
 
     p = sub.add_parser("write-item", help="validate and append one run-state item")
     p.add_argument("--data", required=True)
