@@ -93,7 +93,7 @@ One fenced YAML document per stage return: UTF-8, fixed key set (unknown keys re
 - `artifacts` — required. map carrying exactly the stage's obliged-artifact keys; each value present, `not produced: <reason>` (never on a completed stage), or (conditional artifacts only) `not applicable`
 - `retrievals` — required. `none`, or list of {source, retrieved-at, fact, concerns} — concerns is `candidate-neutral` or the list of every candidate the fact names, evidences, or was retrieved to investigate; capped by bounds.per-stage-retrievals
 - `encounters` — required. `none`, or a list of mappings; each mapping is exactly {kind: withheld-class | instruction-like, where, note}; scalar string entries are invalid
-- `pins` — required. list of {surface, id} — the constituent and evidence identifiers the stage actually verified; `none` when the stage loaded no pinned surface
+- `pins` — required. `none`, or a list of mappings; each mapping is exactly {surface, id}, where surface is non-empty and id is a full 64-hex content identifier for a surface the stage actually verified; legacy maps using class, path, verified, or any extra key are invalid
 - `model` — required. effective model when observable; `unknown` otherwise
 <!-- /generated:envelope-keys -->
 

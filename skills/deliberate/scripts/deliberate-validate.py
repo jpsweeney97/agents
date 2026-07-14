@@ -6330,6 +6330,72 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             results,
         )
 
+        def pins_carrier_guidance() -> None:
+            brief = render_brief("generate", store, contract, readset, None)
+            required = (
+                "`pins` has exactly two valid carrier shapes:\n"
+                "```yaml\npins: none\n```",
+                "pins:\n  - surface: /absolute/path/to/loaded/SKILL.md\n"
+                "    id: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                "entry is exactly `{surface, id}`. Legacy pin maps",
+                "Legacy pin maps using `class`, `path`,\n"
+                "`verified`, or any other key are invalid",
+            )
+            missing = [snippet for snippet in required if snippet not in brief]
+            if missing:
+                raise fail(
+                    "fixture",
+                    "rendered Generate brief is missing pins carrier guidance",
+                    missing,
+                )
+
+        _expect(
+            "rendered Generate brief shows both valid pins carriers",
+            "pass",
+            pins_carrier_guidance,
+            results,
+        )
+
+        def envelope_with_pins(value: object) -> dict[str, object]:
+            envelope = parse_fixture("must-pass/inert-prose-envelope.yaml")
+            envelope["pins"] = value
+            return envelope
+
+        _expect(
+            "mapping-shaped pin entry validates",
+            "pass",
+            lambda: validate_envelope_shape(
+                envelope_with_pins(
+                    [
+                        {
+                            "surface": "/absolute/path/to/loaded/SKILL.md",
+                            "id": "0" * 64,
+                        }
+                    ]
+                ),
+                contract,
+            ),
+            results,
+        )
+        _expect(
+            "legacy class-path-verified pin entry remains rejected",
+            "block",
+            lambda: validate_envelope_shape(
+                envelope_with_pins(
+                    [
+                        {
+                            "class": "constituent",
+                            "path": "/absolute/path/to/loaded/SKILL.md",
+                            "id": "0" * 64,
+                            "verified": True,
+                        }
+                    ]
+                ),
+                contract,
+            ),
+            results,
+        )
+
         def seeds_carriage():
             brief = render_brief("generate", store, contract, readset, None)
             if (
