@@ -14,7 +14,7 @@
 # Editing rule: this file is the authority. After any edit, regenerate the
 # authored renderings (`check-renderings --write`) and rerun the fixtures.
 
-contract-data-version: 2
+contract-data-version: 3
 
 stages: [generate, prune, shape, recommend, contest]
 
@@ -38,6 +38,45 @@ validation:
   method-pin-frontiers:
     default: generate
     references/methods.md: prune
+  # The complete deliberate-owned behavior-surface inventory, immutable v1
+  # constants like the bounds. Method pins, capsule method identity, and the
+  # proof boundary must each carry exactly this set (matched by normalized
+  # path suffix); a missing or unexpected surface fails validation. A future
+  # pinned surface enters by a later contract-data version editing this list,
+  # never at run time.
+  method-surfaces:
+    - SKILL.md
+    - references/capsule.md
+    - references/contract-data.yaml
+    - references/methods.md
+    - references/schemas.md
+    - references/stage-packets.md
+    - scripts/deliberate-validate.py
+  # Typed re-run directive manifest action kinds. Each new raw directive text
+  # supplied at import binds to one or more applied actions of these kinds;
+  # orphan text and orphan actions refuse before the store is staged.
+  directive-action-kinds: [contract-field, revive, withdraw-constraint, accept-seed, invalidate-from, field-base]
+  # Canonical capsule-bearing terminal classes: the total table both
+  # record-terminal and capsule validation/import classify against. `frontier`
+  # names the earliest stage whose artifacts must NOT be produced under that
+  # terminal (`complete` allows every artifact). A terminal matching no class
+  # here, no failure terminal, and not the constituent-exit form
+  # `constituent exit at <stage>: <named exit>` (stages listed in
+  # constituent-exit-stages; frontier = the named stage) is refused, never
+  # accepted as free-form authority.
+  capsule-terminal-classes:
+    - {terminal: close rendered, match: exact, frontier: complete}
+    - {terminal: no candidate survives the confirmed cuts, match: exact, frontier: shape}
+    - {terminal: one candidate survives the authorized cuts, match: prefix, frontier: shape}
+    - {terminal: survivor budget cannot be met without an unstated value trade, match: exact, frontier: shape}
+    - {terminal: field collision unresolved, match: exact, frontier: recommend}
+    - {terminal: authority gap, match: exact, frontier: recommend}
+    - {terminal: field not ready, match: prefix, frontier: contest}
+    - {terminal: options not comparable, match: exact, frontier: contest}
+    - {terminal: no basis yet, match: exact, frontier: contest}
+    - {terminal: only one serious option, match: exact, frontier: contest}
+  constituent-exit-terminal-prefix: "constituent exit at "
+  constituent-exit-stages: [shape, recommend]
   insertion-values: [original-field-position, appended-by-rule]
   prune-bases: [constraint, equivalence, dominance, survivor budget]
   recommend-bases: [post-prune filter, post-prune dominance, post-prune collapse, only-serious-option rival]
@@ -371,7 +410,7 @@ schemas:
       - {key: stage, required: false, note: "required for envelope and brief-render items"}
       - {key: body, required: true, note: keyed payload per kind; fixed top-level key set per body-keys below, each body validated to its nested shape at write}
     body-keys:
-      echo: [invocation-wording-initial, directives, fields, bounds, source-capsule-id]   # fields: map of contract fields, each {value, provenance: user-supplied | inferred | default | absent}; bounds: exact canonical top-level bounds map; source-capsule-id: `none` or full sha256
+      echo: [invocation-wording-initial, directives, directives-collapsed, fields, bounds, source-capsule-id]   # fields: map of contract fields, each {value, provenance: user-supplied | inferred | default | absent}; bounds: exact canonical top-level bounds map; source-capsule-id: `none` or full sha256; directives: newest verbatim texts within bounds.verbatim-directive-history after helper-owned compaction; directives-collapsed: older directive texts as content identifiers, oldest first
       decomposition: [frame, candidates, stakes, soft-prefs, values, composition-provenance]  # candidates: list of {wording, provenance-flag, authority-note: {text, provenance, span} | absent}; composition-provenance: {invocation-span, delegation-span}, candidate-free by elision
       pins: [constituents, method, evidence, in-packet]        # constituent/method entries: {path | name, id | manifest}; evidence/in-packet entries additionally require bytes, which pins-body validation sums against the canonical aggregate bound
       envelope: [document, amendments]                         # document: the validated stage envelope (value-preserving re-serialization at acceptance; every compared value byte-exact); amendments: the acceptance's owed concerns amendments — list of {retrieval: {producing-stage, source, retrieved-at}, option} — stored atomically with the envelope, producing envelopes never rewritten
@@ -381,7 +420,7 @@ schemas:
       terminal-state: [terminal, carrier]                      # reserved: written only by `record-terminal`; failure terminals require failure-capsule, allowed nonfailure terminals require capsule, and receipt-only or echo-only terminals are forbidden
       capsule-progress: [capsule]                              # the capsule-in-progress document
       capsule-import: [capsule]                                # the validated pasted capsule at re-run setup; only artifacts before restart-plan.earliest-stage remain available until superseded
-      restart-plan: [earliest-stage, reasons]                  # reserved: normalized import frontier; renderers refuse stale imported artifacts at or after earliest-stage
+      restart-plan: [earliest-stage, reasons, directives]      # reserved: normalized import frontier; renderers refuse stale imported artifacts at or after earliest-stage; directives: the typed manifest binding each new raw directive text to its applied actions ({directive, actions} list; helper-synthesized entries for flag-only imports)
 
   # -------------------------------------------------------------------------
   # deliberate-capsule/v1 — the recovery capsule. One paste-able fenced YAML
@@ -396,8 +435,8 @@ schemas:
     keys:
       - {key: schema, required: true, const: deliberate-capsule/v1}
       - {key: run, required: true}
-      - {key: terminal, required: true, note: "the non-empty terminal from the store's reserved terminal-state item, normally `close rendered` when Recommend's close stands; receipt-only and echo-only terminals refuse capsule validation; `store failed: write` alone may lack terminal-state under its failed-write exception"}
-      - {key: effective-contract, required: true, note: "map: frame, field-mode, constraints, values, soft-prefs, stakes, evidence-inputs, evidence-authorization, evidence-identity, method-identity, survivor-budget, degradation-permission, bounds, invocation-wording: {initial, directives (verbatim within bounds.verbatim-directive-history, older collapsed to content identifiers), source-capsule-id}; fields named by validation.echo-contract-fields each carry {value, provenance}; every named and in-packet evidence identity entry carries its measured bytes for aggregate re-summing; method-identity and invocation-wording carry their declared direct shapes; bounds equals the exact canonical top-level bounds map"}
+      - {key: terminal, required: true, note: "the non-empty terminal from the store's reserved terminal-state item, normally `close rendered` when Recommend's close stands; every capsule terminal must match one canonical validation.capsule-terminal-classes entry, a failure terminal, or the `constituent exit at <stage>: <named exit>` form over validation.constituent-exit-stages — an unmatched terminal is refused, and artifacts at or after the class frontier must not be produced; receipt-only and echo-only terminals refuse capsule validation; `store failed: write` alone may lack terminal-state under its failed-write exception"}
+      - {key: effective-contract, required: true, note: "map: frame, field-mode, constraints, values, soft-prefs, stakes, evidence-inputs, evidence-authorization, evidence-identity, method-identity, survivor-budget, degradation-permission, bounds, invocation-wording: {initial, directives (newest verbatim texts within bounds.verbatim-directive-history), directives-collapsed (older directive texts as content identifiers, oldest first), source-capsule-id}; fields named by validation.echo-contract-fields each carry {value, provenance}; every named and in-packet evidence identity entry carries its measured bytes for aggregate re-summing; method-identity carries exactly the validation.method-surfaces inventory by normalized path suffix; bounds equals the exact canonical top-level bounds map"}
       - {key: setup-decomposition, required: true, note: "map: frame, candidates (each {wording, provenance-flag, authority-note}), stakes, composition-provenance ({invocation-span, delegation-span})"}
       - {key: field-order-origin, required: true, note: "`user-supplied` | `generate-produced` when original-field exists; `not produced: <reason>` iff original-field is absent. Latest validated Generate fixes `generate-produced`; otherwise import preserves the prior value; an initial or newly supplied closed field fixes `user-supplied`; prior-full-field adoption preserves `generate-produced`."}
       - {key: recommend-authority-packet, required: true, note: "survivor wordings; order-provenance exactly the label derived from field-order-origin via validation.order-origin-labels; per-option insertion provenance when applicable; per-survivor authority notes; any overflow disclosure; stakes/reversibility"}

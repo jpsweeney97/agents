@@ -263,7 +263,7 @@ def validate_contract_data(data: object) -> None:
     }
     if not isinstance(data, dict) or set(data) != top_keys:
         raise refuse(op, f"top-level keys must be exactly {sorted(top_keys)}", data)
-    if data["contract-data-version"] != 2:
+    if data["contract-data-version"] != 3:
         raise refuse(
             op,
             "unsupported contract-data-version",
@@ -284,6 +284,11 @@ def validate_contract_data(data: object) -> None:
         "field-order-origins",
         "order-origin-labels",
         "method-pin-frontiers",
+        "method-surfaces",
+        "directive-action-kinds",
+        "capsule-terminal-classes",
+        "constituent-exit-terminal-prefix",
+        "constituent-exit-stages",
         "insertion-values",
         "prune-bases",
         "recommend-bases",
@@ -306,6 +311,8 @@ def validate_contract_data(data: object) -> None:
     list_keys = validation_keys - {
         "order-origin-labels",
         "method-pin-frontiers",
+        "capsule-terminal-classes",
+        "constituent-exit-terminal-prefix",
         "runstate-writers",
     }
     for key in sorted(list_keys):
@@ -337,6 +344,57 @@ def validate_contract_data(data: object) -> None:
             "method-pin-frontiers must map default and references/methods.md to declared stages",
             method_frontiers,
         )
+
+    method_surfaces = validation["method-surfaces"]
+    if len(method_surfaces) != len(set(method_surfaces)) or not set(
+        method_frontiers
+    ) - {"default"} <= set(method_surfaces):
+        raise refuse(
+            op,
+            "method-surfaces must be unique and cover every non-default frontier key",
+            method_surfaces,
+        )
+
+    if set(validation["constituent-exit-stages"]) - set(stages):
+        raise refuse(
+            op,
+            "constituent-exit-stages must name declared stages",
+            validation["constituent-exit-stages"],
+        )
+    exit_prefix = validation["constituent-exit-terminal-prefix"]
+    if not isinstance(exit_prefix, str) or not exit_prefix.strip():
+        raise refuse(
+            op, "constituent-exit-terminal-prefix must be non-empty", exit_prefix
+        )
+
+    terminal_classes = validation["capsule-terminal-classes"]
+    if not isinstance(terminal_classes, list) or not terminal_classes:
+        raise refuse(
+            op, "capsule-terminal-classes must be a non-empty list", terminal_classes
+        )
+    class_terminals: list[str] = []
+    for entry in terminal_classes:
+        if not isinstance(entry, dict) or set(entry) != {
+            "terminal",
+            "match",
+            "frontier",
+        }:
+            raise refuse(
+                op,
+                "each capsule terminal class must be exactly {terminal, match, frontier}",
+                entry,
+            )
+        if not isinstance(entry["terminal"], str) or not entry["terminal"].strip():
+            raise refuse(op, "terminal class name must be non-empty", entry)
+        if entry["match"] not in {"exact", "prefix"}:
+            raise refuse(op, "terminal class match must be exact or prefix", entry)
+        if entry["frontier"] != "complete" and entry["frontier"] not in stages:
+            raise refuse(
+                op, "terminal class frontier must be `complete` or a stage", entry
+            )
+        class_terminals.append(entry["terminal"])
+    if len(class_terminals) != len(set(class_terminals)):
+        raise refuse(op, "terminal class names must be unique", class_terminals)
 
     bounds = data["bounds"]
     if (
@@ -525,6 +583,15 @@ class Contract:
         self.field_order_origins = set(validation["field-order-origins"])
         self.order_origin_labels: dict[str, str] = validation["order-origin-labels"]
         self.method_pin_frontiers: dict[str, str] = validation["method-pin-frontiers"]
+        self.method_surfaces: list[str] = validation["method-surfaces"]
+        self.directive_action_kinds = set(validation["directive-action-kinds"])
+        self.capsule_terminal_classes: list[dict] = validation[
+            "capsule-terminal-classes"
+        ]
+        self.constituent_exit_prefix: str = validation[
+            "constituent-exit-terminal-prefix"
+        ]
+        self.constituent_exit_stages = set(validation["constituent-exit-stages"])
         self.insertion_values = set(validation["insertion-values"])
         self.prune_bases = set(validation["prune-bases"])
         self.recommend_bases = set(validation["recommend-bases"])
@@ -963,6 +1030,45 @@ def _is_capsule_forbidden_terminal(terminal: str, contract: Contract) -> bool:
     )
 
 
+def _normalize_locator(locator: str) -> str:
+    return locator.replace("\\", "/").removeprefix("./")
+
+
+def _capsule_terminal_frontier(terminal: str, contract: Contract, op: str) -> str:
+    """Classify a non-failure capsule-bearing terminal against the canonical
+    class table and return its artifact frontier (a stage name, or `complete`).
+    A terminal outside every canonical class and the constituent-exit form is
+    refused, never accepted as free-form authority."""
+    for entry in contract.capsule_terminal_classes:
+        name = entry["terminal"]
+        matched = (
+            terminal.startswith(name)
+            if entry["match"] == "prefix"
+            else terminal == name
+        )
+        if matched:
+            return entry["frontier"]
+    prefix = contract.constituent_exit_prefix
+    if terminal.startswith(prefix):
+        stage, sep, exit_name = terminal.removeprefix(prefix).partition(":")
+        stage = stage.strip()
+        if sep != ":" or not exit_name.strip() or stage not in contract.stages:
+            raise refuse(
+                op,
+                f"malformed constituent-exit terminal — expected `{prefix}<stage>: <named exit>`",
+            )
+        if stage not in contract.constituent_exit_stages:
+            raise refuse(
+                op,
+                f"constituent exit at {stage} has no capsule-bearing state — echo-only branch",
+            )
+        return stage
+    raise refuse(
+        op,
+        f"terminal {terminal!r} matches no canonical capsule terminal class, failure terminal, or constituent-exit form",
+    )
+
+
 def _require_str_list(op: str, name: str, value: object) -> list[str]:
     if not isinstance(value, list) or not all(
         isinstance(entry, str) and entry.strip() for entry in value
@@ -1133,6 +1239,42 @@ def _check_pin_list(
     return total_bytes
 
 
+def _check_method_pin_inventory(
+    op: str, name: str, value: object, contract: Contract
+) -> None:
+    """Require exactly the canonical method-surface inventory: every
+    deliberate-owned behavior surface pinned once, nothing extra, nothing
+    missing. Locators match canonical surfaces by normalized path suffix."""
+    _check_pin_list(op, name, value, require_nonempty=True, allow_manifest=False)
+    if not isinstance(value, list):
+        raise fail(op, f"{name} must be a list", value)
+    unmatched = {surface: surface for surface in contract.method_surfaces}
+    for entry in value:
+        locator = str(entry.get("path", entry.get("name", "")))
+        normalized = _normalize_locator(locator)
+        matches = [
+            surface
+            for surface in contract.method_surfaces
+            if normalized == surface or normalized.endswith(f"/{surface}")
+        ]
+        if not matches:
+            raise fail(
+                op,
+                f"{name} pins an unexpected surface outside the canonical method-surface inventory",
+                locator,
+            )
+        surface = matches[0]
+        if surface not in unmatched:
+            raise fail(op, f"{name} pins {surface} more than once", locator)
+        del unmatched[surface]
+    if unmatched:
+        raise fail(
+            op,
+            f"{name} is missing required method surfaces",
+            sorted(unmatched),
+        )
+
+
 def _check_amendments(op: str, value: object) -> None:
     if not isinstance(value, list):
         raise fail(op, "amendments must be a list", value)
@@ -1257,6 +1399,15 @@ def _check_body_echo(op: str, body: dict, contract: Contract) -> None:
     cap = effective_bounds["verbatim-directive-history"]
     if len(directives) > cap:
         raise fail(op, f"directives exceed the history bound of {cap}", len(directives))
+    collapsed = body["directives-collapsed"]
+    if not isinstance(collapsed, list) or not all(
+        _is_sha256(entry) for entry in collapsed
+    ):
+        raise fail(
+            op,
+            "directives-collapsed must be a list of 64-hex content identifiers",
+            collapsed,
+        )
     _check_contract_fields(
         op,
         body["fields"],
@@ -1294,7 +1445,7 @@ def _check_body_pins(op: str, body: dict, contract: Contract) -> None:
         )
     for name, pins in constituents.items():
         _check_pin_list(op, f"constituents[{name}]", pins, require_nonempty=True)
-    _check_pin_list(op, "method", body["method"], require_nonempty=True)
+    _check_method_pin_inventory(op, "method", body["method"], contract)
     _check_pin_list(
         op,
         "evidence",
@@ -1353,11 +1504,8 @@ def _check_proof_boundary_shape(op: str, body: object, contract: Contract) -> di
             pin_list,
             require_nonempty=True,
         )
-    _check_pin_list(
-        op,
-        "proof-boundary method-identity",
-        body["method-identity"],
-        require_nonempty=True,
+    _check_method_pin_inventory(
+        op, "proof-boundary method-identity", body["method-identity"], contract
     )
     for key in (
         "packet-isolation",
@@ -1403,10 +1551,12 @@ def _check_body_terminal_state(op: str, body: dict, contract: Contract) -> None:
         raise refuse(op, f"terminal {terminal!r} cannot own a capsule")
     if carrier == "failure-capsule" and not _is_failure_terminal(terminal, contract):
         raise fail(op, "failure-capsule carrier requires a failure terminal", terminal)
-    if carrier == "capsule" and _is_failure_terminal(terminal, contract):
-        raise fail(
-            op, "failure terminal requires the failure-capsule carrier", terminal
-        )
+    if carrier == "capsule":
+        if _is_failure_terminal(terminal, contract):
+            raise fail(
+                op, "failure terminal requires the failure-capsule carrier", terminal
+            )
+        _capsule_terminal_frontier(terminal, contract, op)
 
 
 def _check_body_capsule_progress(op: str, body: dict, contract: Contract) -> None:
@@ -1423,6 +1573,45 @@ def _check_body_capsule_import(op: str, body: dict, contract: Contract) -> None:
     validate_capsule_document(capsule, contract, restart_state=True)
 
 
+def _parse_directive_action(
+    op: str, action: object, contract: Contract
+) -> tuple[str, str]:
+    """Parse one typed directive action: `accept-seed` or `<kind>: <argument>`."""
+    if not isinstance(action, str) or not action.strip():
+        raise fail(op, "directive action must be a non-empty string", action)
+    kind, sep, argument = action.partition(": ")
+    if not sep:
+        kind = action
+        argument = ""
+    if kind not in contract.directive_action_kinds:
+        raise fail(op, "unknown directive action kind", action)
+    if kind == "accept-seed":
+        if argument:
+            raise fail(op, "accept-seed takes no argument", action)
+    elif not argument:
+        raise fail(op, f"directive action {kind} requires `{kind}: <argument>`", action)
+    return kind, argument
+
+
+def _check_directive_bindings(op: str, value: object, contract: Contract) -> None:
+    if not isinstance(value, list):
+        raise fail(op, "directive bindings must be a list", value)
+    for entry in value:
+        if not isinstance(entry, dict) or set(entry) != {"directive", "actions"}:
+            raise fail(
+                op, "directive bindings must be exactly {directive, actions}", entry
+            )
+        _require_str(op, "directive text", entry["directive"])
+        actions = entry["actions"]
+        if not isinstance(actions, list) or not actions:
+            raise fail(
+                op,
+                f"directive binds no action — unclassifiable directive: {entry['directive']!r}",
+            )
+        for action in actions:
+            _parse_directive_action(op, action, contract)
+
+
 def _check_body_restart_plan(op: str, body: dict, contract: Contract) -> None:
     earliest = body["earliest-stage"]
     if earliest != "none" and earliest not in contract.stages:
@@ -1434,6 +1623,7 @@ def _check_body_restart_plan(op: str, body: dict, contract: Contract) -> None:
     reasons = _require_str_list(op, "restart reasons", body["reasons"])
     if not reasons:
         raise fail(op, "restart reasons must not be empty")
+    _check_directive_bindings(op, body["directives"], contract)
 
 
 _BODY_CHECKS = {
@@ -3278,6 +3468,45 @@ def _validate_capsule_terminal_state(
     seed = capsule["provisional-seed"]
     exclusion = capsule["exclusion-check"]
     recommend_packet = capsule["recommend-authority-packet"]
+    if not failure:
+        frontier = _capsule_terminal_frontier(terminal, contract, op)
+        stage_outputs = {
+            "generate": (
+                ("original-field", field),
+                ("generation-boundary", generation_boundary),
+            ),
+            "prune": (
+                ("survivors", survivors),
+                ("records", records),
+                ("overflow", capsule["overflow"]),
+            ),
+            "shape": (("surface", surface), ("consequences", consequences)),
+            "recommend": (
+                ("close", close),
+                ("registered-leans", leans),
+                ("provisional-seed", seed),
+                ("recommend-authority-packet", recommend_packet),
+            ),
+            "contest": (),
+        }
+        if frontier != "complete":
+            frontier_index = contract.stages.index(frontier)
+            for stage in contract.stages[frontier_index:]:
+                for key, value in stage_outputs[stage]:
+                    if _is_produced(value):
+                        raise fail(
+                            op,
+                            f"terminal {terminal!r} forbids {key} — its artifact frontier is {frontier}",
+                        )
+        if terminal in {
+            "options not comparable",
+            "no basis yet",
+            "only one serious option",
+        } and not _is_produced(close):
+            raise fail(
+                op,
+                "a Recommend constituent exit carries its exit statement as the close",
+            )
     if _is_produced(field) != _is_produced(generation_boundary):
         raise fail(
             op, "original-field and generation-boundary must be produced together"
@@ -3353,7 +3582,7 @@ def _validate_capsule_terminal_state(
     if terminal == "survivor budget cannot be met without an unstated value trade":
         if not isinstance(capsule["overflow"], dict):
             raise fail(op, "budget terminal requires a produced overflow disclosure")
-    if "field not ready" in terminal:
+    if terminal.startswith("field not ready"):
         if not isinstance(seed, dict) or _is_produced(close):
             raise fail(op, "field-not-ready terminal requires a seed and no close")
     if terminal == "stage failed: contest":
@@ -3501,21 +3730,19 @@ def validate_capsule_document(
         allow_manifest=False,
         byte_cap=effective_bounds["in-packet-evidence-bytes"],
     )
-    _check_pin_list(
-        op,
-        "method-identity",
-        contract_map["method-identity"],
-        require_nonempty=True,
+    _check_method_pin_inventory(
+        op, "method-identity", contract_map["method-identity"], contract
     )
     wording = contract_map["invocation-wording"]
     if not isinstance(wording, dict) or set(wording) != {
         "initial",
         "directives",
+        "directives-collapsed",
         "source-capsule-id",
     }:
         raise fail(
             op,
-            "invocation-wording must be exactly {initial, directives, source-capsule-id}",
+            "invocation-wording must be exactly {initial, directives, directives-collapsed, source-capsule-id}",
             wording,
         )
     _require_str(op, "invocation-wording initial", wording["initial"])
@@ -3527,6 +3754,15 @@ def validate_capsule_document(
         raise fail(
             op,
             f"invocation-wording carries {len(directives)} directives past the bound of {directive_cap}",
+        )
+    collapsed = wording["directives-collapsed"]
+    if not isinstance(collapsed, list) or not all(
+        _is_sha256(entry) for entry in collapsed
+    ):
+        raise fail(
+            op,
+            "invocation-wording directives-collapsed must be a list of 64-hex content identifiers",
+            collapsed,
         )
     source_id = wording["source-capsule-id"]
     if source_id != "none" and not _is_sha256(source_id):
@@ -3865,6 +4101,8 @@ def validate_capsule_against_store(
         raise fail(op, "invocation initial wording differs from store echo")
     if wording["directives"] != echo["directives"]:
         raise fail(op, "invocation directives differ from store echo")
+    if wording["directives-collapsed"] != echo["directives-collapsed"]:
+        raise fail(op, "collapsed directive history differs from store echo")
     if wording["source-capsule-id"] != echo["source-capsule-id"]:
         raise fail(op, "source-capsule-id differs from store echo")
 
@@ -4116,6 +4354,64 @@ def _pin_change_frontiers(
     return stages, reasons
 
 
+def _compact_directive_history(echo_body: dict, contract: Contract) -> None:
+    """Collapse older directive texts past the verbatim bound to content
+    identifiers, oldest first — the executable standing rule, applied before
+    any bound check so re-run continuity never dies at the history bound."""
+    cap = contract.bounds["verbatim-directive-history"]
+    verbatim = list(echo_body["directives"])
+    collapsed = list(echo_body["directives-collapsed"])
+    while len(verbatim) > cap:
+        collapsed.append(sha256_bytes(verbatim.pop(0).encode("utf-8")))
+    echo_body["directives"] = verbatim
+    echo_body["directives-collapsed"] = collapsed
+
+
+def _check_import_directive_manifest(
+    op: str,
+    manifest: list | None,
+    new_texts: list[str],
+    applied: set[tuple[str, str]],
+    contract: Contract,
+) -> None:
+    """Bind each new raw directive text to its applied actions, both ways:
+    orphan text (a directive bound to no applied action) and orphan actions
+    (an applied action bound to no directive) refuse before the store is
+    staged. Without new texts, flag- and field-derived actions stay legal and
+    are recorded by synthesized history entries and the restart plan."""
+    if manifest is None:
+        if new_texts:
+            raise refuse(
+                op,
+                "new re-run directive texts require a directive manifest binding each text to its classified actions",
+            )
+        return
+    _check_directive_bindings(op, manifest, contract)
+    manifest_texts = [entry["directive"] for entry in manifest]
+    if manifest_texts != new_texts:
+        raise refuse(
+            op,
+            "directive manifest must list exactly the new directive texts in order",
+            {"manifest": manifest_texts, "new": new_texts},
+        )
+    claimed: set[tuple[str, str]] = set()
+    for entry in manifest:
+        for action in entry["actions"]:
+            parsed = _parse_directive_action(op, action, contract)
+            if parsed not in applied:
+                raise refuse(
+                    op,
+                    f"directive {entry['directive']!r} claims an action this import does not apply: {action}",
+                )
+            claimed.add(parsed)
+    orphans = applied - claimed
+    if orphans:
+        raise refuse(
+            op,
+            f"applied actions bound to no directive text: {sorted(orphans)}",
+        )
+
+
 def import_capsule_into_store(
     capsule: dict,
     root: Path,
@@ -4130,6 +4426,7 @@ def import_capsule_into_store(
     field_base: str | None = None,
     closed_field: list[str] | None = None,
     current_pins: dict | None = None,
+    directive_manifest: list | None = None,
 ) -> Store:
     """Create typed import state plus the normalized restart frontier."""
     op = "capsule import"
@@ -4158,6 +4455,7 @@ def import_capsule_into_store(
     }
     current_pins = copy.deepcopy(prior_pins if current_pins is None else current_pins)
     _check_body_pins(op, current_pins, contract)
+    new_directive_texts: list[str] = []
     if echo_body is None:
         fields = {
             name: {
@@ -4169,6 +4467,9 @@ def import_capsule_into_store(
         echo_body = {
             "invocation-wording-initial": contract_map["invocation-wording"]["initial"],
             "directives": list(contract_map["invocation-wording"]["directives"]),
+            "directives-collapsed": list(
+                contract_map["invocation-wording"]["directives-collapsed"]
+            ),
             "bounds": copy.deepcopy(contract_map["bounds"]),
             "source-capsule-id": source_capsule_id,
             "fields": fields,
@@ -4198,6 +4499,19 @@ def import_capsule_into_store(
                 "echo override must preserve prior directive history as an exact prefix",
                 directives,
             )
+        if (
+            echo_body.get("directives-collapsed")
+            != prior_wording["directives-collapsed"]
+        ):
+            raise fail(
+                op,
+                "echo override must preserve the collapsed directive history exactly",
+                echo_body.get("directives-collapsed"),
+            )
+        new_directive_texts = [
+            str(text) for text in directives[len(prior_directives) :]
+        ]
+    _compact_directive_history(echo_body, contract)
     _check_body_echo(op, echo_body, contract)
     for label, values in (
         ("revival", revive),
@@ -4209,6 +4523,23 @@ def import_capsule_into_store(
     old_fields = {name: contract_map[name] for name in contract.echo_contract_fields}
     change_stages, change_reasons = _contract_change_frontiers(
         old_fields, echo_body["fields"], contract
+    )
+    applied_actions: set[tuple[str, str]] = set()
+    for name in contract.echo_contract_fields:
+        if echo_body["fields"][name] != old_fields[name]:
+            applied_actions.add(("contract-field", name))
+    for wording in revive:
+        applied_actions.add(("revive", wording))
+    for wording in constraint_withdrawn:
+        applied_actions.add(("withdraw-constraint", wording))
+    if accept_seed:
+        applied_actions.add(("accept-seed", ""))
+    for stage in invalidate_from:
+        applied_actions.add(("invalidate-from", stage))
+    if field_base is not None:
+        applied_actions.add(("field-base", field_base))
+    _check_import_directive_manifest(
+        op, directive_manifest, new_directive_texts, applied_actions, contract
     )
     pin_stages, pin_reasons = _pin_change_frontiers(prior_pins, current_pins, contract)
     constraints_changed = (
@@ -4450,8 +4781,9 @@ def import_capsule_into_store(
         capsule["generation-boundary"] = invalidated_field
         capsule["field-order-origin"] = invalidated_field
 
-    if directives_applied:
+    if directives_applied and directive_manifest is None:
         echo_body["directives"] = list(echo_body["directives"]) + directives_applied
+        _compact_directive_history(echo_body, contract)
     pre_recommend_frontiers = change_stages + pin_stages + list(invalidate_from)
     invalidates_recommend = bool(directives_applied) or any(
         contract.stages.index(stage) <= contract.stages.index("recommend")
@@ -4482,6 +4814,7 @@ def import_capsule_into_store(
     contract_map["invocation-wording"] = {
         "initial": echo_body["invocation-wording-initial"],
         "directives": copy.deepcopy(echo_body["directives"]),
+        "directives-collapsed": copy.deepcopy(echo_body["directives-collapsed"]),
         "source-capsule-id": echo_body["source-capsule-id"],
     }
 
@@ -4523,9 +4856,22 @@ def import_capsule_into_store(
             op,
             "completed capsule has no classified re-run directive or invalidation",
         )
+    if directive_manifest is not None:
+        plan_directives = copy.deepcopy(directive_manifest)
+    else:
+        plan_directives = [
+            {
+                "directive": text,
+                "actions": ["accept-seed"]
+                if text.startswith("accept seed: ")
+                else [text],
+            }
+            for text in directives_applied
+        ]
     restart_plan = {
         "earliest-stage": _earliest_stage_name(contract, restart_stages),
         "reasons": restart_reasons,
+        "directives": plan_directives,
     }
 
     soft_prefs = echo_body["fields"]["soft-prefs"]["value"]
@@ -4645,6 +4991,20 @@ def cmd_import_capsule(args: argparse.Namespace) -> int:
         closed_field = _require_str_list(
             "closed field", "closed-field wordings", parsed_field
         )
+    directive_manifest = None
+    if args.directive_manifest:
+        manifest_path = readset.allow(Path(args.directive_manifest))
+        parsed_manifest = safe_parse(
+            readset.read_bytes(manifest_path),
+            byte_cap=contract.bounds["parse-bytes"],
+            depth_cap=contract.bounds["parse-depth"],
+            op="directive manifest",
+        )
+        if not isinstance(parsed_manifest, list):
+            raise fail(
+                "directive manifest", "manifest must be a YAML list", parsed_manifest
+            )
+        directive_manifest = parsed_manifest
     store = import_capsule_into_store(
         capsule,
         Path(args.store),
@@ -4659,6 +5019,7 @@ def cmd_import_capsule(args: argparse.Namespace) -> int:
         field_base=args.field_base,
         closed_field=closed_field,
         current_pins=current_pins,
+        directive_manifest=directive_manifest,
     )
     print(
         f"capsule imported: store={store.root} run={args.run} "
@@ -4843,6 +5204,10 @@ _FIXTURE_PROVENANCE = {
 }
 
 
+def _fixture_method_pins(contract: Contract) -> list[dict]:
+    return [{"path": surface, "id": "0" * 64} for surface in contract.method_surfaces]
+
+
 def _fixture_store(
     contract: Contract,
     readset: ReadSet,
@@ -4861,6 +5226,7 @@ def _fixture_store(
             "body": {
                 "invocation-wording-initial": "fixture invocation",
                 "directives": [],
+                "directives-collapsed": [],
                 "bounds": dict(contract.bounds),
                 "source-capsule-id": "none",
                 "fields": {
@@ -4961,7 +5327,7 @@ def _fixture_store(
                         }
                     ],
                 },
-                "method": [{"path": "references/methods.md", "id": "0" * 64}],
+                "method": _fixture_method_pins(contract),
                 "evidence": [],
                 "in-packet": [],
             },
@@ -5021,7 +5387,7 @@ def _fixture_capsule(contract: Contract) -> dict:
         "survivor-budget": 4,
         "degradation-permission": "absent",
     }
-    pin = [{"path": "references/methods.md", "id": "0" * 64}]
+    pin = _fixture_method_pins(contract)
     return {
         "schema": CAPSULE_SCHEMA,
         "run": "fixture-capsule-run",
@@ -5037,6 +5403,7 @@ def _fixture_capsule(contract: Contract) -> dict:
             "invocation-wording": {
                 "initial": "fixture invocation",
                 "directives": [],
+                "directives-collapsed": [],
                 "source-capsule-id": "none",
             },
         },
@@ -5179,10 +5546,9 @@ def _fixture_one_survivor_capsule(contract: Contract) -> dict:
         }
         for option in field[1:]
     ]
-    capsule["recommend-authority-packet"]["survivors"] = field[:1]
-    capsule["recommend-authority-packet"]["authority-notes"] = capsule[
-        "recommend-authority-packet"
-    ]["authority-notes"][:1]
+    capsule["recommend-authority-packet"] = "not produced: one-survivor terminal"
+    capsule["surface"] = "not produced: one-survivor terminal"
+    capsule["consequences"] = "not produced: one-survivor terminal"
     capsule["close"] = "not produced: one-survivor terminal"
     capsule["registered-leans"] = "not produced: one-survivor terminal"
     capsule["terminal-claim"] = {
@@ -5484,7 +5850,7 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
                     name: [{"path": f"skills/{name}/SKILL.md", "id": "0" * 64}]
                     for name in contract.constituent_names
                 },
-                "method": [{"path": "references/methods.md", "id": "0" * 64}],
+                "method": _fixture_method_pins(contract),
                 "evidence": [],
                 "in-packet": [],
             }
@@ -5525,7 +5891,7 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
                     name: [{"path": f"skills/{name}/SKILL.md", "id": "0" * 64}]
                     for name in contract.constituent_names
                 },
-                "method": [{"path": "references/methods.md", "id": "0" * 64}],
+                "method": _fixture_method_pins(contract),
                 "evidence": [],
                 "in-packet": [
                     {"name": "opaque attachment", "id": "no comparable identity"}
@@ -6838,6 +7204,9 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
                     "initial"
                 ],
                 "directives": list(contract_map["invocation-wording"]["directives"]),
+                "directives-collapsed": list(
+                    contract_map["invocation-wording"]["directives-collapsed"]
+                ),
                 "bounds": copy.deepcopy(contract_map["bounds"]),
                 "source-capsule-id": "none",
                 "fields": {
@@ -7282,7 +7651,9 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
                 "evidence": [],
                 "in-packet": [],
             }
-            current["method"][0]["id"] = "3" * 64
+            for pin in current["method"]:
+                if pin["path"] == "references/methods.md":
+                    pin["id"] = "3" * 64
             imported = import_capsule_into_store(
                 capsule,
                 sandbox / "current-methods-reference-change",
@@ -7303,13 +7674,6 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
 
         def current_skill_surface_change_restarts_generate():
             capsule = _fixture_capsule(contract)
-            skill_pin = {"path": "SKILL.md", "id": "4" * 64}
-            capsule["effective-contract"]["method-identity"].append(
-                copy.deepcopy(skill_pin)
-            )
-            capsule["proof-boundary"]["method-identity"].append(
-                copy.deepcopy(skill_pin)
-            )
             current = {
                 "constituents": copy.deepcopy(
                     capsule["proof-boundary"]["constituent-pins"]
@@ -7320,7 +7684,9 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
                 "evidence": [],
                 "in-packet": [],
             }
-            current["method"][1]["id"] = "5" * 64
+            for pin in current["method"]:
+                if pin["path"] == "SKILL.md":
+                    pin["id"] = "5" * 64
             imported = import_capsule_into_store(
                 capsule,
                 sandbox / "current-skill-surface-change",
@@ -7336,6 +7702,472 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             "non-method owned-surface pin drift restarts Generate",
             "pass",
             current_skill_surface_change_restarts_generate,
+            results,
+        )
+
+        def ninth_rerun_compacts_history():
+            capsule = _fixture_capsule(contract)
+            eight = [f"prior directive {i}" for i in range(1, 9)]
+            capsule["effective-contract"]["invocation-wording"]["directives"] = list(
+                eight
+            )
+            validate_capsule_document(copy.deepcopy(capsule), contract)
+            override = echo_override(capsule)
+            override["fields"]["frame"] = {
+                "value": "a changed frame for the ninth run",
+                "provenance": "user-supplied",
+            }
+            override["directives"] = eight + ["change the frame"]
+            imported = import_capsule_into_store(
+                capsule,
+                sandbox / "ninth-rerun-compaction",
+                "ninth-rerun-compaction-run",
+                contract,
+                readset,
+                echo_body=override,
+                directive_manifest=[
+                    {
+                        "directive": "change the frame",
+                        "actions": ["contract-field: frame"],
+                    }
+                ],
+            )
+            echo = imported.require("echo")["body"]
+            collapsed_id = sha256_bytes("prior directive 1".encode("utf-8"))
+            if (
+                len(echo["directives"]) != 8
+                or echo["directives"][0] != "prior directive 2"
+            ):
+                raise fail(
+                    "fixture", "ninth re-run did not keep the newest eight verbatim"
+                )
+            if echo["directives-collapsed"] != [collapsed_id]:
+                raise fail(
+                    "fixture",
+                    "oldest directive text did not collapse to its content identifier",
+                )
+            if imported.require("restart-plan")["body"]["earliest-stage"] != "generate":
+                raise fail(
+                    "fixture", "ninth re-run frame change did not restart Generate"
+                )
+            brief = render_brief("generate", imported, contract, readset, None)
+            if collapsed_id in brief or "prior directive 1" in brief:
+                raise fail("fixture", "collapsed history leaked into a stage packet")
+            stored = imported.require("capsule-import")["body"]["capsule"]
+            wording = stored["effective-contract"]["invocation-wording"]
+            if wording["directives-collapsed"] != [collapsed_id]:
+                raise fail("fixture", "capsule round-trip lost the collapsed history")
+            validate_capsule_document(
+                copy.deepcopy(stored), contract, restart_state=True
+            )
+
+        _expect(
+            "ninth re-run compacts history instead of dying at the bound",
+            "pass",
+            ninth_rerun_compacts_history,
+            results,
+        )
+
+        def flag_directive_compacts_past_bound():
+            capsule = _fixture_capsule(contract)
+            eight = [f"prior directive {i}" for i in range(1, 9)]
+            capsule["effective-contract"]["invocation-wording"]["directives"] = list(
+                eight
+            )
+            imported = import_capsule_into_store(
+                capsule,
+                sandbox / "revive-at-eight-compaction",
+                "revive-at-eight-compaction-run",
+                contract,
+                readset,
+                revive=["Option C — shared git repo"],
+            )
+            echo = imported.require("echo")["body"]
+            if echo["directives"][-1] != "revive: Option C — shared git repo":
+                raise fail("fixture", "revival entry missing from directive history")
+            if echo["directives-collapsed"] != [
+                sha256_bytes("prior directive 1".encode("utf-8"))
+            ]:
+                raise fail(
+                    "fixture", "flag-derived entry did not compact the oldest text"
+                )
+            plan = imported.require("restart-plan")["body"]
+            if plan["directives"] != [
+                {
+                    "directive": "revive: Option C — shared git repo",
+                    "actions": ["revive: Option C — shared git repo"],
+                }
+            ]:
+                raise fail(
+                    "fixture", "synthesized directive binding missing from restart plan"
+                )
+
+        _expect(
+            "flag-derived directive entry compacts past the bound",
+            "pass",
+            flag_directive_compacts_past_bound,
+            results,
+        )
+
+        def missing_method_surface_fails(surface: str):
+            capsule = _fixture_capsule(contract)
+            for holder in (
+                capsule["effective-contract"]["method-identity"],
+                capsule["proof-boundary"]["method-identity"],
+            ):
+                holder[:] = [pin for pin in holder if pin["path"] != surface]
+            validate_capsule_document(capsule, contract)
+
+        for surface in contract.method_surfaces:
+            _expect(
+                f"method identity missing {surface} fails",
+                "block",
+                (lambda s: lambda: missing_method_surface_fails(s))(surface),
+                results,
+            )
+
+        def unexpected_method_surface_fails():
+            capsule = _fixture_capsule(contract)
+            extra = {"path": "references/rogue-surface.md", "id": "6" * 64}
+            capsule["effective-contract"]["method-identity"].append(dict(extra))
+            capsule["proof-boundary"]["method-identity"].append(dict(extra))
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "method identity rejects a surface outside the canonical inventory",
+            "block",
+            unexpected_method_surface_fails,
+            results,
+        )
+
+        def duplicate_method_surface_fails():
+            capsule = _fixture_capsule(contract)
+            extra = {"path": "elsewhere/SKILL.md", "id": "7" * 64}
+            capsule["effective-contract"]["method-identity"].append(dict(extra))
+            capsule["proof-boundary"]["method-identity"].append(dict(extra))
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "method identity rejects a duplicate surface pin",
+            "block",
+            duplicate_method_surface_fails,
+            results,
+        )
+
+        def mixed_directive_override(capsule: dict) -> dict:
+            override = echo_override(capsule)
+            override["fields"]["frame"] = {
+                "value": "a changed frame",
+                "provenance": "user-supplied",
+            }
+            override["directives"] = list(override["directives"]) + [
+                "change the frame",
+                "also perform an unclassifiable unrelated action",
+            ]
+            return override
+
+        def unbound_directive_text_refused():
+            capsule = _fixture_capsule(contract)
+            import_capsule_into_store(
+                capsule,
+                sandbox / "unbound-directive-text",
+                "unbound-directive-text-run",
+                contract,
+                readset,
+                echo_body=mixed_directive_override(capsule),
+                directive_manifest=[
+                    {
+                        "directive": "change the frame",
+                        "actions": ["contract-field: frame"],
+                    },
+                    {
+                        "directive": "also perform an unclassifiable unrelated action",
+                        "actions": [],
+                    },
+                ],
+            )
+
+        _expect(
+            "unclassifiable directive text refuses before store staging",
+            "block",
+            unbound_directive_text_refused,
+            results,
+        )
+
+        def new_texts_without_manifest_refused():
+            capsule = _fixture_capsule(contract)
+            import_capsule_into_store(
+                capsule,
+                sandbox / "texts-without-manifest",
+                "texts-without-manifest-run",
+                contract,
+                readset,
+                echo_body=mixed_directive_override(capsule),
+            )
+
+        _expect(
+            "new directive texts without a manifest refuse import",
+            "block",
+            new_texts_without_manifest_refused,
+            results,
+        )
+
+        def orphan_applied_action_refused():
+            capsule = _fixture_capsule(contract)
+            override = echo_override(capsule)
+            override["fields"]["frame"] = {
+                "value": "a changed frame",
+                "provenance": "user-supplied",
+            }
+            override["fields"]["stakes"] = {
+                "value": "highly reversible pilot",
+                "provenance": "user-supplied",
+            }
+            override["directives"] = list(override["directives"]) + ["change the frame"]
+            import_capsule_into_store(
+                capsule,
+                sandbox / "orphan-applied-action",
+                "orphan-applied-action-run",
+                contract,
+                readset,
+                echo_body=override,
+                directive_manifest=[
+                    {
+                        "directive": "change the frame",
+                        "actions": ["contract-field: frame"],
+                    }
+                ],
+            )
+
+        _expect(
+            "applied action bound to no directive text refuses import",
+            "block",
+            orphan_applied_action_refused,
+            results,
+        )
+
+        def manifest_claiming_unapplied_action_refused():
+            capsule = _fixture_capsule(contract)
+            override = echo_override(capsule)
+            override["fields"]["frame"] = {
+                "value": "a changed frame",
+                "provenance": "user-supplied",
+            }
+            override["directives"] = list(override["directives"]) + ["change the frame"]
+            import_capsule_into_store(
+                capsule,
+                sandbox / "unapplied-action-claim",
+                "unapplied-action-claim-run",
+                contract,
+                readset,
+                echo_body=override,
+                directive_manifest=[
+                    {
+                        "directive": "change the frame",
+                        "actions": [
+                            "contract-field: frame",
+                            "revive: Option C — shared git repo",
+                        ],
+                    }
+                ],
+            )
+
+        _expect(
+            "manifest claiming an unapplied action refuses import",
+            "block",
+            manifest_claiming_unapplied_action_refused,
+            results,
+        )
+
+        def total_manifest_binds_text_to_actions():
+            capsule = _fixture_capsule(contract)
+            override = echo_override(capsule)
+            override["fields"]["frame"] = {
+                "value": "a changed frame",
+                "provenance": "user-supplied",
+            }
+            directive_text = "change the frame and revive the git option"
+            override["directives"] = list(override["directives"]) + [directive_text]
+            manifest = [
+                {
+                    "directive": directive_text,
+                    "actions": [
+                        "contract-field: frame",
+                        "revive: Option C — shared git repo",
+                    ],
+                }
+            ]
+            imported = import_capsule_into_store(
+                capsule,
+                sandbox / "total-manifest",
+                "total-manifest-run",
+                contract,
+                readset,
+                revive=["Option C — shared git repo"],
+                echo_body=override,
+                directive_manifest=manifest,
+            )
+            echo = imported.require("echo")["body"]
+            if echo["directives"][-1] != directive_text:
+                raise fail("fixture", "raw directive text missing from history")
+            if any(entry.startswith("revive: ") for entry in echo["directives"]):
+                raise fail(
+                    "fixture",
+                    "synthesized entry duplicated a manifest-bound directive",
+                )
+            plan = imported.require("restart-plan")["body"]
+            if plan["directives"] != manifest:
+                raise fail("fixture", "restart plan lost the directive manifest")
+
+        _expect(
+            "total directive manifest binds text to actions and persists",
+            "pass",
+            total_manifest_binds_text_to_actions,
+            results,
+        )
+
+        def completed_relabel_as_free_prose_refused():
+            capsule = _fixture_capsule(contract)
+            capsule["terminal"] = "one right answer at Generate"
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "free-prose echo-only terminal relabel refuses capsule validation",
+            "block",
+            completed_relabel_as_free_prose_refused,
+            results,
+        )
+
+        def prose_outcome_shaping_relabel_refused():
+            capsule = _fixture_capsule(contract)
+            capsule["terminal"] = "muddy goal — exit naming outcome-shaping"
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "prose muddy-goal terminal relabel refuses capsule validation",
+            "block",
+            prose_outcome_shaping_relabel_refused,
+            results,
+        )
+
+        def constituent_exit_at_generate_refused():
+            capsule = _fixture_capsule(contract)
+            capsule["terminal"] = "constituent exit at generate: one right answer"
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "constituent exit at Generate refuses capsule-bearing state",
+            "block",
+            constituent_exit_at_generate_refused,
+            results,
+        )
+
+        def constituent_exit_past_frontier_refused():
+            capsule = _fixture_capsule(contract)
+            capsule["terminal"] = "constituent exit at shape: comparison collapsed"
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "constituent exit cannot carry artifacts past its stage frontier",
+            "block",
+            constituent_exit_past_frontier_refused,
+            results,
+        )
+
+        def constituent_exit_within_frontier_passes():
+            capsule = _fixture_capsule(contract)
+            terminal = "constituent exit at shape: comparison collapsed"
+            capsule["terminal"] = terminal
+            for key in (
+                "surface",
+                "consequences",
+                "close",
+                "registered-leans",
+                "recommend-authority-packet",
+            ):
+                capsule[key] = "not produced: constituent exit at Shape"
+            capsule["terminal-claim"] = {
+                "terminal": terminal,
+                "claim": "Shape exited before a comparison surface existed",
+                "survivor": "not applicable",
+            }
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "constituent exit within its stage frontier validates",
+            "pass",
+            constituent_exit_within_frontier_passes,
+            results,
+        )
+
+        def zero_survivor_relabel_with_shape_artifacts_refused():
+            capsule = _fixture_capsule(contract)
+            capsule["terminal"] = "no candidate survives the confirmed cuts"
+            capsule["survivors"] = []
+            capsule["records"] = [
+                {
+                    "option": option["wording"],
+                    "status": "active",
+                    "delegation": "field narrowing under the echoed budget",
+                    "predicate-source": "agent-derived proposition",
+                    "cut-basis": "dominance",
+                    "epistemic-status": "fact-established at comparable resolution",
+                    "reason": "fixture reason",
+                    "load-bearing-premise": "fixture premise",
+                    "strongest-case": "fixture strongest case, written before the kill",
+                    "revive-if": "fixture revival condition",
+                }
+                for option in capsule["original-field"]
+            ]
+            capsule["recommend-authority-packet"] = "not produced: zero survivors"
+            capsule["close"] = "not produced: zero survivors"
+            capsule["registered-leans"] = "not produced: zero survivors"
+            capsule["terminal-claim"] = {
+                "terminal": "no candidate survives the confirmed cuts",
+                "claim": "every candidate fell to a confirmed cut",
+                "survivor": "not applicable",
+            }
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "zero-survivor terminal cannot retain Shape artifacts",
+            "block",
+            zero_survivor_relabel_with_shape_artifacts_refused,
+            results,
+        )
+
+        def recommend_exit_requires_exit_close():
+            capsule = _fixture_capsule(contract)
+            capsule["terminal"] = "options not comparable"
+            capsule["close"] = "not produced: constituent exit"
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "Recommend constituent exit requires its exit statement as close",
+            "block",
+            recommend_exit_requires_exit_close,
+            results,
+        )
+
+        def record_terminal_refuses_unknown_terminal():
+            validate_runstate_item(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "terminal-state",
+                    "run": "fixture-run",
+                    "seq": 9,
+                    "body": {
+                        "terminal": "one right answer at Generate",
+                        "carrier": "capsule",
+                    },
+                },
+                contract,
+            )
+
+        _expect(
+            "record-terminal refuses a terminal outside the canonical classes",
+            "block",
+            record_terminal_refuses_unknown_terminal,
             results,
         )
 
@@ -7829,6 +8661,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--closed-field",
         help="YAML list of exact wordings; required only with --field-base new",
+    )
+    p.add_argument(
+        "--directive-manifest",
+        help="YAML list of {directive, actions} binding each new raw directive text "
+        "to its applied actions; required whenever --echo-body carries new directive "
+        "texts, and total both ways — orphan text and orphan actions refuse",
     )
     p.set_defaults(func=cmd_import_capsule)
 

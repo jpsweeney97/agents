@@ -64,7 +64,7 @@ Five moves, all five packet-isolated in fresh, non-forked stage agents — Conte
 - In a Git worktree, compare net Git-visible state before and after every stage. Unauthorized mutation is `containment violation`: stop with a dirty-state receipt, never restore or adopt silently. This proves only net Git-visible change.
 - Preserve the session model where supported, record the effective model or `unknown`, and report transitions and counts without hidden judgments.
 
-**Global exit rule:** any constituent honest exit not explicitly transformed by this contract terminates the run as that exit; the orchestrator names the next lane, never asks a mid-run permission question, never silently enters that lane. Muddy goal at Generate → `outcome-shaping`, echo only.
+**Global exit rule:** any constituent honest exit not explicitly transformed by this contract terminates the run as that exit; the orchestrator names the next lane, never asks a mid-run permission question, never silently enters that lane, and records the terminal canonically as `constituent exit at <stage>: <the named exit>` — capsule-bearing only at Shape and Recommend; an exit at Generate is echo-only. Muddy goal at Generate → `outcome-shaping`, echo only.
 
 **Operational failure rule:** a typed failure capsule preserves only validated artifacts and restarts at the earliest invalid one. Helper or store-read failure gets a non-resumable receipt. If Contest fails, the underlying semantic terminal and pre-Contest claim stand while `exclusion-check` becomes `exclusion check unavailable`; no exclusion-stability claim is made. Store terminals are `store unavailable`, `store failed: write`, and `store failed: read` as defined in the capsule reference.
 
@@ -78,7 +78,7 @@ After reloading the capsule reference, follow its total branch table and close o
 
 ## Re-runs
 
-Restart at the earliest invalid input or artifact under `references/capsule.md`. `import-capsule` validates typed restart state and writes a reserved restart plan; only imported stage artifacts before its earliest-stage frontier remain available, stage artifacts at or after it stay unavailable until a new accepted envelope supplies them, and no envelope is synthesized. Re-resolve identities live, supply the current pins to import, and pass any additional classified source-drift frontier explicitly. Revival marks provenance and rejoins at its original position in a reused field; no-argument `--accept-seed` accepts only canonical stored wording. A field-mode change supplies its explicit base when landing closed. Preserve field-order origin and transition insertion provenance. Prior judgments enter only named packets.
+Restart at the earliest invalid input or artifact under `references/capsule.md`. `import-capsule` validates typed restart state and writes a reserved restart plan; only imported stage artifacts before its earliest-stage frontier remain available, stage artifacts at or after it stay unavailable until a new accepted envelope supplies them, and no envelope is synthesized. Re-resolve identities live, supply the current pins to import, and pass any additional classified source-drift frontier explicitly. New directive texts enter with a typed manifest binding each text to its applied actions — orphan text and orphan actions refuse before the store is staged. Revival marks provenance and rejoins at its original position in a reused field; no-argument `--accept-seed` accepts only canonical stored wording. A field-mode change supplies its explicit base when landing closed. Preserve field-order origin and transition insertion provenance. Prior judgments enter only named packets.
 
 ## Helper
 
@@ -94,7 +94,7 @@ uv run --script $V record-proof-inputs --data $D --store <store> <proof-inputs.y
 uv run --script $V record-terminal --data $D --store <store> --terminal <terminal> --carrier <capsule|failure-capsule>
 uv run --script $V validate-capsule --data $D --store <store> --accept <capsule.yaml>
 uv run --script $V validate-capsule --data $D --store <store> <failure-capsule.yaml>  # store failed: write; no new write
-uv run --script $V import-capsule --data $D --store <root>/deliberate-run-live --run <id> --capsule <capsule.yaml> --pins-body <current-pins.yaml> [--file-capsule] [--echo-body <echo.yaml>] [--invalidate-from <stage>] [--revive <wording>] [--constraint-withdrawn <wording>] [--accept-seed] [--field-base <prior-seeds|prior-full-field|new> [--closed-field <wordings.yaml>]]
+uv run --script $V import-capsule --data $D --store <root>/deliberate-run-live --run <id> --capsule <capsule.yaml> --pins-body <current-pins.yaml> [--file-capsule] [--echo-body <echo.yaml>] [--directive-manifest <manifest.yaml>] [--invalidate-from <stage>] [--revive <wording>] [--constraint-withdrawn <wording>] [--accept-seed] [--field-base <prior-seeds|prior-full-field|new> [--closed-field <wordings.yaml>]]
 ```
 
 Use command `--help` and the mandatory references for complete syntax, including generic setup writes and storeless ingest validation. The store root is the fixed `deliberate-run-live/` directly under the runtime's ambient session-scoped temporary root. No detectable root → `store unavailable`. Exit codes: 0 pass, 1 validation failure, 2 refusal, 4 store read loss.
