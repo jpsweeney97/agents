@@ -1,6 +1,6 @@
 # Design Spec: `deliberate` — one-invocation autonomous deliberation pipeline
 
-**Status:** v5 approval candidate — four review rounds folded; hand-authoring starts on JP's explicit approval · **Date:** 2026-07-13 · **Source:** this session's `outcome-shaping` → `making-recommendations` → `design-exploration` chain, with three external design reviews adjudicated via `review-reviewer` (all judged `reliable`; every confirmed correction incorporated) and a fourth in-repo `scrutinize-skill` review folded as v5. Build-and-prune class (a user-invoked, read-only skill): **not a charter event**, no ledger entry owed.
+**Status:** v6 approval candidate — five review rounds folded; hand-authoring starts on JP's explicit approval · **Date:** 2026-07-13 · **Source:** this session's `outcome-shaping` → `making-recommendations` → `design-exploration` chain, with three external design reviews adjudicated via `review-reviewer` (all judged `reliable`; every confirmed correction incorporated), a fourth in-repo `scrutinize-skill` review folded as v5, and a fifth in-repo `scrutinize-skill` review adjudicated `reliable` via `review-reviewer` and folded as v6 — both confirmed P1 packet-contract defects plus the adjudication's two adjacent packet gaps. Build-and-prune class (a user-invoked, read-only skill): **not a charter event**, no ledger entry owed.
 
 ## What this builds
 
@@ -8,7 +8,7 @@
 
 The governing principle, in JP's words: **the workflow must complete every judgment it can honestly own, not manufacture a winner.** All four `making-recommendations` close shapes (`clear call`, `conditional call`, `check first`, `your call`) are successful completions — forcing a pick would delegate JP's values, not the process.
 
-The pipeline: **Generate → Prune → Shape → Recommend → Contest**, orchestrated by a main context that does trust work only. Generate, Shape, and Recommend read and execute the live constituent contracts (`ideate`, `option-shaping`, `making-recommendations`); Prune and Contest are the only methods this skill owns.
+The pipeline: **Generate → Prune → Shape → Recommend → Contest**, orchestrated by a main context that does trust work only. Generate, Shape, and Recommend read and execute the live constituent contracts (`ideate`, `option-shaping`, `making-recommendations`); Prune and Contest are the only methods this skill owns, and the only deliberate-owned deviations from constituent behavior are the named composition seams (see Composition seams).
 
 ## The settled want (from the shaping arc)
 
@@ -25,6 +25,7 @@ The pipeline: **Generate → Prune → Shape → Recommend → Contest**, orches
 - **v3** (review 2 folded): bounded authority grant with independent exclusion axes; `closed-to-widening` mode naming; honest survivor terminals; neutral authority capsule for Recommend; expanded `option-shaping` edit; detection-only Contest; conservative re-run invalidation; totalized branch table; single-sourced proof boundary; labeled exclusion records.
 - **v4** (review 3 folded): value-trade guard with overflow-before-terminal; both stage packets completed by merge; three-case Shape constraint-consequence split; field storage separated from generation provenance; dominance gated to fact-established; full capsule inventory; provisional-seed and re-run totalization; Contest pinned isolated; operational-failure terminals; `option-shaping:51` ordering seam; honest budget-cut wording.
 - **v5** (review 4 — in-repo `scrutinize-skill` — folded): seeds collapse-exempt through Generate with seed-preserving equivalence cuts; Recommend constituent-exit branch row plus a constituent-exit catch-all; fixed per-stage input-packet checklists keying the isolation claim; Contest's highlight made conditional-mandatory; two forward tests added.
+- **v6** (review 5 — in-repo `scrutinize-skill`, adjudicated `reliable` via `review-reviewer` — folded): setup decomposition of the invocation replaces "original decision wording" in Recommend's packet (candidate-free frame; per-candidate authority notes with provenance; raw wording capsule-only); per-stage checklists made exhaustive two-sided lists, with the budget-overflow disclosure routed to Recommend as a named withhold exception; Contest totalized — eligibility keyed to validated exclusion records, ledger-only packet shape on surface-less terminals, excluded-visible-favorite always a live challenge; named composition-seam section with a precedence rule; constituent source set pinned at setup with a `constituent drift` terminal and capsule version evidence; favorite-excluded and zero/one-survivor forward tests upgraded to packet-level assertions; the empirical pruning check gated behind a pre-registered protocol.
 
 ## Identity and invocation
 
@@ -61,27 +62,40 @@ The invocation carries:
 
 The contract echo labels every material field `user-supplied`, `inferred`, `default`, or `absent`. Visible setup, correctable by live interruption where the session supports it, otherwise by re-run — no universal interrupt promise.
 
+**Setup decomposition** (pre-run, before any stage launches): the orchestrator decomposes the invocation into a **candidate-free decision frame** — the decision restated so it names no candidate — the **candidate set** per field mode, and **per-candidate authority notes**: visible lean, stated preference, valuing language, each labeled `user-supplied` or `inferred`. The raw invocation wording survives only in the capsule; no stage packet carries it. This decomposition is what keeps stage isolation satisfiable when the invocation itself names candidates: candidate identity and candidate-attached authority travel per candidate, so any packet can carry exactly its stage's share.
+
 ## Run shape
 
-Five moves, **all five packet-isolated** in fresh, non-forked stage agents — Contest included, pinned rather than optional, so the proof boundary has one story. Stages receive ambient instructions and can read the filesystem; they do not receive earlier stage reasoning unless the seam packet carries it — "blind" is not claimed. Fresh agents unavailable → capability-unavailable honest exit unless the invocation permits inline degradation (a named, deliberate divergence from `plan-panel-loop`'s degrade-and-label idiom, because here isolation is load-bearing bias mitigation). The isolation rule throughout: **hide previous-stage judgments, never decision-controlling user authority.**
+Five moves, **all five packet-isolated** in fresh, non-forked stage agents — Contest included, pinned isolated whenever it runs and mandatory on every Contest-eligible branch (the eligibility rule, under Close), so the proof boundary has one story. Stages receive ambient instructions and can read the filesystem; they do not receive earlier stage reasoning unless the seam packet carries it — "blind" is not claimed. Fresh agents unavailable → capability-unavailable honest exit unless the invocation permits inline degradation (a named, deliberate divergence from `plan-panel-loop`'s degrade-and-label idiom, because here isolation is load-bearing bias mitigation). The isolation rule throughout: **hide previous-stage judgments, never decision-controlling user authority.**
 
-**Single-sourcing:** Generate reads and executes the current `ideate` contract; Shape reads and executes the current `option-shaping` contract plus its authorized-composition seam; Recommend reads and executes the current `making-recommendations` contract. Prune and Contest are the only methods `deliberate` owns. Methods are read live from the constituent files, never copied into this skill.
+**Single-sourcing:** Generate reads and executes the current `ideate` contract; Shape reads and executes the current `option-shaping` contract plus its authorized-composition seam; Recommend reads and executes the current `making-recommendations` contract. Prune and Contest are the only methods `deliberate` owns. Methods are read live from the constituent files, never copied into this skill. Where this contract deliberately deviates from a constituent, the deviation is a named composition seam (see Composition seams); everywhere no seam is named, the stage obeys the live constituent.
 
 **Global exit rule:** any constituent honest exit not explicitly transformed by this contract terminates the run as that exit. The orchestrator names the next lane; it never asks a mid-run permission question and never silently enters that lane.
 
-**Stage rules, in every brief:** never ask the user a question — return assumptions, gaps, or an honest exit inside the bounded packet; behavioral containment (read-only, no nested agents or workflows, one bounded packet) is always included and is distinguished from **runtime-enforced containment**, which is claimed only when tool restrictions, sandboxing, or depth limits actually enforce it. In a git worktree, the orchestrator snapshots worktree state before and after each stage (the `plan-panel-loop` precedent); unauthorized mutation is reported and stops the run — while the proof boundary stays narrower, since snapshots do not prove absence of external side effects. Stage agents request or preserve the session model where the runtime supports that guarantee; the proof boundary reports the effective model when observable and marks it unknown or overridden otherwise. Each stage's input packet is composed from a fixed per-stage checklist authored in the skill — an explicit include list and withhold list, never recomposed from memory at run time — because output-packet validation cannot catch an isolation leak the orchestrator itself introduced on the way in.
+**Stage rules, in every brief:** never ask the user a question — return assumptions, gaps, or an honest exit inside the bounded packet; behavioral containment (read-only, no nested agents or workflows, one bounded packet) is always included and is distinguished from **runtime-enforced containment**, which is claimed only when tool restrictions, sandboxing, or depth limits actually enforce it. In a git worktree, the orchestrator snapshots worktree state before and after each stage (the `plan-panel-loop` precedent); unauthorized mutation is reported and stops the run — while the proof boundary stays narrower, since snapshots do not prove absence of external side effects. Stage agents request or preserve the session model where the runtime supports that guarantee; the proof boundary reports the effective model when observable and marks it unknown or overridden otherwise. Each stage's input packet is composed from a fixed per-stage checklist authored in the skill — an explicit include list and withhold list, never recomposed from memory at run time — because output-packet validation cannot catch an isolation leak the orchestrator itself introduced on the way in. The checklists are exhaustive two-sided lists: an item on neither list is withheld by default, and admitting it is a skill edit, never run-time judgment. At setup the orchestrator resolves the three constituent source paths once and records a compact content identifier for each; every stage brief carries its constituent's resolved path and identifier, the stage verifies the match before executing, and a mismatch terminates the run as `constituent drift` — the checked-out tree is the live skill source, so a mid-run branch switch or rebase is a real hazard, not a hypothetical.
 
 **Progress visibility:** inherit host behavior; report stage transitions and counts without revealing hidden judgments — "Generated 9 options; pruning now," "Shaping 4 survivors."
 
-**Operational failure rule** (small and global): the orchestrator validates each stage packet before accepting it; a failed, timed-out, or malformed stage → `stage failed: <stage>`; unauthorized mutation → `containment violation`; only validated partial artifacts are preserved, and any later resume restarts at the earliest stage whose artifact is absent or invalid. If Contest alone fails after a valid close, the run reports `exclusion check unavailable` and never claims anything about exclusion stability.
+**Operational failure rule** (small and global): the orchestrator validates each stage packet before accepting it; a failed, timed-out, or malformed stage → `stage failed: <stage>`; unauthorized mutation → `containment violation`; only validated partial artifacts are preserved, and any later resume restarts at the earliest stage whose artifact is absent or invalid. If Contest alone fails on a Contest-eligible branch, the run reports `exclusion check unavailable` and never claims anything about exclusion stability.
 
 The moves:
 
 1. **Generate** — receives the frame, constraints (kept visible: ideate uses them as relaxation and inversion targets), seeds if any, and the generation-controlling supplied context: relevant evidence inputs and stated values — never candidate-specific prior judgments. Returns the un-ranked field plus the untouched-fixed-points line. **User-supplied seeds are collapse-exempt:** `ideate`'s de-cluster never merges, drops, or renames a seed in private scratch — a seed sharing a mechanism with another option survives to the field, and the shared mechanism passes to Prune as a recordable equivalence or collision judgment. A seed dies only on Prune's ledger; anything else is the silent option-collision resolution the authority grant forbids.
 2. **Prune** — receives field, full effective contract, and the prune method below. Returns survivors plus labeled exclusion records, plus any disclosed budget overflow.
 3. **Shape** — receives the frozen survivors, frame, constraints, stated values, evidence inputs, evidence authorization. Hidden: the wider field, the kills, Prune's reasoning. Constraint-consequence ownership, split explicitly: a consequence of an **echoed, price-confirmed constraint** → record it, preserve the candidate, Recommend owns the filter; an **unconfirmed or newly inferred constraint** → no cut ever, and an authority-gap exit only if honest comparison cannot proceed; a **collision requiring merge, drop, or changed identity** → `field collision unresolved`, while recordable collisions are recorded and development continues.
-4. **Recommend** — receives the comparison surface plus the complete authority packet: the **effective decision frame**; the **echoed price-confirmed constraints**; **stated values**; **labeled soft preferences** (context, never gates); the original decision wording; the survivors' original wording and relative ordering **with an order-provenance field** — `user-supplied order — may evidence lean` or `Generate-produced order — non-evaluative; never evidence of user lean`; any explicit or visible user preference among the survivors; reversibility, stakes, and blast-radius context; evidence inputs, evidence gaps, and evidence authorization. Still withheld: excluded identities and every Generate/Prune judgment — if the user's visible favorite was excluded, Contest owns that challenge. Owns filters on recorded constraint consequences and collapsed survivors, and all honest exits; a discovered unshaped alternative that could win → field-not-ready exit, recorded as a provisional rerun seed.
-5. **Contest** — packet-isolated; receives the effective contract, comparison surface, close, and full ledger. Detection only: identifies every recorded exclusion premise or revival condition the final logic makes live, names the one most worth contesting whenever any live challenge exists, never compares unshaped exclusions to shaped survivors, never substitutes a recommendation.
+4. **Recommend** — receives the comparison surface plus the complete authority packet: the **candidate-free decision frame** from setup decomposition; the **echoed price-confirmed constraints**; **stated values**; **labeled soft preferences** (context, never gates); each survivor's original wording and the survivors' relative ordering **with an order-provenance field** — `user-supplied order — may evidence lean` or `Generate-produced order — non-evaluative; never evidence of user lean`; the survivors' **per-candidate authority notes** with provenance — this is where `making-recommendations`' register-the-lean move gets its user lean; **any disclosed budget overflow**, carried as the named exception to the Prune-judgment withhold so the unpriced trade is posed priced — the blocked trade's existence and identity cross, Prune's per-cut reasoning does not; reversibility, stakes, and blast-radius context; evidence inputs, evidence gaps, and evidence authorization. Withheld, exhaustively: the raw invocation wording, excluded identities, excluded candidates' authority notes (they route to Contest), and every other Generate/Prune judgment — if the user's visible favorite was excluded, Contest owns that challenge. Owns filters on recorded constraint consequences and collapsed survivors, and all honest exits; a discovered unshaped alternative that could win → field-not-ready exit, recorded as a provisional rerun seed.
+5. **Contest** — packet-isolated; runs on every Contest-eligible branch (the eligibility rule, under Close). Receives the effective contract, the full ledger, the **excluded candidates' authority notes** from setup decomposition, and — when they exist — the comparison surface and close (`not produced` otherwise: on a surface-less terminal, Contest tests the exclusions against the terminal claim itself — on zero survivors, whether any recorded premise being wrong would revive a candidate; on one survivor, whether one would restore a rival). Detection only: identifies every recorded exclusion premise or revival condition the final logic — or terminal claim — makes live, names the one most worth contesting whenever any live challenge exists, never compares unshaped exclusions to shaped survivors, never substitutes a recommendation. **An excluded candidate carrying a visible user preference is always a live challenge**, whether or not its kill premise is load-bearing in the final logic.
+
+## Composition seams
+
+The named deliberate-owned overrides to constituent behavior — the only ones. Precedence: inside a run these seams outrank the constituent text; everywhere no seam is named the stage obeys the live constituent, and a conflict no seam covers resolves as a constituent honest exit under the global exit rule, never by stage improvisation.
+
+- **All stages:** constituent ask-the-user moves and permissioned handoffs are transformed — questions return inside the bounded packet as assumptions, gaps, or honest exits, and handoffs terminate the run naming the lane. The stage rules and global exit rule above carry this; it is a seam, not an accident.
+- **`ideate` (Generate):** user-supplied seeds are collapse-exempt in de-cluster — a seed dies only on Prune's ledger; and ideate's "ask them to fix the candidate set before handoff" is replaced by the delegated Prune stage, because candidate-set fixing is exactly what the invocation authorized.
+- **`option-shaping` (Shape):** the provenance seam ships as a source edit (see The constituent edit) because it changes what the skill accepts standalone; the constraint-consequence split and collision terminals in the Shape move are run-context packet rules layered on top.
+- **`making-recommendations` (Recommend):** register-the-lean reads the extracted per-survivor authority notes, never raw invocation wording; unstable-fact verification and cheap-check recommendations are bounded by the echoed evidence authorization — an unauthorized check returns as `check first`, never performed; field-readiness failure exits as field-not-ready with a provisional rerun seed.
+
+Only `option-shaping` warrants a source edit: its user-provenance assumptions govern standalone behavior, while the `ideate` and `making-recommendations` overrides are pure run-context transformations that leave the standalone contracts untouched.
 
 ## Prune method
 
@@ -123,21 +137,22 @@ Totalized, with every branch emitting only artifacts that exist (`not produced` 
 | --- | --- | --- |
 | Muddy goal at Generate | exit naming `outcome-shaping` | echo only |
 | One right answer at Generate | that honest terminal | echo, partial field if any |
-| Zero survivors | `no candidate survives the confirmed cuts` | echo, field, exclusion records, capsule |
-| One survivor | `one candidate survives the authorized cuts; no comparative recommendation was performed` — survivor, rivals' exclusion basis, smallest next lane | echo, field, records, capsule |
-| Budget unmeetable without a value trade (past overflow bound) | `survivor budget cannot be met without an unstated value trade` | echo, field, records incl. blocked cuts, capsule |
+| Zero survivors | `no candidate survives the confirmed cuts` | echo, field, exclusion records, exclusion check, capsule |
+| One survivor | `one candidate survives the authorized cuts; no comparative recommendation was performed` — survivor, rivals' exclusion basis, smallest next lane | echo, field, records, exclusion check, capsule |
+| Budget unmeetable without a value trade (past overflow bound) | `survivor budget cannot be met without an unstated value trade` | echo, field, records incl. blocked cuts, exclusion check, capsule |
 | Two or more survivors | full path | all |
-| Field collision unresolved in Shape | that terminal | echo, field, records, partial surface, capsule |
+| Field collision unresolved in Shape | that terminal | echo, field, records, partial surface, exclusion check, capsule |
 | Authority gap in Shape | that exit | same as above |
-| Field-not-ready from Recommend | that exit, seed recorded | all but close/Contest |
-| Recommend constituent exit (`options not comparable` / `no basis yet`) | that exit; its basis-restoring question is carried in the close as the suggested re-run directive, never asked mid-run | echo, field, records, comparison surface, capsule |
+| Field-not-ready from Recommend | that exit, seed recorded | all but close |
+| Recommend constituent exit (`options not comparable` / `no basis yet`) | that exit; its basis-restoring question is carried in the close as the suggested re-run directive, never asked mid-run | echo, field, records, comparison surface, exclusion check, capsule |
 | Capability unavailable | that exit, pre-spend | echo only |
 | Stage failure / malformed packet | `stage failed: <stage>` | echo plus validated partials only |
 | Unauthorized mutation | `containment violation` | echo plus validated partials only |
-| Contest fails after valid close | `exclusion check unavailable` — no stability claim | all but exclusion check |
+| Constituent drift mid-run | `constituent drift` | echo plus validated partials only |
+| Contest fails on an eligible branch | `exclusion check unavailable` — no stability claim | all but exclusion check |
 | Revived option violating an active constraint | `authority conflict` | capsule, records |
 
-Any constituent honest exit without its own row terminates under the global exit rule and emits the echo, every artifact validated before the exiting stage, and — whenever a field exists — the capsule.
+Any constituent honest exit without its own row terminates under the global exit rule and emits the echo, every artifact validated before the exiting stage, and — whenever a field exists — the capsule, with the exclusion check whenever exclusion records exist.
 
 A user-revived option joins on user authority, may exceed the budget, and evicts nothing.
 
@@ -145,18 +160,18 @@ A user-revived option joins on user authority, may exceed the budget, and evicts
 
 Close order:
 
-1. **Exclusion check** — `Exclusion check: no live recorded challenge found` or `Exclusion check: live recorded challenges — X, Y`, naming the kill most worth contesting whenever any live challenge exists (omitted otherwise). Detection language only; works under every close shape.
+1. **Exclusion check** — exactly one of: `Exclusion check: no live recorded challenge found`; `Exclusion check: live recorded challenges — X, Y`, naming the kill most worth contesting; `Exclusion check: not applicable — no exclusions recorded` (branches where Prune never cut); or `exclusion check unavailable` (Contest failed). **Eligibility:** Contest runs on every branch whose terminal or close carries at least one validated exclusion record, except the failure terminals (`stage failed`, `containment violation`, `constituent drift`), which stop the run immediately. Detection language only; works under every close shape and every eligible terminal.
 2. The recommendation or honest exit — any of the four `making-recommendations` close shapes is a successful completion.
 3. **The recovery capsule**, one self-contained paste-able block (chat-first; written to a file only on request).
 
-The capsule stores the **complete effective contract**: frame; field mode; priced constraints; stated values; soft preferences; evidence inputs and authorization; survivor budget; inline-degradation permission; the full Recommend authority packet (original wording, ordering with provenance, visible preference, stakes/reversibility). Then the field, stored separately from its provenance:
+The capsule stores the **complete effective contract**: frame; field mode; priced constraints; stated values; soft preferences; evidence inputs and authorization; survivor budget; inline-degradation permission; the raw invocation wording (capsule-only — no stage packet carries it); the setup decomposition (candidate-free frame, per-candidate authority notes with provenance); the full Recommend authority packet (survivor wordings, ordering with provenance, per-survivor authority notes, any overflow disclosure, stakes/reversibility). Then the field, stored separately from its provenance:
 
 ```text
 Original field:       <complete generated or user-supplied field — always present>
 Generation boundary:  <untouched-fixed-points line | Generate not run: closed-to-widening>
 ```
 
-Then prior survivors, any disclosed budget overflow, every exclusion record, any provisional rerun seed (marked unaccepted), revival instructions, and, as its final field, **the single proof boundary** — packet isolation achieved or not (claimed only when every stage ran fresh on a checklist-composed input packet), effective models when observable, evidence scope actually used, containment class (behavioral vs runtime-enforced), and what none of it proves. Nothing outside the capsule re-renders the proof boundary; a close that displays it displays the capsule's field verbatim. `not generated` never means `field unavailable`.
+Then prior survivors, any disclosed budget overflow, every exclusion record, any provisional rerun seed (marked unaccepted), revival instructions, and, as its final field, **the single proof boundary** — packet isolation achieved or not (claimed only when every stage ran fresh on a checklist-composed input packet), the pinned constituent source set (resolved paths and content identifiers), effective models when observable, evidence scope actually used, containment class (behavioral vs runtime-enforced), and what none of it proves. Nothing outside the capsule re-renders the proof boundary; a close that displays it displays the capsule's field verbatim. `not generated` never means `field unavailable`.
 
 ## Re-runs
 
@@ -167,6 +182,7 @@ One principle: **restart at the earliest stage whose input or required artifact 
 - A change that could alter what counts as a candidate or a mechanism-distinct field — the frame, the field mode, or a constraint change of that character → regenerate in `seed-and-widen`.
 - A revived option is pinned against delegated budget, equivalence, and dominance cuts after any re-prune, provided it satisfies every still-active confirmed constraint; if it violates one, the run returns `authority conflict` rather than silently reviving or re-killing it. Reviving a constraint-failing option therefore requires withdrawing or repricing that constraint — a contract change, which re-prunes.
 - A provisional seed stays provisional until the user explicitly accepts it or changes field mode — relaunching with an unrelated directive is not acceptance, and a seed never auto-widens a `closed-to-widening` field. An accepted seed must carry Generate's minimum option shape (handle, core idea, distinct bet) to join re-prune directly; otherwise it passes through Generate, collapse-exempt like any seed.
+- A re-run re-resolves and re-pins the live constituents; the capsule's recorded identifiers are evidence of what governed the prior run, never a freeze against constituent evolution — a method change between runs is visible, not blocking. The pasted capsule is orchestrator input: its prior judgments (records, close, proof boundary) enter a stage packet only where that stage's checklist names them.
 
 ## The constituent edit (`option-shaping`)
 
@@ -190,12 +206,12 @@ Verify-first at authoring: whether Codex spawns ad hoc stage agents from a skill
 **Forward tests:**
 
 - A rich field where an unconventional option deserves to survive.
-- Zero- and one-survivor fields exercising the honest terminals.
+- Zero- and one-survivor fields exercising the honest terminals — asserted at dispatch and packet level: Shape and Recommend never launch, Contest launches with the ledger-only packet shape (`not produced` for surface and close), and the terminal carries the exclusion check.
 - A muddy-goal Generate exit.
 - A `closed-to-widening` run (no manufactured field-boundary artifacts; capsule retains every candidate).
 - Absent values → `conditional call` or `your call`.
-- A visibly-user-leaning invocation whose favorite gets excluded (Contest, not Recommend, must surface it).
-- A rich field where meeting the budget would require pricing an unstated value trade (overflow first, terminal past the bound).
+- A visibly-user-leaning invocation whose favorite gets excluded — asserted at packet level: Recommend's literal input carries no excluded identity, no raw invocation wording, and no excluded-candidate authority note; Contest's input carries the favorite's authority note; the close surfaces that exclusion as a live challenge.
+- A rich field where meeting the budget would require pricing an unstated value trade (overflow first, terminal past the bound); on the overflow path, Recommend's packet carries the overflow disclosure and the close poses the trade priced.
 - A field already within budget where only contestable dominance exists (no cut may fire).
 - Generated ordering must not be read as a user lean.
 - A closed-field capsule pasted into a fresh session must retain every candidate.
@@ -204,12 +220,13 @@ Verify-first at authoring: whether Codex spawns ad hoc stage agents from a skill
 - A thin invocation driving Recommend's `no basis yet` exit: the run terminates with that row's artifact set and carries the basis-restoring question in the close as the re-run directive.
 - A constraint change that must regenerate rather than re-prune.
 - A malformed stage packet, a stage timeout, and a containment violation.
+- A constituent file mutated between stages: the next stage's identifier check fails, the run exits `constituent drift`, and the capsule records the pinned source set.
 - Contest failure after a valid recommendation (no stability claim).
 - A revived-option re-run and a constraint-repricing re-run; the revived option must survive delegated cuts.
 - A packet-isolated run and the capability-unavailable exit.
 - The standalone `option-shaping` regression: ask-the-user moves *and* ordering behavior unchanged for user-provenance fields.
 
-Then a `scrutinize-skill` pass, then the decisive empirical check: shallow-prune results against a full-shaping control, hunting excluded eventual winners. Contract correctness makes v1 executable; only that control can tell whether the delegated pruning is worth trusting.
+Then a `scrutinize-skill` pass, then the decisive empirical check: shallow-prune results against a full-shaping control, hunting excluded eventual winners. The check runs only after its protocol is pre-registered through `methodology-check` or the repo's contract-evaluation methodology — same-field control, winner adjudication, leakage boundary, case set, pass/fail rule — and until then its result is a plan, not evidence. Contract correctness makes v1 executable; only that control can tell whether the delegated pruning is worth trusting.
 
 ## Handoff
 
