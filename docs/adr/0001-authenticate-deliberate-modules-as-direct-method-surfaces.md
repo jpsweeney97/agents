@@ -16,6 +16,17 @@ When the `deliberate` validator is decomposed, every behavior-bearing imported p
 - Each new module must be classified through the existing method-pin restart-frontier mechanism. The default remains Generate unless a narrower stage is justified and represented in the canonical frontier map.
 - Test-only harnesses and fixtures remain outside `method-surfaces`; they prove behavior but do not become authenticated production inputs.
 
+## Rollout Boundary
+
+CH-2 may proceed before the topology gates only while every extraction remains inside `scripts/deliberate-validate.py` and `method-surfaces` stays unchanged.
+
+Before the first physical module extraction, both of these gates must pass:
+
+- An exact-layout dual-path spike must exercise the intended module location and import syntax through the existing PEP 723 entrypoint from the canonical in-place skill path and the Claude symlink path. Both invocations must resolve the intended canonical module and return the same exit status and stdout/stderr for the selected smoke command; a generic throwaway layout is not sufficient evidence.
+- An external, non-executing check must derive the root-inclusive transitive first-party Python import closure from source and require exact equality with the Python subset of `method-surfaces`. The check must not import the entrypoint or any production module, because executing imports before the comparison would cross the authentication boundary it is meant to guard. This authoring gate detects accidental inventory omission; platform hashing remains the runtime authentication gate for inventoried files.
+
+Failure or absence of either gate blocks the v6 physical extraction, but does not block in-file CH-2 simplification.
+
 ## Revisit When
 
 Reconsider aggregate identity only if the direct inventory becomes operationally unmanageable, a transitive import can no longer be enumerated before execution, or a real legacy capsule population creates a migration requirement.
