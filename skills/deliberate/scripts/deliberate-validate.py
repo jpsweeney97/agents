@@ -4340,25 +4340,39 @@ def validate_capsule_document(
     if isinstance(claim, dict):
         for key in ("terminal", "claim", "survivor"):
             _require_str(op, f"terminal-claim {key}", claim[key])
+    leans = parsed["registered-leans"]
     seed = parsed["provisional-seed"]
-    if not _is_not_produced(seed):
+    recommend_packet = parsed["recommend-authority-packet"]
+    recommend_siblings = (parsed["close"], leans, recommend_packet)
+    if seed == "not applicable":
+        if not all(_is_produced(value) for value in recommend_siblings):
+            raise fail(
+                op,
+                "provisional-seed `not applicable` requires completed Recommend authority",
+            )
+    elif _is_not_produced(seed):
+        if any(_is_produced(value) for value in recommend_siblings):
+            raise fail(
+                op,
+                "completed Recommend authority without a seed requires exact `not applicable`",
+            )
+    else:
         _check_artifact_shape(
             {"key": "provisional-seed", "shape": "seed"}, seed, "capsule", contract
         )
-    leans = parsed["registered-leans"]
     if not _is_not_produced(leans):
         _check_artifact_shape(
             {"key": "registered-leans", "shape": "leans"}, leans, "capsule", contract
         )
     if any(
         _is_produced(value) for value in (parsed["close"], leans, seed)
-    ) and not _is_produced(parsed["recommend-authority-packet"]):
+    ) and not _is_produced(recommend_packet):
         raise fail(
             op,
             "a produced Recommend artifact requires recommend-authority-packet",
         )
     _check_recommend_authority_packet(
-        parsed["recommend-authority-packet"],
+        recommend_packet,
         survivors=survivors,
         overflow=overflow,
         decomposition=decomposition,
@@ -5951,7 +5965,7 @@ def _fixture_capsule(contract: Contract) -> dict:
         },
         "terminal-claim": "not produced: close rendered",
         "exclusion-check": "Exclusion check: no live recorded challenge found",
-        "provisional-seed": "not produced: none discovered",
+        "provisional-seed": "not applicable",
         "revival-instructions": "paste this capsule with a revival directive naming the option",
         "proof-boundary": {
             "packet-isolation": "fixture",
@@ -6111,6 +6125,7 @@ def _fixture_one_survivor_capsule(contract: Contract) -> dict:
     capsule["consequences"] = "not produced: one-survivor terminal"
     capsule["close"] = "not produced: one-survivor terminal"
     capsule["registered-leans"] = "not produced: one-survivor terminal"
+    capsule["provisional-seed"] = "not produced: one-survivor terminal"
     capsule["terminal-claim"] = {
         "terminal": terminal,
         "claim": "the sole survivor is Option A under the confirmed cuts",
@@ -7457,6 +7472,207 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             results,
         )
 
+        def completed_recommend_rejects_not_produced_seed():
+            capsule = _fixture_capsule(contract)
+            capsule["provisional-seed"] = "not produced: none discovered"
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "completed Recommend without a seed requires not-applicable capsule authority",
+            "block",
+            completed_recommend_rejects_not_produced_seed,
+            results,
+        )
+
+        def absent_recommend_rejects_not_applicable_seed():
+            capsule = _fixture_one_survivor_capsule(contract)
+            capsule["provisional-seed"] = "not applicable"
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "absent Recommend rejects not-applicable provisional-seed authority",
+            "block",
+            absent_recommend_rejects_not_applicable_seed,
+            results,
+        )
+
+        def store_backed_check_first_capsule_accepts_and_imports():
+            source = _fixture_capsule(contract)
+            close = (
+                "check first\n\n"
+                "The Call: run the bounded feasibility gate before choosing."
+            )
+            leans = {
+                "agent-first-lean": "Option A",
+                "user-visible-lean": "No reliable visible lean.",
+            }
+            source["close"] = close
+            source["registered-leans"] = copy.deepcopy(leans)
+            source["provisional-seed"] = "not applicable"
+            validate_capsule_document(source, contract)
+
+            run = "check-first-store-run"
+            store = import_capsule_into_store(
+                source,
+                sandbox / "check-first-store",
+                run,
+                contract,
+                readset,
+                invalidate_from=["recommend"],
+            )
+            invalidated = store.require("capsule-import")["body"]["capsule"]
+            if not _is_not_produced(invalidated["provisional-seed"]):
+                raise fail(
+                    "fixture",
+                    "Recommend invalidation did not replace the completed-empty seed carrier",
+                    invalidated["provisional-seed"],
+                )
+
+            _fixture_record_brief(store, "recommend", contract, readset)
+            recommend = {
+                "schema": ENVELOPE_SCHEMA,
+                "stage": "recommend",
+                "status": "completed",
+                "artifacts": {
+                    "close": close,
+                    "registered-leans": copy.deepcopy(leans),
+                    "disposition-records": "not applicable",
+                    "provisional-seed": "not applicable",
+                },
+                "retrievals": "none",
+                "encounters": "none",
+                "pins": "none",
+                "model": "unknown",
+            }
+            store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "envelope",
+                    "run": run,
+                    "seq": store.next_seq(),
+                    "stage": "recommend",
+                    "body": {"document": recommend, "amendments": []},
+                },
+                writer="validate-envelope",
+            )
+
+            _fixture_record_brief(store, "contest", contract, readset)
+            exclusion = "Exclusion check: no live recorded challenge found"
+            contest = {
+                "schema": ENVELOPE_SCHEMA,
+                "stage": "contest",
+                "status": "completed",
+                "artifacts": {"exclusion-check-line": exclusion},
+                "retrievals": "none",
+                "encounters": "none",
+                "pins": "none",
+                "model": "unknown",
+            }
+            store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "envelope",
+                    "run": run,
+                    "seq": store.next_seq(),
+                    "stage": "contest",
+                    "body": {"document": contest, "amendments": []},
+                },
+                writer="validate-envelope",
+            )
+
+            capsule = copy.deepcopy(invalidated)
+            capsule["run"] = run
+            capsule["recommend-authority-packet"] = copy.deepcopy(
+                source["recommend-authority-packet"]
+            )
+            capsule["close"] = close
+            capsule["registered-leans"] = copy.deepcopy(leans)
+            capsule["provisional-seed"] = "not applicable"
+            capsule["exclusion-check"] = exclusion
+            capsule["proof-boundary"]["store-path"] = str(store.root)
+            store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "proof-inputs",
+                    "run": run,
+                    "seq": store.next_seq(),
+                    "body": copy.deepcopy(capsule["proof-boundary"]),
+                },
+                writer="record-proof-inputs",
+            )
+            store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "terminal-state",
+                    "run": run,
+                    "seq": store.next_seq(),
+                    "body": {"terminal": "close rendered", "carrier": "capsule"},
+                },
+                writer="record-terminal",
+            )
+            store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "capsule-progress",
+                    "run": run,
+                    "seq": store.next_seq(),
+                    "body": {"capsule": capsule},
+                },
+                writer="validate-capsule",
+            )
+            accepted = store.require("capsule-progress")["body"]["capsule"]
+
+            contest_restart = import_capsule_into_store(
+                accepted,
+                sandbox / "check-first-contest-restart",
+                "check-first-contest-restart-run",
+                contract,
+                readset,
+                invalidate_from=["contest"],
+            )
+            contest_state = contest_restart.require("capsule-import")["body"]["capsule"]
+            if contest_state["provisional-seed"] != "not applicable":
+                raise fail(
+                    "fixture",
+                    "Contest-only restart did not preserve completed-empty seed authority",
+                    contest_state["provisional-seed"],
+                )
+            if (
+                contest_restart.require("restart-plan")["body"]["earliest-stage"]
+                != "contest"
+            ):
+                raise fail("fixture", "Contest-only restart moved the frontier")
+
+            recommend_restart = import_capsule_into_store(
+                accepted,
+                sandbox / "check-first-recommend-restart",
+                "check-first-recommend-restart-run",
+                contract,
+                readset,
+                invalidate_from=["recommend"],
+            )
+            recommend_state = recommend_restart.require("capsule-import")["body"][
+                "capsule"
+            ]
+            if not _is_not_produced(recommend_state["provisional-seed"]):
+                raise fail(
+                    "fixture",
+                    "Recommend restart retained completed-empty seed authority",
+                    recommend_state["provisional-seed"],
+                )
+            if (
+                recommend_restart.require("restart-plan")["body"]["earliest-stage"]
+                != "recommend"
+            ):
+                raise fail("fixture", "Recommend restart moved the frontier")
+
+        _expect(
+            "store-backed check-first capsule accepts and imports exact empty carriers",
+            "pass",
+            store_backed_check_first_capsule_accepts_and_imports,
+            results,
+        )
+
         def close_less_contest_store(root_name: str) -> Store:
             contest_store = _fixture_store(
                 contract,
@@ -8562,7 +8778,7 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             results,
         )
 
-        def failed_proof_guidance_forbids_terminal_invocation():
+        def first_helper_failure_forbids_any_second_probe():
             skill_root = Path(os.path.realpath(Path(__file__).parent.parent))
             stage_packets_path = readset.allow(
                 skill_root / "references" / "stage-packets.md"
@@ -8578,9 +8794,12 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             )
             required = (
                 "contains exactly one such invocation",
-                "do not invoke a later store-mutating helper, even to record a terminal",
+                "do not invoke any later helper command",
+                "including a corrected or diagnostic second validation probe",
+                "neither may invoke the helper or write run state",
                 "a nonzero proof call makes terminal recording forbidden",
                 "Run exactly one in each shell or tool call",
+                "after the first nonzero result do not invoke any helper command again",
             )
             combined = stage_packets + "\n" + skill_text
             missing = [snippet for snippet in required if snippet not in combined]
@@ -8631,9 +8850,9 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
                     )
 
         _expect(
-            "failed proof recording cannot invoke terminal recording",
+            "first helper failure forbids any second validator probe",
             "pass",
-            failed_proof_guidance_forbids_terminal_invocation,
+            first_helper_failure_forbids_any_second_probe,
             results,
         )
 
@@ -9351,6 +9570,7 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
                 "close",
                 "registered-leans",
                 "recommend-authority-packet",
+                "provisional-seed",
             ):
                 capsule[key] = "not produced: constituent exit at Shape"
             capsule["terminal-claim"] = {
@@ -9389,6 +9609,7 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             capsule["recommend-authority-packet"] = "not produced: zero survivors"
             capsule["close"] = "not produced: zero survivors"
             capsule["registered-leans"] = "not produced: zero survivors"
+            capsule["provisional-seed"] = "not produced: zero survivors"
             capsule["terminal-claim"] = {
                 "terminal": "no candidate survives the confirmed cuts",
                 "claim": "every candidate fell to a confirmed cut",

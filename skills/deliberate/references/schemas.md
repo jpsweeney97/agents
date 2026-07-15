@@ -150,7 +150,7 @@ The recovery capsule (and, with `not produced` markers and a recorded failure te
 - `registered-leans` — required. Recommend's registered leans ({agent-first-lean, user-visible-lean}), verbatim when produced
 - `terminal-claim` — required. the close-less terminal's claim item ({terminal, claim, survivor}); required whenever active records make Contest eligible and close is not produced, with survivor required on the one-survivor branch; otherwise `not produced`
 - `exclusion-check` — required. the rendered exclusion check line
-- `provisional-seed` — required. `not produced` or an unaccepted {wording, handle, core-idea, distinct-bet}, every value a non-empty string; acceptance has no free-form wording argument
+- `provisional-seed` — required. exact `not applicable` when Recommend completed without a seed; `not produced: <reason>` only when Recommend is absent or invalidated; otherwise an unaccepted {wording, handle, core-idea, distinct-bet}, every value a non-empty string; acceptance has no free-form wording argument
 - `revival-instructions` — required
 - `proof-boundary` — required. map: packet-isolation, read-isolation, constituent-pins, method-identity, effective-models, evidence-scope-used, containment, store-path, collapses, not-proven; an echo-only `store failed: write` capsule uses `not produced: pins not written` for the two pin-derived members
 - `capsule-complete` — required. final key; content identifier over the document body above it
