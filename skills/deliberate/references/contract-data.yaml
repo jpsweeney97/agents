@@ -637,11 +637,14 @@ brief-extras:
     provisional rerun seed ({wording, handle, core-idea, distinct-bet}); an alternative
     that merely reveals a constraint or would change the recommendation enters
     the close only as a named agent-derived consideration — never a new
-    comparison candidate. Every exclusion you create — a filter on a recorded
-    constraint consequence, a fact-established dominance end, a survivor
-    collapse, or the rivals of an `only one serious option` close — appends a
-    complete disposition record before the close is valid, and the close
-    carries each record's revival condition. Each record's `option` must
+    comparison candidate. Every exclusion you create appends a complete
+    disposition record before the close is valid, and the close carries each
+    record's revival condition. Set that record's `cut-basis` to the exact
+    canonical value for the case — never the prose description: a filter on a
+    recorded constraint consequence is `post-prune filter`; a fact-established
+    dominance end is `post-prune dominance`; a survivor collapse is
+    `post-prune collapse`; the rivals of an `only one serious option` close
+    are `only-serious-option rival`. Each record's `option` must
     reproduce the stored survivor bytes exactly: emit single-line or folded
     (`>-`) scalars, never a literal (`|`) block whose soft-wraps inject
     newlines the store does not contain. Close as exactly one of the four
