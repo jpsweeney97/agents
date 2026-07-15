@@ -11,7 +11,7 @@ The survey phase only reports through a throwaway HTML file and does not edit co
 
 ## Glossary
 
-Use these terms exactly in every suggestion. Consistent language is the point — don't drift into "component," "service," "API," or "boundary." Full definitions in [LANGUAGE.md](LANGUAGE.md).
+Use these terms exactly in every suggestion. Consistent language is the point — don't drift into "component," "service," "API," or "boundary." The ban covers the whole engagement — grilling prose and recommended answers included, which is where drift actually lands; a grep over the report file proves only the report. Full definitions in [LANGUAGE.md](LANGUAGE.md).
 
 - **Module** — anything with an interface and an implementation (function, class, package, slice).
 - **Interface** — everything a caller must know to use the module: types, invariants, error modes, ordering, config. Not just the type signature.
@@ -36,7 +36,7 @@ This skill is _informed_ by the project's domain model. The domain language give
 
 Read the project's domain glossary and any ADRs in the area you're touching first.
 
-Then walk the codebase — using an exploration subagent when the runtime offers one (in Claude Code, the Agent tool with `subagent_type=Explore`); otherwise explore directly. Don't follow rigid heuristics — explore organically and note where you experience friction:
+Then walk the codebase — using an exploration subagent when the runtime offers one (in Claude Code, the Agent tool with `subagent_type=Explore`); otherwise explore directly. Exploration subagents return findings, not reports — the survey produces one consolidated report, written by you. Don't follow rigid heuristics — explore organically and note where you experience friction:
 
 - Where does understanding one concept require bouncing between many small modules?
 - Where are modules **shallow** — interface nearly as complex as the implementation?
@@ -48,7 +48,7 @@ Apply the **deletion test** to anything you suspect is shallow: would deleting i
 
 ### 2. Present candidates as an HTML report
 
-Write a self-contained HTML file to the OS temp directory so nothing lands in the repo. Resolve the temp dir from `$TMPDIR`, falling back to `/tmp` (or `%TEMP%` on Windows), and write to `<tmpdir>/architecture-review-<timestamp>.html` so each run gets a fresh file. Open it for the user — `xdg-open <path>` on Linux, `open <path>` on macOS, `start <path>` on Windows — and tell them the absolute path.
+Write a self-contained HTML file to the OS temp directory so nothing lands in the repo. Resolve the temp dir from `$TMPDIR`, falling back to `/tmp` (or `%TEMP%` on Windows), and write to `<tmpdir>/architecture-review-<timestamp>.html` so each run gets a fresh file. Stamp the report header with the commit the survey read (`git rev-parse --short HEAD`, noting a dirty worktree if there is one): the codebase moves, and an unpinned survey cannot show its own staleness. Open it for the user — `xdg-open <path>` on Linux, `open <path>` on macOS, `start <path>` on Windows — and tell them the absolute path.
 
 The report uses **Tailwind via CDN** for layout and styling, and **Mermaid via CDN** for diagrams where a graph/flow/sequence reliably communicates the structure. Mix Mermaid with hand-crafted CSS/SVG visuals — use Mermaid when relationships are graph-shaped (call graphs, dependencies, sequences), and hand-built divs/SVG when you want something more editorial (mass diagrams, cross-sections, collapse animations). Each candidate gets a **before/after visualisation**. Be visual.
 
@@ -66,6 +66,8 @@ For each candidate, render a card with these fields:
 
 End the report with a **Top recommendation** section: which candidate you'd tackle first and why.
 
+What the verdict words claim: a badge grades the observed friction and the evidence behind it, never the proposed after-state — Solutions are one-pass design hypotheses for the follow-up grilling to contest. `Strong` claims strong evidence of a real problem at a real seam; it is not implementation authorization. The Top recommendation means "explore this first," not "build this first." The recorded failure mode of these surveys is over-consolidation — after-states that merge modules whose contracts the code or the domain glossary deliberately keeps distinct — so check a proposed after-state against those distinctions before writing its card.
+
 **Use CONTEXT.md vocabulary for the domain, and [LANGUAGE.md](LANGUAGE.md) vocabulary for the architecture.** If `CONTEXT.md` defines "Order," talk about "the Order intake module" — not "the FooBarHandler," and not "the Order service."
 
 **ADR conflicts**: if a candidate contradicts an existing ADR, only surface it when the friction is real enough to warrant revisiting the ADR. Mark it clearly in the card (e.g. a warning callout: _"contradicts ADR-0007 — but worth reopening because…"_). Don't list every theoretical refactor an ADR forbids.
@@ -78,7 +80,7 @@ Do NOT propose interfaces yet. After the file is written, ask the user: "Which o
 
 Once the user picks a candidate, switch to `grill-with-docs` for the design conversation, seeded with the chosen candidate, its files, dependency category, problem, proposed solution, relevant diagrams, and any domain glossary or ADR anchors already found. Keep this architecture-specific lens in play while grilling: constraints, dependencies, the shape of the deepened module, what sits behind the seam, what tests survive.
 
-Do not let the conversation become agreement theater: if the user accepts a run of recommended answers verbatim, say the grilling has become drafting with their consent, then ask the design question whose answer you are least sure of or offer to stop. If a candidate claim, current-code claim, or recommended closed set can be checked in the codebase, check it before treating it as settled.
+Do not let the conversation become agreement theater: if the user accepts a run of recommended answers verbatim, say the grilling has become drafting with their consent, then ask the design question whose answer you are least sure of or offer to stop. The naming is not single-shot: if verbatim acceptance resumes afterward, that is the stronger signal — say so again or stop. If a candidate claim, current-code claim, or recommended closed set can be checked in the codebase, check it before treating it as settled.
 
 Side effects happen inline as decisions crystallize, under `grill-with-docs` write discipline:
 
@@ -86,5 +88,6 @@ Side effects happen inline as decisions crystallize, under `grill-with-docs` wri
 - **Sharpening a fuzzy term during the conversation?** Update `CONTEXT.md` right there.
 - **User rejects the candidate with a load-bearing reason?** Offer an ADR, framed as: _"Want me to record this as an ADR so future architecture reviews don't re-suggest it?"_ Only offer when the reason would actually be needed by a future explorer to avoid re-suggesting the same thing — skip ephemeral reasons ("not worth it right now") and self-evident ones. See [ADR-FORMAT.md](../grill-with-docs/ADR-FORMAT.md).
 - **Want to explore alternative interfaces for the deepened module?** See [INTERFACE-DESIGN.md](INTERFACE-DESIGN.md).
+- **Does the candidate's premise need proof rather than interface alternatives?** Route to the proving lanes before committing the design — pin current behavior with a characterization net (`characterization-tests`), build a deliberately throwaway spike (`prototype`), compare against the live baseline — then ratify the design with evidence in hand.
 
 For `CONTEXT.md` and ADR writes, follow `grill-with-docs` for the dirty-worktree warning, unrelated-edit protection, incremental writes, commit-mid-session handling, closeout reporting, and proof boundary. (The HTML report stays in the temp directory, per step 2.) Proof boundary: you recorded glossary and decision text, not verified refactors.
