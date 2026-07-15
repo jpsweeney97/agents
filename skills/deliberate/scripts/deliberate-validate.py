@@ -807,6 +807,19 @@ def cmd_identity(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 
 
+def _normalize_proof_store_path(
+    op: str,
+    body: dict,
+    store_root: Path,
+) -> dict:
+    normalized = copy.deepcopy(body)
+    supplied_root = Path(os.path.realpath(normalized["store-path"]))
+    if supplied_root != store_root:
+        raise fail(op, "store path differs from the live store root")
+    normalized["store-path"] = str(store_root)
+    return normalized
+
+
 class Store:
     def __init__(self, root: Path, contract: Contract, readset: ReadSet) -> None:
         self.root = Path(os.path.realpath(root))
@@ -930,7 +943,10 @@ class Store:
             _validate_terminal_claim_against_store(item["body"], self)
         elif kind == "proof-inputs":
             pins = self.require("pins")["body"]
-            body = item["body"]
+            op = "proof inputs" if writer == "record-proof-inputs" else "store write"
+            body = _normalize_proof_store_path(op, item["body"], self.root)
+            item = copy.deepcopy(item)
+            item["body"] = body
             if body["constituent-pins"] != pins["constituents"]:
                 raise fail(
                     "store write",
@@ -940,11 +956,6 @@ class Store:
                 raise fail(
                     "store write",
                     "proof-input method identity differs from the store pins item",
-                )
-            if body["store-path"] != str(self.root):
-                raise fail(
-                    "store write",
-                    "proof-input store path differs from the live store root",
                 )
         elif kind == "terminal-state":
             if not self.find("proof-inputs"):
@@ -3492,8 +3503,6 @@ def cmd_record_proof_inputs(args: argparse.Namespace) -> int:
         raise fail("proof inputs", "constituent pins differ from the store pins item")
     if body["method-identity"] != pins["method"]:
         raise fail("proof inputs", "method identity differs from the store pins item")
-    if body["store-path"] != str(store.root):
-        raise fail("proof inputs", "store path differs from the live store root")
     path = store.write(
         {
             "schema": RUNSTATE_SCHEMA,
@@ -8449,6 +8458,182 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             "direct proof-input write rejects mismatched store path",
             "block",
             proof_inputs_wrong_store_path,
+            results,
+        )
+
+        def proof_inputs_alias_path_is_canonicalized():
+            proof_store = _fixture_store(
+                contract,
+                readset,
+                sandbox / "proof-path-canonical",
+            )
+            canonical = str(proof_store.root)
+            if canonical.startswith("/private/var/"):
+                alias = Path("/var") / Path(canonical).relative_to("/private/var")
+            else:
+                alias = sandbox / "proof-path-alias"
+                alias.symlink_to(proof_store.root, target_is_directory=True)
+            proof = copy.deepcopy(_fixture_capsule(contract)["proof-boundary"])
+            proof["store-path"] = str(alias)
+            proof_store.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "proof-inputs",
+                    "run": "fixture-run",
+                    "seq": proof_store.next_seq(),
+                    "body": proof,
+                },
+                writer="record-proof-inputs",
+            )
+            stored_path = proof_store.require("proof-inputs")["body"]["store-path"]
+            if stored_path != str(proof_store.root):
+                raise fail(
+                    "fixture",
+                    "proof-input alias was not persisted as the canonical live store root",
+                    stored_path,
+                )
+
+        _expect(
+            "proof-input /var and /private/var aliases persist canonically",
+            "pass",
+            proof_inputs_alias_path_is_canonicalized,
+            results,
+        )
+
+        def failed_proof_recording_blocks_terminal_authority():
+            proof_store = _fixture_store(
+                contract,
+                readset,
+                sandbox / "proof-failure-terminal-cutoff",
+            )
+            proof = copy.deepcopy(_fixture_capsule(contract)["proof-boundary"])
+            proof["store-path"] = "/definitely/not/the/live/store"
+            try:
+                proof_store.write(
+                    {
+                        "schema": RUNSTATE_SCHEMA,
+                        "kind": "proof-inputs",
+                        "run": "fixture-run",
+                        "seq": proof_store.next_seq(),
+                        "body": proof,
+                    },
+                    writer="record-proof-inputs",
+                )
+            except ValidationFailure:
+                pass
+            else:
+                raise fail("fixture", "invalid proof inputs unexpectedly recorded")
+            if proof_store.find("proof-inputs") or proof_store.find("terminal-state"):
+                raise fail(
+                    "fixture",
+                    "failed proof recording left proof or terminal authority",
+                )
+            try:
+                proof_store.write(
+                    {
+                        "schema": RUNSTATE_SCHEMA,
+                        "kind": "terminal-state",
+                        "run": "fixture-run",
+                        "seq": proof_store.next_seq(),
+                        "body": {
+                            "terminal": "close rendered",
+                            "carrier": "capsule",
+                        },
+                    },
+                    writer="record-terminal",
+                )
+            except StoreReadLoss:
+                pass
+            else:
+                raise fail(
+                    "fixture",
+                    "terminal recording remained possible after proof rejection",
+                )
+            if proof_store.find("proof-inputs") or proof_store.find("terminal-state"):
+                raise fail(
+                    "fixture",
+                    "terminal attempt after proof rejection mutated run-state authority",
+                )
+
+        _expect(
+            "failed proof recording leaves terminal authority impossible",
+            "pass",
+            failed_proof_recording_blocks_terminal_authority,
+            results,
+        )
+
+        def failed_proof_guidance_forbids_terminal_invocation():
+            skill_root = Path(os.path.realpath(Path(__file__).parent.parent))
+            stage_packets_path = readset.allow(
+                skill_root / "references" / "stage-packets.md"
+            )
+            skill_path = readset.allow(skill_root / "SKILL.md")
+            stage_packets = _decode_utf8(
+                readset.read_bytes(stage_packets_path),
+                "fixture stage-packets guidance",
+            )
+            skill_text = _decode_utf8(
+                readset.read_bytes(skill_path),
+                "fixture skill guidance",
+            )
+            required = (
+                "contains exactly one such invocation",
+                "do not invoke a later store-mutating helper, even to record a terminal",
+                "a nonzero proof call makes terminal recording forbidden",
+                "Run exactly one in each shell or tool call",
+            )
+            combined = stage_packets + "\n" + skill_text
+            missing = [snippet for snippet in required if snippet not in combined]
+            if missing:
+                raise fail(
+                    "fixture",
+                    "fail-fast proof-to-terminal guidance is incomplete",
+                    missing,
+                )
+
+            for block in re.findall(r"```bash\n(.*?)```", stage_packets, re.DOTALL):
+                normalized = block.replace("\\\n", " ")
+                mutating = any(
+                    token in normalized
+                    for token in (
+                        " init-setup ",
+                        " write-item ",
+                        " render-brief ",
+                        " validate-envelope ",
+                        " record-proof-inputs ",
+                        " record-terminal ",
+                        " import-capsule ",
+                    )
+                ) or (" validate-capsule " in normalized and " --accept " in normalized)
+                if not mutating:
+                    continue
+                lines = [line for line in block.splitlines() if line.strip()]
+                if not lines or lines[0] != "set -euo pipefail":
+                    raise fail(
+                        "fixture",
+                        "store-mutating guidance block lacks fail-fast shell mode",
+                        block,
+                    )
+                if normalized.count("uv run --script") != 1:
+                    raise fail(
+                        "fixture",
+                        "store-mutating guidance block contains multiple helper calls",
+                        block,
+                    )
+                if (
+                    " record-proof-inputs " in normalized
+                    and " record-terminal " in normalized
+                ):
+                    raise fail(
+                        "fixture",
+                        "proof and terminal recording share one helper-call block",
+                        block,
+                    )
+
+        _expect(
+            "failed proof recording cannot invoke terminal recording",
+            "pass",
+            failed_proof_guidance_forbids_terminal_invocation,
             results,
         )
 

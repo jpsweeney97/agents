@@ -58,6 +58,7 @@ Five moves, all five packet-isolated in fresh, non-forked stage agents — Conte
 
 **Orchestrator obligations, every stage:**
 
+- Apply the dedicated fail-fast helper-call boundary from `references/stage-packets.md` to every store mutation. A nonzero helper result prevents every later store-mutating helper on that branch; receipt rendering and cleanup never reopen the store write sequence.
 - Render every complete matrix brief from stored values with `render-brief`, record its identifier, and dispatch its bytes unaltered. Never hand-assemble or override an off-column refusal. Store the canonical `terminal-claim` before a close-less eligible Contest render.
 - Accept only `validate-envelope --accept` output. A validated `failed: pin mismatch — constituent:<path>` becomes `constituent drift`; `evidence:<path>` becomes `evidence drift`; `method:<path>` becomes `method drift`. Every other failed envelope, timeout, or malformed packet is `stage failed: <stage>`.
 - Verify constituent, evidence, and method pins before every stage and before each owned-reference or helper use; verify the validator with the platform hasher. A drifted validator takes the emergency-receipt branch.
@@ -74,7 +75,7 @@ Only seams rendered from `contract-data.yaml` bind: questions and handoffs becom
 
 ## Close
 
-After reloading the capsule reference, follow its total branch table and close order: **exclusion check → recommendation or honest exit → one terminated `deliberate-capsule/v1` document**. Emit only existing artifacts. For a capsule-bearing terminal, assemble and compact enough to fix the carrier, record the exact proof inputs and terminal state, then run `validate-capsule --store --accept`; receipt/echo-only terminals refuse validation, while `store failed: write` still requires comparison without a new write. The final content field is the recorded proof boundary. If chat compaction still cannot meet `capsule-bytes`, emit the non-resumable bound receipt and wait; an explicitly requested file capsule keeps the underlying semantic terminal and validates under `capsule-file-bytes`. `trash` the store only after the recovery carrier exists; disclose retirement failure.
+After reloading the capsule reference, follow its total branch table and close order: **exclusion check → recommendation or honest exit → one terminated `deliberate-capsule/v1` document**. Emit only existing artifacts. For a capsule-bearing terminal, assemble and compact enough to fix the carrier, record proof inputs and terminal state in separate fail-fast helper calls, then run `validate-capsule --store --accept` in its own call; the proof recorder realpath-compares the submitted store locator with the live store and persists the helper-owned canonical root. A failed proof call makes terminal recording impossible. Receipt/echo-only terminals refuse validation, while `store failed: write` still requires comparison without a new write. The final content field is the recorded proof boundary. If chat compaction still cannot meet `capsule-bytes`, emit the non-resumable bound receipt and wait; an explicitly requested file capsule keeps the underlying semantic terminal and validates under `capsule-file-bytes`. `trash` the store only after the recovery carrier exists; disclose retirement failure.
 
 ## Re-runs
 
@@ -87,17 +88,9 @@ V=scripts/deliberate-validate.py; D=references/contract-data.yaml   # paths rela
 shasum -a 256 $V
 uv run --script $V fixtures --data $D
 uv run --script $V identity --data $D [--as-evidence | --as-in-packet] <path>...
-uv run --script $V init-setup --data $D --store <root>/deliberate-run-live --run <id> --setup <setup.yaml>
-uv run --script $V render-brief --data $D --store <store> --stage <stage>
-uv run --script $V validate-envelope --data $D --store <store> --stage <stage> --accept <envelope.yaml>
-uv run --script $V record-proof-inputs --data $D --store <store> <proof-inputs.yaml>
-uv run --script $V record-terminal --data $D --store <store> --terminal <terminal> --carrier <capsule|failure-capsule>
-uv run --script $V validate-capsule --data $D --store <store> --accept <capsule.yaml>
-uv run --script $V validate-capsule --data $D --store <store> <failure-capsule.yaml>  # store failed: write; no new write
-uv run --script $V import-capsule --data $D --store <root>/deliberate-run-live --run <id> --capsule <capsule.yaml> --pins-body <current-pins.yaml> [--file-capsule] [--echo-body <echo.yaml>] [--directive-manifest <manifest.yaml>] [--invalidate-from <stage>] [--revive <wording>] [--constraint-withdrawn <wording>] [--accept-seed] [--field-base <prior-seeds|prior-full-field|new> [--closed-field <wordings.yaml>]]
 ```
 
-Use command `--help` and the mandatory references for complete syntax, including dedicated setup initialization, the remaining store writes, and storeless ingest validation. The store root is the fixed `deliberate-run-live/` directly under the runtime's ambient session-scoped temporary root. No detectable root → `store unavailable`. Exit codes: 0 pass, 1 validation failure, 2 refusal, 4 store read loss.
+The store-mutating forms are `init-setup`, `write-item`, `render-brief`, `validate-envelope --accept`, `record-proof-inputs`, `record-terminal`, `validate-capsule --accept`, and `import-capsule`. Run exactly one in each shell or tool call, beginning that call with `set -euo pipefail`; never paste a mutation sequence as one script. Use command `--help` and the mandatory references for complete syntax, including dedicated setup initialization, the remaining store writes, and storeless ingest validation. The store root is the fixed `deliberate-run-live/` directly under the runtime's ambient session-scoped temporary root. No detectable root → `store unavailable`. Exit codes: 0 pass, 1 validation failure, 2 refusal, 4 store read loss.
 
 ## v1 boundaries
 

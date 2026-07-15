@@ -230,6 +230,7 @@ Conditional carriage inside a column: `overflow` renders only when Prune disclos
 Each stage's input packet is rendered by the bundled helper, never hand-assembled — because output-packet validation cannot catch an isolation leak the orchestrator itself introduced on the way in, packet composition is mechanical or unclaimed:
 
 ```bash
+set -euo pipefail
 uv run --script scripts/deliberate-validate.py render-brief \
   --data references/contract-data.yaml --store <store-root> --stage <stage>
 ```
@@ -243,6 +244,7 @@ Every stage returns one fenced YAML document under `deliberate-envelope/v1` — 
 Validation is mechanical, runs before acceptance, and is executed by the helper:
 
 ```bash
+set -euo pipefail
 uv run --script scripts/deliberate-validate.py validate-envelope \
   --data references/contract-data.yaml --store <store-root> --stage <stage> --accept <envelope.yaml>
 ```
@@ -255,21 +257,42 @@ These are deterministic shape and consistency checks only: the validator cannot 
 
 The intra-run byte-exact authority for packet composition, validation's stored-original comparisons, and capsule construction. Initial setup is single-sourced: the orchestrator authors one `deliberate-setup/v1` document, and `init-setup` derives and writes the echo then decomposition in one helper call. Candidate-attached language exists only in that source's `authority-note`; only its separately authored candidate-neutral `criteria` values enter derived `soft-prefs`. If either setup write fails, the helper returns nonzero before any pin operation, the orchestrator stops immediately, and the store refuses a pins write while decomposition is absent. Thereafter the orchestrator writes the pins item, every validated stage envelope with its owed concerns amendments (one atomic item — neither is ever visible without the other), any terminal claim, the reserved proof inputs, the reserved terminal state, and the accepted capsule-in-progress to the store, each at validation, before it is acted on — a value-preserving re-serialization: every compared value (wordings, records, retrievals, the close, and proof-boundary members) is byte-exact, while document formatting is not preserved and never claimed — through the helper so every item is validated against `deliberate-runstate/v1` at write, per-kind nested body shapes included. Generic `write-item` admits only `pins` and `terminal-claim`; it refuses echo, decomposition, and every other mechanically owned kind. The canonical writer map in `contract-data.yaml` is exact: `init-setup` owns initial echo and decomposition; import may restore echo, decomposition, and pins; `validate-envelope --accept` owns `envelope`; `render-brief` owns `brief-render`; `record-proof-inputs` owns `proof-inputs`; `record-terminal` owns `terminal-state`; successful `validate-capsule --store --accept` owns `capsule-progress`; `import-capsule` owns `capsule-import` and `restart-plan`. A write failing its schema is a store write failure at that point, never adopted. After context compaction the orchestrator rebuilds from the store and the re-read references, never from summarized memory.
 
-Before any capsule-bearing terminal, write the exact proof-boundary inputs and terminal state with their dedicated commands, then validate the assembled capsule against the store:
+**Fail-fast helper-call boundary:** every shell or tool call containing a store-mutating helper invocation starts with `set -euo pipefail`, contains exactly one such invocation, and ends with it. The store-mutating forms are `init-setup`, `write-item`, `render-brief`, `validate-envelope --accept`, `record-proof-inputs`, `record-terminal`, `validate-capsule --accept`, and `import-capsule`. Inspect that call's exit status before any next helper. A nonzero result freezes the store sequence at that first failure: do not invoke a later store-mutating helper, even to record a terminal. Only contract-selected receipt rendering and cleanup may follow, neither writing run state. `record-proof-inputs` and `record-terminal` are always separate calls; a nonzero proof call makes terminal recording forbidden, and the store independently refuses terminal authority without proof.
+
+Before any capsule-bearing terminal, write the exact proof-boundary inputs and terminal state with their dedicated commands, then validate the assembled capsule against the store. Each fenced block below is one complete shell or tool call; never concatenate them:
 
 ```bash
+set -euo pipefail
 uv run --script scripts/deliberate-validate.py record-proof-inputs \
   --data references/contract-data.yaml --store <store-root> <proof-inputs.yaml>
+```
+
+The proof recorder realpath-resolves the submitted `store-path` and the live store root before comparing identity, so macOS aliases such as `/var/...` and `/private/var/...` match; it persists the helper-owned canonical root and rejects a truly different root.
+
+```bash
+set -euo pipefail
 uv run --script scripts/deliberate-validate.py record-terminal \
   --data references/contract-data.yaml --store <store-root> --terminal <terminal> --carrier <capsule|failure-capsule>
+```
+
+```bash
+set -euo pipefail
 uv run --script scripts/deliberate-validate.py validate-capsule \
   --data references/contract-data.yaml --store <store-root> --accept <capsule.yaml>
+```
 
-# Narrow failed-write exception: no new proof, terminal, or acceptance write.
+Narrow failed-write exception: no new proof, terminal, or acceptance write.
+
+```bash
+set -euo pipefail
 uv run --script scripts/deliberate-validate.py validate-capsule \
   --data references/contract-data.yaml --store <store-root> <failure-capsule.yaml>
+```
 
-# Explicit-only file carrier after the chat cap still binds following compaction.
+Explicit-only file carrier after the chat cap still binds following compaction.
+
+```bash
+set -euo pipefail
 uv run --script scripts/deliberate-validate.py validate-capsule \
   --data references/contract-data.yaml --store <store-root> --accept --file-capsule <capsule.yaml>
 ```
