@@ -3486,11 +3486,25 @@ def cmd_write_item(args: argparse.Namespace) -> int:
     return EXIT_PASS
 
 
+def _resolve_proof_inputs_body_path(args: argparse.Namespace) -> Path:
+    """Resolve exactly one supported proof-input body spelling."""
+    positional = args.body
+    named = args.body_option
+    if (positional is None) == (named is None):
+        raise refuse(
+            "proof inputs",
+            "supply exactly one body path as positional BODY or --body PATH",
+            {"BODY": positional, "--body": named},
+        )
+    return Path(positional if positional is not None else named)
+
+
 def cmd_record_proof_inputs(args: argparse.Namespace) -> int:
+    resolved_body_path = _resolve_proof_inputs_body_path(args)
     readset = ReadSet()
     contract = load_contract(Path(args.data), readset)
     store = Store(Path(args.store), contract, readset)
-    body_path = readset.allow(Path(args.body))
+    body_path = readset.allow(resolved_body_path)
     body = safe_parse(
         readset.read_bytes(body_path),
         byte_cap=contract.bounds["parse-bytes"],
@@ -8651,6 +8665,126 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             results,
         )
 
+        def run_record_proof_inputs_cli(
+            data_path: Path,
+            store_root: Path,
+            body_args: list[str],
+        ) -> int:
+            parsed = build_parser().parse_args(
+                [
+                    "record-proof-inputs",
+                    "--data",
+                    str(data_path),
+                    "--store",
+                    str(store_root),
+                    *body_args,
+                ]
+            )
+            return parsed.func(parsed)
+
+        def proof_inputs_body_forms_write_identical_items():
+            shared_root = sandbox / "proof-body-form-store"
+            positional_store = _fixture_store(contract, readset, shared_root)
+            proof = copy.deepcopy(_fixture_capsule(contract)["proof-boundary"])
+            proof["store-path"] = str(positional_store.root)
+            proof_path = sandbox / "proof-body-form.yaml"
+            proof_path.write_text(dump_yaml(proof))
+
+            run_record_proof_inputs_cli(
+                contract.data_path,
+                shared_root,
+                [str(proof_path)],
+            )
+            item_name = "003-proof-inputs.yaml"
+            positional_bytes = (shared_root / item_name).read_bytes()
+
+            positional_snapshot = sandbox / "proof-body-form-positional"
+            shared_root.rename(positional_snapshot)
+            _fixture_store(contract, readset, shared_root)
+            run_record_proof_inputs_cli(
+                contract.data_path,
+                shared_root,
+                ["--body", str(proof_path)],
+            )
+            named_bytes = (shared_root / item_name).read_bytes()
+            if positional_bytes != named_bytes:
+                raise fail(
+                    "fixture",
+                    "positional and --body proof-input store items differ",
+                )
+
+        _expect(
+            "positional and --body proof inputs write byte-identical store items",
+            "pass",
+            proof_inputs_body_forms_write_identical_items,
+            results,
+        )
+
+        def assert_proof_body_form_refuses_without_store_access(
+            label: str,
+            body_args: list[str],
+        ) -> None:
+            untouched_root = sandbox / f"proof-body-{label}-untouched"
+            untouched_root.mkdir()
+            sentinel = untouched_root / "sentinel.txt"
+            sentinel.write_text("unchanged\n")
+            before = [
+                (path.name, path.read_bytes()) for path in untouched_root.iterdir()
+            ]
+            try:
+                run_record_proof_inputs_cli(
+                    sandbox / "must-not-read-contract.yaml",
+                    untouched_root,
+                    body_args,
+                )
+            except Refusal as exc:
+                if "supply exactly one body path" not in str(exc):
+                    raise fail(
+                        "fixture",
+                        "body-form refusal used the wrong boundary",
+                        str(exc),
+                    ) from exc
+            except (ValidationFailure, StoreReadLoss) as exc:
+                raise fail(
+                    "fixture",
+                    "body-form refusal reached contract or store access",
+                    str(exc),
+                ) from exc
+            else:
+                raise fail("fixture", "invalid proof-input body forms were accepted")
+            after = [
+                (path.name, path.read_bytes()) for path in untouched_root.iterdir()
+            ]
+            if before != after:
+                raise fail(
+                    "fixture",
+                    "body-form refusal changed the sentinel store",
+                    {"before": before, "after": after},
+                )
+
+        _expect(
+            "record-proof-inputs refuses both body forms before store access",
+            "pass",
+            lambda: assert_proof_body_form_refuses_without_store_access(
+                "both",
+                [
+                    str(sandbox / "positional-proof.yaml"),
+                    "--body",
+                    str(sandbox / "named-proof.yaml"),
+                ],
+            ),
+            results,
+        )
+        _expect(
+            "record-proof-inputs refuses neither body form before store access",
+            "pass",
+            lambda: assert_proof_body_form_refuses_without_store_access(
+                "neither",
+                [],
+            ),
+            results,
+        )
+
         def proof_inputs_wrong_store_path():
             proof_store = _fixture_store(
                 contract,
@@ -10029,10 +10163,25 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser(
         "record-proof-inputs",
         help="record the exact proof-boundary inputs before capsule acceptance",
+        description=(
+            "Record the exact proof-boundary inputs before capsule acceptance. "
+            "Supply exactly one body path as positional BODY or --body PATH."
+        ),
     )
     p.add_argument("--data", required=True)
     p.add_argument("--store", required=True)
-    p.add_argument("body", help="path to a YAML file with the proof-boundary body")
+    p.add_argument(
+        "body",
+        nargs="?",
+        metavar="BODY",
+        help="path to the proof-boundary YAML body (positional form)",
+    )
+    p.add_argument(
+        "--body",
+        dest="body_option",
+        metavar="PATH",
+        help="explicit alias for the proof-boundary YAML body path",
+    )
     p.set_defaults(func=cmd_record_proof_inputs)
 
     p = sub.add_parser(

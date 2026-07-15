@@ -259,12 +259,22 @@ The intra-run byte-exact authority for packet composition, validation's stored-o
 
 **Fail-fast helper-call boundary:** every shell or tool call containing a store-mutating helper invocation starts with `set -euo pipefail`, contains exactly one such invocation, and ends with it. The store-mutating forms are `init-setup`, `write-item`, `render-brief`, `validate-envelope --accept`, `record-proof-inputs`, `record-terminal`, `validate-capsule --accept`, and `import-capsule`. Inspect that call's exit status before any next helper. A nonzero result freezes the entire helper sequence at that first failure: do not invoke any later helper command, including a corrected or diagnostic second validation probe, and do not invoke a later store-mutating helper even to record a terminal. Only contract-selected receipt rendering and cleanup may follow; neither may invoke the helper or write run state. `record-proof-inputs` and `record-terminal` are always separate calls; a nonzero proof call makes terminal recording forbidden, and the store independently refuses terminal authority without proof.
 
-Before any capsule-bearing terminal, write the exact proof-boundary inputs and terminal state with their dedicated commands, then validate the assembled capsule against the store. Each fenced block below is one complete shell or tool call; never concatenate them:
+Before any capsule-bearing terminal, write the exact proof-boundary inputs and terminal state with their dedicated commands, then validate the assembled capsule against the store. `record-proof-inputs` requires exactly one body-path spelling: positional `BODY` or explicit `--body PATH`. Both forms resolve to the same validation and store-write path; both-present and neither-present refuse before contract or store access. Each fenced block below is one complete shell or tool call; never concatenate them.
+
+Positional form:
 
 ```bash
 set -euo pipefail
 uv run --script scripts/deliberate-validate.py record-proof-inputs \
   --data references/contract-data.yaml --store <store-root> <proof-inputs.yaml>
+```
+
+Equivalent explicit alias:
+
+```bash
+set -euo pipefail
+uv run --script scripts/deliberate-validate.py record-proof-inputs \
+  --data references/contract-data.yaml --store <store-root> --body <proof-inputs.yaml>
 ```
 
 The proof recorder realpath-resolves the submitted `store-path` and the live store root before comparing identity, so macOS aliases such as `/var/...` and `/private/var/...` match; it persists the helper-owned canonical root and rejects a truly different root.
