@@ -88,7 +88,7 @@ Repo-local `scripts/__pycache__/` was trashed first (clean slate, asserted absen
 | D | 0 | `074fb8ca0a45` | `ff2f1ac9f755` (identical content except `python=3.13`) |
 
 - Repo-local bytecode after the pass: **zero** files under `scripts/` (`find` count 0).
-- Prefix populated with the four spike pycs, mirroring the **canonical** source path (`<prefix>/Users/jp/.agents/skills/deliberate/scripts/…`) for every form — including the symlink-path invocations. The loader therefore resolves the script path to canonical before import (uv canonicalizes; no duplicate cache identity per path).
+- Prefix populated with the four spike pycs, mirroring the **canonical** source path (`<prefix>/Users/jp/.agents/skills/deliberate/scripts/…`) for every form — including the symlink-path invocations. The loader therefore resolved the script path to canonical before import (no duplicate cache identity per path). This canonicalization conclusion is bounded to the observed environment — macOS, `uv 0.10.11`, the four tested invocation forms — strong evidence for the current cut, not a permanent guarantee for future `uv` versions.
 
 **Finding 5 — mitigation PROVEN.** Behavior identical across paths (module resolution, marks, exit, stdout), no repo-local bytecode created, and nothing repo-local to read. `sys.pycache_prefix` set before the first first-party import is a workable v6 cache-neutralization mechanism; the production cut should derive the prefix from the runtime's session-temp root rather than this spike's hardcoded scratchpad path.
 
@@ -100,7 +100,7 @@ Repo-local `scripts/__pycache__/` was trashed first (clean slate, asserted absen
 
 **Gate 1: PASS.** The direct-per-file layout is portable across both delivery paths as specified; the ADR-0001 hard-stop clause is not triggered and no root-cause investigation is needed.
 
-Carry into the v6 cut as design inputs (deliberately *not* resolved here, per scope): (1) adopt cache neutralization in the v6 entrypoint — session-temp `sys.pycache_prefix` before any first-party import, per Finding 5 — so imported-module bytecode can neither pollute nor impersonate the authenticated sources; (2) decide whether v6 pins or records the interpreter minor version, given per-path selection variance (Finding 2); (3) module identity is single-homed at the canonical path even under symlink invocation (Pass 2), which the pinning design can rely on. Gate 2 (the non-executing import-closure check), the first coherent module choice, and frontier assignments remain separate v6-cut inputs.
+Carry into the v6 cut as design inputs (deliberately *not* resolved here, per scope): (1) adopt cache neutralization in the v6 entrypoint — session-temp `sys.pycache_prefix` before any first-party import, per Finding 5 — so imported-module bytecode can neither pollute nor impersonate the authenticated sources (promoted to a mandatory rollout consequence in ADR-0001, 2026-07-15); (2) interpreter-version variance across invocation forms (Finding 2) — decision 2026-07-15: no minor-version pin for now, future smoke evidence records the effective interpreter, revisit only on observed behavioral divergence; (3) module identity is single-homed at the canonical path even under symlink invocation (Pass 2), which the pinning design can rely on for the current environment, re-verifying at the v6 smoke. Gate 2 (the non-executing import-closure check), the first coherent module choice, and frontier assignments remain separate v6-cut inputs.
 
 ## Reproduction
 
@@ -125,7 +125,18 @@ run_form A "$REPO" "scripts/deliberate-validate.py" "references/contract-data.ya
 run_form B "$LINK" "scripts/deliberate-validate.py" "references/contract-data.yaml"
 run_form C "/Users/jp/.agents" "$REPO/scripts/deliberate-validate.py" "$REPO/references/contract-data.yaml"
 run_form D "/Users/jp/.agents" "$LINK/scripts/deliberate-validate.py" "$LINK/references/contract-data.yaml"
-for f in B C D; do cmp "$BASE/A.out" "$BASE/$f.out"; cmp "$BASE/A.err" "$BASE/$f.err" || true; done
+# Gate assertion: the gate-named forms must match exactly; any difference fails the script.
+cmp "$BASE/A.exit" "$BASE/B.exit"
+cmp "$BASE/A.out" "$BASE/B.out"
+cmp "$BASE/A.err" "$BASE/B.err"
+echo "gate: A==B (exit, stdout, stderr)"
+# Diagnostic only: C/D carry an interpreter-bearing sentinel that may legitimately differ.
+for f in C D; do
+  cmp -s "$BASE/A.out" "$BASE/$f.out" && echo "stdout A==$f" || echo "stdout A!=$f (diagnostic)"
+  cmp -s "$BASE/A.err" "$BASE/$f.err" && echo "stderr A==$f" || echo "stderr A!=$f (diagnostic)"
+done
 ```
+
+Correction (2026-07-15, closeout review): the runner as originally reproduced here applied `|| true` to stderr comparisons and never compared the captured `.exit` files, so a reused copy could have violated the A/B gate without failing. The executed spike verified A/B equality out of band (the `cmp`/SHA results recorded in the tables above), so the gate verdict stands; the block above is the corrected fail-fast form for reuse.
 
 Pass 1b mtime-preserving edit: read `st_mtime_ns`/`st_atime_ns` via `os.stat`, rewrite the same-length source bytes, then `os.utime(path, ns=(atime_ns, mtime_ns))`, asserting size and `st_mtime_ns` unchanged. Stream capture files were session-temporary; their SHA-256 prefixes are recorded in the tables above.
