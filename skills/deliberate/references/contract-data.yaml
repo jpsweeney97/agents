@@ -559,7 +559,8 @@ stage-brief-template: |
   model; prose values as block scalars). `status` is exactly one of three
   forms: `completed`, `exit: <the named honest exit>`, or `failed: <reason>` —
   any other form fails the stage. `artifacts` carries exactly these obliged
-  keys, each present or `not produced: <reason>` (never on a completed stage):
+  keys, each present, `not applicable` when a conditional artifact has no
+  value, or `not produced: <reason>` (never on a completed stage):
   {obliged}
   Your envelope is validated mechanically before acceptance; a missing or
   extra key, an over-cap retrievals list, or a record whose `option` wording
@@ -635,6 +636,15 @@ brief-extras:
     carries each record's revival condition. Close as exactly one of the four
     `making-recommendations` shapes or a named honest exit — every one is a
     successful completion; never manufacture a winner.
+    Both conditional Recommend artifacts remain mandatory keys on every close
+    shape. Inside `artifacts`, render each absent conditional value exactly:
+    ```yaml
+    disposition-records: not applicable
+    provisional-seed: not applicable
+    ```
+    Treat the keys independently: replace only an applicable value with its
+    complete typed record list or seed. Never omit either key. A `check first`
+    close does not make either key optional.
   contest: |
     Execute the Contest method carried verbatim in your `method` packet item.
     Detection only: identify every recorded exclusion premise or revival

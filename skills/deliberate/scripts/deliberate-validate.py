@@ -7383,6 +7383,71 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             results,
         )
 
+        def recommend_conditional_carrier_guidance():
+            capsule = _fixture_capsule(contract)
+            imported = import_capsule_into_store(
+                capsule,
+                sandbox / "recommend-conditional-carriers",
+                "fixture-recommend-conditional-carriers",
+                contract,
+                readset,
+                invalidate_from=["recommend"],
+            )
+            brief = render_brief("recommend", imported, contract, readset, None)
+            required = (
+                "Both conditional Recommend artifacts remain mandatory keys",
+                "```yaml\ndisposition-records: not applicable\n"
+                "provisional-seed: not applicable\n```",
+                "A `check first`\nclose does not make either key optional.",
+            )
+            missing = [snippet for snippet in required if snippet not in brief]
+            if missing:
+                raise fail(
+                    "fixture",
+                    "rendered Recommend brief is missing conditional carrier guidance",
+                    missing,
+                )
+
+        _expect(
+            "rendered Recommend brief shows explicit conditional empty carriers",
+            "pass",
+            recommend_conditional_carrier_guidance,
+            results,
+        )
+
+        def check_first_recommend_envelope():
+            validate_envelope_shape(
+                {
+                    "schema": ENVELOPE_SCHEMA,
+                    "stage": "recommend",
+                    "status": "completed",
+                    "artifacts": {
+                        "close": (
+                            "check first\n\n"
+                            "The Call: run the bounded feasibility gate before choosing."
+                        ),
+                        "registered-leans": {
+                            "agent-first-lean": "Option A",
+                            "user-visible-lean": "No reliable visible lean.",
+                        },
+                        "disposition-records": "not applicable",
+                        "provisional-seed": "not applicable",
+                    },
+                    "retrievals": "none",
+                    "encounters": "none",
+                    "pins": "none",
+                    "model": "unknown",
+                },
+                contract,
+            )
+
+        _expect(
+            "check-first Recommend envelope accepts explicit conditional empties",
+            "pass",
+            check_first_recommend_envelope,
+            results,
+        )
+
         def close_less_contest_store(root_name: str) -> Store:
             contest_store = _fixture_store(
                 contract,
