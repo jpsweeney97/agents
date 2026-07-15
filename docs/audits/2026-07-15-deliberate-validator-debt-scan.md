@@ -17,7 +17,7 @@ Artifact Path: `docs/audits/2026-07-15-deliberate-validator-debt-scan.md`
 
 ### Do First
 
-- Add an independent black-box characterization suite around the unchanged `deliberate-validate.py` entrypoint. Pin the twelve-command CLI surface, exit-code mapping, stdout/stderr shapes, representative store files, accepted/rejected envelope and capsule behavior, and the current 158-fixture summary before moving production code. Keep the existing fixture command intact as the control until the new harness proves equivalent coverage at the public boundary.
+- Add an independent black-box characterization suite around the unchanged `deliberate-validate.py` entrypoint. Pin the twelve-command CLI surface, exit-code mapping, stdout/stderr shapes, representative store files, accepted/rejected envelope and capsule behavior, and the current 158-fixture summary before moving production code. This work is un-gated and starts immediately: the harness is test-only and outside the runtime method-surface inventory. Keep the existing fixture command intact as the control; the harness's pass criterion is that it demonstrates detection of representative public-seam mutations (mutate, observe the net fail, restore, rerun green), never a claim of full behavioral coverage.
 
 ### Why It Matters
 
@@ -65,7 +65,7 @@ Artifact Path: `docs/audits/2026-07-15-deliberate-validator-debt-scan.md`
 
 ### E-CH-2: Complexity is concentrated in contract-critical paths
 
-- Anchor: `uv run ruff check --select C901 --output-format concise skills/deliberate/scripts/deliberate-validate.py` reported 22 over-threshold functions; AST measurement found 13 definitions at least 100 lines, six at least 200, and two at least 500.
+- Anchor: `uv run ruff check --select C901 --output-format concise skills/deliberate/scripts/deliberate-validate.py` reported 22 over-threshold functions; AST measurement found 13 definitions at least 100 lines, six at least 200, and two at least 500 (counting top-level definitions only; the 135 functions nested inside `cmd_fixtures` are excluded).
 - Category: code-health.
 - Observation: the largest production functions are `import_capsule_into_store` (563 lines, 79 Ruff complexity), `validate_capsule_document` (382 lines, 61), `validate_contract_data` (318 lines, 49), `_render_packet_item` (203 lines, 39), and `_validate_capsule_terminal_state` (195 lines, 45). The full ordinary Ruff check still passes because complexity is not selected by the repository's default invocation.
 - Present Cost: high-risk changes require reasoning across many conditional branches in a single frame, and a green default lint run does not expose that risk.
@@ -95,7 +95,7 @@ Artifact Path: `docs/audits/2026-07-15-deliberate-validator-debt-scan.md`
 
 ### E-AD-1: Method authentication binds the current single-file topology
 
-- Anchor: `contract-data.yaml:45-54` fixes the exact method-surface inventory with only `scripts/deliberate-validate.py`; `_check_method_pin_inventory` calls `_check_pin_list(... allow_manifest=False)` and rejects missing or unexpected surfaces at `deliberate-validate.py:1286-1319`; capsule validation applies that exact check at `:4261`; `SKILL.md:39,87-90` requires platform hashing the script and running its fixtures.
+- Anchor: `contract-data.yaml:47-54` fixes the exact method-surface inventory with only `scripts/deliberate-validate.py`; `_check_method_pin_inventory` calls `_check_pin_list(... allow_manifest=False)` and rejects missing or unexpected surfaces at `deliberate-validate.py:1286-1319`; capsule validation applies that exact check at `:4261`; `SKILL.md:39,87-90` requires platform hashing the script and running its fixtures.
 - Category: architecture-drift.
 - Observation: imported production modules would execute behavior that the current platform hash and method-identity capsule member do not authenticate. Adding module files to the canonical inventory changes the exact set old capsules carry, so current capsule validation would reject them before a re-run could classify ordinary method drift.
 - Present Cost: the obvious monolith repair is not behavior-preserving under the live contract; planning must account for authentication and capsule continuity before moving code.
@@ -150,10 +150,11 @@ Artifact Path: `docs/audits/2026-07-15-deliberate-validator-debt-scan.md`
 - Severity: P1.
 - Category: systemic.
 - Subcategory: trust boundary and compatibility.
-- Anchor: `contract-data.yaml:45-54`; `deliberate-validate.py:1286-1319,4261`; `SKILL.md:39,87-90`.
+- Anchor: `contract-data.yaml:47-54`; `deliberate-validate.py:1286-1319,4261`; `SKILL.md:39,87-90`.
 - Problem: ordinary imports would move behavior outside the authenticated surface, while expanding the exact surface set makes existing capsules fail current validation.
 - Impact: a nominal cleanup can weaken bootstrap proof or break the recovery product the skill promises.
 - Recommendation: specify and prove one authenticated multi-file design that preserves the public entrypoint and explicitly defines prior-capsule behavior. If it changes the method-identity shape, contract-data version, capsule acceptance, or migration policy, classify that work as contract evolution rather than behavior-preserving simplification.
+- Revision (2026-07-15): the compatibility branch is collapsed — pre-topology capsules are declared unsupported (no legacy population found; see Revisions). The open question is authentication topology only: direct per-file inclusion in `method-surfaces` versus an aggregate identity. P1 preserved until that choice is confirmed; its concrete delta then gets a `contract-change-propagation` pass before CH-1.
 - Effort: medium.
 - Leverage: high.
 - Confidence: high.
@@ -170,6 +171,7 @@ Artifact Path: `docs/audits/2026-07-15-deliberate-validator-debt-scan.md`
 - Problem: the only behavioral suite lives inside the implementation being reorganized and primarily calls internal functions.
 - Impact: structural movement lacks an independent detector for CLI, exit-code, stdout/stderr, file-layout, and cross-process behavior changes.
 - Recommendation: add an out-of-process suite around the unchanged script, covering all command help surfaces and representative pass/refuse/fail/store-read paths, exact observable messages where contractual, store file names and sequence, capsule import/validation round trips, and the current fixture summary. Do not delete or relocate embedded fixtures in this slice.
+- Revision (2026-07-15): un-gated — the harness is test-only and outside the runtime method-surface inventory, so it starts immediately, before SY-1, through `characterization-tests`. Include the mandatory deliberate-mutation proof: mutate production code, observe the net fail, restore, rerun green. The pass criterion is detection of representative public-seam mutations with the embedded 158-case suite as control, never a claim of full behavioral coverage.
 - Effort: medium.
 - Leverage: high.
 - Confidence: high.
@@ -227,7 +229,7 @@ Artifact Path: `docs/audits/2026-07-15-deliberate-validator-debt-scan.md`
 
 ### OP-1: Reduce mandatory fixture latency without weakening the preflight claim
 
-- Severity: P1.
+- Severity: P2 (downgraded from P1, 2026-07-15 revision: the latency is material but carries no trust or recovery consequence comparable to SY-1).
 - Category: operational.
 - Subcategory: local proof latency.
 - Anchor: 51.54-second fresh fixture run; `SKILL.md:39`; repeated store parsing at `deliberate-validate.py:830-1014`.
@@ -314,3 +316,17 @@ Local-run synthesis metadata, not durable proof and not audit evidence — the f
 - Top calls are corroborated with present cost: yes - each uses at least two source classes and names current review, runtime, or recovery cost.
 - Coverage limits are visible in Result Brief: yes - the artifact is explicitly an audit/backlog, not an execution sequence.
 - Status updated to complete only after final checks: yes - the final artifact diff, whitespace check, metrics, source anchors, and recommendation qualifiers were reviewed before this status change.
+
+## Revisions
+
+### 2026-07-15: post-audit adjudication (repo head `59b4015`; audited validator byte-identical to `61583d5`)
+
+An independent verification pass re-ran every quantitative anchor against the live tree; all reproduced. The following adjudicated changes were applied in place (marked `Revision (2026-07-15)` in the affected entries) and are recorded here with their evidence.
+
+- Verification upgrade: the old-capsule consequence in E-AD-1/SY-1 is code-confirmed, no longer inferential. Every capsule-validating command loads the current contract (`load_contract(Path(args.data), ...)`), and `_check_method_pin_inventory` (`deliberate-validate.py:1286-1319`, called unconditionally at `:4261`) requires the capsule's method-identity to match the current canonical surface set exactly. Expanding `method-surfaces` therefore rejects every capsule carrying the current seven-surface inventory — factual.
+- Scope correction: not every contract-data change orphans capsules. `contract-data-version == 5` (`deliberate-validate.py:269`) versions the contract-data document the helper accepts; capsules do not carry it as their compatibility discriminator, so a version bump alone neither rejects nor migrates old capsules. Changed method-pin identifiers are deliberate drift handling, converted into restart frontiers by `_pin_change_frontiers` (`deliberate-validate.py:4920`), and the v27 brief-only edit (`61583d5`) changed `contract-data.yaml` without a version or schema change. Set expansion, bounds, schema, and tightened-value changes do break capsules; identifier drift and value-neutral text edits do not.
+- Compatibility branch collapsed: no `deliberate-run-live/` store exists in the current temporary roots or the repository, the smoke record carries no durable full capsule, and v26 (`docs/specs/2026-07-13-deliberate.md:55`) set the hard-rejection-without-migration precedent when no legacy population exists. Pre-topology capsules are declared unsupported for this refactor. Pasted capsules outside the visible workspace remain the one unreachable consumer class and are accepted as lost unless one surfaces.
+- SY-1 narrows to its topology branch: how imported implementation files enter authentication. Working lean: direct per-file inclusion in `method-surfaces`, extending the mechanism already present rather than introducing aggregate-manifest machinery. P1 preserved until the choice is confirmed; the concrete delta then gets a `contract-change-propagation` pass before CH-1.
+- TD-1 un-gated: starts immediately via `characterization-tests` with the mandatory deliberate-mutation proof; "proves equivalent coverage" replaced with the bounded detection claim in Do First and TD-1.
+- OP-1 downgraded P1 → P2.
+- Corrections applied in place: method-surface anchor is `contract-data.yaml:47-54` (was 45-54); the E-CH-2 complexity distribution now states it counts top-level definitions and excludes the 135 nested fixture functions.
