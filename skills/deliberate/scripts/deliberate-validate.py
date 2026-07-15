@@ -266,7 +266,7 @@ def validate_contract_data(data: object) -> None:
     }
     if not isinstance(data, dict) or set(data) != top_keys:
         raise refuse(op, f"top-level keys must be exactly {sorted(top_keys)}", data)
-    if data["contract-data-version"] != 4:
+    if data["contract-data-version"] != 5:
         raise refuse(
             op,
             "unsupported contract-data-version",
@@ -1085,6 +1085,42 @@ def _require_str_list(op: str, name: str, value: object) -> list[str]:
     return value
 
 
+def _canonical_wording(text: str) -> str:
+    """Canonical whitespace form for option wordings: internal whitespace runs
+    (newlines included) collapse to one space, ends trimmed. Applied exactly
+    once, at identity ingress — init-setup candidates and fresh Generate
+    outputs — never at comparison time: every downstream comparison stays
+    byte-exact, so whitespace-equivalence can never stand in for identity."""
+    return " ".join(text.split())
+
+
+def _canonicalize_setup_wordings(source: object) -> object:
+    """The init-setup ingress rule: candidate wordings and the soft-preference
+    entries naming them are canonicalized here, before validation, so duplicate
+    detection runs post-normalization and the stored bytes are the identity
+    every later surface must match exactly. Malformed shapes pass through for
+    the shape checks to reject with their own messages."""
+    if not isinstance(source, dict):
+        return source
+    candidates = source.get("candidates")
+    if isinstance(candidates, list):
+        for candidate in candidates:
+            if isinstance(candidate, dict) and isinstance(
+                candidate.get("wording"), str
+            ):
+                candidate["wording"] = _canonical_wording(candidate["wording"])
+    preferences = source.get("soft-preferences")
+    if isinstance(preferences, dict) and isinstance(preferences.get("entries"), list):
+        for entry in preferences["entries"]:
+            if (
+                isinstance(entry, dict)
+                and isinstance(entry.get("candidate"), str)
+                and entry["candidate"] != "absent"
+            ):
+                entry["candidate"] = _canonical_wording(entry["candidate"])
+    return source
+
+
 def _serialized_bytes(value: object) -> int:
     return len(dump_yaml(value).encode("utf-8"))
 
@@ -1650,11 +1686,15 @@ def normalize_setup_document(document: object, contract: Contract) -> tuple[dict
 
     source = _check_setup_source(
         op,
-        {
-            "candidates": copy.deepcopy(document["candidates"]),
-            "soft-preferences": copy.deepcopy(document["soft-preferences"]),
-            "composition-provenance": copy.deepcopy(document["composition-provenance"]),
-        },
+        _canonicalize_setup_wordings(
+            {
+                "candidates": copy.deepcopy(document["candidates"]),
+                "soft-preferences": copy.deepcopy(document["soft-preferences"]),
+                "composition-provenance": copy.deepcopy(
+                    document["composition-provenance"]
+                ),
+            }
+        ),
         contract,
     )
     input_fields = document["fields"]
@@ -2209,6 +2249,28 @@ def _check_retrievals(value: object, contract: Contract, op: str) -> list[dict]:
             sorted(duplicates),
         )
     return value
+
+
+def canonicalize_generate_wordings(document: object) -> object:
+    """Identity ingress for fresh Generate outputs: canonicalize the wording of
+    every generated option before any validation, so duplicate detection runs
+    post-normalization and the field is stored in canonical bytes. Non-generated
+    options are echoes of already-canonical setup candidates and stay untouched
+    for the byte-exact seed check. Every other stage's wordings are downstream
+    of ingress and are never normalized. Malformed shapes pass through for the
+    shape checks to reject with their own messages."""
+    if not isinstance(document, dict) or document.get("stage") != "generate":
+        return document
+    artifacts = document.get("artifacts")
+    if isinstance(artifacts, dict) and isinstance(artifacts.get("field"), list):
+        for option in artifacts["field"]:
+            if (
+                isinstance(option, dict)
+                and option.get("provenance") == "generated"
+                and isinstance(option.get("wording"), str)
+            ):
+                option["wording"] = _canonical_wording(option["wording"])
+    return document
 
 
 def validate_envelope_shape(document: object, contract: Contract) -> dict:
@@ -2982,6 +3044,7 @@ def cmd_validate_envelope(args: argparse.Namespace) -> int:
         depth_cap=contract.bounds["parse-depth"],
         op="envelope",
     )
+    canonicalize_generate_wordings(document)
     validate_envelope_shape(document, contract)
     if args.stage and document["stage"] != args.stage:
         raise fail(
@@ -4038,6 +4101,61 @@ def _validate_capsule_terminal_state(
         raise fail(op, "a non-failure resumable capsule requires an original field")
 
 
+def _check_canonical_capsule_wordings(parsed: dict, op: str) -> None:
+    """Wording canonical-form gate on every capsule read path: since the
+    canonicalization contract landed, every stored wording identity is in
+    canonical whitespace form, so a capsule carrying a non-canonical wording
+    was minted before the contract (or altered since) and is rejected as
+    legacy — never silently reinterpreted, because the completeness terminator
+    hashes raw bytes and re-admitting rewritten wordings would mint identities
+    no run ever validated."""
+    surfaces: list[tuple[str, object]] = []
+    field = parsed.get("original-field")
+    if isinstance(field, list):
+        surfaces.extend(
+            ("original-field", option.get("wording"))
+            for option in field
+            if isinstance(option, dict)
+        )
+    survivors = parsed.get("survivors")
+    if isinstance(survivors, list):
+        surfaces.extend(
+            ("survivors", option.get("wording"))
+            for option in survivors
+            if isinstance(option, dict)
+        )
+    records = parsed.get("records")
+    if isinstance(records, list):
+        surfaces.extend(
+            ("records", record.get("option"))
+            for record in records
+            if isinstance(record, dict)
+        )
+    decomposition = parsed.get("setup-decomposition")
+    if isinstance(decomposition, dict) and isinstance(
+        decomposition.get("candidates"), list
+    ):
+        surfaces.extend(
+            ("setup-decomposition candidates", candidate.get("wording"))
+            for candidate in decomposition["candidates"]
+            if isinstance(candidate, dict)
+        )
+    seed = parsed.get("provisional-seed")
+    if isinstance(seed, dict):
+        surfaces.append(("provisional-seed", seed.get("wording")))
+    legacy = [
+        {"surface": name, "wording": wording}
+        for name, wording in surfaces
+        if isinstance(wording, str) and _canonical_wording(wording) != wording
+    ]
+    if legacy:
+        raise fail(
+            op,
+            "option wording is not in canonical whitespace form — a capsule minted before wording canonicalization is legacy and is rejected, never silently reinterpreted; re-run the deliberation",
+            legacy,
+        )
+
+
 def validate_capsule_document(
     parsed: object, contract: Contract, *, restart_state: bool = False
 ) -> dict:
@@ -4394,6 +4512,7 @@ def validate_capsule_document(
         contract=contract,
         op=op,
     )
+    _check_canonical_capsule_wordings(parsed, op)
     boundary = parsed["proof-boundary"]
     _check_proof_boundary_shape(
         op,
@@ -6756,6 +6875,205 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             lambda: check_prune(
                 prune_envelope([option_a], [full_record("Option B — hosted wiki")])
             ),
+            results,
+        )
+
+        # wording canonicalization at identity ingress: normalized once at
+        # origin, byte-exact everywhere downstream
+        wrapped_wording = (
+            "Option B — a hosted wiki serving\nthe two-person team with offline\n"
+            "mirrors kept in sync"
+        )
+        canonical_wording = (
+            "Option B — a hosted wiki serving the two-person team with offline "
+            "mirrors kept in sync"
+        )
+
+        def wrapped_generate_canonicalized_then_prune_passes():
+            live = _fixture_store(
+                contract,
+                readset,
+                sandbox / "deliberate-canonical-live",
+                transition_seeds=False,
+            )
+            _fixture_record_brief(live, "generate", contract, readset)
+            document = parse_fixture("must-pass/inert-prose-envelope.yaml")
+            document["artifacts"]["field"][1]["wording"] = wrapped_wording
+            canonicalize_generate_wordings(document)
+            validate_envelope_shape(document, contract)
+            validate_envelope_against_store(document, live, contract)
+            stored = document["artifacts"]["field"][1]["wording"]
+            if stored != canonical_wording:
+                raise fail(
+                    "fixture",
+                    "generated wording was not canonicalized at Generate ingress",
+                    stored,
+                )
+            live.write(
+                {
+                    "schema": RUNSTATE_SCHEMA,
+                    "kind": "envelope",
+                    "run": "fixture-run",
+                    "seq": live.next_seq(),
+                    "stage": "generate",
+                    "body": {"document": document, "amendments": []},
+                },
+                writer="validate-envelope",
+            )
+            prune = prune_envelope(
+                [
+                    dict(option_a),
+                    {"wording": canonical_wording, "provenance": "generated"},
+                ],
+                [],
+            )
+            validate_envelope_shape(prune, contract)
+            validate_envelope_against_store(prune, live, contract)
+
+        _expect(
+            "soft-wrapped generated wording canonicalized at origin, canonical Prune echo accepted",
+            "pass",
+            wrapped_generate_canonicalized_then_prune_passes,
+            results,
+        )
+
+        def canonical_field_conservation_stays_exact():
+            live = Store(sandbox / "deliberate-canonical-live", contract, readset)
+            prune = prune_envelope([dict(option_a)], [])
+            validate_envelope_shape(prune, contract)
+            validate_envelope_against_store(prune, live, contract)
+
+        _expect(
+            "prune partition conservation stays exact on a canonicalized field",
+            "block",
+            canonical_field_conservation_stays_exact,
+            results,
+        )
+
+        def generated_post_normalization_collision():
+            document = parse_fixture("must-pass/inert-prose-envelope.yaml")
+            document["artifacts"]["field"].append(
+                {"wording": "Option B —\nhosted wiki", "provenance": "generated"}
+            )
+            canonicalize_generate_wordings(document)
+            validate_envelope_shape(document, contract)
+
+        _expect(
+            "generated wordings colliding after normalization rejected",
+            "block",
+            generated_post_normalization_collision,
+            results,
+        )
+
+        def setup_post_normalization_collision():
+            setup = _fixture_setup_document(contract, transition_seeds=False)
+            setup["candidates"].append(
+                {
+                    "wording": "Option A — file\nsync over Syncthing",
+                    "provenance-flag": "user-seed",
+                }
+            )
+            normalize_setup_document(setup, contract)
+
+        _expect(
+            "setup candidates colliding after normalization rejected",
+            "block",
+            setup_post_normalization_collision,
+            results,
+        )
+
+        def multiline_setup_candidate_canonicalized():
+            setup = _fixture_setup_document(contract, transition_seeds=False)
+            multiline = "Option A — file\nsync over Syncthing"
+            canonical = "Option A — file sync over Syncthing"
+            setup["candidates"][0]["wording"] = multiline
+            setup["soft-preferences"]["entries"][0]["candidate"] = multiline
+            echo, decomposition = normalize_setup_document(setup, contract)
+            stored = [c["wording"] for c in decomposition["candidates"]]
+            source = echo["setup-source"]
+            entry = source["soft-preferences"]["entries"][0]["candidate"]
+            if (
+                stored != [canonical]
+                or [c["wording"] for c in source["candidates"]] != [canonical]
+                or entry != canonical
+            ):
+                raise fail(
+                    "fixture",
+                    "setup candidate wordings were not canonicalized at init-setup",
+                    {"decomposition": stored, "soft-preference": entry},
+                )
+
+        _expect(
+            "multi-line setup candidate canonicalized at init-setup",
+            "pass",
+            multiline_setup_candidate_canonicalized,
+            results,
+        )
+
+        _expect(
+            "whitespace-altered downstream survivor rejected, no comparison-time normalization",
+            "block",
+            lambda: check_prune(
+                prune_envelope(
+                    [{"wording": "Option B —\nhosted wiki", "provenance": "generated"}],
+                    [full_record("Option A — file sync over Syncthing")],
+                )
+            ),
+            results,
+        )
+
+        _expect(
+            "whitespace-altered record option rejected, paraphrase guard intact",
+            "block",
+            lambda: check_prune(
+                prune_envelope(
+                    [dict(option_a)],
+                    [full_record("Option B —\nhosted wiki")],
+                )
+            ),
+            results,
+        )
+
+        def legacy_capsule_wordings_rejected():
+            capsule = _fixture_capsule(contract)
+            capsule["original-field"][2]["wording"] = "Option C — shared\ngit repo"
+            capsule["records"][0]["option"] = "Option C — shared\ngit repo"
+            validate_capsule_document(capsule, contract)
+
+        _expect(
+            "legacy capsule with non-canonical wording rejected",
+            "block",
+            legacy_capsule_wordings_rejected,
+            results,
+        )
+
+        def import_preserves_canonical_wording():
+            capsule = _fixture_capsule(contract)
+            validate_capsule_text(_capsule_text(capsule), contract)
+            imported = import_capsule_into_store(
+                capsule,
+                sandbox / "import-canonical-roundtrip",
+                "fixture-import-canonical",
+                contract,
+                readset,
+                invalidate_from=["contest"],
+            )
+            expected = [
+                "Option A — file sync over Syncthing",
+                "Option B — hosted wiki",
+                "Option C — shared git repo",
+            ]
+            if _stored_field_wordings(imported) != expected:
+                raise fail(
+                    "fixture",
+                    "imported field wordings drifted from the capsule's canonical bytes",
+                    _stored_field_wordings(imported),
+                )
+
+        _expect(
+            "capsule round-trip and import preserve canonical wording byte-exact",
+            "pass",
+            import_preserves_canonical_wording,
             results,
         )
 

@@ -14,7 +14,7 @@
 # Editing rule: this file is the authority. After any edit, regenerate the
 # authored renderings (`check-renderings --write`) and rerun the fixtures.
 
-contract-data-version: 4
+contract-data-version: 5
 
 stages: [generate, prune, shape, recommend, contest]
 
@@ -351,12 +351,12 @@ obliged-artifacts:
     - {key: exclusion-check-line, required: always, shape: text}
 
 artifact-shapes:
-  option-list: "list of {wording, provenance, insertion?} — wording is a non-empty complete byte-exact string; provenance is one of validation.provenance-flags; insertion is present only when a revived candidate rejoins a reused field at `original-field-position` or an accepted seed is appended to one at `appended-by-rule`, and is preserved byte-exact through Prune; adopted candidates and fresh Generate outputs carry no insertion"
-  record-list: "list of records, each with keys: option (complete original wording, byte-exact — paraphrase rejected), status (active), delegation, predicate-source (direct user rule | agent-derived proposition), cut-basis (from the stage's basis set), epistemic-status (fact-established at comparable resolution | contestable sketch-depth judgment), reason, evidence-provenance (list of {source, retrieved-at}; omit when no external fact is relied on), load-bearing-premise, strongest-case (written before the kill), revive-if, evidence-warning (omit when inapplicable)"
+  option-list: "list of {wording, provenance, insertion?} — wording is a non-empty complete byte-exact string in canonical whitespace form (internal whitespace runs, newlines included, collapse to one space; the validator applies this exactly once, at identity ingress — init-setup candidates and fresh Generate outputs at acceptance — never at comparison time, so every downstream echo must match the stored bytes exactly); emit each wording as a single-line or folded (`>-`) scalar, never a literal (`|`) block whose soft-wraps inject real newlines; provenance is one of validation.provenance-flags; insertion is present only when a revived candidate rejoins a reused field at `original-field-position` or an accepted seed is appended to one at `appended-by-rule`, and is preserved byte-exact through Prune; adopted candidates and fresh Generate outputs carry no insertion"
+  record-list: "list of records, each with keys: option (complete original wording, byte-exact — paraphrase rejected; emit single-line or folded `>-`, never a literal `|` block), status (active), delegation, predicate-source (direct user rule | agent-derived proposition), cut-basis (from the stage's basis set), epistemic-status (fact-established at comparable resolution | contestable sketch-depth judgment), reason, evidence-provenance (list of {source, retrieved-at}; omit when no external fact is relied on), load-bearing-premise, strongest-case (written before the kill), revive-if, evidence-warning (omit when inapplicable)"
   overflow: "{disclosure, blocked-cuts: list of {option, unpriced-trade, why-blocked}}"
   consequence-list: "list of {option, constraint, consequence}"
   leans: "{agent-first-lean, user-visible-lean}"
-  seed: "{wording, handle, core-idea, distinct-bet} — each a non-empty string; wording is the only candidate wording `--accept-seed` may accept"
+  seed: "{wording, handle, core-idea, distinct-bet} — each a non-empty string; wording is the only candidate wording `--accept-seed` may accept, so emit it in canonical single-line whitespace form (single-line or folded `>-` scalar, never a literal `|` block)"
   text: "non-empty prose as a block scalar"
 
 # ---------------------------------------------------------------------------
@@ -397,7 +397,7 @@ schemas:
       - {key: directives, required: true, note: empty on an initial run}
       - {key: directives-collapsed, required: true, note: empty on an initial run}
       - {key: fields, required: true, note: "map of every validation.echo-contract-fields entry except soft-prefs, each {value, provenance}; soft-prefs is derived only from soft-preferences.entries[].criteria"}
-      - {key: candidates, required: true, note: "list of {wording, provenance-flag}; authority notes cannot be authored here"}
+      - {key: candidates, required: true, note: "list of {wording, provenance-flag}; authority notes cannot be authored here. Init-setup canonicalization rule: candidate wordings and the soft-preference entries naming them are canonicalized at this ingress (internal whitespace runs collapse to one space, ends trimmed), duplicates are rejected after that normalization, and the stored canonical bytes are the identity every later surface must match exactly"}
       - {key: soft-preferences, required: true, note: "{provenance, entries}; each entry is exactly {candidate, criteria, authority-note}; candidate is `absent` for a neutral preference and requires authority-note `absent`, or one exact candidate wording with its complete candidate-attached language only in authority-note; only candidate-neutral criteria are flattened into echo and decomposition soft-prefs"}
       - {key: composition-provenance, required: true, note: "{invocation-span, delegation-span}, candidate-free by elision"}
       - {key: bounds, required: true, note: exact canonical top-level bounds map}
@@ -582,7 +582,12 @@ brief-extras:
     exit; handoffs become that honest exit by name. Constraints in your packet
     are generation-controlling context: use them as relaxation and inversion
     targets. Return the un-ranked field (each option: wording complete,
-    provenance flag) plus the untouched-fixed-points line.
+    provenance flag) plus the untouched-fixed-points line. Emit every option
+    wording as a single-line or folded (`>-`) scalar, never a literal (`|`)
+    block — literal soft-wraps become real newlines inside the wording value.
+    Acceptance canonicalizes generated wordings (whitespace runs collapse to
+    one space) and rejects wordings that collide after that normalization;
+    seed echoes must match their setup candidates byte-exactly.
   prune: |
     Execute the Prune method carried verbatim in your `method` packet item —
     it is your complete cutting authority. Never reorder: survivors must be an
@@ -593,7 +598,10 @@ brief-extras:
     active exclusion record's option; a dropped option with no record or a
     record for a surviving option fails the stage. A budget cut blocked by the
     value-trade guard is a blocked-cut disclosure riding with the overflow
-    disclosure, never a record.
+    disclosure, never a record. Every wording you echo — survivors and record
+    `option` values — must reproduce the stored bytes exactly: emit single-line
+    or folded (`>-`) scalars, never a literal (`|`) block whose soft-wraps
+    inject newlines the store does not contain.
   shape: |
     Read and execute the live `option-shaping` contract at the pinned paths in
     your `pin` packet item, verifying each identifier before use, under its
@@ -633,7 +641,10 @@ brief-extras:
     constraint consequence, a fact-established dominance end, a survivor
     collapse, or the rivals of an `only one serious option` close — appends a
     complete disposition record before the close is valid, and the close
-    carries each record's revival condition. Close as exactly one of the four
+    carries each record's revival condition. Each record's `option` must
+    reproduce the stored survivor bytes exactly: emit single-line or folded
+    (`>-`) scalars, never a literal (`|`) block whose soft-wraps inject
+    newlines the store does not contain. Close as exactly one of the four
     `making-recommendations` shapes or a named honest exit — every one is a
     successful completion; never manufacture a winner.
     Both conditional Recommend artifacts remain mandatory keys on every close

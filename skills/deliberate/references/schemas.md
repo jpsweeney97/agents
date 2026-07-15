@@ -75,7 +75,7 @@ Never write `invocation-span: Field mode: seed-and-widen` as a plain scalar; the
 - `directives` — required. empty on an initial run
 - `directives-collapsed` — required. empty on an initial run
 - `fields` — required. map of every validation.echo-contract-fields entry except soft-prefs, each {value, provenance}; soft-prefs is derived only from soft-preferences.entries[].criteria
-- `candidates` — required. list of {wording, provenance-flag}; authority notes cannot be authored here
+- `candidates` — required. list of {wording, provenance-flag}; authority notes cannot be authored here. Init-setup canonicalization rule: candidate wordings and the soft-preference entries naming them are canonicalized at this ingress (internal whitespace runs collapse to one space, ends trimmed), duplicates are rejected after that normalization, and the stored canonical bytes are the identity every later surface must match exactly
 - `soft-preferences` — required. {provenance, entries}; each entry is exactly {candidate, criteria, authority-note}; candidate is `absent` for a neutral preference and requires authority-note `absent`, or one exact candidate wording with its complete candidate-attached language only in authority-note; only candidate-neutral criteria are flattened into echo and decomposition soft-prefs
 - `composition-provenance` — required. {invocation-span, delegation-span}, candidate-free by elision
 - `bounds` — required. exact canonical top-level bounds map
