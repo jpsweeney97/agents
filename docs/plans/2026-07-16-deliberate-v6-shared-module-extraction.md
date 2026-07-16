@@ -21,7 +21,7 @@ The 2026-07-16 execution-readiness scrutiny of this plan reproduced a live Gate-
 
 ## What this plan builds
 
-One `contract-data-version` bump to 6 delivering, together: (a) a declarative `import-boundary` policy section in the pinned `references/contract-data.yaml`; (b) the Gate-2 authoring checker consuming that section directly; (c) a two-pass, stdlib-only pre-import census (layout rules first, then a `zipfile.is_zipfile` content check on the collected inert files once shadows are provably cleared) plus fresh invocation-private `sys.pycache_prefix` in the entrypoint, with a release-time test asserting the embedded policy equals the contract section and a per-invocation `_require_boundary_match` as defense-in-depth; (d) the first physical extraction, `scripts/_deliberate_shared.py` (error/refusal constructors, read authorization, safe-YAML foundation), entering `method-surfaces` at the default (Generate) frontier; (e) the companion doc, test, smoke, and spec updates.
+One `contract-data-version` bump to 6 delivering, together: (a) a declarative `import-boundary` policy section in the pinned `references/contract-data.yaml`; (b) the Gate-2 authoring checker consuming that section directly; (c) a two-pass, stdlib-only pre-import census (layout rules first, then a `zipfile.is_zipfile` content check on the collected inert files once shadows are provably cleared) plus a fresh invocation-private `sys.pycache_prefix` that is mechanically kept outside the repository (or outside the served skill root when standalone), with unsafe ambient temp roots refused fail-closed, a release-time test asserting the embedded policy equals the contract section, and a per-invocation `_require_boundary_match` as defense-in-depth; (d) the first physical extraction, `scripts/_deliberate_shared.py` (error/refusal constructors, read authorization, safe-YAML foundation), entering `method-surfaces` at the default (Generate) frontier; (e) the companion doc, test, smoke, and spec updates.
 
 Non-goals: no further module splits (CH-1 stays gated on this landing), no launcher/staged-root (Option 3), no broadening of the external `sys.path` residual (portfolio open question 4 stays open), no plugin publish, no push, no merge to `main` — landing is JP's call.
 
@@ -30,11 +30,11 @@ Non-goals: no further module splits (CH-1 stays gated on this landing), no launc
 | Path | Change | Responsibility |
 | --- | --- | --- |
 | `skills/deliberate/references/contract-data.yaml` | modify | version 5→6; new top-level `import-boundary` section; `method-surfaces` gains `scripts/_deliberate_shared.py` |
-| `skills/deliberate/scripts/deliberate-validate.py` | modify | embedded boundary policy + module-level pre-import census + fresh cache prefix; accepts/validates `import-boundary`; version gate 6; embedded-vs-contract comparison at every load; shared foundation removed, `from _deliberate_shared import …` added |
+| `skills/deliberate/scripts/deliberate-validate.py` | modify | embedded boundary policy + module-level pre-import census + fresh cache prefix verified outside the repository/standalone skill root; unsafe temp roots refuse; accepts/validates `import-boundary`; version gate 6; embedded-vs-contract comparison at every load; shared foundation removed, `from _deliberate_shared import …` added |
 | `skills/deliberate/scripts/_deliberate_shared.py` | create | the extracted foundation: exceptions, `fail`/`refuse`, `ReadSet`, `_decode_utf8`, `safe_parse`, `_UniqueKeyLoader`, `_NoAliasDumper`, `dump_yaml`, `SAFE_TAGS` |
 | `skills/deliberate/tests/check_import_closure.py` | modify | census/ban values loaded from the target root's `contract-data.yaml` `import-boundary` section (structural zip detection via `zipfile.is_zipfile` already landed in `43065ca`) |
 | `skills/deliberate/tests/test_import_closure.py` | modify | `make_layout` writes the policy section; live-tree test expects 2 surfaces; policy-floor, policy-binding, and embedded-vs-contract-equality tests (prefixed-ZIP regression already landed in `43065ca`) |
-| `skills/deliberate/tests/test_runtime_boundary.py` | create | out-of-process battery: contract tamper, seeded-artifact refusals (incl. prefixed-ZIP), benign passes, prefix lifecycle + containment, bytecode-freshness probe, module-name grammar (predicate-vs-regex agreement) |
+| `skills/deliberate/tests/test_runtime_boundary.py` | create | out-of-process battery: contract tamper, seeded-artifact refusals (incl. prefixed-ZIP), benign passes, external prefix lifecycle + unsafe repo/bundle/scripts/allowed-data/symlink/case-alias temp-root refusals, bytecode-freshness probe, module-name grammar (predicate-vs-regex agreement) |
 | `skills/deliberate/SKILL.md` | modify | bootstrap verification hashes both production files; orchestrator hashing bullet names imported modules |
 | `skills/deliberate/references/capsule.md` | modify | method-identity prose includes the shared module |
 | `docs/specs/2026-07-13-deliberate.md` | modify | Status v27→v28; v28 lineage entry |
@@ -47,8 +47,9 @@ Non-goals: no further module splits (CH-1 stays gated on this landing), no launc
 
 - The Gate-2 checker stays non-executing: `ast.parse` only, never importing production code.
 - The runtime census enforces layout rules only. Closure/inventory equality stays an authoring-gate concern: a flat, conforming, uninventoried module is inert at runtime because production code contains no dynamic-import machinery and the orchestrator hashes every method surface. Do not add a YAML read or inventory comparison before first-party import.
-- **Import ordering before first-party code (revised after the 2026-07-16 scrutiny).** Only `os` and `sys` are imported before the *layout* census (both initialized during CPython startup, so they cannot be shadowed from `scripts/`). The layout census enforces every structural rule using `os`/`sys` alone and *collects* the inert-suffix files for a content check. Once that pass returns without refusing, no `.py`/`.pyc`/`.so`/package/symlink shadow exists under `scripts/`, so `import zipfile` (and its stdlib deps) cannot resolve to a `scripts/` file — the zip-content check then runs `zipfile.is_zipfile` on the collected inert files, matching the Gate-2 checker's detector exactly. Every other import — stdlib and first-party — waits until both passes have refused nothing. This is what makes the seeded-`scripts/argparse.py` test pass and what carries the prefixed-ZIP repair (`43065ca`) into runtime.
+- **Import ordering before first-party code (revised after the 2026-07-16 scrutiny).** Only `os` and `sys` are imported before the *layout* census (both initialized during CPython startup, so they cannot be shadowed from `scripts/`). The layout census enforces every structural rule using `os`/`sys` alone and *collects* the inert-suffix files for a content check. Once that pass returns without refusing, no `.py`/`.pyc`/`.so`/package/symlink shadow exists under `scripts/`, so only the narrow deferred stdlib set needed to create and retire a verified-external cache prefix and perform the structural archive check (`atexit`, `shutil`, `tempfile`, `zipfile`, and their stdlib dependencies) may import; first-party code and every other import wait until the zip-content pass has refused nothing. The zip-content check runs `zipfile.is_zipfile` on the collected inert files, matching the Gate-2 checker's detector exactly. This is what makes the seeded-`scripts/argparse.py` test pass and what carries the prefixed-ZIP repair (`43065ca`) into runtime.
 - **Zip detection is structural in both consumers.** Neither the checker nor the runtime compares magic bytes; both call `zipfile.is_zipfile`, so a prefixed/self-extracting zip is caught and the two consumers cannot drift on zip detection. There is no `zip-magics` policy value.
+- **The cache prefix is fresh *and* external.** ADR-0001 requires the prefix outside the repository, not merely outside `scripts/`. After pass 1, the entrypoint resolves the served source path through symlinks, scans every ancestor and selects the outermost containing Git root so an inner `.git` marker cannot narrow the protected tree (falling back to the served skill root when standalone), resolves the process temp root, and refuses before prefix creation if that temp root is inside the protected root. Containment walks resolved ancestors and compares filesystem identity with `os.path.samefile`, not path-string casing, so case aliases on the default macOS filesystem cannot bypass the check; an identity-check error is treated as unsafe. It creates the prefix beneath the approved resolved temp root, resolves and checks the created path again to close a temp-root symlink swap between selection and creation, and only then assigns `sys.pycache_prefix`. A repo-, bundle-, `scripts/`-, allowed-data-, symlink-resolved-, or case-aliased internal `TMPDIR` is an invocation refusal, not a supported placement; an ordinary external `TMPDIR` remains supported and the prefix is retired at exit.
 - **The embedded-vs-contract match is authenticated at release time, not pre-import at runtime (ordering decision, 2026-07-16 scrutiny).** A truly pre-import *runtime* equality check is architecturally impossible under this cut: the comparison needs the contract parsed, contract-loading uses `safe_parse`/`ReadSet`, and those are exactly the first-party code being extracted into `_deliberate_shared` — so matching before first-party import would be circular, and a weaker pre-import `yaml.safe_load` of the pinned surface was already rejected (ADR-0001 amendment). Instead, (a) the census's policy values are authenticated by the entrypoint's own method-surface hash — they live in the hashed entrypoint source, so trusting the entrypoint is trusting its embedded census; (b) a non-executing release-time test asserts the embedded `_BOUNDARY_POLICY` equals the contract's `import-boundary` section (minus `banned-identifiers`), so a desynced pair cannot ship green; and (c) `_require_boundary_match` in `load_contract` is per-invocation defense-in-depth (it catches a contract swapped via `--data` at runtime) and necessarily runs post-import. Do not "fix" this by adding a pre-import contract parse.
 - Moved code is cut-and-pasted, never retyped: the characterization suite pins exact CLI messages, and any transcription drift fails it.
 - Production sources never name a banned identifier (`__import__`, `__builtins__`, `builtins`, `importlib`, `zipimport`, `runpy`, `exec`, `eval`, `compile`) as an identifier or import — string literals are fine (the ban is positional). `zipfile` is *not* banned (it reads archives; `zipimport` loads them), so the runtime preflight may import it. Tests are outside that boundary and may use `py_compile`, `importlib`, etc.
@@ -803,25 +804,80 @@ def test_module_name_grammar_matches_declared_pattern(tmp_path: Path) -> None:
         assert name in result.stderr
 
 
-def test_cache_prefix_is_scoped_private_and_retired(tmp_path: Path) -> None:
-    """The invocation-private pycache prefix lives under the process temp root
-    and is retired at exit; no repo-local bytecode is created under scripts/,
-    even when TMPDIR points inside the bundle (ADR-0001; 2026-07-16 scrutiny
-    finding 5 — temp-root containment must be proven, not trusted)."""
-    root = make_bundle(tmp_path)
+def test_cache_prefix_is_external_private_retired_and_unsafe_roots_refuse(
+    tmp_path: Path,
+) -> None:
+    """An external temp root works; any protected-tree placement refuses.
+
+    ADR-0001 requires the prefix outside the repository, not merely outside
+    scripts/. The runtime finds the outermost containing Git root (so an inner
+    marker cannot narrow the boundary), falls back to the served bundle when
+    standalone, resolves symlinks, and refuses before any first-party import.
+    The optional shared-module marker becomes active after Task 4 without
+    changing this Task-3 checkpoint.
+    """
+    root = make_bundle(tmp_path / "external")
     scoped = tmp_path / "scoped-tmp"
     scoped.mkdir()
     result = run_cli(root, *identity_args(root), tmpdir=scoped)
     assert result.returncode == 0, result.stderr
     assert list(scoped.glob("deliberate-pycache-*")) == []  # prefix retired at exit
+    assert list(root.rglob("deliberate-pycache-*")) == []
     assert list((root / "scripts").rglob("__pycache__")) == []
     assert list((root / "scripts").rglob("*.pyc")) == []
-    # Even a bundle-internal TMPDIR (outside scripts/) must not pollute scripts/.
-    inside = root / "tmp"
-    inside.mkdir()
-    assert run_cli(root, *identity_args(root), tmpdir=inside).returncode == 0
-    assert list((root / "scripts").rglob("__pycache__")) == []
-    assert list((root / "scripts").rglob("*.pyc")) == []
+
+    cases: list[tuple[str, Path, Path]] = []
+    for label, relative in (
+        ("bundle", "tmp"),
+        ("scripts", "scripts"),
+        ("allowed-data", "scripts/fixtures"),
+    ):
+        case_root = make_bundle(tmp_path / label)
+        unsafe = case_root / relative
+        unsafe.mkdir(parents=True, exist_ok=True)
+        cases.append((label, case_root, unsafe))
+
+    repo = tmp_path / "repo"
+    (repo / ".git").mkdir(parents=True)
+    repo_root = make_bundle(repo / "skills" / "deliberate")
+    (repo_root / ".git").mkdir()  # inner marker must not narrow the outer root
+    repo_tmp = repo / "tmp"  # inside Git root, outside the served bundle
+    repo_tmp.mkdir()
+    cases.append(("repo", repo_root, repo_tmp))
+    case_alias = repo.parent / repo.name.swapcase() / "tmp"
+    if case_alias.exists() and os.path.samefile(case_alias, repo_tmp):
+        cases.append(("case-alias", repo_root, case_alias))
+
+    link_root = make_bundle(tmp_path / "symlink")
+    link_target = link_root / "tmp"
+    link_target.mkdir()
+    unsafe_link = tmp_path / "symlink" / "tmp-link"
+    unsafe_link.symlink_to(link_target, target_is_directory=True)
+    cases.append(("symlink", link_root, unsafe_link))
+
+    for label, case_root, unsafe in cases:
+        marker = tmp_path / f"{label}.marker"
+        shared = case_root / "scripts" / "_deliberate_shared.py"
+        if shared.exists():
+            text = shared.read_text(encoding="utf-8")
+            needle = "from __future__ import annotations\n"
+            assert text.count(needle) == 1
+            shared.write_text(
+                text.replace(
+                    needle,
+                    needle + f"\nopen({str(marker)!r}, 'w').write('ran')\n",
+                    1,
+                ),
+                encoding="utf-8",
+            )
+        result = run_cli(case_root, *identity_args(case_root), tmpdir=unsafe)
+        assert result.returncode == 2, label
+        assert "cache temp root must resolve outside" in result.stderr, label
+        assert not marker.exists(), label
+        assert list(tmp_path.rglob("deliberate-pycache-*")) == [], label
+        assert list(tmp_path.rglob("*.pyc")) == [], label
+        assert list((case_root / "scripts").rglob("__pycache__")) == [], label
+        assert list((case_root / "scripts").rglob("*.pyc")) == [], label
 ```
 
 Also append to `skills/deliberate/tests/test_import_closure.py` a non-executing test proving the runtime name predicate agrees with the contract regex over a *generated* corpus, not a handful of examples (2026-07-16 scrutiny finding 5 / assumption audit: examples are not algorithmic equivalence). It extracts the dependency-free `_boundary_module_name_conforms` by source segment and compiles it in isolation — never importing the entrypoint (which runs its census on import):
@@ -887,16 +943,21 @@ import sys
 # already initialized at interpreter startup, so they cannot be shadowed from
 # scripts/ (which is sys.path[0]) — enforces every structural rule, and COLLECTS
 # the inert-suffix files. Once pass 1 returns without refusing, no
-# .py/.pyc/.so/package/symlink shadow exists under scripts/, so the fresh cache
-# prefix and `import zipfile` (plus its stdlib deps) below cannot resolve to a
-# scripts/ file. Pass 2 runs `zipfile.is_zipfile` on the collected inert files
-# — the same structural detector the Gate-2 checker uses (43065ca), so a
-# prefixed/self-extracting zip is caught and the two consumers cannot drift on
-# zip detection. The census consumes only the embedded policy, authenticated by
-# this entrypoint's own method-surface hash; a release-time test asserts that
-# embedding equals the pinned contract section, and `_require_boundary_match`
-# re-checks it per invocation as defense-in-depth. No pre-import contract parse
-# (a weaker first parse of a pinned surface was rejected — ADR-0001 amendment).
+# .py/.pyc/.so/package/symlink shadow exists under scripts/, so only the narrow
+# deferred stdlib imports below may run: atexit/shutil/tempfile create and
+# retire a cache prefix mechanically verified outside the repository (or the
+# served skill root when standalone), and zipfile performs pass 2's structural
+# archive check. Unsafe ambient temp roots refuse before prefix creation; the
+# created prefix is resolved and checked again before assignment. Pass 2 runs
+# `zipfile.is_zipfile` on the collected inert files — the same detector the
+# Gate-2 checker uses (43065ca), so a prefixed/self-extracting zip is caught and
+# the two consumers cannot drift on zip detection. Every first-party and other
+# import waits until pass 2 returns. The census consumes only the embedded
+# policy, authenticated by this entrypoint's own method-surface hash; a
+# release-time test asserts that embedding equals the pinned contract section,
+# and `_require_boundary_match` re-checks it per invocation as defense-in-depth.
+# No pre-import contract parse (a weaker first parse of a pinned surface was
+# rejected — ADR-0001 amendment).
 # ---------------------------------------------------------------------------
 _BOUNDARY_POLICY: dict = {
     "entrypoint": "deliberate-validate.py",
@@ -1001,20 +1062,73 @@ def _boundary_layout_census(scripts_dir: str) -> list[str]:
     return inert
 
 
-_boundary_inert_files = _boundary_layout_census(
-    os.path.dirname(os.path.abspath(__file__))
-)
+_boundary_scripts_dir = os.path.dirname(os.path.abspath(__file__))
+_boundary_inert_files = _boundary_layout_census(_boundary_scripts_dir)
 
 import atexit  # noqa: E402 — deferred by design: imports wait for pass 1
 import shutil  # noqa: E402
 import tempfile  # noqa: E402
 
+
+def _boundary_protected_root(scripts_dir: str) -> str:
+    """Outermost Git root containing the skill, or skill root if standalone."""
+    skill_root = os.path.realpath(os.path.dirname(scripts_dir))
+    protected_root = skill_root
+    cursor = skill_root
+    while True:
+        if os.path.exists(os.path.join(cursor, ".git")):
+            protected_root = cursor
+        parent = os.path.dirname(cursor)
+        if parent == cursor:
+            return protected_root
+        cursor = parent
+
+
+def _boundary_path_is_within(path: str, root: str) -> bool:
+    """Containment by filesystem identity; comparison errors are unsafe."""
+    real_root = os.path.realpath(root)
+    cursor = os.path.realpath(path)
+    while True:
+        try:
+            if os.path.samefile(cursor, real_root):
+                return True
+        except OSError:
+            return True
+        parent = os.path.dirname(cursor)
+        if parent == cursor:
+            return False
+        cursor = parent
+
+
 # Fresh, initially empty (mkdtemp), invocation-private (0o700), under the
-# process temp root, retired at exit, never reused across invocations
-# (ADR-0001). Set BEFORE any further import so even those imports' bytecode
-# lands in the private prefix. Redirecting alone is insufficient — pass 1 above
-# is what stops directly-read sourceless bytecode.
-sys.pycache_prefix = tempfile.mkdtemp(prefix="deliberate-pycache-")
+# process temp root but mechanically outside the repository (or outside the
+# served skill root when no Git root is present), retired at exit, never reused
+# across invocations (ADR-0001). A temp root inside the protected source tree —
+# directly, through a symlink, or through a case alias — refuses BEFORE prefix
+# creation. Containment compares filesystem identity, not path-string casing;
+# errors are unsafe. The created prefix is resolved and checked again before
+# assignment, closing a symlink swap between selection and creation.
+# Redirecting alone is insufficient — pass 1 above is what stops directly-read
+# sourceless bytecode.
+_boundary_source_root = _boundary_protected_root(_boundary_scripts_dir)
+_boundary_temp_root = os.path.realpath(tempfile.gettempdir())
+if _boundary_path_is_within(_boundary_temp_root, _boundary_source_root):
+    _boundary_refuse(
+        "cache temp root must resolve outside the repository or served skill "
+        "root (ADR-0001)",
+        _boundary_temp_root,
+    )
+_boundary_cache_prefix = os.path.realpath(
+    tempfile.mkdtemp(prefix="deliberate-pycache-", dir=_boundary_temp_root)
+)
+if _boundary_path_is_within(_boundary_cache_prefix, _boundary_source_root):
+    shutil.rmtree(_boundary_cache_prefix, ignore_errors=True)
+    _boundary_refuse(
+        "created cache prefix must resolve outside the repository or served "
+        "skill root (ADR-0001)",
+        _boundary_cache_prefix,
+    )
+sys.pycache_prefix = _boundary_cache_prefix
 atexit.register(shutil.rmtree, sys.pycache_prefix, ignore_errors=True)
 
 # Pass 2: pass 1 refused every importable shadow, so importing zipfile (which
@@ -1048,11 +1162,15 @@ import yaml  # noqa: E402
 Add one bullet to the docstring's "Validator boundary" list:
 
 ```
-- Pre-import boundary: before any shadowable import, a two-pass stdlib-only
+- Pre-import boundary: before any first-party import, a two-pass stdlib-only
   census of scripts/ refuses unexpected artifacts fail-closed (ADR-0001) —
-  layout rules on os/sys alone, then a structural zip check (zipfile.is_zipfile,
-  after shadows are cleared) that catches prefixed archives; bytecode is
-  redirected to a fresh invocation-private cache prefix retired at exit; the
+  layout rules run on os/sys before any shadowable import, then the narrow
+  deferred stdlib set performs a structural zip check (zipfile.is_zipfile,
+  after direct shadows are cleared) that catches prefixed archives; bytecode is
+  redirected to a fresh invocation-private cache prefix mechanically verified
+  outside the repository (or served skill root when standalone) and retired at
+  exit, with repo-, bundle-, scripts-, allowed-data-, symlink-resolved-, and
+  case-aliased internal temp roots refused before first-party import; the
   embedded census policy is authenticated by this file's own method-surface
   hash and asserted equal to contract-data.yaml's import-boundary section by a
   release-time test, with _require_boundary_match re-checking it at every load.
@@ -1248,7 +1366,7 @@ In `docs/specs/2026-07-13-deliberate.md`:
 - In the Design lineage list, append after the v27 entry:
 
 ```markdown
-- **v28** (contract evolution — v6 module topology and the import-execution boundary): the first physical extraction under ADR-0001 — `scripts/_deliberate_shared.py` (error/refusal constructors, read authorization, safe-YAML foundation) leaves the entrypoint; `validation.method-surfaces` grows to eight entries and `contract-data-version` bumps to 6, hard-cutting pre-topology capsules (no migration path; no legacy population). The import-execution boundary becomes one explicit control (hardening portfolio Option 2; placement decided by JP 2026-07-16): a declarative `import-boundary` policy section in the pinned `contract-data.yaml` feeds the Gate-2 authoring checker directly, and the entrypoint embeds the census subset (authenticated by its own method-surface hash), runs a two-pass stdlib-only pre-import census of `scripts/` (symlinks, `__pycache__`, bytecode and extension artifacts, zip archives by suffix and by zip structure so a prefixed/self-extracting archive is caught, out-of-allowlist directories, nested or non-conforming `.py` — refused fail-closed before any shadowable import), and sets a fresh invocation-private `sys.pycache_prefix` retired at exit. The embedded policy is asserted equal to the contract section by a release-time test; `_require_boundary_match` re-checks it per invocation as defense-in-depth (post-import, because a pre-import runtime match is circular under this cut — the contract-loading machinery is the extracted module — and a weaker pre-import parse was rejected). **To be verified by** the runtime-boundary battery (seeded sourceless `.pyc`, stdlib shadow, real and prefixed disguised zips, policy tamper, embedded-vs-contract equality, bytecode-freshness probe, prefix retirement and temp-root containment, predicate-vs-regex agreement), Gate-2 at two Python surfaces, dual-path smokes with the effective interpreter recorded, and exact-prompt end-to-end re-smokes on both runtimes per the debt-scan bar; the observed-proof sentence is added only after Tasks 6–7 pass (Task 7).
+- **v28** (contract evolution — v6 module topology and the import-execution boundary): the first physical extraction under ADR-0001 — `scripts/_deliberate_shared.py` (error/refusal constructors, read authorization, safe-YAML foundation) leaves the entrypoint; `validation.method-surfaces` grows to eight entries and `contract-data-version` bumps to 6, hard-cutting pre-topology capsules (no migration path; no legacy population). The import-execution boundary becomes one explicit control (hardening portfolio Option 2; placement decided by JP 2026-07-16): a declarative `import-boundary` policy section in the pinned `contract-data.yaml` feeds the Gate-2 authoring checker directly, and the entrypoint embeds the census subset (authenticated by its own method-surface hash), runs a two-pass stdlib-only pre-first-party-import census of `scripts/` (layout hazards — symlinks, `__pycache__`, bytecode and extension artifacts, archive suffixes, out-of-allowlist directories, nested or non-conforming `.py` — refused on `os`/`sys` before any shadowable import; zip structure checked by the narrow deferred stdlib set after direct shadows are cleared so a prefixed/self-extracting archive is caught), and sets a fresh invocation-private `sys.pycache_prefix` mechanically verified outside the repository (or served skill root when standalone) and retired at exit, refusing repo-, bundle-, `scripts/`-, allowed-data-, symlink-resolved-, and case-aliased internal temp roots before first-party import. The embedded policy is asserted equal to the contract section by a release-time test; `_require_boundary_match` re-checks it per invocation as defense-in-depth (post-import, because a pre-import runtime match is circular under this cut — the contract-loading machinery is the extracted module — and a weaker pre-import parse was rejected). **To be verified by** the runtime-boundary battery (seeded sourceless `.pyc`, stdlib shadow, real and prefixed disguised zips, policy tamper, embedded-vs-contract equality, bytecode-freshness probe, external-prefix lifecycle and unsafe-temp-root refusals including symlink and case aliases, predicate-vs-regex agreement), Gate-2 at two Python surfaces, dual-path smokes with the effective interpreter recorded, and exact-prompt end-to-end re-smokes on both runtimes per the debt-scan bar; the observed-proof sentence is added only after Tasks 6–7 pass (Task 7).
 ```
 
 The verification clause is deliberately prospective ("To be verified by") because Tasks 6–7 have not run at this point and Task 7 may pause for JP or fail; Task 7 replaces it with an observed statement once both smoke tasks succeed.
@@ -1268,9 +1386,9 @@ Create `docs/smoke-tests/<execution date>_deliberate-v6-dual-path-runtime-bounda
 | ADR-0001 runtime obligation | Evidence |
 | --- | --- |
 | Seeded stale repo-local bytecode is ignored/refused | `test_seeded_pycache_directory_is_refused`, `test_seeded_sourceless_pyc_is_refused_without_executing` |
-| Chosen prefix starts empty | `tempfile.mkdtemp` semantics + `test_cache_prefix_is_scoped_private_and_retired` |
+| Chosen prefix starts empty and outside the protected source root | `tempfile.mkdtemp` semantics + the external-success and unsafe-root branches of `test_cache_prefix_is_external_private_retired_and_unsafe_roots_refuse` |
 | Second invocation cannot execute the first's cached code | `test_second_invocation_never_reuses_prior_bytecode` |
-| No repo-local bytecode created or read | `test_cache_prefix_is_scoped_private_and_retired` + census `__pycache__` refusal |
+| No repo-local bytecode created or read | repo/bundle/`scripts/`/allowed-data/symlink/case-alias refusal branches of `test_cache_prefix_is_external_private_retired_and_unsafe_roots_refuse` + census `__pycache__` refusal |
 | Seeded sourceless `.pyc` refused without executing | marker assertions in both `.pyc` tests |
 | Both delivery paths, interpreter recorded | this smoke record, sections 1–3 |
 
@@ -1302,7 +1420,7 @@ Every task commits a green tree, so rollback is `git revert` (or branch abandonm
 
 ## Self-review notes (already applied)
 
-- Coverage check against ADR-0001's five runtime obligations, the portfolio's validation plan (mismatch test, runtime negative tests for every E005 class, dual-path, interpreter recording, latency baseline), and the decided open questions: each maps to a task above; the sole deliberate deviation is that cache-prefix *obligations* are not declared as policy data — they are behavior, proven by tests, with no mechanical consumer; the ADR amendment records this.
+- Coverage check against ADR-0001's five runtime obligations, the portfolio's validation plan (mismatch test, runtime negative tests for every E005 class, external cache-prefix placement with unsafe repo/bundle/`scripts/`/allowed-data/symlink/case-alias temp-root refusals, dual-path, interpreter recording, latency baseline), and the decided open questions: each maps to a task above; the sole deliberate deviation is that cache-prefix *obligations* are not declared as policy data — they are behavior, proven by tests, with no mechanical consumer; the ADR amendment records this.
 - Consistency: `_BOUNDARY_POLICY` keys equal the contract section minus `banned-identifiers` (no `zip-magics` — zip detection is structural); the checker requires the full key set; `_require_boundary_match` iterates only embedded keys, so the ban list never falsely mismatches; `test_embedded_runtime_policy_matches_contract_section` pins the embedding to the contract at release time.
 - Ordering decision (2026-07-16 scrutiny, Blocker 2): the embedded census is authenticated by the entrypoint's own method-surface hash and by a release-time equality test; `_require_boundary_match` runs post-import as defense-in-depth because a pre-import *runtime* match is circular (the contract-loading machinery is the extracted first-party module) and a weaker pre-import parse was rejected. This is the deliberately-accepted weaker-than-"strong-form" boundary; ADR-0001 and the proposal are amended to say so.
 - The characterization suite is the transcription-drift net for the moved block; expected test counts at each boundary: 39 → 43 → 46 → 57 → 59 (predictions until run; recompute if a test is added or split).
