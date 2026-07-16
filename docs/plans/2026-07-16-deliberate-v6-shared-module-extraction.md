@@ -204,7 +204,7 @@ Change the version line:
 contract-data-version: 6
 ```
 
-Insert this section between the `bounds:` block and the `obliged-artifacts:` comment banner (top-level key; placement between existing top-level sections is free — key-set validation is exact-set, not ordered):
+Insert this section between the `bounds:` block and the `obliged-artifacts:` comment banner (top-level key; the *validator* accepts any placement between top-level sections — key-set validation is exact-set, not ordered). Two Task 1.1 tests do couple to the format specified here, though, so keep it: `test_contract_missing_import_boundary_is_refused` slices the section out via `text.index("\n# ", start)` (relies on a comment banner immediately following the section) and `test_contract_policy_tamper_is_refused_at_load` asserts `text.count("[.egg, .whl, .zip]") == 1` (relies on the flow-style `archive-suffixes` list). Emit the section exactly as written below.
 
 ```yaml
 # ---------------------------------------------------------------------------
@@ -458,7 +458,7 @@ def make_layout(
     return root
 ```
 
-Run the file's suite; the two new tests fail (checker still uses constants), existing tests still pass:
+Run the file's suite; `test_checker_consumes_the_contract_policy_not_constants` fails (the checker still uses constants), while `test_live_policy_floor_holds_known_hazard_classes` and `test_embedded_runtime_policy_matches_contract_section` pass immediately (they depend only on Task 1's contract section and embedded policy), and existing tests still pass:
 
 ```bash
 uv run --with pyyaml --with pytest pytest skills/deliberate/tests/test_import_closure.py -q
@@ -595,7 +595,21 @@ def inventory_python_surfaces(loaded: object, contract_data: Path) -> set[str]:
     return {str(surface) for surface in surfaces if str(surface).endswith(".py")}
 ```
 
-Update the direct callers in `test_import_closure.py`: the live-tree test builds the policy explicitly —
+Update **every** direct `import_closure(...)` caller in `test_import_closure.py` — the signature is now `import_closure(entrypoint, policy)`, so a one-arg call raises `TypeError` that `pytest.raises(SystemExit, …)` will not catch. There are three:
+
+- `test_import_resolving_to_sourceless_bytecode_is_rejected` and `test_import_resolving_to_directory_is_rejected` each call `import_closure(<entrypoint path>)`; build the policy first and pass it, e.g.
+
+```python
+    from check_import_closure import BoundaryPolicy
+
+    policy = BoundaryPolicy(LIVE_POLICY, root / "references" / "contract-data.yaml")
+    with pytest.raises(SystemExit, match=r"never bytecode, a package, or a symlink"):
+        import_closure(root / "scripts" / "deliberate-validate.py", policy)
+```
+
+  (These layouts are built by `make_layout`, which now writes the live policy section, so `LIVE_POLICY` is the right value.)
+
+- The live-tree test builds the policy explicitly —
 
 ```python
 def test_live_tree_passes_with_entrypoint_only_closure() -> None:
@@ -815,9 +829,15 @@ Also append to `skills/deliberate/tests/test_import_closure.py` a non-executing 
 ```python
 def test_runtime_name_predicate_matches_contract_regex() -> None:
     """The entrypoint's re-free `_boundary_module_name_conforms` must agree with
-    the contract's `module-name-pattern` over a generated corpus. Non-executing:
-    the function is dependency-free, extracted by source segment and exec'd in
-    isolation, never by importing production code."""
+    the contract's `module-name-pattern` over a generated corpus of realistic
+    (newline-free) filenames. Non-executing: the function is dependency-free,
+    extracted by source segment and exec'd in isolation, never by importing
+    production code. Scope note: `re`'s `$` matches before a trailing newline
+    while the predicate requires `.endswith('.py')`, so a name like
+    `"_deliberate_x.py\\n"` would disagree — but that class is unreachable
+    because both the runtime census and the Gate-2 checker gate on
+    `lower.endswith('.py')` before applying the name rule (fail-closed either
+    way), so the corpus is deliberately newline-free."""
     import ast
     import itertools
     import re as _re
