@@ -24,21 +24,25 @@ Alongside the set comparison, the same run enforces the complete ADR-0001
 - A recursive census rejects every unexpected importable artifact anywhere
   under ``scripts/``: symlinks (file or directory, including symlinked
   packages), ``__pycache__`` entries, bytecode and extension-module files
-  (any loader suffix other than flat source), and directories outside the
-  declared data allowlist. Files with no loader suffix are import-inert
-  and permitted.
+  (any loader suffix other than flat source), zip-format archives
+  (``.zip``/``.egg``/``.whl``, loadable through zipimport), and directories
+  outside the declared data allowlist. Files with no loadable suffix are
+  import-inert and permitted.
 - A statically imported name with any local presence in ``scripts/`` other
   than its inventoried flat ``.py`` source is rejected rather than
   classified as third-party, so an import can never resolve to sourceless
   bytecode, a package directory, or a symlink.
-- Dynamic-import and code-execution machinery is rejected by a
-  position-independent identifier ban: any occurrence of a banned
-  identifier in any syntactic role — name, attribute, alias, argument,
-  definition — or as an identifier token inside a string literal fails the
-  check. Identifiers computed at runtime from constructed strings are
-  statically undetectable by design; that residual is covered by diff
-  review and by the census guarantee that no uninventoried repo-local
-  artifact exists to import.
+- Dynamic-import and code-execution machinery is rejected by a positional
+  identifier ban: a banned name used as an identifier (``ast.Name``) or as
+  an imported module or symbol (``import`` / ``from ... import``) fails the
+  check. The ban does not scan attribute names or string literals, so
+  ordinary ``re.compile`` or the word "eval" in a docstring is not a false
+  positive. Reaching import or exec machinery still requires naming a banned
+  identifier or a reflection gadget; the gadget/computed-string residual is
+  statically undetectable by design and is backstopped by the census
+  guarantee that no loadable artifact sits uninventoried under ``scripts/``.
+  Native-code loaders (for example ``ctypes`` loading a shared library) load
+  outside the Python-module import graph and outside this gate's boundary.
 
 Non-executing by design: importing the entrypoint or any production module
 would execute code before the comparison and cross the authentication
@@ -71,13 +75,13 @@ BANNED_IDENTIFIERS = frozenset(
         "__builtins__",
         "builtins",
         "importlib",
+        "zipimport",
         "runpy",
         "exec",
         "eval",
         "compile",
     }
 )
-IDENTIFIER_TOKEN = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 # Every suffix the running interpreter's FileFinder can load, plus the
 # cross-platform forms this platform does not register (.pyw/.pyc/.pyo/.pyd),
 # so a census run on macOS still rejects artifacts another platform loads.
@@ -89,39 +93,60 @@ LOADER_SUFFIXES = frozenset(importlib.machinery.all_suffixes()) | {
     ".so",
 }
 ARTIFACT_SUFFIXES = tuple(sorted(s.lower() for s in LOADER_SUFFIXES if s != ".py"))
+# Zip-format archives carry no FileFinder loader suffix but are loadable as
+# code through zipimport / path hooks, so the census rejects them too — no
+# importable artifact may sit beside the modules while the gate is green.
+ARCHIVE_SUFFIXES = (".egg", ".whl", ".zip")
+CENSUS_FORBIDDEN_SUFFIXES = tuple(
+    sorted(set(ARTIFACT_SUFFIXES) | set(ARCHIVE_SUFFIXES))
+)
 
 
-def _identifier_candidates(node: ast.AST):
-    """Every identifier-shaped string the node carries, in any syntactic role.
-
-    String constants are scanned token-wise so a banned name smuggled as a
-    literal (``getattr(x, "__import__")``) is caught; dotted strings from
-    import statements are split so any dotted segment counts.
-    """
-    if isinstance(node, ast.Constant):
-        if isinstance(node.value, str):
-            yield from IDENTIFIER_TOKEN.findall(node.value)
-        return
-    for _field, value in ast.iter_fields(node):
-        items = value if isinstance(value, list) else [value]
-        for item in items:
-            if isinstance(item, str):
-                yield from item.split(".")
+def _reject_if_banned(name: str, node: ast.AST, source_path: Path) -> None:
+    """Fail when any dotted segment of ``name`` is banned import/exec machinery."""
+    for segment in name.split("."):
+        if segment in BANNED_IDENTIFIERS:
+            line = getattr(node, "lineno", "?")
+            raise SystemExit(
+                "import-closure check failed: dynamic import machinery is "
+                "forbidden in production sources (ADR-0001), because the "
+                f"static closure must be authoritative. Got: {segment!r} "
+                f"(line {line}) in {source_path}"
+            )
 
 
 def reject_banned_identifiers(tree: ast.AST, source_path: Path) -> None:
-    """Fail on any syntactic occurrence of dynamic-import or code-execution machinery."""
+    """Fail on named dynamic-import or code-execution machinery.
+
+    The ban is positional, not textual: it fires on a banned name used as an
+    identifier (``ast.Name``, any context) or as an imported module or symbol
+    (``import`` / ``from ... import``). It deliberately does not scan attribute
+    names or string literals, so ordinary ``re.compile`` or the word "eval" in
+    a docstring is not a false positive. Reaching import or exec machinery
+    still requires naming a banned identifier — ``__import__``, ``builtins``,
+    ``__builtins__``, ``importlib``, ``zipimport``, ``runpy``, ``exec``,
+    ``eval``, ``compile`` — or a reflection gadget; the gadget/computed-string
+    residual is statically undetectable by design and is backstopped by the
+    census guarantee that no loadable artifact sits uninventoried under
+    ``scripts/``.
+    """
     for node in ast.walk(tree):
-        for candidate in _identifier_candidates(node):
-            if candidate in BANNED_IDENTIFIERS:
-                line = getattr(node, "lineno", "?")
+        if isinstance(node, ast.Name):
+            if node.id in BANNED_IDENTIFIERS:
                 raise SystemExit(
                     "import-closure check failed: dynamic import machinery is "
                     "forbidden in production sources (ADR-0001), because the "
-                    "static closure must be authoritative; the ban is "
-                    "position-independent and covers string-literal tokens. "
-                    f"Got: {candidate!r} (line {line}) in {source_path}"
+                    f"static closure must be authoritative. Got: {node.id!r} "
+                    f"(line {node.lineno}) in {source_path}"
                 )
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                _reject_if_banned(alias.name, node, source_path)
+        elif isinstance(node, ast.ImportFrom):
+            if node.module:
+                _reject_if_banned(node.module, node, source_path)
+            for alias in node.names:
+                _reject_if_banned(alias.name, node, source_path)
 
 
 def classify_first_party(scripts_dir: Path, top: str, source_path: Path) -> bool:
@@ -208,13 +233,32 @@ def import_closure(entrypoint: Path) -> set[Path]:
     return closure
 
 
+ZIP_MAGICS = (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")
+
+
+def _has_zip_magic(path: Path) -> bool:
+    """True when the file begins with a zip local/central/spanned signature.
+
+    Zip archives import as code through zipimport regardless of filename, so a
+    disguised-suffix archive (``payload.dat``) added to ``sys.path`` would load
+    without naming any banned identifier. Content-sniffing the four-byte magic
+    closes that gap so the census guarantee — no loadable Python artifact sits
+    uninventoried under ``scripts/`` — actually holds, which is what lets the
+    identifier ban stay narrow (attribute names and string literals unscanned).
+    """
+    with path.open("rb") as handle:
+        return handle.read(4) in ZIP_MAGICS
+
+
 def census_scripts_layout(scripts_dir: Path) -> set[Path]:
     """Fail-closed census of everything under scripts/; returns production ``.py`` files.
 
     Rejects every unexpected importable artifact — symlinks, ``__pycache__``,
-    bytecode and extension modules, directories outside the declared data
-    allowlist, nested or non-conforming ``.py`` — whether or not anything
-    imports it. Files with no loader suffix cannot be imported and pass.
+    bytecode and extension modules, zip-format archives (by suffix and by
+    content signature), directories outside the declared data allowlist,
+    nested or non-conforming ``.py`` — whether or not anything imports it.
+    Files with no loadable suffix and no archive signature are import-inert
+    and pass.
     """
     if scripts_dir.is_symlink():
         raise SystemExit(
@@ -266,12 +310,19 @@ def census_scripts_layout(scripts_dir: Path) -> set[Path]:
                 )
             files.add(path.resolve())
             continue
-        if any(lower_name.endswith(suffix) for suffix in ARTIFACT_SUFFIXES):
+        if any(lower_name.endswith(suffix) for suffix in CENSUS_FORBIDDEN_SUFFIXES):
             raise SystemExit(
                 "import-closure check failed: importable non-source artifact "
-                "is forbidden under scripts/ (ADR-0001) — bytecode and "
-                "extension modules execute without matching any hashed "
-                f"source. Got: {path}"
+                "is forbidden under scripts/ (ADR-0001) — bytecode, extension "
+                "modules, and zip-format archives execute or import without "
+                f"matching any hashed source. Got: {path}"
+            )
+        if _has_zip_magic(path):
+            raise SystemExit(
+                "import-closure check failed: file carries a zip archive "
+                "signature despite an inert suffix (ADR-0001) — a disguised "
+                "archive on sys.path imports as code through zipimport without "
+                f"naming any banned identifier. Got: {path}"
             )
     return files
 

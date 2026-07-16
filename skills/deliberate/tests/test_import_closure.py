@@ -423,18 +423,125 @@ def test_exec_identifier_is_rejected(tmp_path: Path) -> None:
         check(root)
 
 
-def test_banned_identifier_inside_string_literal_is_rejected(tmp_path: Path) -> None:
-    """A banned name smuggled as a string literal is caught token-wise."""
+def test_zipimport_reference_is_rejected(tmp_path: Path) -> None:
+    """zipimport loads code from an archive the static closure never sees.
+
+    Reproduces the 2026-07-15 review-reviewer bypass: the entrypoint imported
+    zipimport and executed a module from a `.zip`; zipimport was absent from
+    the ban and `.zip` absent from the census, so the gate passed green.
+    """
     root = make_layout(
         tmp_path,
-        'x = getattr(object, "__import__")\n',
+        'import zipimport\nzipimport.zipimporter("payload.zip").load_module("evil")\n',
         {},
         ["scripts/deliberate-validate.py"],
     )
     with pytest.raises(
-        SystemExit, match=r"dynamic import machinery is forbidden.*__import__"
+        SystemExit, match=r"dynamic import machinery is forbidden.*zipimport"
     ):
         check(root)
+
+
+def test_zip_archive_artifact_is_rejected(tmp_path: Path) -> None:
+    """A `.zip` beside the modules is loadable via zipimport and must fail the census.
+
+    Defense in depth for the zipimport bypass: the archive is rejected on disk
+    even when no source references zipimport.
+    """
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    (root / "scripts" / "payload.zip").write_bytes(b"PK\x03\x04fake-archive")
+    with pytest.raises(SystemExit, match=r"importable non-source artifact"):
+        check(root)
+
+
+def test_disguised_zip_archive_is_rejected(tmp_path: Path) -> None:
+    """A zip with an inert suffix still imports via sys.path + zipimport hook.
+
+    Reproduces the follow-up bypass found while verifying the narrowed ban:
+    `payload.dat` (real zip) added to sys.path loads `import evilmod` with no
+    banned identifier named. Content-sniffing the zip magic closes it, keeping
+    the census guarantee that justifies the narrowed identifier ban.
+    """
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    (root / "scripts" / "payload.dat").write_bytes(b"PK\x03\x04rest-of-archive")
+    with pytest.raises(
+        SystemExit, match=r"zip archive signature despite an inert suffix"
+    ):
+        check(root)
+
+
+def test_inert_non_archive_file_still_passes(tmp_path: Path) -> None:
+    """A genuinely inert file (no loadable suffix, no zip magic) is allowed."""
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    (root / "scripts" / "notes.txt").write_bytes(b"plain text, not an archive\n")
+    (root / "scripts" / ".DS_Store").write_bytes(b"\x00\x00\x00\x01Bud1")
+    assert check(root).endswith("1 Python surface(s)")
+
+
+def test_wheel_and_egg_archives_are_rejected(tmp_path: Path) -> None:
+    """`.whl` and `.egg` are zip-format archives loadable as code."""
+    for suffix in (".whl", ".egg"):
+        root = make_layout(
+            tmp_path / suffix.strip("."),
+            "import os\n",
+            {},
+            ["scripts/deliberate-validate.py"],
+        )
+        (root / "scripts" / f"payload{suffix}").write_bytes(b"PK\x03\x04fake")
+        with pytest.raises(SystemExit, match=r"importable non-source artifact"):
+            check(root)
+
+
+def test_re_compile_attribute_is_allowed(tmp_path: Path) -> None:
+    """`re.compile` is ordinary code, not dynamic-import machinery.
+
+    Guards against the over-broad ban that rejected benign attribute access.
+    """
+    root = make_layout(
+        tmp_path,
+        'import re\nPATTERN = re.compile(r"[a-z]+")\n',
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    assert check(root).endswith("1 Python surface(s)")
+
+
+def test_method_named_compile_is_allowed(tmp_path: Path) -> None:
+    """A method or attribute named `compile`/`eval`/`exec` is not machinery."""
+    root = make_layout(
+        tmp_path,
+        "class C:\n    def compile(self):\n        return 1\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    assert check(root).endswith("1 Python surface(s)")
+
+
+def test_banned_word_in_prose_is_allowed(tmp_path: Path) -> None:
+    """Banned names as English words in a docstring or string are not rejected."""
+    root = make_layout(
+        tmp_path,
+        '"""We eval nothing; do not exec or compile here."""\n'
+        'MSG = "could not compile the report"\n',
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    assert check(root).endswith("1 Python surface(s)")
 
 
 def test_live_tree_passes_with_entrypoint_only_closure() -> None:
