@@ -4,6 +4,12 @@ All notable changes to the Review Family plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.10.0 - 2026-07-16
+
+### Added
+
+- `scrutinize` gains a continued-investment handoff on re-scrutiny: when a valid re-scrutiny finding opens a new structural repair class, mainly polices machinery earlier repairs added, or would change the target's category, the re-scrutiny paragraph now names `recheck-investment` (where available) as the next move before prescribing another hardening cycle — this review keeps owning whether the finding is real; that check owns only whether continued investment needs renewed human authorization. One sentence appended to the re-scrutiny paragraph; both CANON cores, routing frontmatter, verdict vocabulary, and every other organ unchanged. The seam is slice 2 of the `recheck-investment` caller integrations (the skill born from the cross-model slim-control retirement, that repo's ADR-0034), landed alongside the sibling `plan-panel-loop` seam and behavior-proven by a blind five-fixture proxy suite (machinery-policing re-scrutiny routes; an ordinary unfixed defect does not). This release is the authorized publish: the Codex cache moves 0.9.0 → 0.10.0, folding in 0.9.1's deferred conciseness campaign and clearing the standing expected `DRIFT`.
+
 ## 0.9.1 - 2026-07-13
 
 ### Changed
