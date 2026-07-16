@@ -25,8 +25,10 @@ Alongside the set comparison, the same run enforces the complete ADR-0001
   under ``scripts/``: symlinks (file or directory, including symlinked
   packages), ``__pycache__`` entries, bytecode and extension-module files
   (any loader suffix other than flat source), zip-format archives
-  (``.zip``/``.egg``/``.whl``, loadable through zipimport), and directories
-  outside the declared data allowlist. Files with no loadable suffix are
+  (``.zip``/``.egg``/``.whl``, loadable through zipimport) and any other file
+  whose bytes form a valid zip archive (a prefixed/self-extracting zip whose
+  first bytes are not ``PK``), and directories outside the declared data
+  allowlist. Files with no loadable suffix and no zip structure are
   import-inert and permitted.
 - A statically imported name with any local presence in ``scripts/`` other
   than its inventoried flat ``.py`` source is rejected rather than
@@ -62,6 +64,7 @@ import ast
 import importlib.machinery
 import re
 import sys
+import zipfile
 from pathlib import Path
 
 import yaml
@@ -233,21 +236,21 @@ def import_closure(entrypoint: Path) -> set[Path]:
     return closure
 
 
-ZIP_MAGICS = (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")
-
-
-def _has_zip_magic(path: Path) -> bool:
-    """True when the file begins with a zip local/central/spanned signature.
+def _is_zip_archive(path: Path) -> bool:
+    """True when the file is a valid zip archive (importable through zipimport).
 
     Zip archives import as code through zipimport regardless of filename, so a
     disguised-suffix archive (``payload.dat``) added to ``sys.path`` would load
-    without naming any banned identifier. Content-sniffing the four-byte magic
-    closes that gap so the census guarantee — no loadable Python artifact sits
-    uninventoried under ``scripts/`` — actually holds, which is what lets the
-    identifier ban stay narrow (attribute names and string literals unscanned).
+    without naming any banned identifier. Detection is structural, not a
+    first-bytes magic check: ``zipfile.is_zipfile`` locates the end-of-central-
+    directory record the way zipimport does, so a zip carrying an arbitrary
+    prefix (a shell or self-extracting stub, whose first bytes are not ``PK``)
+    is still caught — the case a four-byte magic sniff misses. That keeps the
+    census guarantee — no loadable Python artifact sits uninventoried under
+    ``scripts/`` — actually holding, which is what lets the identifier ban stay
+    narrow (attribute names and string literals unscanned).
     """
-    with path.open("rb") as handle:
-        return handle.read(4) in ZIP_MAGICS
+    return zipfile.is_zipfile(path)
 
 
 def census_scripts_layout(scripts_dir: Path) -> set[Path]:
@@ -255,10 +258,10 @@ def census_scripts_layout(scripts_dir: Path) -> set[Path]:
 
     Rejects every unexpected importable artifact — symlinks, ``__pycache__``,
     bytecode and extension modules, zip-format archives (by suffix and by
-    content signature), directories outside the declared data allowlist,
-    nested or non-conforming ``.py`` — whether or not anything imports it.
-    Files with no loadable suffix and no archive signature are import-inert
-    and pass.
+    zip structure, so a prefixed/self-extracting zip is caught too),
+    directories outside the declared data allowlist, nested or non-conforming
+    ``.py`` — whether or not anything imports it. Files with no loadable suffix
+    and no zip structure are import-inert and pass.
     """
     if scripts_dir.is_symlink():
         raise SystemExit(
@@ -317,10 +320,10 @@ def census_scripts_layout(scripts_dir: Path) -> set[Path]:
                 "modules, and zip-format archives execute or import without "
                 f"matching any hashed source. Got: {path}"
             )
-        if _has_zip_magic(path):
+        if _is_zip_archive(path):
             raise SystemExit(
-                "import-closure check failed: file carries a zip archive "
-                "signature despite an inert suffix (ADR-0001) — a disguised "
+                "import-closure check failed: file is a valid zip archive "
+                "despite an inert suffix (ADR-0001) — a disguised or prefixed "
                 "archive on sys.path imports as code through zipimport without "
                 f"naming any banned identifier. Got: {path}"
             )

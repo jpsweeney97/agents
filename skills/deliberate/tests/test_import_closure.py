@@ -6,11 +6,21 @@ throwaway skill layouts on disk — never by importing production code.
 
 from __future__ import annotations
 
+import io
+import zipfile
 from pathlib import Path
 
 import pytest
 
 from check_import_closure import check, import_closure
+
+
+def _zip_bytes(arcname: str = "evilmod.py", body: str = "VALUE = 1\n") -> bytes:
+    """A real, structurally valid zip archive (has an end-of-central-directory)."""
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr(arcname, body)
+    return buffer.getvalue()
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 
@@ -464,8 +474,8 @@ def test_disguised_zip_archive_is_rejected(tmp_path: Path) -> None:
 
     Reproduces the follow-up bypass found while verifying the narrowed ban:
     `payload.dat` (real zip) added to sys.path loads `import evilmod` with no
-    banned identifier named. Content-sniffing the zip magic closes it, keeping
-    the census guarantee that justifies the narrowed identifier ban.
+    banned identifier named. Structural zip detection closes it, keeping the
+    census guarantee that justifies the narrowed identifier ban.
     """
     root = make_layout(
         tmp_path,
@@ -473,9 +483,34 @@ def test_disguised_zip_archive_is_rejected(tmp_path: Path) -> None:
         {},
         ["scripts/deliberate-validate.py"],
     )
-    (root / "scripts" / "payload.dat").write_bytes(b"PK\x03\x04rest-of-archive")
+    (root / "scripts" / "payload.dat").write_bytes(_zip_bytes())
     with pytest.raises(
-        SystemExit, match=r"zip archive signature despite an inert suffix"
+        SystemExit, match=r"valid zip archive despite an inert suffix"
+    ):
+        check(root)
+
+
+def test_prefixed_zip_archive_is_rejected(tmp_path: Path) -> None:
+    """A valid zip carrying an arbitrary prefix (first bytes not ``PK``) is caught.
+
+    Regression for the 2026-07-16 scrutiny finding: a four-byte magic sniff
+    reads only offset 0, so a shell/self-extracting stub prepended to a real
+    zip passed the census green while zipimport still loaded a module from it.
+    zipimport locates the archive from its trailing end-of-central-directory
+    record, so a structural check must too.
+    """
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    prefix = b"#!/bin/sh\n# self-extracting stub; bytes below are a real zip\n"
+    payload = prefix + _zip_bytes()
+    assert payload[:4] != b"PK\x03\x04"
+    (root / "scripts" / "payload.dat").write_bytes(payload)
+    with pytest.raises(
+        SystemExit, match=r"valid zip archive despite an inert suffix"
     ):
         check(root)
 
