@@ -1,0 +1,1154 @@
+# Implementation Plan: deliberate v6 — `_deliberate_shared.py` extraction under a single-sourced import-boundary policy
+
+**Date:** 2026-07-16 · **Branch:** `feature/deliberate-v6-shared-module` (created at planning time; the ADR/portfolio decision folds and this plan are its first commits) · **Executor:** `execute-plan` or a follow-up session working task-by-task.
+
+## Governing sources (read before executing)
+
+- `docs/adr/0001-authenticate-deliberate-modules-as-direct-method-surfaces.md` — the authentication model, both rollout gates, the five runtime obligations, and the 2026-07-16 amendment (policy placement in pinned `contract-data.yaml`; embedded-values runtime mechanism; single v6 cut).
+- `docs/hardening/2026-07-16-deliberate-import-boundary/proposals/import-execution-boundary.md` — Option 2 (chosen), its validation plan and work packages, decided open questions.
+- `docs/audits/2026-07-15-deliberate-validator-debt-scan.md` — drift-class rules (line ~327) and the cross-runtime smoke bar ("Re-run an exact Codex and Claude smoke after any physical topology change").
+- `skills/deliberate/tests/check_import_closure.py` — the Gate-2 authoring checker whose census semantics the runtime preflight mirrors.
+
+## Current state (verified 2026-07-16 at `fc86e7b`)
+
+- `main` holds the landed Gate-2 arc; worktree clean; full suite 38 passed in ~59s; Gate-2 checker exit 0 with "agree: 1 Python surface(s)"; fixtures 158/158.
+- `skills/deliberate/scripts/deliberate-validate.py` is the single production Python surface (10,667 lines); `contract-data-version: 5`; `validation.method-surfaces` has seven entries.
+- The entrypoint has no first-party imports; `yaml` is used only inside the block this plan extracts (verified: zero `yaml.` references outside lines 59–233).
+
+## What this plan builds
+
+One `contract-data-version` bump to 6 delivering, together: (a) a declarative `import-boundary` policy section in the pinned `references/contract-data.yaml`; (b) the Gate-2 authoring checker consuming that section directly; (c) a stdlib-only pre-import census plus fresh invocation-private `sys.pycache_prefix` in the entrypoint, with the embedded policy rendering compared against the contract at every load; (d) the first physical extraction, `scripts/_deliberate_shared.py` (error/refusal constructors, read authorization, safe-YAML foundation), entering `method-surfaces` at the default (Generate) frontier; (e) the companion doc, test, smoke, and spec updates.
+
+Non-goals: no further module splits (CH-1 stays gated on this landing), no launcher/staged-root (Option 3), no broadening of the external `sys.path` residual (portfolio open question 4 stays open), no plugin publish, no push, no merge to `main` — landing is JP's call.
+
+## File map
+
+| Path | Change | Responsibility |
+| --- | --- | --- |
+| `skills/deliberate/references/contract-data.yaml` | modify | version 5→6; new top-level `import-boundary` section; `method-surfaces` gains `scripts/_deliberate_shared.py` |
+| `skills/deliberate/scripts/deliberate-validate.py` | modify | embedded boundary policy + module-level pre-import census + fresh cache prefix; accepts/validates `import-boundary`; version gate 6; embedded-vs-contract comparison at every load; shared foundation removed, `from _deliberate_shared import …` added |
+| `skills/deliberate/scripts/_deliberate_shared.py` | create | the extracted foundation: exceptions, `fail`/`refuse`, `ReadSet`, `_decode_utf8`, `safe_parse`, `_UniqueKeyLoader`, `_NoAliasDumper`, `dump_yaml`, `SAFE_TAGS` |
+| `skills/deliberate/tests/check_import_closure.py` | modify | census/ban values loaded from the target root's `contract-data.yaml` `import-boundary` section |
+| `skills/deliberate/tests/test_import_closure.py` | modify | `make_layout` writes the policy section; live-tree test expects 2 surfaces; policy-floor and policy-binding tests |
+| `skills/deliberate/tests/test_runtime_boundary.py` | create | out-of-process battery: contract tamper, seeded-artifact refusals, benign passes, prefix lifecycle, bytecode-freshness probe, module-name grammar |
+| `skills/deliberate/SKILL.md` | modify | bootstrap verification hashes both production files; orchestrator hashing bullet names imported modules |
+| `skills/deliberate/references/capsule.md` | modify | method-identity prose includes the shared module |
+| `docs/specs/2026-07-13-deliberate.md` | modify | Status v27→v28; v28 lineage entry |
+| `docs/smoke-tests/2026-07-XX_deliberate-v6-dual-path-runtime-boundary.md` | create | dual-path evidence, effective interpreter, startup latency, obligation checklist |
+
+`skills/deliberate/tests/test_validator_cli_characterization.py` should need no edits: it derives method pins from the live contract at run time, pins `--help` output (no commands change), and pins the fixture summary (`158/158`, unchanged). If it fails at any task boundary, that is a regression to fix, not a test to update — with one exception noted in Task 1.
+
+## Design invariants (do not violate while executing)
+
+- The Gate-2 checker stays non-executing: `ast.parse` only, never importing production code.
+- The runtime census enforces layout rules only. Closure/inventory equality stays an authoring-gate concern: a flat, conforming, uninventoried module is inert at runtime because production code contains no dynamic-import machinery and the orchestrator hashes every method surface. Do not add a YAML read or inventory comparison before first-party import.
+- Only `os` and `sys` are imported before the census (both initialized during CPython startup, so they cannot be shadowed from `scripts/`); every other import — stdlib included — waits until the census has passed. This is what makes the seeded-`scripts/argparse.py` test pass.
+- Moved code is cut-and-pasted, never retyped: the characterization suite pins exact CLI messages, and any transcription drift fails it.
+- Production sources never name a banned identifier (`__import__`, `__builtins__`, `builtins`, `importlib`, `zipimport`, `runpy`, `exec`, `eval`, `compile`) as an identifier or import — string literals are fine (the ban is positional). Tests are outside that boundary and may use `py_compile`, `importlib`, etc.
+- Every task ends with the full suite green and a commit; no task leaves the tree red.
+
+Commands below assume the repo root as CWD. The ambient env lacks pyyaml/pytest: always run the suite as `uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q`.
+
+---
+
+## Task 0: Branch and baseline
+
+1. `git status --short --branch` — expect a clean tree on `feature/deliberate-v6-shared-module` (created at planning time, carrying the ADR amendment, portfolio decision fold, and this plan). If the branch is absent, create it from `main` at `fc86e7b` or later: `git switch -c feature/deliberate-v6-shared-module`.
+2. Baseline the suite and gates; expected outputs shown:
+
+```bash
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q          # 38 passed
+uv run --script skills/deliberate/tests/check_import_closure.py               # import closure, on-disk production files, and method-surfaces agree: 1 Python surface(s)
+uv run --script skills/deliberate/scripts/deliberate-validate.py fixtures --data skills/deliberate/references/contract-data.yaml | tail -1   # 158/158 fixtures behaved as required
+uv run --script skills/deliberate/scripts/deliberate-validate.py check-renderings --data skills/deliberate/references/contract-data.yaml     # exit 0
+```
+
+3. Capture the startup-latency baseline for the smoke record (the portfolio's validation plan requires a before/after read; no threshold exists, so record and compare):
+
+```bash
+for i in 1 2 3; do /usr/bin/time -p uv run --script skills/deliberate/scripts/deliberate-validate.py identity --data skills/deliberate/references/contract-data.yaml skills/deliberate/references/contract-data.yaml >/dev/null; done
+```
+
+Record the three `real` values in scratch notes for Task 6.
+
+## Task 1: Policy contract in `contract-data.yaml`, version 6, validator acceptance, embedded comparison
+
+### 1.1 Write the failing tests first
+
+Create `skills/deliberate/tests/test_runtime_boundary.py` with this exact content (later tasks append to it):
+
+```python
+"""Runtime import-boundary tests (ADR-0001 + 2026-07-16 amendment).
+
+Out-of-process by design: the boundary is module-level entrypoint behavior,
+so every case drives the real CLI on an isolated copy of the live bundle.
+Test code may use py_compile/importlib freely — the identifier ban governs
+production sources only.
+"""
+
+from __future__ import annotations
+
+import os
+import shutil
+import subprocess
+from pathlib import Path
+
+SKILL_ROOT = Path(__file__).resolve().parents[1]
+
+
+def make_bundle(tmp_path: Path) -> Path:
+    """Copy the live bundle (scripts/ + references/) into an isolated root."""
+    root = tmp_path / "bundle"
+    root.mkdir(parents=True)
+    shutil.copytree(SKILL_ROOT / "scripts", root / "scripts")
+    shutil.copytree(SKILL_ROOT / "references", root / "references")
+    return root
+
+
+def run_cli(
+    root: Path, *args: str, tmpdir: Path | None = None
+) -> subprocess.CompletedProcess[str]:
+    """Run the copied entrypoint in a deterministic subprocess."""
+    env = dict(os.environ, LC_ALL="C.UTF-8", PYTHONHASHSEED="0")
+    if tmpdir is not None:
+        env["TMPDIR"] = str(tmpdir)
+    return subprocess.run(
+        [
+            "uv",
+            "run",
+            "--script",
+            str(root / "scripts" / "deliberate-validate.py"),
+            *args,
+        ],
+        capture_output=True,
+        text=True,
+        env=env,
+        timeout=120,
+    )
+
+
+def identity_args(root: Path) -> list[str]:
+    """Cheapest full contract-loading command: hash the contract file itself."""
+    data = root / "references" / "contract-data.yaml"
+    return ["identity", "--data", str(data), str(data)]
+
+
+def test_unmodified_bundle_copy_passes(tmp_path: Path) -> None:
+    """Harness pilot: the copied bundle loads its contract and exits 0."""
+    root = make_bundle(tmp_path)
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 0, result.stderr
+    assert "identities:" in result.stdout
+
+
+def test_contract_missing_import_boundary_is_refused(tmp_path: Path) -> None:
+    """A contract without the policy section fails the exact top-level key set."""
+    root = make_bundle(tmp_path)
+    data = root / "references" / "contract-data.yaml"
+    text = data.read_text(encoding="utf-8")
+    start = text.index("import-boundary:")
+    end = text.index("\n# ", start)
+    data.write_text(text[:start] + text[end + 1 :], encoding="utf-8")
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "top-level keys must be exactly" in result.stderr
+
+
+def test_contract_policy_tamper_is_refused_at_load(tmp_path: Path) -> None:
+    """Embedded census policy vs contract section: any drift refuses (ADR-0001)."""
+    root = make_bundle(tmp_path)
+    data = root / "references" / "contract-data.yaml"
+    text = data.read_text(encoding="utf-8")
+    assert text.count("[.egg, .whl, .zip]") == 1
+    data.write_text(
+        text.replace("[.egg, .whl, .zip]", "[.egg, .whl]"), encoding="utf-8"
+    )
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "import-boundary" in result.stderr
+    assert "archive-suffixes" in result.stderr
+
+
+def test_prior_contract_data_version_is_refused(tmp_path: Path) -> None:
+    root = make_bundle(tmp_path)
+    data = root / "references" / "contract-data.yaml"
+    text = data.read_text(encoding="utf-8")
+    assert text.count("contract-data-version: 6") == 1
+    data.write_text(
+        text.replace("contract-data-version: 6", "contract-data-version: 5"),
+        encoding="utf-8",
+    )
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "unsupported contract-data-version" in result.stderr
+```
+
+Run it and watch it fail (the section, comparison, and version gate do not exist yet):
+
+```bash
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/test_runtime_boundary.py -q   # expect: 1 passed (pilot may pass), 3 failed — the pilot passes only after 1.2; on first run expect 4 failures or errors
+```
+
+### 1.2 Edit `skills/deliberate/references/contract-data.yaml`
+
+Change the version line:
+
+```yaml
+contract-data-version: 6
+```
+
+Insert this section between the `bounds:` block and the `obliged-artifacts:` comment banner (top-level key; placement between existing top-level sections is free — key-set validation is exact-set, not ordered):
+
+```yaml
+# ---------------------------------------------------------------------------
+# Import-boundary policy contract (ADR-0001, 2026-07-16 amendment; hardening
+# portfolio Option 2). Single declarative source for the scripts/ execution
+# boundary. Consumers: the Gate-2 authoring checker
+# (tests/check_import_closure.py) loads these values directly; the entrypoint
+# embeds the census subset and refuses at every contract load when its
+# embedded rendering differs. banned-identifiers is authoring-time (AST)
+# enforcement only — the runtime census does not parse Python. Editing any
+# value is a method-identity change: classify under the method-pin drift
+# rules before landing.
+# ---------------------------------------------------------------------------
+import-boundary:
+  entrypoint: deliberate-validate.py
+  module-name-pattern: "^_deliberate_[a-z][a-z0-9_]*\\.py$"
+  allowed-data-dirs: [fixtures]
+  forbidden-loader-suffixes: [.pyc, .pyo, .pyd, .pyw, .so]
+  archive-suffixes: [.egg, .whl, .zip]
+  zip-magics: ["504b0304", "504b0506", "504b0708"]
+  banned-identifiers: [__import__, __builtins__, builtins, importlib, zipimport, runpy, exec, eval, compile]
+```
+
+### 1.3 Edit `skills/deliberate/scripts/deliberate-validate.py`
+
+(a) Add the embedded policy after the `PINS_NOT_PRODUCED` constant (Task 3 relocates the dict above the import block; placing it here first keeps this task minimal):
+
+```python
+# Embedded rendering of contract-data.yaml's `import-boundary` census subset
+# (ADR-0001, 2026-07-16 amendment). The pre-import census consumes ONLY these
+# values; `_require_boundary_match` compares them against the loaded contract
+# on every command and refuses on any difference, so this copy cannot drift
+# from the authenticated policy source unnoticed. banned-identifiers is
+# deliberately absent: it has no runtime consumer (authoring-time AST ban).
+_BOUNDARY_POLICY: dict = {
+    "entrypoint": "deliberate-validate.py",
+    "module-name-pattern": r"^_deliberate_[a-z][a-z0-9_]*\.py$",
+    "allowed-data-dirs": ["fixtures"],
+    "forbidden-loader-suffixes": [".pyc", ".pyo", ".pyd", ".pyw", ".so"],
+    "archive-suffixes": [".egg", ".whl", ".zip"],
+    "zip-magics": ["504b0304", "504b0506", "504b0708"],
+}
+```
+
+(b) In `validate_contract_data`, add `"import-boundary"` to the `top_keys` set, change the version gate to `if data["contract-data-version"] != 6:`, and append this shape validation at the end of the function body:
+
+```python
+    boundary = data["import-boundary"]
+    boundary_keys = {
+        "entrypoint",
+        "module-name-pattern",
+        "allowed-data-dirs",
+        "forbidden-loader-suffixes",
+        "archive-suffixes",
+        "zip-magics",
+        "banned-identifiers",
+    }
+    if not isinstance(boundary, dict) or set(boundary) != boundary_keys:
+        raise refuse(
+            op,
+            f"import-boundary keys must be exactly {sorted(boundary_keys)}",
+            boundary,
+        )
+    for key in ("entrypoint", "module-name-pattern"):
+        if not isinstance(boundary[key], str) or not boundary[key].strip():
+            raise refuse(
+                op, f"import-boundary {key} must be a non-empty string", boundary[key]
+            )
+    for key in sorted(boundary_keys - {"entrypoint", "module-name-pattern"}):
+        _contract_string_list(op, boundary, key)
+    for magic in boundary["zip-magics"]:
+        if len(magic) != 8 or any(c not in "0123456789abcdef" for c in magic):
+            raise refuse(
+                op, "zip-magics entries must be 8 lowercase hex characters", magic
+            )
+```
+
+(c) Add the comparison next to `load_contract` and call it from `load_contract` after `validate_contract_data(parsed)`:
+
+```python
+def _require_boundary_match(data: dict) -> None:
+    """Refuse when the contract's import-boundary differs from the embedded census policy.
+
+    The runtime census (module top) consumes only the embedded values, so this
+    comparison is what proves — at every invocation — that the embedded
+    rendering matches the authenticated policy source (ADR-0001 amendment):
+    the runtime never reads an unpinned policy reference as authority.
+    """
+    boundary = data["import-boundary"]
+    for key, embedded in _BOUNDARY_POLICY.items():
+        if boundary[key] != embedded:
+            raise refuse(
+                "contract data",
+                f"import-boundary {key} differs from the entrypoint's embedded "
+                "census policy (ADR-0001) — the embedded rendering must match "
+                "the authenticated contract",
+                boundary[key],
+            )
+```
+
+```python
+def load_contract(data_path: Path, readset: ReadSet) -> Contract:
+    readset.allow(data_path)
+    raw = readset.read_bytes(data_path)
+    parsed = safe_parse(raw, byte_cap=4 * 1024 * 1024, depth_cap=48, op="contract data")
+    validate_contract_data(parsed)
+    _require_boundary_match(parsed)
+    return Contract(parsed, Path(os.path.realpath(data_path)))
+```
+
+### 1.4 Verify
+
+```bash
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/test_runtime_boundary.py -q   # 4 passed
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q                            # 42 passed
+uv run --script skills/deliberate/tests/check_import_closure.py                                  # agree: 1 Python surface(s)  (checker reads only method-surfaces until Task 2)
+uv run --script skills/deliberate/scripts/deliberate-validate.py fixtures --data skills/deliberate/references/contract-data.yaml | tail -1   # 158/158 fixtures behaved as required
+uv run --script skills/deliberate/scripts/deliberate-validate.py check-renderings --data skills/deliberate/references/contract-data.yaml     # exit 0
+```
+
+Exception flagged in the file map: if any characterization case pinned a message that now includes the enlarged `top_keys` list, the assertion text updates to the new sorted list — verified 2026-07-16 that no test pins those messages, so expect no such edit.
+
+### 1.5 Commit
+
+`git add` the three files, review `git diff --cached --stat` and the diff, commit: `feat(deliberate): add pinned import-boundary policy contract (contract-data v6)`.
+
+## Task 2: Bind the Gate-2 checker to the policy section
+
+### 2.1 Failing tests first — append to `skills/deliberate/tests/test_import_closure.py`
+
+Add `import yaml` to the imports, and add after `SKILL_ROOT`:
+
+```python
+LIVE_POLICY: dict = yaml.safe_load(
+    (SKILL_ROOT / "references" / "contract-data.yaml").read_text(encoding="utf-8")
+)["import-boundary"]
+```
+
+Append these tests:
+
+```python
+def test_live_policy_floor_holds_known_hazard_classes() -> None:
+    """Regression floor: single-sourcing must never silently weaken the policy."""
+    assert LIVE_POLICY["entrypoint"] == "deliberate-validate.py"
+    assert LIVE_POLICY["module-name-pattern"] == r"^_deliberate_[a-z][a-z0-9_]*\.py$"
+    assert set(LIVE_POLICY["allowed-data-dirs"]) == {"fixtures"}
+    for suffix in (".pyc", ".pyo", ".pyd", ".pyw", ".so"):
+        assert suffix in LIVE_POLICY["forbidden-loader-suffixes"]
+    assert set(LIVE_POLICY["archive-suffixes"]) == {".egg", ".whl", ".zip"}
+    assert set(LIVE_POLICY["zip-magics"]) == {"504b0304", "504b0506", "504b0708"}
+    for name in (
+        "__import__",
+        "__builtins__",
+        "builtins",
+        "importlib",
+        "zipimport",
+        "runpy",
+        "exec",
+        "eval",
+        "compile",
+    ):
+        assert name in LIVE_POLICY["banned-identifiers"]
+
+
+def test_checker_consumes_the_contract_policy_not_constants(tmp_path: Path) -> None:
+    """Weakening a synthetic layout's policy must change checker behavior: the
+    contract is the authority, not hardcoded constants. (On the live tree the
+    floor test above plus the entrypoint's load-time comparison guard against
+    weakening.)"""
+    weakened = dict(LIVE_POLICY)
+    weakened["archive-suffixes"] = [".egg", ".whl"]
+    weakened["zip-magics"] = ["00000000"]
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+        policy=weakened,
+    )
+    (root / "scripts" / "payload.zip").write_bytes(b"PK\x03\x04weakened")
+    assert check(root).endswith("1 Python surface(s)")
+```
+
+### 2.2 Update `make_layout` in the same file
+
+Replace its `references` block so every synthetic contract carries a policy section (default: the live one), keeping the existing signature plus a `policy` keyword:
+
+```python
+def make_layout(
+    root: Path,
+    entry_body: str,
+    modules: dict[str, str],
+    surfaces: list[str],
+    policy: dict | None = None,
+) -> Path:
+    """Write a minimal skill layout: entrypoint, modules, contract data.
+
+    Module keys are scripts-relative paths; nested keys create the parent
+    directories so package layouts can be expressed (to prove rejection).
+    Every layout carries an import-boundary section (default: the live
+    policy) because the checker consumes the contract as its policy source.
+    """
+    scripts = root / "scripts"
+    scripts.mkdir(parents=True)
+    (scripts / "deliberate-validate.py").write_text(entry_body, encoding="utf-8")
+    for name, body in modules.items():
+        target = scripts / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(body, encoding="utf-8")
+    references = root / "references"
+    references.mkdir()
+    document = {
+        "validation": {"method-surfaces": surfaces},
+        "import-boundary": policy if policy is not None else LIVE_POLICY,
+    }
+    (references / "contract-data.yaml").write_text(
+        yaml.safe_dump(document, sort_keys=False), encoding="utf-8"
+    )
+    return root
+```
+
+Run the file's suite; the two new tests fail (checker still uses constants), existing tests still pass:
+
+```bash
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/test_import_closure.py -q
+```
+
+### 2.3 Rework `skills/deliberate/tests/check_import_closure.py`
+
+Replace the module-level constants `ENTRYPOINT_NAME`, `MODULE_NAME`, `ALLOWED_DATA_DIRS`, `BANNED_IDENTIFIERS`, `LOADER_SUFFIXES`, `ARTIFACT_SUFFIXES`, `ARCHIVE_SUFFIXES`, `CENSUS_FORBIDDEN_SUFFIXES`, and `ZIP_MAGICS` with a policy object loaded from the target's contract, threaded through the existing functions:
+
+```python
+class BoundaryPolicy:
+    """Census and ban values from the target's pinned contract-data.yaml.
+
+    The static forbidden-suffix family from the contract is unioned with the
+    running interpreter's ``importlib.machinery.all_suffixes()`` — a
+    test-side-only extension (production code may not name importlib), so a
+    census run on macOS still rejects artifacts another platform loads.
+    """
+
+    def __init__(self, raw: object, source: Path) -> None:
+        if not isinstance(raw, dict):
+            raise SystemExit(
+                "import-closure check failed: import-boundary section missing "
+                f"or not a mapping in {source}. Got: {raw!r:.100}"
+            )
+        required = {
+            "entrypoint",
+            "module-name-pattern",
+            "allowed-data-dirs",
+            "forbidden-loader-suffixes",
+            "archive-suffixes",
+            "zip-magics",
+            "banned-identifiers",
+        }
+        if set(raw) != required:
+            raise SystemExit(
+                "import-closure check failed: import-boundary keys must be "
+                f"exactly {sorted(required)} in {source}. Got: {sorted(raw)}"
+            )
+        self.entrypoint_name: str = raw["entrypoint"]
+        self.module_name = re.compile(raw["module-name-pattern"])
+        self.allowed_data_dirs = frozenset(raw["allowed-data-dirs"])
+        self.banned_identifiers = frozenset(raw["banned-identifiers"])
+        static = frozenset(s.lower() for s in raw["forbidden-loader-suffixes"])
+        loader_suffixes = frozenset(importlib.machinery.all_suffixes()) | static
+        self.artifact_suffixes = tuple(
+            sorted(s.lower() for s in loader_suffixes if s != ".py")
+        )
+        archive_suffixes = tuple(s.lower() for s in raw["archive-suffixes"])
+        self.census_forbidden_suffixes = tuple(
+            sorted(set(self.artifact_suffixes) | set(archive_suffixes))
+        )
+        self.zip_magics = tuple(bytes.fromhex(magic) for magic in raw["zip-magics"])
+```
+
+Mechanical threading (keep every check, message, and traversal order as-is; only the value source changes):
+
+- `_reject_if_banned(name, node, source_path, policy)` and `reject_banned_identifiers(tree, source_path, policy)` use `policy.banned_identifiers`.
+- `classify_first_party(scripts_dir, top, source_path, policy)` uses `policy.artifact_suffixes`.
+- `first_party_import_names(source_path, scripts_dir, policy)` threads `policy` down.
+- `import_closure(entrypoint, policy)` threads `policy` down.
+- `_has_zip_magic(path, policy)` uses `policy.zip_magics`.
+- `census_scripts_layout(scripts_dir, policy)` uses `policy.allowed_data_dirs`, `policy.entrypoint_name`, `policy.module_name`, `policy.census_forbidden_suffixes`, and `_has_zip_magic(path, policy)`.
+- `check(skill_root)` loads the contract once, builds both the policy and the inventory from that one parse, and threads the policy:
+
+```python
+def check(skill_root: Path) -> str:
+    """Require closure == inventory == on-disk; return the pass message or exit 1."""
+    root = skill_root.resolve()
+    scripts_dir = root / "scripts"
+    contract_data = root / "references" / "contract-data.yaml"
+    if not contract_data.is_file():
+        raise SystemExit(
+            f"import-closure check failed: required file missing. Got: {contract_data}"
+        )
+    loaded = yaml.safe_load(contract_data.read_text(encoding="utf-8"))
+    if not isinstance(loaded, dict):
+        raise SystemExit(
+            f"import-closure check failed: contract data is not a mapping. Got: {contract_data}"
+        )
+    policy = BoundaryPolicy(loaded.get("import-boundary"), contract_data)
+    entrypoint = scripts_dir / policy.entrypoint_name
+    if not entrypoint.is_file():
+        raise SystemExit(
+            f"import-closure check failed: required file missing. Got: {entrypoint}"
+        )
+    on_disk = {
+        path.relative_to(root).as_posix()
+        for path in census_scripts_layout(scripts_dir, policy)
+    }
+    closure = {
+        path.relative_to(root).as_posix()
+        for path in import_closure(entrypoint, policy)
+    }
+    inventory = inventory_python_surfaces(loaded, contract_data)
+    if closure != inventory:
+        missing = sorted(closure - inventory)
+        unlisted = sorted(inventory - closure)
+        raise SystemExit(
+            "import-closure check failed: source closure and method-surfaces "
+            f"Python subset differ. Imported but not inventoried: {missing}; "
+            f"inventoried but never imported: {unlisted}"
+        )
+    if on_disk != inventory:
+        present = sorted(on_disk - inventory)
+        absent = sorted(inventory - on_disk)
+        raise SystemExit(
+            "import-closure check failed: on-disk production Python and "
+            f"method-surfaces Python subset differ. On disk but not "
+            f"inventoried: {present}; inventoried but absent from scripts/: "
+            f"{absent}"
+        )
+    return (
+        "import closure, on-disk production files, and method-surfaces "
+        f"agree: {len(closure)} Python surface(s)"
+    )
+```
+
+`inventory_python_surfaces` changes signature to take the already-parsed mapping instead of re-reading the file; its validation and message text stay byte-identical:
+
+```python
+def inventory_python_surfaces(loaded: object, contract_data: Path) -> set[str]:
+    """Python entries of validation.method-surfaces, as skill-relative paths."""
+    try:
+        surfaces = loaded["validation"]["method-surfaces"]
+    except (TypeError, KeyError) as error:
+        raise SystemExit(
+            "import-closure check failed: validation.method-surfaces absent "
+            f"from {contract_data}. Got: {error!r}"
+        ) from error
+    if not isinstance(surfaces, list) or not surfaces:
+        raise SystemExit(
+            "import-closure check failed: validation.method-surfaces must be "
+            f"a non-empty list. Got: {surfaces!r:.100}"
+        )
+    return {str(surface) for surface in surfaces if str(surface).endswith(".py")}
+```
+
+Update the direct callers in `test_import_closure.py`: the live-tree test builds the policy explicitly —
+
+```python
+def test_live_tree_passes_with_entrypoint_only_closure() -> None:
+    """Pre-extraction reality: the closure is exactly the entrypoint, and the gate passes."""
+    from check_import_closure import BoundaryPolicy
+
+    entrypoint = SKILL_ROOT / "scripts" / "deliberate-validate.py"
+    policy = BoundaryPolicy(
+        LIVE_POLICY, SKILL_ROOT / "references" / "contract-data.yaml"
+    )
+    assert import_closure(entrypoint, policy) == {entrypoint.resolve()}
+    message = check(SKILL_ROOT)
+    assert message == (
+        "import closure, on-disk production files, and method-surfaces "
+        "agree: 1 Python surface(s)"
+    )
+```
+
+(Task 4 rewrites this test for two surfaces.)
+
+### 2.4 Verify and commit
+
+```bash
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q            # 44 passed
+uv run --script skills/deliberate/tests/check_import_closure.py                  # agree: 1 Python surface(s)
+```
+
+Commit: `feat(deliberate): bind gate-2 checker to the pinned import-boundary policy`.
+
+## Task 3: Runtime pre-import census and fresh cache prefix
+
+### 3.1 Failing tests first — append to `skills/deliberate/tests/test_runtime_boundary.py`
+
+Add `import py_compile` to the imports, then append:
+
+```python
+def seed_marker_pyc(root: Path, tmp_path: Path, name: str) -> Path:
+    """Compile a marker-writing source into a sourceless .pyc under scripts/."""
+    marker = tmp_path / "executed.marker"
+    src = tmp_path / "seed_src.py"
+    src.write_text(f"open({str(marker)!r}, 'w').write('ran')\n", encoding="utf-8")
+    py_compile.compile(str(src), cfile=str(root / "scripts" / name))
+    return marker
+
+
+def test_seeded_sourceless_pyc_is_refused_without_executing(tmp_path: Path) -> None:
+    root = make_bundle(tmp_path)
+    marker = seed_marker_pyc(root, tmp_path, "_deliberate_hidden.pyc")
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "import boundary refused" in result.stderr
+    assert "_deliberate_hidden.pyc" in result.stderr
+    assert not marker.exists()
+
+
+def test_seeded_pycache_directory_is_refused(tmp_path: Path) -> None:
+    root = make_bundle(tmp_path)
+    cache = root / "scripts" / "__pycache__"
+    cache.mkdir()
+    (cache / "stale.cpython-313.pyc").write_bytes(b"\x00stale")
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "__pycache__" in result.stderr
+
+
+def test_symlinked_module_and_symlinked_package_are_refused(tmp_path: Path) -> None:
+    outside_file = tmp_path / "outside.py"
+    outside_file.write_text("VALUE = 1\n", encoding="utf-8")
+    outside_pkg = tmp_path / "outside_pkg"
+    outside_pkg.mkdir()
+    (outside_pkg / "__init__.py").write_text("VALUE = 1\n", encoding="utf-8")
+    for label, target, link_name in (
+        ("file", outside_file, "_deliberate_link.py"),
+        ("package", outside_pkg, "_deliberate_linkpkg"),
+    ):
+        root = make_bundle(tmp_path / label)
+        (root / "scripts" / link_name).symlink_to(target)
+        result = run_cli(root, *identity_args(root))
+        assert result.returncode == 2, label
+        assert "symlink" in result.stderr, label
+
+
+def test_package_directory_is_refused(tmp_path: Path) -> None:
+    root = make_bundle(tmp_path)
+    pkg = root / "scripts" / "_deliberate_pkg"
+    pkg.mkdir()
+    (pkg / "__init__.py").write_text("VALUE = 1\n", encoding="utf-8")
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "_deliberate_pkg" in result.stderr
+
+
+def test_zip_archives_and_disguised_zip_are_refused(tmp_path: Path) -> None:
+    """.zip/.egg/.whl fall to the suffix rule; payload.dat falls to the magic sniff."""
+    for name in ("payload.zip", "payload.egg", "payload.whl", "payload.dat"):
+        root = make_bundle(tmp_path / name.replace(".", "_"))
+        (root / "scripts" / name).write_bytes(b"PK\x03\x04payload")
+        result = run_cli(root, *identity_args(root))
+        assert result.returncode == 2, name
+        assert name in result.stderr
+
+
+def test_nested_python_file_is_refused(tmp_path: Path) -> None:
+    root = make_bundle(tmp_path)
+    (root / "scripts" / "fixtures" / "evil.py").write_text(
+        "VALUE = 1\n", encoding="utf-8"
+    )
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "evil.py" in result.stderr
+
+
+def test_stdlib_shadow_is_refused_before_it_can_import(tmp_path: Path) -> None:
+    """A scripts/argparse.py would shadow stdlib argparse via sys.path[0]; the
+    census must refuse it before the entrypoint's own deferred imports run —
+    the marker proves nothing executed."""
+    root = make_bundle(tmp_path)
+    marker = tmp_path / "shadow.marker"
+    (root / "scripts" / "argparse.py").write_text(
+        f"open({str(marker)!r}, 'w').write('ran')\n", encoding="utf-8"
+    )
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "argparse.py" in result.stderr
+    assert not marker.exists()
+
+
+def test_inert_file_passes_and_conforming_extra_module_is_runtime_inert(
+    tmp_path: Path,
+) -> None:
+    """Layer boundary: the runtime census is layout-only. An inert data file
+    passes; a flat conforming-but-uninventoried module also passes at runtime
+    (it is unreachable without dynamic import) while the authoring gate
+    rejects the same layout via inventory equality."""
+    import pytest
+    from check_import_closure import check
+
+    root = make_bundle(tmp_path)
+    (root / "scripts" / "notes.txt").write_text("plain text\n", encoding="utf-8")
+    (root / "scripts" / "_deliberate_extra.py").write_text(
+        "VALUE = 1\n", encoding="utf-8"
+    )
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 0, result.stderr
+    with pytest.raises(SystemExit, match="on-disk production Python"):
+        check(root)
+
+
+def test_module_name_grammar_matches_declared_pattern(tmp_path: Path) -> None:
+    """The census's re-free name check must agree with module-name-pattern."""
+    accepted = ["_deliberate_shared.py", "_deliberate_a9_x.py"]
+    refused = [
+        "_deliberate_.py",
+        "_deliberate_9x.py",
+        "_Deliberate_x.py",
+        "_deliberate_X.py",
+        "deliberate_x.py",
+        "_deliberate_x.mod.py",
+    ]
+    for index, name in enumerate(accepted):
+        root = make_bundle(tmp_path / f"ok{index}")
+        (root / "scripts" / name).write_text("VALUE = 1\n", encoding="utf-8")
+        assert run_cli(root, *identity_args(root)).returncode == 0, name
+    for index, name in enumerate(refused):
+        root = make_bundle(tmp_path / f"bad{index}")
+        (root / "scripts" / name).write_text("VALUE = 1\n", encoding="utf-8")
+        result = run_cli(root, *identity_args(root))
+        assert result.returncode == 2, name
+        assert name in result.stderr
+
+
+def test_cache_prefix_is_scoped_private_and_retired(tmp_path: Path) -> None:
+    """The invocation-private pycache prefix lives under the process temp root
+    and is retired at exit; no repo-local bytecode is created (ADR-0001)."""
+    root = make_bundle(tmp_path)
+    scoped = tmp_path / "scoped-tmp"
+    scoped.mkdir()
+    result = run_cli(root, *identity_args(root), tmpdir=scoped)
+    assert result.returncode == 0, result.stderr
+    assert list(scoped.glob("deliberate-pycache-*")) == []
+    assert list((root / "scripts").rglob("__pycache__")) == []
+```
+
+Run and watch them fail (`uv run --with pyyaml --with pytest pytest skills/deliberate/tests/test_runtime_boundary.py -q`): every seeded case currently exits 0 because no census exists.
+
+### 3.2 Restructure the entrypoint header
+
+In `skills/deliberate/scripts/deliberate-validate.py`, replace the import block (currently `import argparse` through `import yaml`) with the following, and move the `_BOUNDARY_POLICY` dict from Task 1 up into this block (delete it from its Task-1 position). The PEP 723 header, docstring, and `from __future__ import annotations` stay first and unchanged (the docstring gains one bullet, below):
+
+```python
+import os
+import sys
+
+# ---------------------------------------------------------------------------
+# Pre-import boundary (ADR-0001 + 2026-07-16 amendment). Everything above the
+# deferred imports below must be stdlib-only and limited to modules already
+# initialized at interpreter startup (`os`, `sys`): sys.path[0] is scripts/,
+# so any other import could resolve to a file the census has not yet vetted.
+# The census consumes only the embedded policy; `_require_boundary_match`
+# proves that rendering against the pinned contract on every command.
+# ---------------------------------------------------------------------------
+_BOUNDARY_POLICY: dict = {
+    "entrypoint": "deliberate-validate.py",
+    "module-name-pattern": r"^_deliberate_[a-z][a-z0-9_]*\.py$",
+    "allowed-data-dirs": ["fixtures"],
+    "forbidden-loader-suffixes": [".pyc", ".pyo", ".pyd", ".pyw", ".so"],
+    "archive-suffixes": [".egg", ".whl", ".zip"],
+    "zip-magics": ["504b0304", "504b0506", "504b0708"],
+}
+_BOUNDARY_ZIP_MAGICS = tuple(bytes.fromhex(m) for m in _BOUNDARY_POLICY["zip-magics"])
+_BOUNDARY_FORBIDDEN_SUFFIXES = tuple(
+    sorted(
+        set(_BOUNDARY_POLICY["forbidden-loader-suffixes"])
+        | set(_BOUNDARY_POLICY["archive-suffixes"])
+    )
+)
+
+
+def _boundary_refuse(reason: str, got: str) -> None:
+    sys.stderr.write(f"import boundary refused: {reason}. Got: {got}\n")
+    sys.exit(2)
+
+
+def _boundary_module_name_conforms(name: str) -> bool:
+    """`re`-free rendering of module-name-pattern; agreement is test-pinned."""
+    if not name.startswith("_deliberate_") or not name.endswith(".py"):
+        return False
+    stem = name[len("_deliberate_") : -len(".py")]
+    if not stem or stem[0] not in "abcdefghijklmnopqrstuvwxyz":
+        return False
+    return all(c in "abcdefghijklmnopqrstuvwxyz0123456789_" for c in stem)
+
+
+def _boundary_has_zip_magic(path: str) -> bool:
+    with open(path, "rb") as handle:
+        return handle.read(4) in _BOUNDARY_ZIP_MAGICS
+
+
+def _boundary_census(scripts_dir: str) -> None:
+    """ADR-0001 runtime pre-import census: layout rules only, fail-closed.
+
+    Mirrors the Gate-2 authoring census (tests/check_import_closure.py) minus
+    closure/inventory equality, which stays an authoring-gate concern: a flat
+    conforming uninventoried module is inert here because production code
+    contains no dynamic-import machinery and the orchestrator platform-hashes
+    every method surface before trusting results.
+    """
+    if os.path.islink(scripts_dir):
+        _boundary_refuse(
+            "scripts/ itself must be a real directory, not a symlink (ADR-0001)",
+            scripts_dir,
+        )
+    allowed_dirs = set(_BOUNDARY_POLICY["allowed-data-dirs"])
+    for dirpath, dirnames, filenames in os.walk(scripts_dir, followlinks=False):
+        for name in sorted(dirnames):
+            path = os.path.join(dirpath, name)
+            if os.path.islink(path):
+                _boundary_refuse(
+                    "symlinks are forbidden anywhere under scripts/ (ADR-0001)", path
+                )
+            if name == "__pycache__":
+                _boundary_refuse(
+                    "__pycache__ is forbidden under scripts/ (ADR-0001)", path
+                )
+            top = os.path.relpath(path, scripts_dir).split(os.sep)[0]
+            if top not in allowed_dirs:
+                _boundary_refuse(
+                    "directories under scripts/ are forbidden outside the "
+                    f"declared data allowlist {sorted(allowed_dirs)} (ADR-0001)",
+                    path,
+                )
+        for name in sorted(filenames):
+            path = os.path.join(dirpath, name)
+            if os.path.islink(path):
+                _boundary_refuse(
+                    "symlinks are forbidden anywhere under scripts/ (ADR-0001)", path
+                )
+            if name == "__pycache__":
+                _boundary_refuse(
+                    "__pycache__ is forbidden under scripts/ (ADR-0001)", path
+                )
+            if not os.path.isfile(path):
+                _boundary_refuse("unsupported filesystem object under scripts/", path)
+            lower = name.lower()
+            if lower.endswith(".py"):
+                if dirpath != scripts_dir:
+                    _boundary_refuse(
+                        "production Python must be flat in scripts/ (ADR-0001)", path
+                    )
+                if name != _BOUNDARY_POLICY[
+                    "entrypoint"
+                ] and not _boundary_module_name_conforms(name):
+                    _boundary_refuse(
+                        "production module name must match _deliberate_<domain>.py "
+                        "(ADR-0001 naming rule)",
+                        path,
+                    )
+                continue
+            if any(lower.endswith(suffix) for suffix in _BOUNDARY_FORBIDDEN_SUFFIXES):
+                _boundary_refuse(
+                    "importable non-source artifact is forbidden under scripts/ "
+                    "(ADR-0001)",
+                    path,
+                )
+            if _boundary_has_zip_magic(path):
+                _boundary_refuse(
+                    "file carries a zip archive signature despite an inert suffix "
+                    "(ADR-0001)",
+                    path,
+                )
+
+
+_boundary_census(os.path.dirname(os.path.abspath(__file__)))
+
+import atexit  # noqa: E402 — deferred by design: imports wait for the census
+import shutil  # noqa: E402
+import tempfile  # noqa: E402
+
+# Fresh, initially empty (mkdtemp), invocation-private (0o700), under the
+# process temp root, retired at exit, never reused across invocations
+# (ADR-0001). Redirecting alone is insufficient — the census above is what
+# stops directly-read sourceless bytecode.
+sys.pycache_prefix = tempfile.mkdtemp(prefix="deliberate-pycache-")
+atexit.register(shutil.rmtree, sys.pycache_prefix, ignore_errors=True)
+
+import argparse  # noqa: E402
+import copy  # noqa: E402
+import hashlib  # noqa: E402
+import io  # noqa: E402
+import re  # noqa: E402
+import stat  # noqa: E402
+import subprocess  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import Any  # noqa: E402
+
+import yaml  # noqa: E402
+```
+
+Add one bullet to the docstring's "Validator boundary" list:
+
+```
+- Pre-import boundary: before any shadowable import, a stdlib-only census of
+  scripts/ refuses unexpected artifacts fail-closed (ADR-0001), bytecode is
+  redirected to a fresh invocation-private cache prefix retired at exit, and
+  the embedded census policy is compared against contract-data.yaml's
+  import-boundary section at every contract load.
+```
+
+### 3.3 Verify and commit
+
+```bash
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q            # 54 passed
+uv run --script skills/deliberate/tests/check_import_closure.py                  # agree: 1 Python surface(s)
+uv run --script skills/deliberate/scripts/deliberate-validate.py fixtures --data skills/deliberate/references/contract-data.yaml | tail -1   # 158/158 fixtures behaved as required
+uvx ruff check skills/deliberate/scripts/deliberate-validate.py                  # All checks passed!
+```
+
+Commit: `feat(deliberate): runtime pre-import census and invocation-private cache prefix`.
+
+## Task 4: Extract `scripts/_deliberate_shared.py`
+
+### 4.1 Failing tests first
+
+Rewrite `test_live_tree_passes_with_entrypoint_only_closure` in `skills/deliberate/tests/test_import_closure.py` as:
+
+```python
+def test_live_tree_passes_with_shared_module_closure() -> None:
+    """v6 reality: the closure is the entrypoint plus _deliberate_shared."""
+    from check_import_closure import BoundaryPolicy
+
+    entrypoint = SKILL_ROOT / "scripts" / "deliberate-validate.py"
+    shared = SKILL_ROOT / "scripts" / "_deliberate_shared.py"
+    policy = BoundaryPolicy(
+        LIVE_POLICY, SKILL_ROOT / "references" / "contract-data.yaml"
+    )
+    assert import_closure(entrypoint, policy) == {
+        entrypoint.resolve(),
+        shared.resolve(),
+    }
+    message = check(SKILL_ROOT)
+    assert message == (
+        "import closure, on-disk production files, and method-surfaces "
+        "agree: 2 Python surface(s)"
+    )
+```
+
+Append to `skills/deliberate/tests/test_runtime_boundary.py`:
+
+```python
+def test_sourceless_shadow_of_shared_module_is_refused(tmp_path: Path) -> None:
+    """A sourceless _deliberate_shared.pyc beside the real module is exactly
+    the directly-read-bytecode hazard: refused before any import."""
+    root = make_bundle(tmp_path)
+    marker = seed_marker_pyc(root, tmp_path, "_deliberate_shared.pyc")
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "_deliberate_shared.pyc" in result.stderr
+    assert not marker.exists()
+
+
+def test_second_invocation_never_reuses_prior_bytecode(tmp_path: Path) -> None:
+    """Gate-1 follow-up hazard as a tripwire: after a same-size, mtime-restored
+    edit to _deliberate_shared.py, the second invocation must execute the
+    edited code — a reused cache entry (size+mtime match) would show the old
+    string. The observable channel is safe_parse's anchor refusal, which lives
+    in the shared module."""
+    root = make_bundle(tmp_path)
+    scoped = tmp_path / "scoped-tmp"
+    scoped.mkdir()
+    bad_contract = tmp_path / "anchored.yaml"
+    bad_contract.write_text("a: &x 1\nb: *x\n", encoding="utf-8")
+    probe_args = ["identity", "--data", str(bad_contract), str(bad_contract)]
+    first = run_cli(root, *probe_args, tmpdir=scoped)
+    assert first.returncode == 2
+    assert "YAML anchors are rejected" in first.stderr
+    shared = root / "scripts" / "_deliberate_shared.py"
+    before = shared.stat()
+    text = shared.read_text(encoding="utf-8")
+    assert text.count("YAML anchors are rejected") == 1
+    edited = text.replace("YAML anchors are rejected", "YAML anchorZ are rejected")
+    assert len(edited.encode("utf-8")) == len(text.encode("utf-8"))
+    shared.write_text(edited, encoding="utf-8")
+    os.utime(shared, ns=(before.st_atime_ns, before.st_mtime_ns))
+    second = run_cli(root, *probe_args, tmpdir=scoped)
+    assert second.returncode == 2
+    assert "YAML anchorZ are rejected" in second.stderr
+```
+
+Run both files; the closure test and the two new runtime tests fail (module absent).
+
+### 4.2 Create `skills/deliberate/scripts/_deliberate_shared.py`
+
+Start the file with exactly:
+
+```python
+"""deliberate — shared foundation: errors, read authorization, safe YAML.
+
+Extracted from scripts/deliberate-validate.py under ADR-0001 (contract-data
+version 6): the base of the internal dependency graph — everything calls into
+it; it calls into no other first-party code. A direct method surface: listed
+in validation.method-surfaces and platform-hashed by the orchestrator before
+any helper invocation. No PEP 723 header: an imported module, never an
+entrypoint — the entrypoint's script environment supplies `yaml`.
+"""
+
+from __future__ import annotations
+
+import io
+import os
+from pathlib import Path
+from typing import Any
+
+import yaml
+```
+
+Then cut (not copy) the following block from `deliberate-validate.py` and paste it verbatim below that header — cut-and-paste in the editor, never retype. The block starts at the line `SAFE_TAGS = {` and ends at the closing `    )` of `dump_yaml` (the line before the `# Canonical data` section banner). It comprises, in order: `SAFE_TAGS`; the `Refusal`, `ValidationFailure`, `StoreReadLoss` classes; `fail`; `refuse`; the `# Read-set enforcement` banner and `ReadSet`; the `# Safe YAML` banner, `_decode_utf8`, `safe_parse`, `_UniqueKeyLoader`, `_construct_unique_mapping`, the `add_constructor` call, `_NoAliasDumper`, and `dump_yaml`.
+
+### 4.3 Wire the entrypoint
+
+In `deliberate-validate.py`, at the point where the cut block was removed (just after the deferred `import yaml`), add:
+
+```python
+from _deliberate_shared import (  # noqa: E402
+    ReadSet,
+    Refusal,
+    StoreReadLoss,
+    ValidationFailure,
+    _decode_utf8,
+    dump_yaml,
+    fail,
+    refuse,
+    safe_parse,
+)
+```
+
+Then prune now-unused entrypoint imports: run `uvx ruff check skills/deliberate/scripts/deliberate-validate.py` and delete exactly the imports it reports as F401 (expected: `io` and `yaml` — verified 2026-07-16 as the only imports with zero uses outside the moved block; `tempfile`, `re`, `stat`, `subprocess`, `copy`, `hashlib` all have live uses elsewhere in the file). Do NOT remove `pyyaml` from the PEP 723 `dependencies` — the shared module needs it from the entrypoint's script environment.
+
+### 4.4 Inventory, prose, and bootstrap updates
+
+(a) `skills/deliberate/references/contract-data.yaml` — in `validation.method-surfaces`, insert `scripts/_deliberate_shared.py` before `scripts/deliberate-validate.py`:
+
+```yaml
+  method-surfaces:
+    - SKILL.md
+    - references/capsule.md
+    - references/contract-data.yaml
+    - references/methods.md
+    - references/schemas.md
+    - references/stage-packets.md
+    - scripts/_deliberate_shared.py
+    - scripts/deliberate-validate.py
+```
+
+(b) `skills/deliberate/references/capsule.md` — in the method-identity sentence, replace this exact fragment:
+
+```text
+and the bundled validator script, recorded at setup beside the constituent pins
+```
+
+with:
+
+```text
+and the bundled validator script with its imported production module (`scripts/_deliberate_shared.py`), recorded at setup beside the constituent pins
+```
+
+(c) `skills/deliberate/SKILL.md` — two edits:
+
+- In the preflight paragraph, change `Before spending, verify the helper with \`shasum -a 256\`` to `Before spending, verify the helper — the entrypoint and every imported production module — with \`shasum -a 256\``.
+- In the Helper section code block, change the first two lines to:
+
+```bash
+V=scripts/deliberate-validate.py; M=scripts/_deliberate_shared.py; D=references/contract-data.yaml   # paths relative to this skill directory
+shasum -a 256 $V $M
+```
+
+- In the orchestrator obligations bullet, change `verify the validator with the platform hasher. A drifted validator takes the emergency-receipt branch.` to `verify the validator and its imported production modules with the platform hasher. A drifted validator or module takes the emergency-receipt branch.`
+
+### 4.5 Verify and commit
+
+```bash
+uv run --script skills/deliberate/tests/check_import_closure.py                  # agree: 2 Python surface(s)
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q            # 56 passed
+uv run --script skills/deliberate/scripts/deliberate-validate.py fixtures --data skills/deliberate/references/contract-data.yaml | tail -1   # 158/158 fixtures behaved as required
+uv run --script skills/deliberate/scripts/deliberate-validate.py check-renderings --data skills/deliberate/references/contract-data.yaml     # exit 0
+uvx ruff check skills/deliberate/scripts/                                        # All checks passed!
+git diff --word-diff=plain -- skills/deliberate/scripts/deliberate-validate.py | head -80   # the moved region must show as pure deletion
+```
+
+Commit: `feat(deliberate): extract scripts/_deliberate_shared.py as the eighth method surface`.
+
+## Task 5: Spec lineage
+
+In `docs/specs/2026-07-13-deliberate.md`:
+
+- Status line: change `**Status:** v27 —` to `**Status:** v28 —`, and change `· **Date:** 2026-07-13 (v26–v27: 2026-07-15)` to `· **Date:** 2026-07-13 (v26–v27: 2026-07-15; v28: <execution date>)`.
+- In the Design lineage list, append after the v27 entry:
+
+```markdown
+- **v28** (contract evolution — v6 module topology and the import-execution boundary): the first physical extraction under ADR-0001 — `scripts/_deliberate_shared.py` (error/refusal constructors, read authorization, safe-YAML foundation) leaves the entrypoint; `validation.method-surfaces` grows to eight entries and `contract-data-version` bumps to 6, hard-cutting pre-topology capsules (no migration path; no legacy population). The import-execution boundary becomes one explicit control (hardening portfolio Option 2; placement decided by JP 2026-07-16): a declarative `import-boundary` policy section in the pinned `contract-data.yaml` feeds the Gate-2 authoring checker directly, and the entrypoint embeds the census subset, runs a stdlib-only pre-import census of `scripts/` (symlinks, `__pycache__`, bytecode and extension artifacts, zip archives by suffix and by content signature, out-of-allowlist directories, nested or non-conforming `.py` — refused fail-closed before any shadowable import), sets a fresh invocation-private `sys.pycache_prefix` retired at exit, and refuses at every contract load when the embedded rendering differs from the contract section. Verified by the runtime-boundary battery (seeded sourceless `.pyc`, stdlib shadow, disguised zip, policy tamper, bytecode-freshness probe, prefix retirement), Gate-2 at two Python surfaces, dual-path smokes with the effective interpreter recorded, and exact-prompt end-to-end re-smokes on both runtimes per the debt-scan bar.
+```
+
+Commit: `docs(deliberate): record v28 contract evolution in the spec lineage`.
+
+## Task 6: Dual-path smoke and evidence record
+
+Create `docs/smoke-tests/<execution date>_deliberate-v6-dual-path-runtime-boundary.md` recording, with commands and verbatim output:
+
+1. Both delivery paths, live tree: `uv run --script <path>/scripts/deliberate-validate.py fixtures --data <path>/references/contract-data.yaml` and the `identity` probe, where `<path>` is (a) `/Users/jp/.agents/skills/deliberate` and (b) `~/.claude/skills/deliberate` (the symlink). Expect identical exit codes and `158/158`.
+2. Gate-2 through both paths: `uv run --script <path>/tests/check_import_closure.py` → `agree: 2 Python surface(s)` twice.
+3. Effective interpreter, recorded the way the Gate-1 spike did: run a throwaway probe script carrying the identical PEP 723 header (`requires-python = ">=3.11"`, `dependencies = ["pyyaml"]`) that prints `sys.executable` and `sys.version`, executed via `uv run --script` from both paths; put the script in the scratchpad, not the repo.
+4. Startup latency: repeat the Task 0 timing loop; record before/after medians side by side. No pre-registered threshold exists; flag anything materially above baseline for JP rather than deciding alone.
+5. The ADR obligation map — one line each stating where the evidence lives:
+
+| ADR-0001 runtime obligation | Evidence |
+| --- | --- |
+| Seeded stale repo-local bytecode is ignored/refused | `test_seeded_pycache_directory_is_refused`, `test_seeded_sourceless_pyc_is_refused_without_executing` |
+| Chosen prefix starts empty | `tempfile.mkdtemp` semantics + `test_cache_prefix_is_scoped_private_and_retired` |
+| Second invocation cannot execute the first's cached code | `test_second_invocation_never_reuses_prior_bytecode` |
+| No repo-local bytecode created or read | `test_cache_prefix_is_scoped_private_and_retired` + census `__pycache__` refusal |
+| Seeded sourceless `.pyc` refused without executing | marker assertions in both `.pyc` tests |
+| Both delivery paths, interpreter recorded | this smoke record, sections 1–3 |
+
+Commit: `docs(deliberate): v6 dual-path runtime-boundary smoke record`.
+
+## Task 7: Cross-runtime end-to-end re-smokes (the debt-scan bar)
+
+The debt scan is explicit: "Re-run an exact Codex and Claude smoke after any physical topology change; fixtures and black-box CLI checks cannot prove runtime loading in both hosts." This task needs JP to fire live runs — flag it rather than skipping silently.
+
+1. Claude Code: re-run the exact accepted prompt from the 2026-07-15 smoke records in `docs/smoke-tests/` through all five stages to a validated close capsule.
+2. Codex: re-run the exact accepted prompt from the 2026-07-14 record likewise.
+3. Record both under `docs/smoke-tests/` following the existing records' shape, including the effective interpreter and the eight-surface method identity in the capsule.
+
+A failure here is a v6 defect: diagnose before landing; do not weaken the boundary to pass.
+
+## Task 8: Closeout
+
+1. Validation ladder: `git diff --check` on the branch range; re-run the full suite, fixtures, check-renderings, and Gate-2 one final time; `python3 -m json.tool docs/hardening/2026-07-16-deliberate-import-boundary/hardening.json > /dev/null`.
+2. Review the whole branch diff (`git diff main...HEAD --stat`, then per-file, word-diff for prose).
+3. Landing (`merge-branch` lane), pushing, and branch retirement (`fix/deliberate-gate2-*` are already retirement candidates) are JP's decisions — stop and report.
+
+## Rollback
+
+Every task commits a green tree, so rollback is `git revert` (or branch abandonment before landing) in reverse task order. Reverting Task 1 or 4 restores the prior `contract-data.yaml` hash and the seven-surface identity — that is a method-identity change like any other; the tactical Gate-2 protections (checker + tests) survive every rollback point because Task 2 only rebinds their value source.
+
+## Self-review notes (already applied)
+
+- Coverage check against ADR-0001's five runtime obligations, the portfolio's validation plan (mismatch test, runtime negative tests for every E005 class, dual-path, interpreter recording, latency baseline), and the decided open questions: each maps to a task above; the sole deliberate deviation is that cache-prefix *obligations* are not declared as policy data — they are behavior, proven by tests, with no mechanical consumer; the ADR amendment records this.
+- Consistency: `_BOUNDARY_POLICY` keys equal the contract section minus `banned-identifiers`; the checker requires the full key set; `_require_boundary_match` iterates only embedded keys, so the ban list never falsely mismatches.
+- The characterization suite is the transcription-drift net for the moved block; expected test counts at each boundary: 38 → 42 → 44 → 54 → 56.
+
+## Outside view
+
+Reference class: this repo's own contract-evolution cuts on `deliberate` (v26, v27, the Gate-2 arc) — schema-plus-runtime changes under a hash-authenticated method identity. What that class reliably required beyond the obvious diff, and where this plan carries it: renderings regeneration and fixture reruns after any `contract-data.yaml` edit (Tasks 1.4, 4.5); companion prose surfaces that silently encode the old topology — `capsule.md`, `SKILL.md` bootstrap — found and edited explicitly (Task 4.4); live cross-runtime fires exposing what fixtures cannot (Task 7, the bar the debt scan pre-registered after v26/v27 each caught a defect only in live fire); interpreter variance recorded rather than pinned (Task 6.3, per the Gate-1 decision); and startup-latency evidence because the portfolio asked for a baseline before accepting runtime preflight cost (Tasks 0.3, 6.4). The class also warns that adversarial re-review finds what the author's own review missed — twice proven in Era 94 — so the plan leaves the tactical Gate-2 tests untouched as the floor and adds tripwires rather than replacing anything. This is a debias against under-scoping, not a completeness certificate: the residuals named in ADR-0001 (reflection gadgets, native loaders, external `sys.path`) remain open by design, and platform evidence stays bounded to macOS + CPython 3.13 via `uv --script`.
