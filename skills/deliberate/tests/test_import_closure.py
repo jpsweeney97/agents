@@ -686,3 +686,47 @@ def test_embedded_runtime_policy_matches_contract_section() -> None:
     assert embedded is not None, "_BOUNDARY_POLICY not found in the entrypoint"
     expected = {k: v for k, v in LIVE_POLICY.items() if k != "banned-identifiers"}
     assert embedded == expected
+
+
+def test_runtime_name_predicate_matches_contract_regex() -> None:
+    """The entrypoint's re-free `_boundary_module_name_conforms` must agree with
+    the contract's `module-name-pattern` over a generated corpus of realistic
+    (newline-free) filenames. Non-executing: the function is dependency-free,
+    extracted by source segment and exec'd in isolation, never by importing
+    production code. Scope note: `re`'s `$` matches before a trailing newline
+    while the predicate requires `.endswith('.py')`, so a name like
+    `"_deliberate_x.py\\n"` would disagree — but that class is unreachable
+    because both the runtime census and the Gate-2 checker gate on
+    `lower.endswith('.py')` before applying the name rule (fail-closed either
+    way), so the corpus is deliberately newline-free."""
+    import ast
+    import itertools
+    import re as _re
+
+    source = (SKILL_ROOT / "scripts" / "deliberate-validate.py").read_text(
+        encoding="utf-8"
+    )
+    tree = ast.parse(source)
+    func_node = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "_boundary_module_name_conforms"
+    )
+    namespace: dict = {}
+    exec(ast.get_source_segment(source, func_node), namespace)
+    predicate = namespace["_boundary_module_name_conforms"]
+    regex = _re.compile(LIVE_POLICY["module-name-pattern"])
+    corpus = [
+        "_deliberate_" + "".join(combo) + ".py"
+        for length in range(0, 4)
+        for combo in itertools.product("az9_.AZ-", repeat=length)
+    ]
+    corpus += [
+        "_deliberate_shared.py", "_deliberate_a9_x.py", "_deliberate_.py",
+        "_deliberate_9x.py", "_Deliberate_x.py", "_deliberate_X.py",
+        "deliberate_x.py", "_deliberate_x.mod.py", "_deliberate_shared.txt",
+        "deliberate-validate.py", "evil.py", "",
+    ]
+    for name in corpus:
+        assert predicate(name) == bool(regex.match(name)), name

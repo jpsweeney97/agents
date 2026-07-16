@@ -28,6 +28,18 @@ Validator boundary (part of the skill contract):
 - The self-hash bootstrap is non-circular: the orchestrator verifies this
   script's content identifier with the platform hasher (`shasum -a 256` or
   equivalent), never with this script.
+- Pre-import boundary: before any first-party import, a two-pass stdlib-only
+  census of scripts/ refuses unexpected artifacts fail-closed (ADR-0001) —
+  layout rules run on os/sys before any shadowable import, then the narrow
+  deferred stdlib set performs a structural zip check (zipfile.is_zipfile,
+  after direct shadows are cleared) that catches prefixed archives; bytecode is
+  redirected to a fresh invocation-private cache prefix mechanically verified
+  outside the repository (or served skill root when standalone) and retired at
+  exit, with repo-, bundle-, scripts-, allowed-data-, symlink-resolved-, and
+  case-aliased internal temp roots refused before first-party import; the
+  embedded census policy is authenticated by this file's own method-surface
+  hash and asserted equal to contract-data.yaml's import-boundary section by a
+  release-time test, with _require_boundary_match re-checking it at every load.
 
 Exit codes: 0 pass; 1 validation failure; 2 refusal (unauthorized read,
 off-column request, unsupported schema, bound breach, usage); 4 required
@@ -36,20 +48,229 @@ run-state item absent (the orchestrator maps this to `store failed: read`).
 
 from __future__ import annotations
 
-import argparse
-import copy
-import hashlib
-import io
 import os
-import re
-import stat
-import subprocess
 import sys
-import tempfile
-from pathlib import Path
-from typing import Any
 
-import yaml
+# ---------------------------------------------------------------------------
+# Pre-import boundary (ADR-0001 + 2026-07-16 amendment), two passes before any
+# first-party import. Pass 1 (the LAYOUT census) uses only `os`/`sys` — modules
+# already initialized at interpreter startup, so they cannot be shadowed from
+# scripts/ (which is sys.path[0]) — enforces every structural rule, and COLLECTS
+# the inert-suffix files. Once pass 1 returns without refusing, no
+# .py/.pyc/.so/package/symlink shadow exists under scripts/, so only the narrow
+# deferred stdlib imports below may run: atexit/shutil/tempfile create and
+# retire a cache prefix mechanically verified outside the repository (or the
+# served skill root when standalone), and zipfile performs pass 2's structural
+# archive check. Unsafe ambient temp roots refuse before prefix creation; the
+# created prefix is resolved and checked again before assignment. Pass 2 runs
+# `zipfile.is_zipfile` on the collected inert files — the same detector the
+# Gate-2 checker uses (43065ca), so a prefixed/self-extracting zip is caught and
+# the two consumers cannot drift on zip detection. Every first-party and other
+# import waits until pass 2 returns. The census consumes only the embedded
+# policy, authenticated by this entrypoint's own method-surface hash; a
+# release-time test asserts that embedding equals the pinned contract section,
+# and `_require_boundary_match` re-checks it per invocation as defense-in-depth.
+# No pre-import contract parse (a weaker first parse of a pinned surface was
+# rejected — ADR-0001 amendment).
+# ---------------------------------------------------------------------------
+_BOUNDARY_POLICY: dict = {
+    "entrypoint": "deliberate-validate.py",
+    "module-name-pattern": r"^_deliberate_[a-z][a-z0-9_]*\.py$",
+    "allowed-data-dirs": ["fixtures"],
+    "forbidden-loader-suffixes": [".pyc", ".pyo", ".pyd", ".pyw", ".so"],
+    "archive-suffixes": [".egg", ".whl", ".zip"],
+}
+_BOUNDARY_FORBIDDEN_SUFFIXES = tuple(
+    sorted(
+        set(_BOUNDARY_POLICY["forbidden-loader-suffixes"])
+        | set(_BOUNDARY_POLICY["archive-suffixes"])
+    )
+)
+
+
+def _boundary_refuse(reason: str, got: str) -> None:
+    sys.stderr.write(f"import boundary refused: {reason}. Got: {got}\n")
+    sys.exit(2)
+
+
+def _boundary_module_name_conforms(name: str) -> bool:
+    """`re`-free rendering of module-name-pattern; agreement is test-pinned."""
+    if not name.startswith("_deliberate_") or not name.endswith(".py"):
+        return False
+    stem = name[len("_deliberate_") : -len(".py")]
+    if not stem or stem[0] not in "abcdefghijklmnopqrstuvwxyz":
+        return False
+    return all(c in "abcdefghijklmnopqrstuvwxyz0123456789_" for c in stem)
+
+
+def _boundary_layout_census(scripts_dir: str) -> list[str]:
+    """ADR-0001 runtime layout census (pass 1): os/sys only, fail-closed.
+
+    Enforces every structural rule and RETURNS the inert-suffix files (no .py,
+    no forbidden loader/archive suffix) for the pass-2 content check. Mirrors
+    the Gate-2 authoring census (tests/check_import_closure.py) minus
+    closure/inventory equality, which stays an authoring-gate concern: a flat
+    conforming uninventoried module is inert here because production code
+    contains no dynamic-import machinery and the orchestrator platform-hashes
+    every method surface before trusting results.
+    """
+    if os.path.islink(scripts_dir):
+        _boundary_refuse(
+            "scripts/ itself must be a real directory, not a symlink (ADR-0001)",
+            scripts_dir,
+        )
+    allowed_dirs = set(_BOUNDARY_POLICY["allowed-data-dirs"])
+    inert: list[str] = []
+    for dirpath, dirnames, filenames in os.walk(scripts_dir, followlinks=False):
+        for name in sorted(dirnames):
+            path = os.path.join(dirpath, name)
+            if os.path.islink(path):
+                _boundary_refuse(
+                    "symlinks are forbidden anywhere under scripts/ (ADR-0001)", path
+                )
+            if name == "__pycache__":
+                _boundary_refuse(
+                    "__pycache__ is forbidden under scripts/ (ADR-0001)", path
+                )
+            top = os.path.relpath(path, scripts_dir).split(os.sep)[0]
+            if top not in allowed_dirs:
+                _boundary_refuse(
+                    "directories under scripts/ are forbidden outside the "
+                    f"declared data allowlist {sorted(allowed_dirs)} (ADR-0001)",
+                    path,
+                )
+        for name in sorted(filenames):
+            path = os.path.join(dirpath, name)
+            if os.path.islink(path):
+                _boundary_refuse(
+                    "symlinks are forbidden anywhere under scripts/ (ADR-0001)", path
+                )
+            if name == "__pycache__":
+                _boundary_refuse(
+                    "__pycache__ is forbidden under scripts/ (ADR-0001)", path
+                )
+            if not os.path.isfile(path):
+                _boundary_refuse("unsupported filesystem object under scripts/", path)
+            lower = name.lower()
+            if lower.endswith(".py"):
+                if dirpath != scripts_dir:
+                    _boundary_refuse(
+                        "production Python must be flat in scripts/ (ADR-0001)", path
+                    )
+                if name != _BOUNDARY_POLICY[
+                    "entrypoint"
+                ] and not _boundary_module_name_conforms(name):
+                    _boundary_refuse(
+                        "production module name must match _deliberate_<domain>.py "
+                        "(ADR-0001 naming rule)",
+                        path,
+                    )
+                continue
+            if any(lower.endswith(suffix) for suffix in _BOUNDARY_FORBIDDEN_SUFFIXES):
+                _boundary_refuse(
+                    "importable non-source artifact is forbidden under scripts/ "
+                    "(ADR-0001)",
+                    path,
+                )
+            inert.append(path)
+    return inert
+
+
+_boundary_scripts_dir = os.path.dirname(os.path.abspath(__file__))
+_boundary_inert_files = _boundary_layout_census(_boundary_scripts_dir)
+
+import atexit  # noqa: E402 — deferred by design: imports wait for pass 1
+import shutil  # noqa: E402
+import tempfile  # noqa: E402
+
+
+def _boundary_protected_root(scripts_dir: str) -> str:
+    """Outermost Git root containing the skill, or skill root if standalone."""
+    skill_root = os.path.realpath(os.path.dirname(scripts_dir))
+    protected_root = skill_root
+    cursor = skill_root
+    while True:
+        if os.path.exists(os.path.join(cursor, ".git")):
+            protected_root = cursor
+        parent = os.path.dirname(cursor)
+        if parent == cursor:
+            return protected_root
+        cursor = parent
+
+
+def _boundary_path_is_within(path: str, root: str) -> bool:
+    """Containment by filesystem identity; comparison errors are unsafe."""
+    real_root = os.path.realpath(root)
+    cursor = os.path.realpath(path)
+    while True:
+        try:
+            if os.path.samefile(cursor, real_root):
+                return True
+        except OSError:
+            return True
+        parent = os.path.dirname(cursor)
+        if parent == cursor:
+            return False
+        cursor = parent
+
+
+# Fresh, initially empty (mkdtemp), invocation-private (0o700), under the
+# process temp root but mechanically outside the repository (or outside the
+# served skill root when no Git root is present), retired at exit, never reused
+# across invocations (ADR-0001). A temp root inside the protected source tree —
+# directly, through a symlink, or through a case alias — refuses BEFORE prefix
+# creation. Containment compares filesystem identity, not path-string casing;
+# errors are unsafe. The created prefix is resolved and checked again before
+# assignment, closing a symlink swap between selection and creation.
+# Redirecting alone is insufficient — pass 1 above is what stops directly-read
+# sourceless bytecode.
+_boundary_source_root = _boundary_protected_root(_boundary_scripts_dir)
+_boundary_temp_root = os.path.realpath(tempfile.gettempdir())
+if _boundary_path_is_within(_boundary_temp_root, _boundary_source_root):
+    _boundary_refuse(
+        "cache temp root must resolve outside the repository or served skill "
+        "root (ADR-0001)",
+        _boundary_temp_root,
+    )
+_boundary_cache_prefix = os.path.realpath(
+    tempfile.mkdtemp(prefix="deliberate-pycache-", dir=_boundary_temp_root)
+)
+if _boundary_path_is_within(_boundary_cache_prefix, _boundary_source_root):
+    shutil.rmtree(_boundary_cache_prefix, ignore_errors=True)
+    _boundary_refuse(
+        "created cache prefix must resolve outside the repository or served "
+        "skill root (ADR-0001)",
+        _boundary_cache_prefix,
+    )
+sys.pycache_prefix = _boundary_cache_prefix
+atexit.register(shutil.rmtree, sys.pycache_prefix, ignore_errors=True)
+
+# Pass 2: pass 1 refused every importable shadow, so importing zipfile (which
+# reads archives; zipimport, banned, loads them) cannot resolve to a scripts/
+# file. is_zipfile locates the trailing end-of-central-directory record the way
+# zipimport does, catching a prefixed/self-extracting zip a magic sniff misses.
+import zipfile  # noqa: E402 — safe only after pass 1 cleared every importable shadow
+
+for _inert_path in _boundary_inert_files:
+    if zipfile.is_zipfile(_inert_path):
+        _boundary_refuse(
+            "file is a valid zip archive despite an inert suffix (ADR-0001) — a "
+            "disguised or prefixed archive on sys.path imports as code through "
+            "zipimport",
+            _inert_path,
+        )
+
+import argparse  # noqa: E402
+import copy  # noqa: E402
+import hashlib  # noqa: E402
+import io  # noqa: E402
+import re  # noqa: E402
+import stat  # noqa: E402
+import subprocess  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import Any  # noqa: E402
+
+import yaml  # noqa: E402
 
 EXIT_PASS = 0
 EXIT_FAIL = 1
@@ -61,23 +282,6 @@ SETUP_SCHEMA = "deliberate-setup/v1"
 RUNSTATE_SCHEMA = "deliberate-runstate/v1"
 CAPSULE_SCHEMA = "deliberate-capsule/v1"
 PINS_NOT_PRODUCED = "not produced: pins not written"
-
-# Embedded rendering of contract-data.yaml's `import-boundary` census subset
-# (ADR-0001, 2026-07-16 amendment). The pre-import census consumes ONLY these
-# values, authenticated by this entrypoint's own method-surface hash. A
-# release-time test asserts this copy equals the contract section (minus
-# banned-identifiers), so a desynced pair cannot ship; `_require_boundary_match`
-# re-checks it at every contract load as defense-in-depth against a contract
-# swapped via --data at runtime. banned-identifiers is deliberately absent: it
-# has no runtime consumer (authoring-time AST ban). No zip-magics: zip
-# detection is structural (zipfile.is_zipfile), not a magic-byte compare.
-_BOUNDARY_POLICY: dict = {
-    "entrypoint": "deliberate-validate.py",
-    "module-name-pattern": r"^_deliberate_[a-z][a-z0-9_]*\.py$",
-    "allowed-data-dirs": ["fixtures"],
-    "forbidden-loader-suffixes": [".pyc", ".pyo", ".pyd", ".pyw", ".so"],
-    "archive-suffixes": [".egg", ".whl", ".zip"],
-}
 
 SAFE_TAGS = {
     "tag:yaml.org,2002:map",
