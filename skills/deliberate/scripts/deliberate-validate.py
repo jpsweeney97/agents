@@ -62,6 +62,23 @@ RUNSTATE_SCHEMA = "deliberate-runstate/v1"
 CAPSULE_SCHEMA = "deliberate-capsule/v1"
 PINS_NOT_PRODUCED = "not produced: pins not written"
 
+# Embedded rendering of contract-data.yaml's `import-boundary` census subset
+# (ADR-0001, 2026-07-16 amendment). The pre-import census consumes ONLY these
+# values, authenticated by this entrypoint's own method-surface hash. A
+# release-time test asserts this copy equals the contract section (minus
+# banned-identifiers), so a desynced pair cannot ship; `_require_boundary_match`
+# re-checks it at every contract load as defense-in-depth against a contract
+# swapped via --data at runtime. banned-identifiers is deliberately absent: it
+# has no runtime consumer (authoring-time AST ban). No zip-magics: zip
+# detection is structural (zipfile.is_zipfile), not a magic-byte compare.
+_BOUNDARY_POLICY: dict = {
+    "entrypoint": "deliberate-validate.py",
+    "module-name-pattern": r"^_deliberate_[a-z][a-z0-9_]*\.py$",
+    "allowed-data-dirs": ["fixtures"],
+    "forbidden-loader-suffixes": [".pyc", ".pyo", ".pyd", ".pyw", ".so"],
+    "archive-suffixes": [".egg", ".whl", ".zip"],
+}
+
 SAFE_TAGS = {
     "tag:yaml.org,2002:map",
     "tag:yaml.org,2002:seq",
@@ -257,6 +274,7 @@ def validate_contract_data(data: object) -> None:
         "validation",
         "packet-items",
         "bounds",
+        "import-boundary",
         "obliged-artifacts",
         "artifact-shapes",
         "record-keys",
@@ -266,7 +284,7 @@ def validate_contract_data(data: object) -> None:
     }
     if not isinstance(data, dict) or set(data) != top_keys:
         raise refuse(op, f"top-level keys must be exactly {sorted(top_keys)}", data)
-    if data["contract-data-version"] != 5:
+    if data["contract-data-version"] != 6:
         raise refuse(
             op,
             "unsupported contract-data-version",
@@ -567,6 +585,29 @@ def validate_contract_data(data: object) -> None:
             op, "echo-contract-fields must be a subset of capsule-contract-fields"
         )
 
+    boundary = data["import-boundary"]
+    boundary_keys = {
+        "entrypoint",
+        "module-name-pattern",
+        "allowed-data-dirs",
+        "forbidden-loader-suffixes",
+        "archive-suffixes",
+        "banned-identifiers",
+    }
+    if not isinstance(boundary, dict) or set(boundary) != boundary_keys:
+        raise refuse(
+            op,
+            f"import-boundary keys must be exactly {sorted(boundary_keys)}",
+            boundary,
+        )
+    for key in ("entrypoint", "module-name-pattern"):
+        if not isinstance(boundary[key], str) or not boundary[key].strip():
+            raise refuse(
+                op, f"import-boundary {key} must be a non-empty string", boundary[key]
+            )
+    for key in sorted(boundary_keys - {"entrypoint", "module-name-pattern"}):
+        _contract_string_list(op, boundary, key)
+
 
 class Contract:
     def __init__(self, data: dict, data_path: Path) -> None:
@@ -630,11 +671,32 @@ class Contract:
         return [e for e in self.items if e["matrix"][stage]["status"] == "include"]
 
 
+def _require_boundary_match(data: dict) -> None:
+    """Refuse when the contract's import-boundary differs from the embedded census policy.
+
+    The runtime census (module top) consumes only the embedded values, so this
+    comparison is what proves — at every invocation — that the embedded
+    rendering matches the authenticated policy source (ADR-0001 amendment):
+    the runtime never reads an unpinned policy reference as authority.
+    """
+    boundary = data["import-boundary"]
+    for key, embedded in _BOUNDARY_POLICY.items():
+        if boundary[key] != embedded:
+            raise refuse(
+                "contract data",
+                f"import-boundary {key} differs from the entrypoint's embedded "
+                "census policy (ADR-0001) — the embedded rendering must match "
+                "the authenticated contract",
+                boundary[key],
+            )
+
+
 def load_contract(data_path: Path, readset: ReadSet) -> Contract:
     readset.allow(data_path)
     raw = readset.read_bytes(data_path)
     parsed = safe_parse(raw, byte_cap=4 * 1024 * 1024, depth_cap=48, op="contract data")
     validate_contract_data(parsed)
+    _require_boundary_match(parsed)
     return Contract(parsed, Path(os.path.realpath(data_path)))
 
 

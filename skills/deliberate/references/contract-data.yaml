@@ -14,7 +14,7 @@
 # Editing rule: this file is the authority. After any edit, regenerate the
 # authored renderings (`check-renderings --write`) and rerun the fixtures.
 
-contract-data-version: 5
+contract-data-version: 6
 
 stages: [generate, prune, shape, recommend, contest]
 
@@ -325,6 +325,28 @@ bounds:
   capsule-file-bytes: 1048576             # explicit file validation/import cap after chat-bound compaction fails; the capsule keeps its underlying terminal
   parse-bytes: 1048576                    # validator byte cap, rejected before parse
   parse-depth: 32                         # validator nesting cap, rejected before parse
+
+# ---------------------------------------------------------------------------
+# Import-boundary policy contract (ADR-0001, 2026-07-16 amendment; hardening
+# portfolio Option 2). Single declarative source for the scripts/ execution
+# boundary. Consumers: the Gate-2 authoring checker
+# (tests/check_import_closure.py) loads these values directly; the entrypoint
+# embeds the census subset; a release-time test asserts the embedded
+# rendering equals this section (minus banned-identifiers), and
+# `_require_boundary_match` re-checks it at every contract load as
+# defense-in-depth. banned-identifiers is authoring-time (AST) enforcement
+# only — the runtime census does not parse Python. Zip detection is
+# structural (zipfile.is_zipfile in both consumers), so there is no
+# zip-magics list. Editing any value is a method-identity change: classify
+# under the method-pin drift rules before landing.
+# ---------------------------------------------------------------------------
+import-boundary:
+  entrypoint: deliberate-validate.py
+  module-name-pattern: "^_deliberate_[a-z][a-z0-9_]*\\.py$"
+  allowed-data-dirs: [fixtures]
+  forbidden-loader-suffixes: [.pyc, .pyo, .pyd, .pyw, .so]
+  archive-suffixes: [.egg, .whl, .zip]
+  banned-identifiers: [__import__, __builtins__, builtins, importlib, zipimport, runpy, exec, eval, compile]
 
 # ---------------------------------------------------------------------------
 # Obliged artifacts per stage (envelope `artifacts` fixed key set).
