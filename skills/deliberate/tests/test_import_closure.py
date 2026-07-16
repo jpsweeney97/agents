@@ -168,7 +168,7 @@ def test_package_submodule_layout_is_rejected(tmp_path: Path) -> None:
             "scripts/_deliberate_pkg/__init__.py",
         ],
     )
-    with pytest.raises(SystemExit, match=r"packages and nested files are forbidden"):
+    with pytest.raises(SystemExit, match=r"directories under scripts/ are forbidden"):
         check(root)
 
 
@@ -213,6 +213,227 @@ def test_relative_import_fails_fast(tmp_path: Path) -> None:
         ["scripts/deliberate-validate.py"],
     )
     with pytest.raises(SystemExit, match=r"relative import is unsupported"):
+        check(root)
+
+
+def test_sourceless_bytecode_artifact_is_rejected(tmp_path: Path) -> None:
+    """A stray .pyc under scripts/ is executable and must fail the census.
+
+    Reproduces the 2026-07-15 re-review bypass: sourceless bytecode loads
+    through SourcelessFileLoader regardless of any cache prefix.
+    """
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    (root / "scripts" / "_deliberate_hidden.pyc").write_bytes(b"\x00fake-bytecode")
+    with pytest.raises(SystemExit, match=r"importable non-source artifact"):
+        check(root)
+
+
+def test_extension_module_artifact_is_rejected(tmp_path: Path) -> None:
+    """An extension module (.so) is loadable code without hashed source."""
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    (root / "scripts" / "_deliberate_fast.so").write_bytes(b"\x00fake-extension")
+    with pytest.raises(SystemExit, match=r"importable non-source artifact"):
+        check(root)
+
+
+def test_pycache_directory_is_rejected(tmp_path: Path) -> None:
+    """A __pycache__ under scripts/ holds bytecode that shadows hashed source."""
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    cache = root / "scripts" / "__pycache__"
+    cache.mkdir()
+    (cache / "x.cpython-313.pyc").write_bytes(b"\x00fake-bytecode")
+    with pytest.raises(SystemExit, match=r"__pycache__ is forbidden"):
+        check(root)
+
+
+def test_symlinked_package_is_rejected(tmp_path: Path) -> None:
+    """A symlinked package imports and executes external code.
+
+    Reproduces the 2026-07-15 re-review bypass: rglob("*.py") never
+    traverses the symlink target, so the old census missed it entirely.
+    """
+    external = tmp_path / "external_pkg"
+    external.mkdir()
+    (external / "__init__.py").write_text("VALUE = 1\n", encoding="utf-8")
+    root = make_layout(
+        tmp_path / "skill",
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    (root / "scripts" / "_deliberate_pkg").symlink_to(
+        external, target_is_directory=True
+    )
+    with pytest.raises(SystemExit, match=r"symlinks are forbidden"):
+        check(root)
+
+
+def test_symlinked_module_file_is_rejected(tmp_path: Path) -> None:
+    """A symlinked .py resolves outside the tree the census hashed."""
+    external = tmp_path / "real_module.py"
+    external.write_text("VALUE = 1\n", encoding="utf-8")
+    root = make_layout(
+        tmp_path / "skill",
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    (root / "scripts" / "_deliberate_shared.py").symlink_to(external)
+    with pytest.raises(SystemExit, match=r"symlinks are forbidden"):
+        check(root)
+
+
+def test_unexpected_directory_is_rejected(tmp_path: Path) -> None:
+    """Any directory outside the declared data allowlist is a package form."""
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    (root / "scripts" / "helpers").mkdir()
+    with pytest.raises(SystemExit, match=r"directories under scripts/ are forbidden"):
+        check(root)
+
+
+def test_allowed_data_directory_and_inert_files_pass(tmp_path: Path) -> None:
+    """The declared data allowlist and loader-suffix-free files stay legal."""
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    cases = root / "scripts" / "fixtures" / "must-pass"
+    cases.mkdir(parents=True)
+    (cases / "case.yaml").write_text("k: v\n", encoding="utf-8")
+    (root / "scripts" / ".DS_Store").write_bytes(b"\x00")
+    message = check(root)
+    assert message.endswith("1 Python surface(s)")
+
+
+def test_python_inside_data_directory_is_rejected(tmp_path: Path) -> None:
+    """The data allowlist never launders nested Python past the flat rule."""
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    fixtures = root / "scripts" / "fixtures"
+    fixtures.mkdir()
+    (fixtures / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+    with pytest.raises(SystemExit, match=r"packages and nested files are forbidden"):
+        check(root)
+
+
+def test_import_resolving_to_sourceless_bytecode_is_rejected(tmp_path: Path) -> None:
+    """Discovery itself must refuse an import satisfied only by bytecode.
+
+    Exercises the closure layer directly (no census): the 2026-07-15 bypass
+    classified `import _deliberate_hidden` as third-party because only
+    `<name>.py` counted as first-party evidence.
+    """
+    root = make_layout(
+        tmp_path,
+        "import _deliberate_hidden\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    scripts = root / "scripts"
+    (scripts / "_deliberate_hidden.pyc").write_bytes(b"\x00fake-bytecode")
+    with pytest.raises(SystemExit, match=r"never bytecode, a package, or a symlink"):
+        import_closure(scripts / "deliberate-validate.py")
+
+
+def test_import_resolving_to_directory_is_rejected(tmp_path: Path) -> None:
+    """Even an allowlisted data directory must never be importable."""
+    root = make_layout(
+        tmp_path,
+        "import fixtures\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    (root / "scripts" / "fixtures").mkdir()
+    with pytest.raises(SystemExit, match=r"never bytecode, a package, or a symlink"):
+        import_closure(root / "scripts" / "deliberate-validate.py")
+
+
+def test_builtins_import_alias_is_rejected(tmp_path: Path) -> None:
+    """`from builtins import __import__ as x` is dynamic import by alias.
+
+    Exact 2026-07-15 re-review probe: the old checker matched only an AST
+    Name spelled __import__ and passed this form.
+    """
+    root = make_layout(
+        tmp_path,
+        'from builtins import __import__ as dynamic_import\ndynamic_import("os")\n',
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    with pytest.raises(
+        SystemExit, match=r"dynamic import machinery is forbidden.*builtins"
+    ):
+        check(root)
+
+
+def test_builtins_attribute_import_is_rejected(tmp_path: Path) -> None:
+    """`builtins.__import__(...)` is dynamic import by attribute access.
+
+    Exact 2026-07-15 re-review probe.
+    """
+    root = make_layout(
+        tmp_path,
+        'import builtins\nbuiltins.__import__("os")\n',
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    with pytest.raises(
+        SystemExit, match=r"dynamic import machinery is forbidden.*builtins"
+    ):
+        check(root)
+
+
+def test_exec_identifier_is_rejected(tmp_path: Path) -> None:
+    """exec/eval/compile can construct imports the static closure never sees."""
+    root = make_layout(
+        tmp_path,
+        'exec("import _deliberate_hidden")\n',
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    with pytest.raises(
+        SystemExit, match=r"dynamic import machinery is forbidden.*exec"
+    ):
+        check(root)
+
+
+def test_banned_identifier_inside_string_literal_is_rejected(tmp_path: Path) -> None:
+    """A banned name smuggled as a string literal is caught token-wise."""
+    root = make_layout(
+        tmp_path,
+        'x = getattr(object, "__import__")\n',
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    with pytest.raises(
+        SystemExit, match=r"dynamic import machinery is forbidden.*__import__"
+    ):
         check(root)
 
 

@@ -14,12 +14,31 @@ Derives three independent sets and requires exact pairwise equality
    inventory;
 3. every production ``.py`` file physically present under ``scripts/``.
 
-Structural rules enforced alongside the set comparison: production Python
-is the entrypoint plus flat ``scripts/_deliberate_<domain>.py`` modules
-only — no packages, no nested files, no name that could shadow a stdlib or
-third-party import — and production sources may not use dynamic-import
-machinery (``__import__``, ``importlib``), so the static closure stays
-authoritative for what executes.
+Alongside the set comparison, the same run enforces the complete ADR-0001
+``scripts/`` layout, fail-closed:
+
+- Production Python is the entrypoint plus flat
+  ``scripts/_deliberate_<domain>.py`` regular files only; nested files,
+  dotted first-party imports, and names that could shadow a stdlib or
+  third-party import are rejected.
+- A recursive census rejects every unexpected importable artifact anywhere
+  under ``scripts/``: symlinks (file or directory, including symlinked
+  packages), ``__pycache__`` entries, bytecode and extension-module files
+  (any loader suffix other than flat source), and directories outside the
+  declared data allowlist. Files with no loader suffix are import-inert
+  and permitted.
+- A statically imported name with any local presence in ``scripts/`` other
+  than its inventoried flat ``.py`` source is rejected rather than
+  classified as third-party, so an import can never resolve to sourceless
+  bytecode, a package directory, or a symlink.
+- Dynamic-import and code-execution machinery is rejected by a
+  position-independent identifier ban: any occurrence of a banned
+  identifier in any syntactic role — name, attribute, alias, argument,
+  definition — or as an identifier token inside a string literal fails the
+  check. Identifiers computed at runtime from constructed strings are
+  statically undetectable by design; that residual is covered by diff
+  review and by the census guarantee that no uninventoried repo-local
+  artifact exists to import.
 
 Non-executing by design: importing the entrypoint or any production module
 would execute code before the comparison and cross the authentication
@@ -36,6 +55,7 @@ exit 1 with the failure otherwise.
 from __future__ import annotations
 
 import ast
+import importlib.machinery
 import re
 import sys
 from pathlib import Path
@@ -44,7 +64,92 @@ import yaml
 
 ENTRYPOINT_NAME = "deliberate-validate.py"
 MODULE_NAME = re.compile(r"^_deliberate_[a-z][a-z0-9_]*\.py$")
-DYNAMIC_IMPORT_TOP_NAMES = frozenset({"importlib"})
+ALLOWED_DATA_DIRS = frozenset({"fixtures"})
+BANNED_IDENTIFIERS = frozenset(
+    {
+        "__import__",
+        "__builtins__",
+        "builtins",
+        "importlib",
+        "runpy",
+        "exec",
+        "eval",
+        "compile",
+    }
+)
+IDENTIFIER_TOKEN = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+# Every suffix the running interpreter's FileFinder can load, plus the
+# cross-platform forms this platform does not register (.pyw/.pyc/.pyo/.pyd),
+# so a census run on macOS still rejects artifacts another platform loads.
+LOADER_SUFFIXES = frozenset(importlib.machinery.all_suffixes()) | {
+    ".pyc",
+    ".pyo",
+    ".pyd",
+    ".pyw",
+    ".so",
+}
+ARTIFACT_SUFFIXES = tuple(sorted(s.lower() for s in LOADER_SUFFIXES if s != ".py"))
+
+
+def _identifier_candidates(node: ast.AST):
+    """Every identifier-shaped string the node carries, in any syntactic role.
+
+    String constants are scanned token-wise so a banned name smuggled as a
+    literal (``getattr(x, "__import__")``) is caught; dotted strings from
+    import statements are split so any dotted segment counts.
+    """
+    if isinstance(node, ast.Constant):
+        if isinstance(node.value, str):
+            yield from IDENTIFIER_TOKEN.findall(node.value)
+        return
+    for _field, value in ast.iter_fields(node):
+        items = value if isinstance(value, list) else [value]
+        for item in items:
+            if isinstance(item, str):
+                yield from item.split(".")
+
+
+def reject_banned_identifiers(tree: ast.AST, source_path: Path) -> None:
+    """Fail on any syntactic occurrence of dynamic-import or code-execution machinery."""
+    for node in ast.walk(tree):
+        for candidate in _identifier_candidates(node):
+            if candidate in BANNED_IDENTIFIERS:
+                line = getattr(node, "lineno", "?")
+                raise SystemExit(
+                    "import-closure check failed: dynamic import machinery is "
+                    "forbidden in production sources (ADR-0001), because the "
+                    "static closure must be authoritative; the ban is "
+                    "position-independent and covers string-literal tokens. "
+                    f"Got: {candidate!r} (line {line}) in {source_path}"
+                )
+
+
+def classify_first_party(scripts_dir: Path, top: str, source_path: Path) -> bool:
+    """True when ``top`` is a flat first-party module; fail on other local forms.
+
+    Script-directory resolution tries every loader form, not just
+    ``<top>.py`` — a sourceless ``.pyc``, an extension module, a package
+    directory, or a symlink would each execute code the static closure never
+    saw. Any such presence is rejected rather than classified.
+    """
+    flat = scripts_dir / f"{top}.py"
+    other_forms = [scripts_dir / top] + [
+        scripts_dir / f"{top}{suffix}" for suffix in ARTIFACT_SUFFIXES
+    ]
+    present = [p for p in other_forms if p.is_symlink() or p.exists()]
+    if present:
+        raise SystemExit(
+            "import-closure check failed: a first-party import must resolve "
+            "to a flat production source file, never bytecode, a package, or "
+            f"a symlink (ADR-0001). Got: {top!r} in {source_path} also "
+            f"resolvable to {[str(p) for p in present]}"
+        )
+    if flat.is_symlink():
+        raise SystemExit(
+            "import-closure check failed: a production module must be a "
+            f"regular file, not a symlink (ADR-0001). Got: {flat}"
+        )
+    return flat.is_file()
 
 
 def first_party_import_names(source_path: Path, scripts_dir: Path) -> set[str]:
@@ -52,10 +157,12 @@ def first_party_import_names(source_path: Path, scripts_dir: Path) -> set[str]:
 
     Walks the full AST so conditional and function-scoped imports count:
     any import statement can execute, so any import is closure-relevant.
-    Rejects relative imports, dotted first-party imports, and dynamic-import
-    machinery — each would let executed code escape the static closure.
+    Rejects relative imports, dotted first-party imports, dynamic-import
+    machinery, and imports resolvable to non-flat-source local artifacts —
+    each would let executed code escape the static closure.
     """
     tree = ast.parse(source_path.read_text(encoding="utf-8"))
+    reject_banned_identifiers(tree, source_path)
     dotted_names: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -69,24 +176,10 @@ def first_party_import_names(source_path: Path, scripts_dir: Path) -> set[str]:
                 )
             if node.module:
                 dotted_names.append(node.module)
-        elif isinstance(node, ast.Name) and node.id == "__import__":
-            raise SystemExit(
-                "import-closure check failed: dynamic import machinery is "
-                "forbidden in production sources (ADR-0001), because the "
-                "static closure must be authoritative. Got: __import__ in "
-                f"{source_path}"
-            )
     names: set[str] = set()
     for dotted in dotted_names:
         top = dotted.split(".")[0]
-        if top in DYNAMIC_IMPORT_TOP_NAMES:
-            raise SystemExit(
-                "import-closure check failed: dynamic import machinery is "
-                "forbidden in production sources (ADR-0001), because the "
-                f"static closure must be authoritative. Got: import of "
-                f"{dotted!r} in {source_path}"
-            )
-        if (scripts_dir / f"{top}.py").is_file():
+        if classify_first_party(scripts_dir, top, source_path):
             if "." in dotted:
                 raise SystemExit(
                     "import-closure check failed: dotted import of a "
@@ -115,28 +208,71 @@ def import_closure(entrypoint: Path) -> set[Path]:
     return closure
 
 
-def production_python_files(scripts_dir: Path) -> set[Path]:
-    """Every ``.py`` under scripts/, validated against the ADR-0001 layout.
+def census_scripts_layout(scripts_dir: Path) -> set[Path]:
+    """Fail-closed census of everything under scripts/; returns production ``.py`` files.
 
-    Fails on any nested or package layout and on any module name outside
-    ``_deliberate_<domain>.py``; the required prefix structurally prevents a
-    local module from shadowing a stdlib or third-party import.
+    Rejects every unexpected importable artifact — symlinks, ``__pycache__``,
+    bytecode and extension modules, directories outside the declared data
+    allowlist, nested or non-conforming ``.py`` — whether or not anything
+    imports it. Files with no loader suffix cannot be imported and pass.
     """
+    if scripts_dir.is_symlink():
+        raise SystemExit(
+            "import-closure check failed: scripts/ itself must be a real "
+            f"directory, not a symlink (ADR-0001). Got: {scripts_dir}"
+        )
     files: set[Path] = set()
-    for path in sorted(scripts_dir.rglob("*.py")):
-        if path.parent != scripts_dir:
+    for path in sorted(scripts_dir.rglob("*")):
+        if path.is_symlink():
             raise SystemExit(
-                "import-closure check failed: production Python must be flat "
-                "in scripts/ — packages and nested files are forbidden "
-                f"(ADR-0001). Got: {path}"
+                "import-closure check failed: symlinks are forbidden anywhere "
+                "under scripts/ (ADR-0001) — a symlinked module or package "
+                f"executes code outside the authenticated tree. Got: {path}"
             )
-        if path.name != ENTRYPOINT_NAME and not MODULE_NAME.match(path.name):
+        if path.name == "__pycache__":
             raise SystemExit(
-                "import-closure check failed: production module name must "
-                "match _deliberate_<domain>.py (ADR-0001 naming rule). Got: "
-                f"{path}"
+                "import-closure check failed: __pycache__ is forbidden under "
+                "scripts/ (ADR-0001) — cached bytecode executes in place of "
+                f"hashed source. Got: {path}"
             )
-        files.add(path.resolve())
+        if path.is_dir():
+            top = path.relative_to(scripts_dir).parts[0]
+            if top not in ALLOWED_DATA_DIRS:
+                raise SystemExit(
+                    "import-closure check failed: directories under scripts/ "
+                    "are forbidden outside the declared data allowlist "
+                    f"{sorted(ALLOWED_DATA_DIRS)} (ADR-0001) — a directory is "
+                    f"an importable package. Got: {path}"
+                )
+            continue
+        if not path.is_file():
+            raise SystemExit(
+                "import-closure check failed: unsupported filesystem object "
+                f"under scripts/. Got: {path}"
+            )
+        lower_name = path.name.lower()
+        if lower_name.endswith(".py"):
+            if path.parent != scripts_dir:
+                raise SystemExit(
+                    "import-closure check failed: production Python must be flat "
+                    "in scripts/ — packages and nested files are forbidden "
+                    f"(ADR-0001). Got: {path}"
+                )
+            if path.name != ENTRYPOINT_NAME and not MODULE_NAME.match(path.name):
+                raise SystemExit(
+                    "import-closure check failed: production module name must "
+                    "match _deliberate_<domain>.py (ADR-0001 naming rule). Got: "
+                    f"{path}"
+                )
+            files.add(path.resolve())
+            continue
+        if any(lower_name.endswith(suffix) for suffix in ARTIFACT_SUFFIXES):
+            raise SystemExit(
+                "import-closure check failed: importable non-source artifact "
+                "is forbidden under scripts/ (ADR-0001) — bytecode and "
+                "extension modules execute without matching any hashed "
+                f"source. Got: {path}"
+            )
     return files
 
 
@@ -170,8 +306,7 @@ def check(skill_root: Path) -> str:
                 f"import-closure check failed: required file missing. Got: {required}"
             )
     on_disk = {
-        path.relative_to(root).as_posix()
-        for path in production_python_files(scripts_dir)
+        path.relative_to(root).as_posix() for path in census_scripts_layout(scripts_dir)
     }
     closure = {path.relative_to(root).as_posix() for path in import_closure(entrypoint)}
     inventory = inventory_python_surfaces(contract_data)
