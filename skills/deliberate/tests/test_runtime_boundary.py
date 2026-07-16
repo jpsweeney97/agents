@@ -240,7 +240,7 @@ def test_inert_file_passes_and_conforming_extra_module_is_runtime_inert(
 
 def test_module_name_grammar_matches_declared_pattern(tmp_path: Path) -> None:
     """The census's re-free name check must agree with module-name-pattern."""
-    accepted = ["_deliberate_shared.py", "_deliberate_a9_x.py"]
+    accepted = ["_deliberate_probe.py", "_deliberate_a9_x.py"]
     refused = [
         "_deliberate_.py",
         "_deliberate_9x.py",
@@ -335,3 +335,42 @@ def test_cache_prefix_is_external_private_retired_and_unsafe_roots_refuse(
         assert list(tmp_path.rglob("*.pyc")) == [], label
         assert list((case_root / "scripts").rglob("__pycache__")) == [], label
         assert list((case_root / "scripts").rglob("*.pyc")) == [], label
+
+
+def test_sourceless_shadow_of_shared_module_is_refused(tmp_path: Path) -> None:
+    """A sourceless _deliberate_shared.pyc beside the real module is exactly
+    the directly-read-bytecode hazard: refused before any import."""
+    root = make_bundle(tmp_path)
+    marker = seed_marker_pyc(root, tmp_path, "_deliberate_shared.pyc")
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "_deliberate_shared.pyc" in result.stderr
+    assert not marker.exists()
+
+
+def test_second_invocation_never_reuses_prior_bytecode(tmp_path: Path) -> None:
+    """Gate-1 follow-up hazard as a tripwire: after a same-size, mtime-restored
+    edit to _deliberate_shared.py, the second invocation must execute the
+    edited code — a reused cache entry (size+mtime match) would show the old
+    string. The observable channel is safe_parse's anchor refusal, which lives
+    in the shared module."""
+    root = make_bundle(tmp_path)
+    scoped = tmp_path / "scoped-tmp"
+    scoped.mkdir()
+    bad_contract = tmp_path / "anchored.yaml"
+    bad_contract.write_text("a: &x 1\nb: *x\n", encoding="utf-8")
+    probe_args = ["identity", "--data", str(bad_contract), str(bad_contract)]
+    first = run_cli(root, *probe_args, tmpdir=scoped)
+    assert first.returncode == 2
+    assert "YAML anchors are rejected" in first.stderr
+    shared = root / "scripts" / "_deliberate_shared.py"
+    before = shared.stat()
+    text = shared.read_text(encoding="utf-8")
+    assert text.count("YAML anchors are rejected") == 1
+    edited = text.replace("YAML anchors are rejected", "YAML anchorZ are rejected")
+    assert len(edited.encode("utf-8")) == len(text.encode("utf-8"))
+    shared.write_text(edited, encoding="utf-8")
+    os.utime(shared, ns=(before.st_atime_ns, before.st_mtime_ns))
+    second = run_cli(root, *probe_args, tmpdir=scoped)
+    assert second.returncode == 2
+    assert "YAML anchorZ are rejected" in second.stderr

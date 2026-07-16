@@ -596,19 +596,23 @@ def test_banned_word_in_prose_is_allowed(tmp_path: Path) -> None:
     assert check(root).endswith("1 Python surface(s)")
 
 
-def test_live_tree_passes_with_entrypoint_only_closure() -> None:
-    """Pre-extraction reality: the closure is exactly the entrypoint, and the gate passes."""
+def test_live_tree_passes_with_shared_module_closure() -> None:
+    """v6 reality: the closure is the entrypoint plus _deliberate_shared."""
     from check_import_closure import BoundaryPolicy
 
     entrypoint = SKILL_ROOT / "scripts" / "deliberate-validate.py"
+    shared = SKILL_ROOT / "scripts" / "_deliberate_shared.py"
     policy = BoundaryPolicy(
         LIVE_POLICY, SKILL_ROOT / "references" / "contract-data.yaml"
     )
-    assert import_closure(entrypoint, policy) == {entrypoint.resolve()}
+    assert import_closure(entrypoint, policy) == {
+        entrypoint.resolve(),
+        shared.resolve(),
+    }
     message = check(SKILL_ROOT)
     assert message == (
         "import closure, on-disk production files, and method-surfaces "
-        "agree: 1 Python surface(s)"
+        "agree: 2 Python surface(s)"
     )
 
 

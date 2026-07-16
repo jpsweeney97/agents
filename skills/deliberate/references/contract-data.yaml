@@ -51,6 +51,7 @@ validation:
     - references/methods.md
     - references/schemas.md
     - references/stage-packets.md
+    - scripts/_deliberate_shared.py
     - scripts/deliberate-validate.py
   # Typed re-run directive manifest action kinds. Each new raw directive text
   # supplied at import binds to one or more applied actions of these kinds;

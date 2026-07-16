@@ -518,11 +518,13 @@ def test_capsule_validate_import_and_reject_round_trip(tmp_path: Path) -> None:
 
 
 def test_embedded_fixture_summary_is_stable() -> None:
-    """Keep the existing 158-case executable suite as the control."""
+    """Keep the existing executable fixture suite as the control (one method-pin
+    drift case is derived per method surface, so the eighth surface grew the
+    count from 158 to 159)."""
     result = run_validator("fixtures", "--data", str(CONTRACT_DATA))
     assert result.returncode == 0, result.stderr
     assert result.stderr == ""
-    assert result.stdout.endswith("\n158/158 fixtures behaved as required\n")
+    assert result.stdout.endswith("\n159/159 fixtures behaved as required\n")
     assert (
-        len(re.findall(r"^(?:PASS|FAIL)  ", result.stdout, flags=re.MULTILINE)) == 158
+        len(re.findall(r"^(?:PASS|FAIL)  ", result.stdout, flags=re.MULTILINE)) == 159
     )
