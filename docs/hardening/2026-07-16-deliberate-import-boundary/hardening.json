@@ -539,7 +539,7 @@
   ],
   "openQuestions": [
     "Decided (JP, 2026-07-16): the already pinned contract-data.yaml owns the policy as a top-level import-boundary section; the other placements are declined. Recorded in the ADR-0001 amendment and proposals/import-execution-boundary.md.",
-    "Settled by the implementation plan (2026-07-16): the entrypoint embeds the census-consumed policy subset and compares it against the contract import-boundary section at every contract load; a pre-import yaml.safe_load read was rejected. See docs/plans/2026-07-16-deliberate-v6-shared-module-extraction.md.",
+    "Settled by the implementation plan (2026-07-16), refined by the same-day execution-readiness scrutiny: the entrypoint embeds the census-consumed policy subset, authenticated by the entrypoint's method-surface hash and a non-executing release-time equality test against the contract import-boundary section; _require_boundary_match re-checks it per contract load as post-import defense-in-depth (a pre-import runtime match is circular since the parser is the extracted first-party code, and a pre-import yaml.safe_load read was rejected). Zip detection is structural (zipfile.is_zipfile, two-pass runtime), so there is no zip-magics value. See the ADR-0001 amendment and 2026-07-16 addendum and docs/plans/2026-07-16-deliberate-v6-shared-module-extraction.md.",
     "Should the accepted external sys.path residual remain unchanged after the first module split?"
   ]
 }

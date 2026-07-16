@@ -1,0 +1,57 @@
+$deliberate
+
+I need to choose the primary six-week validation strategy for a four-person developer-tools team deciding whether to invest the following quarter in a collaborative debugging feature.
+
+Field mode: seed-and-widen.
+
+Candidate seeds:
+
+1. Five-team design-partner cohort using a rough working prototype in a real weekly workflow.
+2. Public self-serve beta with a waitlist and product analytics.
+3. Twelve structured interviews plus a clickable prototype, with no live workflow use.
+4. Three-team paid concierge pilot with a manual Wizard-of-Oz backend.
+5. Internal dogfood and benchmark program using synthetic repositories.
+6. Truthfully labeled concept page with signup intent and scheduled follow-up sessions.
+7. Open-source a narrow alpha and recruit early adopters through its repository.
+8. Instrument the current manual workaround across three partner teams without building a new UI.
+
+Confirmed constraints, each at its price:
+
+- By the end of week six, the strategy must produce observed repeat workflow use by at least three external teams. Price: internal-only and interview-only approaches cannot be the primary strategy, though they may be supporting tactics.
+- The strategy may consume at most $8,000 in cash and six engineer-weeks. Price: discard paths that need more capital or labor even if they promise broader reach.
+- The team may not receive, retain, or transmit customer source code, production credentials, or other sensitive production data. Price: accept lower-fidelity synthetic data, local execution, or screen-shared observation.
+- The team may not imply that an unshipped capability exists or use deceptive signup mechanics. Price: sacrifice conversion volume and speed for truthful framing.
+- The strategy must remain reversible after six weeks, with no public API commitment or load-bearing production architecture. Price: accept manual operations, rough interfaces, and work that may be discarded.
+
+Stated values:
+
+- Observed repeat behavior matters more than stated enthusiasm; I will accept evidence from fewer teams in exchange for seeing real recurring use.
+- Customer trust matters more than speed; I will not trade deceptive framing for faster signal.
+- Learning rate and reversibility matter more than polish or reach.
+- Adoption evidence matters more than precise willingness-to-pay evidence, although a genuine paid signal is valuable when it does not weaken the adoption test.
+- I will trade up to one additional week of setup for materially stronger behavioral evidence, but not more.
+
+Soft preferences and visible lean:
+
+- I prefer a strategy that also produces reusable onboarding or training material, but that preference must not override the confirmed constraints.
+- My current lean is toward “Twelve structured interviews plus a clickable prototype, with no live workflow use” because it is easy to coordinate and should produce clean qualitative synthesis. This is a soft preference, not a constraint or an instruction to preserve that candidate.
+
+Stakes context:
+
+- Medium-high but reversible. A poor choice costs six weeks of team focus. A deceptive public experiment could cause harder-to-repair trust damage. The investment decision can be revisited after the six-week test.
+
+Evidence inputs:
+
+- Use only the facts supplied in this prompt as decision evidence.
+
+Evidence authorization:
+
+- No additional decision-evidence sources, web research, project or user files, or external probes are authorized.
+- Mandatory skill, reference, constituent-contract, Git-state, and mechanical-validation reads required by the deliberate contract are authorized.
+- No side-effecting checks are authorized.
+
+Survivor budget: 4.
+
+Inline-degradation permission: not granted.
+
+Run the complete deliberation now.

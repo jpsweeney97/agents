@@ -9,15 +9,19 @@
 - `docs/audits/2026-07-15-deliberate-validator-debt-scan.md` — drift-class rules (line ~327) and the cross-runtime smoke bar ("Re-run an exact Codex and Claude smoke after any physical topology change").
 - `skills/deliberate/tests/check_import_closure.py` — the Gate-2 authoring checker whose census semantics the runtime preflight mirrors.
 
-## Current state (verified 2026-07-16 at `fc86e7b`)
+## Current state (verified 2026-07-16 at `43065ca`)
 
-- `main` holds the landed Gate-2 arc; worktree clean; full suite 38 passed in ~59s; Gate-2 checker exit 0 with "agree: 1 Python surface(s)"; fixtures 158/158.
+- `main` holds the landed Gate-2 arc; this branch adds the decision folds, this plan, and one Gate-2 repair (`43065ca`, below). Worktree clean; full suite 39 passed in ~62s; Gate-2 checker exit 0 with "agree: 1 Python surface(s)"; fixtures 158/158.
 - `skills/deliberate/scripts/deliberate-validate.py` is the single production Python surface (10,667 lines); `contract-data-version: 5`; `validation.method-surfaces` has seven entries.
 - The entrypoint has no first-party imports; `yaml` is used only inside the block this plan extracts (verified: zero `yaml.` references outside lines 59–233).
 
+### Prerequisite landed on this branch (`43065ca`) — prefixed-ZIP Gate-2 repair
+
+The 2026-07-16 execution-readiness scrutiny of this plan reproduced a live Gate-2 bypass: a structurally valid zip carrying an arbitrary prefix (a shell/self-extracting stub whose first four bytes are not `PK`) passed the checker green while zipimport still loaded a module from it, because the census sniffed only `handle.read(4)`. The fix replaced the four-byte magic sniff with `zipfile.is_zipfile`, which locates the trailing end-of-central-directory record the way zipimport does. A `test_prefixed_zip_archive_is_rejected` regression (mutation-proven: reverting to the sniff fails it) and a real-zip rewrite of `test_disguised_zip_archive_is_rejected` landed with it. **This plan's runtime preflight must carry the same structural detector, not the four-byte sniff** — reflected in Task 3 below, and the `zip-magics` policy value the earlier draft embedded is dropped everywhere (there is no magic list to compare; detection is structural).
+
 ## What this plan builds
 
-One `contract-data-version` bump to 6 delivering, together: (a) a declarative `import-boundary` policy section in the pinned `references/contract-data.yaml`; (b) the Gate-2 authoring checker consuming that section directly; (c) a stdlib-only pre-import census plus fresh invocation-private `sys.pycache_prefix` in the entrypoint, with the embedded policy rendering compared against the contract at every load; (d) the first physical extraction, `scripts/_deliberate_shared.py` (error/refusal constructors, read authorization, safe-YAML foundation), entering `method-surfaces` at the default (Generate) frontier; (e) the companion doc, test, smoke, and spec updates.
+One `contract-data-version` bump to 6 delivering, together: (a) a declarative `import-boundary` policy section in the pinned `references/contract-data.yaml`; (b) the Gate-2 authoring checker consuming that section directly; (c) a two-pass, stdlib-only pre-import census (layout rules first, then a `zipfile.is_zipfile` content check on the collected inert files once shadows are provably cleared) plus fresh invocation-private `sys.pycache_prefix` in the entrypoint, with a release-time test asserting the embedded policy equals the contract section and a per-invocation `_require_boundary_match` as defense-in-depth; (d) the first physical extraction, `scripts/_deliberate_shared.py` (error/refusal constructors, read authorization, safe-YAML foundation), entering `method-surfaces` at the default (Generate) frontier; (e) the companion doc, test, smoke, and spec updates.
 
 Non-goals: no further module splits (CH-1 stays gated on this landing), no launcher/staged-root (Option 3), no broadening of the external `sys.path` residual (portfolio open question 4 stays open), no plugin publish, no push, no merge to `main` — landing is JP's call.
 
@@ -28,13 +32,14 @@ Non-goals: no further module splits (CH-1 stays gated on this landing), no launc
 | `skills/deliberate/references/contract-data.yaml` | modify | version 5→6; new top-level `import-boundary` section; `method-surfaces` gains `scripts/_deliberate_shared.py` |
 | `skills/deliberate/scripts/deliberate-validate.py` | modify | embedded boundary policy + module-level pre-import census + fresh cache prefix; accepts/validates `import-boundary`; version gate 6; embedded-vs-contract comparison at every load; shared foundation removed, `from _deliberate_shared import …` added |
 | `skills/deliberate/scripts/_deliberate_shared.py` | create | the extracted foundation: exceptions, `fail`/`refuse`, `ReadSet`, `_decode_utf8`, `safe_parse`, `_UniqueKeyLoader`, `_NoAliasDumper`, `dump_yaml`, `SAFE_TAGS` |
-| `skills/deliberate/tests/check_import_closure.py` | modify | census/ban values loaded from the target root's `contract-data.yaml` `import-boundary` section |
-| `skills/deliberate/tests/test_import_closure.py` | modify | `make_layout` writes the policy section; live-tree test expects 2 surfaces; policy-floor and policy-binding tests |
-| `skills/deliberate/tests/test_runtime_boundary.py` | create | out-of-process battery: contract tamper, seeded-artifact refusals, benign passes, prefix lifecycle, bytecode-freshness probe, module-name grammar |
+| `skills/deliberate/tests/check_import_closure.py` | modify | census/ban values loaded from the target root's `contract-data.yaml` `import-boundary` section (structural zip detection via `zipfile.is_zipfile` already landed in `43065ca`) |
+| `skills/deliberate/tests/test_import_closure.py` | modify | `make_layout` writes the policy section; live-tree test expects 2 surfaces; policy-floor, policy-binding, and embedded-vs-contract-equality tests (prefixed-ZIP regression already landed in `43065ca`) |
+| `skills/deliberate/tests/test_runtime_boundary.py` | create | out-of-process battery: contract tamper, seeded-artifact refusals (incl. prefixed-ZIP), benign passes, prefix lifecycle + containment, bytecode-freshness probe, module-name grammar (predicate-vs-regex agreement) |
 | `skills/deliberate/SKILL.md` | modify | bootstrap verification hashes both production files; orchestrator hashing bullet names imported modules |
 | `skills/deliberate/references/capsule.md` | modify | method-identity prose includes the shared module |
 | `docs/specs/2026-07-13-deliberate.md` | modify | Status v27→v28; v28 lineage entry |
 | `docs/smoke-tests/2026-07-XX_deliberate-v6-dual-path-runtime-boundary.md` | create | dual-path evidence, effective interpreter, startup latency, obligation checklist |
+| `docs/smoke-tests/fixtures/2026-07-14-deliberate-exact-prompt.txt` | exists (`43065ca`) | byte-exact 3,760-byte `$deliberate` smoke prompt, SHA-256 `253f1bfe…`; the durable, hash-pinned Task 7 input (README beside it records provenance) |
 
 `skills/deliberate/tests/test_validator_cli_characterization.py` should need no edits: it derives method pins from the live contract at run time, pins `--help` output (no commands change), and pins the fixture summary (`158/158`, unchanged). If it fails at any task boundary, that is a regression to fix, not a test to update — with one exception noted in Task 1.
 
@@ -42,9 +47,11 @@ Non-goals: no further module splits (CH-1 stays gated on this landing), no launc
 
 - The Gate-2 checker stays non-executing: `ast.parse` only, never importing production code.
 - The runtime census enforces layout rules only. Closure/inventory equality stays an authoring-gate concern: a flat, conforming, uninventoried module is inert at runtime because production code contains no dynamic-import machinery and the orchestrator hashes every method surface. Do not add a YAML read or inventory comparison before first-party import.
-- Only `os` and `sys` are imported before the census (both initialized during CPython startup, so they cannot be shadowed from `scripts/`); every other import — stdlib included — waits until the census has passed. This is what makes the seeded-`scripts/argparse.py` test pass.
+- **Import ordering before first-party code (revised after the 2026-07-16 scrutiny).** Only `os` and `sys` are imported before the *layout* census (both initialized during CPython startup, so they cannot be shadowed from `scripts/`). The layout census enforces every structural rule using `os`/`sys` alone and *collects* the inert-suffix files for a content check. Once that pass returns without refusing, no `.py`/`.pyc`/`.so`/package/symlink shadow exists under `scripts/`, so `import zipfile` (and its stdlib deps) cannot resolve to a `scripts/` file — the zip-content check then runs `zipfile.is_zipfile` on the collected inert files, matching the Gate-2 checker's detector exactly. Every other import — stdlib and first-party — waits until both passes have refused nothing. This is what makes the seeded-`scripts/argparse.py` test pass and what carries the prefixed-ZIP repair (`43065ca`) into runtime.
+- **Zip detection is structural in both consumers.** Neither the checker nor the runtime compares magic bytes; both call `zipfile.is_zipfile`, so a prefixed/self-extracting zip is caught and the two consumers cannot drift on zip detection. There is no `zip-magics` policy value.
+- **The embedded-vs-contract match is authenticated at release time, not pre-import at runtime (ordering decision, 2026-07-16 scrutiny).** A truly pre-import *runtime* equality check is architecturally impossible under this cut: the comparison needs the contract parsed, contract-loading uses `safe_parse`/`ReadSet`, and those are exactly the first-party code being extracted into `_deliberate_shared` — so matching before first-party import would be circular, and a weaker pre-import `yaml.safe_load` of the pinned surface was already rejected (ADR-0001 amendment). Instead, (a) the census's policy values are authenticated by the entrypoint's own method-surface hash — they live in the hashed entrypoint source, so trusting the entrypoint is trusting its embedded census; (b) a non-executing release-time test asserts the embedded `_BOUNDARY_POLICY` equals the contract's `import-boundary` section (minus `banned-identifiers`), so a desynced pair cannot ship green; and (c) `_require_boundary_match` in `load_contract` is per-invocation defense-in-depth (it catches a contract swapped via `--data` at runtime) and necessarily runs post-import. Do not "fix" this by adding a pre-import contract parse.
 - Moved code is cut-and-pasted, never retyped: the characterization suite pins exact CLI messages, and any transcription drift fails it.
-- Production sources never name a banned identifier (`__import__`, `__builtins__`, `builtins`, `importlib`, `zipimport`, `runpy`, `exec`, `eval`, `compile`) as an identifier or import — string literals are fine (the ban is positional). Tests are outside that boundary and may use `py_compile`, `importlib`, etc.
+- Production sources never name a banned identifier (`__import__`, `__builtins__`, `builtins`, `importlib`, `zipimport`, `runpy`, `exec`, `eval`, `compile`) as an identifier or import — string literals are fine (the ban is positional). `zipfile` is *not* banned (it reads archives; `zipimport` loads them), so the runtime preflight may import it. Tests are outside that boundary and may use `py_compile`, `importlib`, etc.
 - Every task ends with the full suite green and a commit; no task leaves the tree red.
 
 Commands below assume the repo root as CWD. The ambient env lacks pyyaml/pytest: always run the suite as `uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q`.
@@ -57,7 +64,7 @@ Commands below assume the repo root as CWD. The ambient env lacks pyyaml/pytest:
 2. Baseline the suite and gates; expected outputs shown:
 
 ```bash
-uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q          # 38 passed
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q          # 39 passed
 uv run --script skills/deliberate/tests/check_import_closure.py               # import closure, on-disk production files, and method-surfaces agree: 1 Python surface(s)
 uv run --script skills/deliberate/scripts/deliberate-validate.py fixtures --data skills/deliberate/references/contract-data.yaml | tail -1   # 158/158 fixtures behaved as required
 uv run --script skills/deliberate/scripts/deliberate-validate.py check-renderings --data skills/deliberate/references/contract-data.yaml     # exit 0
@@ -205,11 +212,14 @@ Insert this section between the `bounds:` block and the `obliged-artifacts:` com
 # portfolio Option 2). Single declarative source for the scripts/ execution
 # boundary. Consumers: the Gate-2 authoring checker
 # (tests/check_import_closure.py) loads these values directly; the entrypoint
-# embeds the census subset and refuses at every contract load when its
-# embedded rendering differs. banned-identifiers is authoring-time (AST)
-# enforcement only — the runtime census does not parse Python. Editing any
-# value is a method-identity change: classify under the method-pin drift
-# rules before landing.
+# embeds the census subset; a release-time test asserts the embedded
+# rendering equals this section (minus banned-identifiers), and
+# `_require_boundary_match` re-checks it at every contract load as
+# defense-in-depth. banned-identifiers is authoring-time (AST) enforcement
+# only — the runtime census does not parse Python. Zip detection is
+# structural (zipfile.is_zipfile in both consumers), so there is no
+# zip-magics list. Editing any value is a method-identity change: classify
+# under the method-pin drift rules before landing.
 # ---------------------------------------------------------------------------
 import-boundary:
   entrypoint: deliberate-validate.py
@@ -217,7 +227,6 @@ import-boundary:
   allowed-data-dirs: [fixtures]
   forbidden-loader-suffixes: [.pyc, .pyo, .pyd, .pyw, .so]
   archive-suffixes: [.egg, .whl, .zip]
-  zip-magics: ["504b0304", "504b0506", "504b0708"]
   banned-identifiers: [__import__, __builtins__, builtins, importlib, zipimport, runpy, exec, eval, compile]
 ```
 
@@ -228,17 +237,19 @@ import-boundary:
 ```python
 # Embedded rendering of contract-data.yaml's `import-boundary` census subset
 # (ADR-0001, 2026-07-16 amendment). The pre-import census consumes ONLY these
-# values; `_require_boundary_match` compares them against the loaded contract
-# on every command and refuses on any difference, so this copy cannot drift
-# from the authenticated policy source unnoticed. banned-identifiers is
-# deliberately absent: it has no runtime consumer (authoring-time AST ban).
+# values, authenticated by this entrypoint's own method-surface hash. A
+# release-time test asserts this copy equals the contract section (minus
+# banned-identifiers), so a desynced pair cannot ship; `_require_boundary_match`
+# re-checks it at every contract load as defense-in-depth against a contract
+# swapped via --data at runtime. banned-identifiers is deliberately absent: it
+# has no runtime consumer (authoring-time AST ban). No zip-magics: zip
+# detection is structural (zipfile.is_zipfile), not a magic-byte compare.
 _BOUNDARY_POLICY: dict = {
     "entrypoint": "deliberate-validate.py",
     "module-name-pattern": r"^_deliberate_[a-z][a-z0-9_]*\.py$",
     "allowed-data-dirs": ["fixtures"],
     "forbidden-loader-suffixes": [".pyc", ".pyo", ".pyd", ".pyw", ".so"],
     "archive-suffixes": [".egg", ".whl", ".zip"],
-    "zip-magics": ["504b0304", "504b0506", "504b0708"],
 }
 ```
 
@@ -252,7 +263,6 @@ _BOUNDARY_POLICY: dict = {
         "allowed-data-dirs",
         "forbidden-loader-suffixes",
         "archive-suffixes",
-        "zip-magics",
         "banned-identifiers",
     }
     if not isinstance(boundary, dict) or set(boundary) != boundary_keys:
@@ -268,11 +278,6 @@ _BOUNDARY_POLICY: dict = {
             )
     for key in sorted(boundary_keys - {"entrypoint", "module-name-pattern"}):
         _contract_string_list(op, boundary, key)
-    for magic in boundary["zip-magics"]:
-        if len(magic) != 8 or any(c not in "0123456789abcdef" for c in magic):
-            raise refuse(
-                op, "zip-magics entries must be 8 lowercase hex characters", magic
-            )
 ```
 
 (c) Add the comparison next to `load_contract` and call it from `load_contract` after `validate_contract_data(parsed)`:
@@ -312,7 +317,7 @@ def load_contract(data_path: Path, readset: ReadSet) -> Contract:
 
 ```bash
 uv run --with pyyaml --with pytest pytest skills/deliberate/tests/test_runtime_boundary.py -q   # 4 passed
-uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q                            # 42 passed
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q                            # 43 passed
 uv run --script skills/deliberate/tests/check_import_closure.py                                  # agree: 1 Python surface(s)  (checker reads only method-surfaces until Task 2)
 uv run --script skills/deliberate/scripts/deliberate-validate.py fixtures --data skills/deliberate/references/contract-data.yaml | tail -1   # 158/158 fixtures behaved as required
 uv run --script skills/deliberate/scripts/deliberate-validate.py check-renderings --data skills/deliberate/references/contract-data.yaml     # exit 0
@@ -347,7 +352,6 @@ def test_live_policy_floor_holds_known_hazard_classes() -> None:
     for suffix in (".pyc", ".pyo", ".pyd", ".pyw", ".so"):
         assert suffix in LIVE_POLICY["forbidden-loader-suffixes"]
     assert set(LIVE_POLICY["archive-suffixes"]) == {".egg", ".whl", ".zip"}
-    assert set(LIVE_POLICY["zip-magics"]) == {"504b0304", "504b0506", "504b0708"}
     for name in (
         "__import__",
         "__builtins__",
@@ -365,11 +369,16 @@ def test_live_policy_floor_holds_known_hazard_classes() -> None:
 def test_checker_consumes_the_contract_policy_not_constants(tmp_path: Path) -> None:
     """Weakening a synthetic layout's policy must change checker behavior: the
     contract is the authority, not hardcoded constants. (On the live tree the
-    floor test above plus the entrypoint's load-time comparison guard against
-    weakening.)"""
+    floor test above plus the release-time embedded-vs-contract equality test
+    guard against weakening.)
+
+    Weaken `allowed-data-dirs` — a value the checker cannot reconstruct from the
+    interpreter (unlike loader suffixes, which the checker re-unions from
+    `importlib.machinery.all_suffixes()`, or zips, which it detects
+    structurally). With `vendor` allowed, a `scripts/vendor/` directory passes;
+    under the live policy the same directory is rejected."""
     weakened = dict(LIVE_POLICY)
-    weakened["archive-suffixes"] = [".egg", ".whl"]
-    weakened["zip-magics"] = ["00000000"]
+    weakened["allowed-data-dirs"] = ["fixtures", "vendor"]
     root = make_layout(
         tmp_path,
         "import os\n",
@@ -377,8 +386,38 @@ def test_checker_consumes_the_contract_policy_not_constants(tmp_path: Path) -> N
         ["scripts/deliberate-validate.py"],
         policy=weakened,
     )
-    (root / "scripts" / "payload.zip").write_bytes(b"PK\x03\x04weakened")
+    (root / "scripts" / "vendor").mkdir()
     assert check(root).endswith("1 Python surface(s)")
+
+
+def test_embedded_runtime_policy_matches_contract_section() -> None:
+    """Release-time authentication of the embedded census policy (ADR-0001,
+    2026-07-16 amendment): the entrypoint's `_BOUNDARY_POLICY` must equal the
+    contract's `import-boundary` section minus `banned-identifiers`. A desynced
+    pair cannot ship green, which is what lets `_require_boundary_match` run
+    post-import as defense-in-depth rather than as the authentication gate.
+    Extraction is non-executing: the entrypoint runs its census on import, so
+    the dict is read by AST/`literal_eval`, never by importing production code.
+    """
+    import ast
+
+    entrypoint = SKILL_ROOT / "scripts" / "deliberate-validate.py"
+    tree = ast.parse(entrypoint.read_text(encoding="utf-8"))
+    embedded = None
+    for node in ast.walk(tree):
+        target = None
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            target = node.target.id
+        elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(
+            node.targets[0], ast.Name
+        ):
+            target = node.targets[0].id
+        if target == "_BOUNDARY_POLICY":
+            embedded = ast.literal_eval(node.value)
+            break
+    assert embedded is not None, "_BOUNDARY_POLICY not found in the entrypoint"
+    expected = {k: v for k, v in LIVE_POLICY.items() if k != "banned-identifiers"}
+    assert embedded == expected
 ```
 
 ### 2.2 Update `make_layout` in the same file
@@ -451,7 +490,6 @@ class BoundaryPolicy:
             "allowed-data-dirs",
             "forbidden-loader-suffixes",
             "archive-suffixes",
-            "zip-magics",
             "banned-identifiers",
         }
         if set(raw) != required:
@@ -472,7 +510,6 @@ class BoundaryPolicy:
         self.census_forbidden_suffixes = tuple(
             sorted(set(self.artifact_suffixes) | set(archive_suffixes))
         )
-        self.zip_magics = tuple(bytes.fromhex(magic) for magic in raw["zip-magics"])
 ```
 
 Mechanical threading (keep every check, message, and traversal order as-is; only the value source changes):
@@ -481,8 +518,8 @@ Mechanical threading (keep every check, message, and traversal order as-is; only
 - `classify_first_party(scripts_dir, top, source_path, policy)` uses `policy.artifact_suffixes`.
 - `first_party_import_names(source_path, scripts_dir, policy)` threads `policy` down.
 - `import_closure(entrypoint, policy)` threads `policy` down.
-- `_has_zip_magic(path, policy)` uses `policy.zip_magics`.
-- `census_scripts_layout(scripts_dir, policy)` uses `policy.allowed_data_dirs`, `policy.entrypoint_name`, `policy.module_name`, `policy.census_forbidden_suffixes`, and `_has_zip_magic(path, policy)`.
+- `_is_zip_archive(path)` stays policy-free — it calls `zipfile.is_zipfile` (structural detection, already landed in `43065ca`); no magic list to thread.
+- `census_scripts_layout(scripts_dir, policy)` uses `policy.allowed_data_dirs`, `policy.entrypoint_name`, `policy.module_name`, `policy.census_forbidden_suffixes`, and `_is_zip_archive(path)`.
 - `check(skill_root)` loads the contract once, builds both the policy and the inventory from that one parse, and threads the policy:
 
 ```python
@@ -582,7 +619,7 @@ def test_live_tree_passes_with_entrypoint_only_closure() -> None:
 ### 2.4 Verify and commit
 
 ```bash
-uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q            # 44 passed
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q            # 46 passed
 uv run --script skills/deliberate/tests/check_import_closure.py                  # agree: 1 Python surface(s)
 ```
 
@@ -651,14 +688,36 @@ def test_package_directory_is_refused(tmp_path: Path) -> None:
     assert "_deliberate_pkg" in result.stderr
 
 
+def _zip_bytes(arcname: str = "evilmod.py", body: str = "VALUE = 1\n") -> bytes:
+    """A real, structurally valid zip archive (has an end-of-central-directory)."""
+    import io
+    import zipfile
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr(arcname, body)
+    return buffer.getvalue()
+
+
 def test_zip_archives_and_disguised_zip_are_refused(tmp_path: Path) -> None:
-    """.zip/.egg/.whl fall to the suffix rule; payload.dat falls to the magic sniff."""
-    for name in ("payload.zip", "payload.egg", "payload.whl", "payload.dat"):
+    """.zip/.egg/.whl fall to the suffix rule; a real (even prefixed) zip with an
+    inert suffix falls to pass 2's structural `is_zipfile` check. The `.dat`
+    cases use genuine archives: a four-byte fragment would not be importable and
+    must not be relied on. `prefixed.dat` is the 2026-07-16 scrutiny case — a
+    valid zip behind a shell stub whose first bytes are not `PK`."""
+    cases = {
+        "payload.zip": b"PK\x03\x04fragment",  # suffix rule; content irrelevant
+        "payload.egg": b"PK\x03\x04fragment",
+        "payload.whl": b"PK\x03\x04fragment",
+        "payload.dat": _zip_bytes(),  # inert suffix: real zip → structural check
+        "prefixed.dat": b"#!/bin/sh\n# self-extracting stub\n" + _zip_bytes(),
+    }
+    for name, content in cases.items():
         root = make_bundle(tmp_path / name.replace(".", "_"))
-        (root / "scripts" / name).write_bytes(b"PK\x03\x04payload")
+        (root / "scripts" / name).write_bytes(content)
         result = run_cli(root, *identity_args(root))
         assert result.returncode == 2, name
-        assert name in result.stderr
+        assert name in result.stderr, name
 
 
 def test_nested_python_file_is_refused(tmp_path: Path) -> None:
@@ -732,17 +791,67 @@ def test_module_name_grammar_matches_declared_pattern(tmp_path: Path) -> None:
 
 def test_cache_prefix_is_scoped_private_and_retired(tmp_path: Path) -> None:
     """The invocation-private pycache prefix lives under the process temp root
-    and is retired at exit; no repo-local bytecode is created (ADR-0001)."""
+    and is retired at exit; no repo-local bytecode is created under scripts/,
+    even when TMPDIR points inside the bundle (ADR-0001; 2026-07-16 scrutiny
+    finding 5 — temp-root containment must be proven, not trusted)."""
     root = make_bundle(tmp_path)
     scoped = tmp_path / "scoped-tmp"
     scoped.mkdir()
     result = run_cli(root, *identity_args(root), tmpdir=scoped)
     assert result.returncode == 0, result.stderr
-    assert list(scoped.glob("deliberate-pycache-*")) == []
+    assert list(scoped.glob("deliberate-pycache-*")) == []  # prefix retired at exit
     assert list((root / "scripts").rglob("__pycache__")) == []
+    assert list((root / "scripts").rglob("*.pyc")) == []
+    # Even a bundle-internal TMPDIR (outside scripts/) must not pollute scripts/.
+    inside = root / "tmp"
+    inside.mkdir()
+    assert run_cli(root, *identity_args(root), tmpdir=inside).returncode == 0
+    assert list((root / "scripts").rglob("__pycache__")) == []
+    assert list((root / "scripts").rglob("*.pyc")) == []
 ```
 
-Run and watch them fail (`uv run --with pyyaml --with pytest pytest skills/deliberate/tests/test_runtime_boundary.py -q`): every seeded case currently exits 0 because no census exists.
+Also append to `skills/deliberate/tests/test_import_closure.py` a non-executing test proving the runtime name predicate agrees with the contract regex over a *generated* corpus, not a handful of examples (2026-07-16 scrutiny finding 5 / assumption audit: examples are not algorithmic equivalence). It extracts the dependency-free `_boundary_module_name_conforms` by source segment and compiles it in isolation — never importing the entrypoint (which runs its census on import):
+
+```python
+def test_runtime_name_predicate_matches_contract_regex() -> None:
+    """The entrypoint's re-free `_boundary_module_name_conforms` must agree with
+    the contract's `module-name-pattern` over a generated corpus. Non-executing:
+    the function is dependency-free, extracted by source segment and exec'd in
+    isolation, never by importing production code."""
+    import ast
+    import itertools
+    import re as _re
+
+    source = (SKILL_ROOT / "scripts" / "deliberate-validate.py").read_text(
+        encoding="utf-8"
+    )
+    tree = ast.parse(source)
+    func_node = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "_boundary_module_name_conforms"
+    )
+    namespace: dict = {}
+    exec(ast.get_source_segment(source, func_node), namespace)
+    predicate = namespace["_boundary_module_name_conforms"]
+    regex = _re.compile(LIVE_POLICY["module-name-pattern"])
+    corpus = [
+        "_deliberate_" + "".join(combo) + ".py"
+        for length in range(0, 4)
+        for combo in itertools.product("az9_.AZ-", repeat=length)
+    ]
+    corpus += [
+        "_deliberate_shared.py", "_deliberate_a9_x.py", "_deliberate_.py",
+        "_deliberate_9x.py", "_Deliberate_x.py", "_deliberate_X.py",
+        "deliberate_x.py", "_deliberate_x.mod.py", "_deliberate_shared.txt",
+        "deliberate-validate.py", "evil.py", "",
+    ]
+    for name in corpus:
+        assert predicate(name) == bool(regex.match(name)), name
+```
+
+Run and watch them fail: `uv run --with pyyaml --with pytest pytest skills/deliberate/tests/test_runtime_boundary.py skills/deliberate/tests/test_import_closure.py -q`. Every seeded runtime case currently exits 0 because no census exists; the agreement test fails because `_boundary_module_name_conforms` does not exist yet.
 
 ### 3.2 Restructure the entrypoint header
 
@@ -753,12 +862,21 @@ import os
 import sys
 
 # ---------------------------------------------------------------------------
-# Pre-import boundary (ADR-0001 + 2026-07-16 amendment). Everything above the
-# deferred imports below must be stdlib-only and limited to modules already
-# initialized at interpreter startup (`os`, `sys`): sys.path[0] is scripts/,
-# so any other import could resolve to a file the census has not yet vetted.
-# The census consumes only the embedded policy; `_require_boundary_match`
-# proves that rendering against the pinned contract on every command.
+# Pre-import boundary (ADR-0001 + 2026-07-16 amendment), two passes before any
+# first-party import. Pass 1 (the LAYOUT census) uses only `os`/`sys` — modules
+# already initialized at interpreter startup, so they cannot be shadowed from
+# scripts/ (which is sys.path[0]) — enforces every structural rule, and COLLECTS
+# the inert-suffix files. Once pass 1 returns without refusing, no
+# .py/.pyc/.so/package/symlink shadow exists under scripts/, so the fresh cache
+# prefix and `import zipfile` (plus its stdlib deps) below cannot resolve to a
+# scripts/ file. Pass 2 runs `zipfile.is_zipfile` on the collected inert files
+# — the same structural detector the Gate-2 checker uses (43065ca), so a
+# prefixed/self-extracting zip is caught and the two consumers cannot drift on
+# zip detection. The census consumes only the embedded policy, authenticated by
+# this entrypoint's own method-surface hash; a release-time test asserts that
+# embedding equals the pinned contract section, and `_require_boundary_match`
+# re-checks it per invocation as defense-in-depth. No pre-import contract parse
+# (a weaker first parse of a pinned surface was rejected — ADR-0001 amendment).
 # ---------------------------------------------------------------------------
 _BOUNDARY_POLICY: dict = {
     "entrypoint": "deliberate-validate.py",
@@ -766,9 +884,7 @@ _BOUNDARY_POLICY: dict = {
     "allowed-data-dirs": ["fixtures"],
     "forbidden-loader-suffixes": [".pyc", ".pyo", ".pyd", ".pyw", ".so"],
     "archive-suffixes": [".egg", ".whl", ".zip"],
-    "zip-magics": ["504b0304", "504b0506", "504b0708"],
 }
-_BOUNDARY_ZIP_MAGICS = tuple(bytes.fromhex(m) for m in _BOUNDARY_POLICY["zip-magics"])
 _BOUNDARY_FORBIDDEN_SUFFIXES = tuple(
     sorted(
         set(_BOUNDARY_POLICY["forbidden-loader-suffixes"])
@@ -792,15 +908,12 @@ def _boundary_module_name_conforms(name: str) -> bool:
     return all(c in "abcdefghijklmnopqrstuvwxyz0123456789_" for c in stem)
 
 
-def _boundary_has_zip_magic(path: str) -> bool:
-    with open(path, "rb") as handle:
-        return handle.read(4) in _BOUNDARY_ZIP_MAGICS
+def _boundary_layout_census(scripts_dir: str) -> list[str]:
+    """ADR-0001 runtime layout census (pass 1): os/sys only, fail-closed.
 
-
-def _boundary_census(scripts_dir: str) -> None:
-    """ADR-0001 runtime pre-import census: layout rules only, fail-closed.
-
-    Mirrors the Gate-2 authoring census (tests/check_import_closure.py) minus
+    Enforces every structural rule and RETURNS the inert-suffix files (no .py,
+    no forbidden loader/archive suffix) for the pass-2 content check. Mirrors
+    the Gate-2 authoring census (tests/check_import_closure.py) minus
     closure/inventory equality, which stays an authoring-gate concern: a flat
     conforming uninventoried module is inert here because production code
     contains no dynamic-import machinery and the orchestrator platform-hashes
@@ -812,6 +925,7 @@ def _boundary_census(scripts_dir: str) -> None:
             scripts_dir,
         )
     allowed_dirs = set(_BOUNDARY_POLICY["allowed-data-dirs"])
+    inert: list[str] = []
     for dirpath, dirnames, filenames in os.walk(scripts_dir, followlinks=False):
         for name in sorted(dirnames):
             path = os.path.join(dirpath, name)
@@ -863,26 +977,40 @@ def _boundary_census(scripts_dir: str) -> None:
                     "(ADR-0001)",
                     path,
                 )
-            if _boundary_has_zip_magic(path):
-                _boundary_refuse(
-                    "file carries a zip archive signature despite an inert suffix "
-                    "(ADR-0001)",
-                    path,
-                )
+            inert.append(path)
+    return inert
 
 
-_boundary_census(os.path.dirname(os.path.abspath(__file__)))
+_boundary_inert_files = _boundary_layout_census(
+    os.path.dirname(os.path.abspath(__file__))
+)
 
-import atexit  # noqa: E402 — deferred by design: imports wait for the census
+import atexit  # noqa: E402 — deferred by design: imports wait for pass 1
 import shutil  # noqa: E402
 import tempfile  # noqa: E402
 
 # Fresh, initially empty (mkdtemp), invocation-private (0o700), under the
 # process temp root, retired at exit, never reused across invocations
-# (ADR-0001). Redirecting alone is insufficient — the census above is what
-# stops directly-read sourceless bytecode.
+# (ADR-0001). Set BEFORE any further import so even those imports' bytecode
+# lands in the private prefix. Redirecting alone is insufficient — pass 1 above
+# is what stops directly-read sourceless bytecode.
 sys.pycache_prefix = tempfile.mkdtemp(prefix="deliberate-pycache-")
 atexit.register(shutil.rmtree, sys.pycache_prefix, ignore_errors=True)
+
+# Pass 2: pass 1 refused every importable shadow, so importing zipfile (which
+# reads archives; zipimport, banned, loads them) cannot resolve to a scripts/
+# file. is_zipfile locates the trailing end-of-central-directory record the way
+# zipimport does, catching a prefixed/self-extracting zip a magic sniff misses.
+import zipfile  # noqa: E402 — safe only after pass 1 cleared every importable shadow
+
+for _inert_path in _boundary_inert_files:
+    if zipfile.is_zipfile(_inert_path):
+        _boundary_refuse(
+            "file is a valid zip archive despite an inert suffix (ADR-0001) — a "
+            "disguised or prefixed archive on sys.path imports as code through "
+            "zipimport",
+            _inert_path,
+        )
 
 import argparse  # noqa: E402
 import copy  # noqa: E402
@@ -900,17 +1028,20 @@ import yaml  # noqa: E402
 Add one bullet to the docstring's "Validator boundary" list:
 
 ```
-- Pre-import boundary: before any shadowable import, a stdlib-only census of
-  scripts/ refuses unexpected artifacts fail-closed (ADR-0001), bytecode is
-  redirected to a fresh invocation-private cache prefix retired at exit, and
-  the embedded census policy is compared against contract-data.yaml's
-  import-boundary section at every contract load.
+- Pre-import boundary: before any shadowable import, a two-pass stdlib-only
+  census of scripts/ refuses unexpected artifacts fail-closed (ADR-0001) —
+  layout rules on os/sys alone, then a structural zip check (zipfile.is_zipfile,
+  after shadows are cleared) that catches prefixed archives; bytecode is
+  redirected to a fresh invocation-private cache prefix retired at exit; the
+  embedded census policy is authenticated by this file's own method-surface
+  hash and asserted equal to contract-data.yaml's import-boundary section by a
+  release-time test, with _require_boundary_match re-checking it at every load.
 ```
 
 ### 3.3 Verify and commit
 
 ```bash
-uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q            # 54 passed
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q            # 57 passed
 uv run --script skills/deliberate/tests/check_import_closure.py                  # agree: 1 Python surface(s)
 uv run --script skills/deliberate/scripts/deliberate-validate.py fixtures --data skills/deliberate/references/contract-data.yaml | tail -1   # 158/158 fixtures behaved as required
 uvx ruff check skills/deliberate/scripts/deliberate-validate.py                  # All checks passed!
@@ -1080,7 +1211,7 @@ shasum -a 256 $V $M
 
 ```bash
 uv run --script skills/deliberate/tests/check_import_closure.py                  # agree: 2 Python surface(s)
-uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q            # 56 passed
+uv run --with pyyaml --with pytest pytest skills/deliberate/tests/ -q            # 59 passed
 uv run --script skills/deliberate/scripts/deliberate-validate.py fixtures --data skills/deliberate/references/contract-data.yaml | tail -1   # 158/158 fixtures behaved as required
 uv run --script skills/deliberate/scripts/deliberate-validate.py check-renderings --data skills/deliberate/references/contract-data.yaml     # exit 0
 uvx ruff check skills/deliberate/scripts/                                        # All checks passed!
@@ -1097,10 +1228,12 @@ In `docs/specs/2026-07-13-deliberate.md`:
 - In the Design lineage list, append after the v27 entry:
 
 ```markdown
-- **v28** (contract evolution — v6 module topology and the import-execution boundary): the first physical extraction under ADR-0001 — `scripts/_deliberate_shared.py` (error/refusal constructors, read authorization, safe-YAML foundation) leaves the entrypoint; `validation.method-surfaces` grows to eight entries and `contract-data-version` bumps to 6, hard-cutting pre-topology capsules (no migration path; no legacy population). The import-execution boundary becomes one explicit control (hardening portfolio Option 2; placement decided by JP 2026-07-16): a declarative `import-boundary` policy section in the pinned `contract-data.yaml` feeds the Gate-2 authoring checker directly, and the entrypoint embeds the census subset, runs a stdlib-only pre-import census of `scripts/` (symlinks, `__pycache__`, bytecode and extension artifacts, zip archives by suffix and by content signature, out-of-allowlist directories, nested or non-conforming `.py` — refused fail-closed before any shadowable import), sets a fresh invocation-private `sys.pycache_prefix` retired at exit, and refuses at every contract load when the embedded rendering differs from the contract section. Verified by the runtime-boundary battery (seeded sourceless `.pyc`, stdlib shadow, disguised zip, policy tamper, bytecode-freshness probe, prefix retirement), Gate-2 at two Python surfaces, dual-path smokes with the effective interpreter recorded, and exact-prompt end-to-end re-smokes on both runtimes per the debt-scan bar.
+- **v28** (contract evolution — v6 module topology and the import-execution boundary): the first physical extraction under ADR-0001 — `scripts/_deliberate_shared.py` (error/refusal constructors, read authorization, safe-YAML foundation) leaves the entrypoint; `validation.method-surfaces` grows to eight entries and `contract-data-version` bumps to 6, hard-cutting pre-topology capsules (no migration path; no legacy population). The import-execution boundary becomes one explicit control (hardening portfolio Option 2; placement decided by JP 2026-07-16): a declarative `import-boundary` policy section in the pinned `contract-data.yaml` feeds the Gate-2 authoring checker directly, and the entrypoint embeds the census subset (authenticated by its own method-surface hash), runs a two-pass stdlib-only pre-import census of `scripts/` (symlinks, `__pycache__`, bytecode and extension artifacts, zip archives by suffix and by zip structure so a prefixed/self-extracting archive is caught, out-of-allowlist directories, nested or non-conforming `.py` — refused fail-closed before any shadowable import), and sets a fresh invocation-private `sys.pycache_prefix` retired at exit. The embedded policy is asserted equal to the contract section by a release-time test; `_require_boundary_match` re-checks it per invocation as defense-in-depth (post-import, because a pre-import runtime match is circular under this cut — the contract-loading machinery is the extracted module — and a weaker pre-import parse was rejected). **To be verified by** the runtime-boundary battery (seeded sourceless `.pyc`, stdlib shadow, real and prefixed disguised zips, policy tamper, embedded-vs-contract equality, bytecode-freshness probe, prefix retirement and temp-root containment, predicate-vs-regex agreement), Gate-2 at two Python surfaces, dual-path smokes with the effective interpreter recorded, and exact-prompt end-to-end re-smokes on both runtimes per the debt-scan bar; the observed-proof sentence is added only after Tasks 6–7 pass (Task 7).
 ```
 
-Commit: `docs(deliberate): record v28 contract evolution in the spec lineage`.
+The verification clause is deliberately prospective ("To be verified by") because Tasks 6–7 have not run at this point and Task 7 may pause for JP or fail; Task 7 replaces it with an observed statement once both smoke tasks succeed.
+
+Commit: `docs(deliberate): record v28 contract evolution in the spec lineage (proof pending)`.
 
 ## Task 6: Dual-path smoke and evidence record
 
@@ -1127,11 +1260,15 @@ Commit: `docs(deliberate): v6 dual-path runtime-boundary smoke record`.
 
 The debt scan is explicit: "Re-run an exact Codex and Claude smoke after any physical topology change; fixtures and black-box CLI checks cannot prove runtime loading in both hosts." This task needs JP to fire live runs — flag it rather than skipping silently.
 
-1. Claude Code: re-run the exact accepted prompt from the 2026-07-15 smoke records in `docs/smoke-tests/` through all five stages to a validated close capsule.
-2. Codex: re-run the exact accepted prompt from the 2026-07-14 record likewise.
-3. Record both under `docs/smoke-tests/` following the existing records' shape, including the effective interpreter and the eight-surface method identity in the capsule.
+The exact prompt is durable and hash-pinned — do not re-derive it from a session store. It lives at `docs/smoke-tests/fixtures/2026-07-14-deliberate-exact-prompt.txt` (3,760 bytes, SHA-256 `253f1bfe697124f685124f03adb539f5f55005284cb4f107de598b2272493a82`; provenance in the sibling `README.md`). There is no 2026-07-14 deliberate smoke *record* in the repo — the accepted Codex run of 2026-07-14 is a session rollout, and the 07-15 records preserve only this SHA, not the bytes; this fixture closes that gap.
 
-A failure here is a v6 defect: diagnose before landing; do not weaken the boundary to pass.
+1. Verify the fixture before use: `shasum -a 256 docs/smoke-tests/fixtures/2026-07-14-deliberate-exact-prompt.txt` must print `253f1bfe…`. If it does not, stop — the input is corrupt.
+2. Claude Code: feed the fixture verbatim as the invocation prompt; run all five stages to a validated close capsule.
+3. Codex: feed the same fixture verbatim; run likewise.
+4. Record both under `docs/smoke-tests/` following the existing records' shape, including the effective interpreter, the fixture SHA-256 as the input identity, and the eight-surface method identity in the capsule. **Commit the evidence** (`docs(deliberate): v6 cross-runtime end-to-end re-smoke records`) — every task commits (this one was previously implicit and is now explicit).
+5. Only after both smokes pass, update the v28 spec lineage entry: replace **"To be verified by"** with **"Verified by"** and drop the trailing "the observed-proof sentence is added only after Tasks 6–7 pass (Task 7)." clause. Commit: `docs(deliberate): record observed v28 cross-runtime verification`.
+
+A failure here is a v6 defect: diagnose before landing; do not weaken the boundary to pass, and do not perform step 5.
 
 ## Task 8: Closeout
 
@@ -1146,9 +1283,10 @@ Every task commits a green tree, so rollback is `git revert` (or branch abandonm
 ## Self-review notes (already applied)
 
 - Coverage check against ADR-0001's five runtime obligations, the portfolio's validation plan (mismatch test, runtime negative tests for every E005 class, dual-path, interpreter recording, latency baseline), and the decided open questions: each maps to a task above; the sole deliberate deviation is that cache-prefix *obligations* are not declared as policy data — they are behavior, proven by tests, with no mechanical consumer; the ADR amendment records this.
-- Consistency: `_BOUNDARY_POLICY` keys equal the contract section minus `banned-identifiers`; the checker requires the full key set; `_require_boundary_match` iterates only embedded keys, so the ban list never falsely mismatches.
-- The characterization suite is the transcription-drift net for the moved block; expected test counts at each boundary: 38 → 42 → 44 → 54 → 56.
+- Consistency: `_BOUNDARY_POLICY` keys equal the contract section minus `banned-identifiers` (no `zip-magics` — zip detection is structural); the checker requires the full key set; `_require_boundary_match` iterates only embedded keys, so the ban list never falsely mismatches; `test_embedded_runtime_policy_matches_contract_section` pins the embedding to the contract at release time.
+- Ordering decision (2026-07-16 scrutiny, Blocker 2): the embedded census is authenticated by the entrypoint's own method-surface hash and by a release-time equality test; `_require_boundary_match` runs post-import as defense-in-depth because a pre-import *runtime* match is circular (the contract-loading machinery is the extracted first-party module) and a weaker pre-import parse was rejected. This is the deliberately-accepted weaker-than-"strong-form" boundary; ADR-0001 and the proposal are amended to say so.
+- The characterization suite is the transcription-drift net for the moved block; expected test counts at each boundary: 39 → 43 → 46 → 57 → 59 (predictions until run; recompute if a test is added or split).
 
 ## Outside view
 
-Reference class: this repo's own contract-evolution cuts on `deliberate` (v26, v27, the Gate-2 arc) — schema-plus-runtime changes under a hash-authenticated method identity. What that class reliably required beyond the obvious diff, and where this plan carries it: renderings regeneration and fixture reruns after any `contract-data.yaml` edit (Tasks 1.4, 4.5); companion prose surfaces that silently encode the old topology — `capsule.md`, `SKILL.md` bootstrap — found and edited explicitly (Task 4.4); live cross-runtime fires exposing what fixtures cannot (Task 7, the bar the debt scan pre-registered after v26/v27 each caught a defect only in live fire); interpreter variance recorded rather than pinned (Task 6.3, per the Gate-1 decision); and startup-latency evidence because the portfolio asked for a baseline before accepting runtime preflight cost (Tasks 0.3, 6.4). The class also warns that adversarial re-review finds what the author's own review missed — twice proven in Era 94 — so the plan leaves the tactical Gate-2 tests untouched as the floor and adds tripwires rather than replacing anything. This is a debias against under-scoping, not a completeness certificate: the residuals named in ADR-0001 (reflection gadgets, native loaders, external `sys.path`) remain open by design, and platform evidence stays bounded to macOS + CPython 3.13 via `uv --script`.
+Reference class: this repo's own contract-evolution cuts on `deliberate` (v26, v27, the Gate-2 arc) — schema-plus-runtime changes under a hash-authenticated method identity. What that class reliably required beyond the obvious diff, and where this plan carries it: renderings regeneration and fixture reruns after any `contract-data.yaml` edit (Tasks 1.4, 4.5); companion prose surfaces that silently encode the old topology — `capsule.md`, `SKILL.md` bootstrap — found and edited explicitly (Task 4.4); live cross-runtime fires exposing what fixtures cannot (Task 7, the bar the debt scan pre-registered after v26/v27 each caught a defect only in live fire); interpreter variance recorded rather than pinned (Task 6.3, per the Gate-1 decision); and startup-latency evidence because the portfolio asked for a baseline before accepting runtime preflight cost (Tasks 0.3, 6.4). The class also warns that adversarial re-review finds what the author's own review missed — twice proven in Era 94, then a third time by the 2026-07-16 execution-readiness scrutiny of *this* plan: a valid prefixed/self-extracting zip imported through zipimport while the earlier "content-sniff the four-byte magic" repair passed it green, and the runtime equality check was placed after first-party import in contradiction of the proposal's ordering language. The first was fixed in the live Gate-2 census (`43065ca`, structural `zipfile.is_zipfile`) before this plan proceeds and is carried into the runtime pass 2; the second was resolved as an explicit, documented ordering decision (release-time authentication + post-import defense-in-depth) with ADR-0001 and the proposal amended. So the tactical Gate-2 tests are the floor plus one proven repair, and the plan adds tripwires rather than replacing anything. This is a debias against under-scoping, not a completeness certificate: the residuals named in ADR-0001 (reflection gadgets, native loaders, external `sys.path`) remain open by design, and platform evidence stays bounded to macOS + CPython 3.13 via `uv --script`.
