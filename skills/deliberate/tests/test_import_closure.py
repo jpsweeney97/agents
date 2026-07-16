@@ -21,12 +21,18 @@ def make_layout(
     modules: dict[str, str],
     surfaces: list[str],
 ) -> Path:
-    """Write a minimal skill layout: entrypoint, modules, contract data."""
+    """Write a minimal skill layout: entrypoint, modules, contract data.
+
+    Module keys are scripts-relative paths; nested keys create the parent
+    directories so package layouts can be expressed (to prove rejection).
+    """
     scripts = root / "scripts"
     scripts.mkdir(parents=True)
     (scripts / "deliberate-validate.py").write_text(entry_body, encoding="utf-8")
     for name, body in modules.items():
-        (scripts / name).write_text(body, encoding="utf-8")
+        target = scripts / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(body, encoding="utf-8")
     references = root / "references"
     references.mkdir()
     listed = "\n".join(f"    - {surface}" for surface in surfaces)
@@ -55,7 +61,10 @@ def test_exact_closure_passes_and_ignores_external_imports(tmp_path: Path) -> No
         ],
     )
     message = check(root)
-    assert message == "import closure matches method-surfaces: 3 Python surface(s)"
+    assert message == (
+        "import closure, on-disk production files, and method-surfaces "
+        "agree: 3 Python surface(s)"
+    )
 
 
 def test_omitted_module_is_detected(tmp_path: Path) -> None:
@@ -89,8 +98,8 @@ def test_unimported_inventory_entry_is_detected(tmp_path: Path) -> None:
         check(root)
 
 
-def test_dependency_shadowing_module_is_detected(tmp_path: Path) -> None:
-    """A local file taking a dependency's name enters the closure and fails."""
+def test_uninventoried_shadowing_module_is_detected(tmp_path: Path) -> None:
+    """A local file taking a dependency's name violates the naming rule."""
     root = make_layout(
         tmp_path,
         "import yaml\n",
@@ -98,7 +107,99 @@ def test_dependency_shadowing_module_is_detected(tmp_path: Path) -> None:
         ["scripts/deliberate-validate.py"],
     )
     with pytest.raises(
-        SystemExit, match=r"Imported but not inventoried.*scripts/yaml\.py"
+        SystemExit, match=r"must match _deliberate_<domain>\.py.*yaml\.py"
+    ):
+        check(root)
+
+
+def test_inventoried_shadowing_module_is_detected(tmp_path: Path) -> None:
+    """Inventorying the shadow file must not launder it past the naming rule."""
+    root = make_layout(
+        tmp_path,
+        "import yaml\n",
+        {"yaml.py": "VALUE = 1\n"},
+        ["scripts/deliberate-validate.py", "scripts/yaml.py"],
+    )
+    with pytest.raises(
+        SystemExit, match=r"must match _deliberate_<domain>\.py.*yaml\.py"
+    ):
+        check(root)
+
+
+def test_dynamic_import_call_is_rejected(tmp_path: Path) -> None:
+    """__import__ can execute first-party code the static closure never sees."""
+    root = make_layout(
+        tmp_path,
+        '__import__("_deliberate_hidden")\n',
+        {"_deliberate_hidden.py": "VALUE = 1\n"},
+        ["scripts/deliberate-validate.py"],
+    )
+    with pytest.raises(
+        SystemExit, match=r"dynamic import machinery is forbidden.*__import__"
+    ):
+        check(root)
+
+
+def test_importlib_import_is_rejected(tmp_path: Path) -> None:
+    """importlib is dynamic-import machinery regardless of how it is imported."""
+    root = make_layout(
+        tmp_path,
+        "from importlib import import_module\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    with pytest.raises(
+        SystemExit, match=r"dynamic import machinery is forbidden.*importlib"
+    ):
+        check(root)
+
+
+def test_package_submodule_layout_is_rejected(tmp_path: Path) -> None:
+    """A package under scripts/ executes files the flat closure cannot pin."""
+    root = make_layout(
+        tmp_path,
+        "import _deliberate_pkg.sub\n",
+        {
+            "_deliberate_pkg/__init__.py": "",
+            "_deliberate_pkg/sub.py": "VALUE = 1\n",
+        },
+        [
+            "scripts/deliberate-validate.py",
+            "scripts/_deliberate_pkg/__init__.py",
+        ],
+    )
+    with pytest.raises(SystemExit, match=r"packages and nested files are forbidden"):
+        check(root)
+
+
+def test_dotted_first_party_import_is_rejected(tmp_path: Path) -> None:
+    """A dotted first-party import has no meaning for flat production modules."""
+    root = make_layout(
+        tmp_path,
+        "import _deliberate_shared.sub\n",
+        {"_deliberate_shared.py": "VALUE = 1\n"},
+        ["scripts/deliberate-validate.py", "scripts/_deliberate_shared.py"],
+    )
+    with pytest.raises(
+        SystemExit, match=r"dotted import of a first-party module is unsupported"
+    ):
+        check(root)
+
+
+def test_on_disk_orphan_module_is_detected(tmp_path: Path) -> None:
+    """A conforming on-disk module outside closure and inventory must fail.
+
+    This is the fail-closed backstop: any first-party file reachable only
+    dynamically (or plain dead code) surfaces as an on-disk/inventory delta.
+    """
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {"_deliberate_orphan.py": "VALUE = 1\n"},
+        ["scripts/deliberate-validate.py"],
+    )
+    with pytest.raises(
+        SystemExit, match=r"On disk but not inventoried.*_deliberate_orphan"
     ):
         check(root)
 
@@ -120,4 +221,7 @@ def test_live_tree_passes_with_entrypoint_only_closure() -> None:
     entrypoint = SKILL_ROOT / "scripts" / "deliberate-validate.py"
     assert import_closure(entrypoint) == {entrypoint.resolve()}
     message = check(SKILL_ROOT)
-    assert message == "import closure matches method-surfaces: 1 Python surface(s)"
+    assert message == (
+        "import closure, on-disk production files, and method-surfaces "
+        "agree: 1 Python surface(s)"
+    )
