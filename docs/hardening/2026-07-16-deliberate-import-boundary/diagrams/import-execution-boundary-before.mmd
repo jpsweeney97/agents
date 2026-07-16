@@ -1,0 +1,12 @@
+flowchart TD
+  Developer["Developer edits deliberate sources"] --> ADR["ADR-0001 policy text"]
+  Developer --> Checker["Test-only Gate-2 checker"]
+  Checker --> Scripts["skills/deliberate/scripts/"]
+  Checker --> Contract["contract-data.yaml method-surfaces"]
+  Scripts --> Loader["Python import machinery"]
+  Loader --> Runtime["Future v6 entrypoint"]
+  Runtime --> Hashing["Orchestrator platform hashes"]
+  Hashing --> Capsule["Capsule/restart identity"]
+  ADR -. "mirrored by hand" .-> Checker
+  ADR -. "future mirrored by hand" .-> Runtime
+  Scripts -. "ambient artifacts" .-> Loader

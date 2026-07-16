@@ -1,0 +1,535 @@
+{
+  "documentType": "codex-security.hardening-analysis",
+  "schemaVersion": "1.0",
+  "analysisId": "hardening_20260716_deliberate_import_boundary",
+  "sourceEvidence": {
+    "kind": "mixed_document_source_collection",
+    "label": "Deliberate Gate-2 import-boundary evidence",
+    "collectionSha256": "0f29bee7b7d1270d7cec4d454f536d3ded33c6c8e43fafd66fab10bc79fb1513",
+    "artifactCount": 7,
+    "sourceDrift": "none",
+    "targetRevision": "288e4caa9d35a9a172f6e65e2305927e1ae3fcef"
+  },
+  "assessment": {
+    "outcome": "opportunities_identified",
+    "summary": "The evidence supports one structural hardening opportunity: make the deliberate import-execution boundary a first-class control so the authoring checker and future runtime preflight do not drift."
+  },
+  "constraints": {
+    "profile": "balanced",
+    "changeHorizons": ["incremental", "medium_term"],
+    "nonNegotiables": [
+      "Preserve ADR-0001 direct per-file method-surface authentication unless explicitly revisited.",
+      "Do not treat test-only harness code as authenticated production input.",
+      "Preserve canonical in-place and Claude symlink delivery paths."
+    ],
+    "assumptions": [
+      "No measured startup latency or memory budget was supplied.",
+      "The current Gate-2 branch remains local-only until JP authorizes merge or push.",
+      "Runtime pre-import census has not yet been implemented."
+    ]
+  },
+  "evidence": [
+    {
+      "evidenceId": "E001",
+      "title": "User-supplied closure summary",
+      "sourceKind": "disclosure",
+      "path": "conversation prompt supplied 2026-07-16",
+      "claimType": "observed",
+      "claim": "Reports that the zipimport bypass and disguised-zip bypass were verified, repaired on commit 288e4ca, and rechecked with tests, mutation sweep, dual-path checker runs, adversarial probes, formatting checks, and production identity comparison."
+    },
+    {
+      "evidenceId": "E002",
+      "title": "Branch handoff for zipimport closure",
+      "sourceKind": "document",
+      "path": ".agents/handoffs/2026-07-15_23-06-24_deliberate-v6-gate2-zipimport-closed-clean-review.md",
+      "sha256": "f0b4de4702a542dcfff58993e942240496bf021c43a0b47409a81606d6227d8e",
+      "claimType": "observed",
+      "claim": "Records the branch state, clean re-review claim, exact changed files, residual risks, and decision to leave the branch unmerged and unpushed."
+    },
+    {
+      "evidenceId": "E003",
+      "title": "ADR-0001 module authentication boundary",
+      "sourceKind": "document",
+      "path": "docs/adr/0001-authenticate-deliberate-modules-as-direct-method-surfaces.md",
+      "sha256": "f2afc54310846e4c59bf8a41c67eb6a9c9a44ee25ae83b230847611403d13304",
+      "claimType": "observed",
+      "claim": "Defines the direct per-file authentication decision, Gate 2, runtime pre-import census, fresh cache-prefix obligations, and accepted residuals."
+    },
+    {
+      "evidenceId": "E004",
+      "title": "Gate-2 import-closure checker",
+      "sourceKind": "source",
+      "path": "skills/deliberate/tests/check_import_closure.py",
+      "sha256": "e682fda0adb7b2f96a75995f93a87fe55a63682e890a3cf7040646f15673870c",
+      "claimType": "observed",
+      "claim": "Implements the current non-executing authoring gate with complete scripts census, zip-magic sniff, banned identifier checks, and closure/inventory/on-disk equality."
+    },
+    {
+      "evidenceId": "E005",
+      "title": "Gate-2 regression tests",
+      "sourceKind": "source",
+      "path": "skills/deliberate/tests/test_import_closure.py",
+      "sha256": "26613210396e6f50ad200444d24766f27d2e7d56c42484532866111d1269a50f",
+      "claimType": "observed",
+      "claim": "Covers sourceless bytecode, extension artifacts, __pycache__, symlinks, packages, dynamic import aliases, zip archives, disguised zip archives, and benign false-positive controls."
+    },
+    {
+      "evidenceId": "E006",
+      "title": "Gate-1 dual-path layout smoke",
+      "sourceKind": "experiment",
+      "path": "docs/smoke-tests/2026-07-15_deliberate-gate1-dual-path-layout-spike.md",
+      "sha256": "c06001627b506adcdb2331160a7c92d929b414c4bf9cd91b9e86c39b27973445",
+      "claimType": "observed",
+      "claim": "Shows bytecode can silently impersonate source, that a fresh cache prefix is necessary but must be invocation-private, and that interpreter selection can vary by invocation form."
+    },
+    {
+      "evidenceId": "E007",
+      "title": "Current method-surface inventory",
+      "sourceKind": "source",
+      "path": "skills/deliberate/references/contract-data.yaml",
+      "sha256": "3a8369dfb7a6eae7e79aa881ce6fd5a74319887c30aa5d7272d130cb6a29d62a",
+      "claimType": "observed",
+      "claim": "Shows the current production validator remains a single Python method surface at contract-data-version 5."
+    }
+  ],
+  "opportunities": [
+    {
+      "opportunityId": "import-execution-boundary",
+      "title": "Own the deliberate import-execution boundary as one explicit control",
+      "summary": "Reduce drift between ADR policy, the test-only authoring checker, and the future runtime pre-import census.",
+      "diagnosis": "The known bypasses were local fixes, but they reveal a broader ownership split: the same loader-boundary invariant must be carried by prose, a test-only checker, future runtime code, cache-prefix setup, and method-surface hashing.",
+      "evidence": [
+        {
+          "claimType": "observed",
+          "sourceKind": "source",
+          "evidenceId": "E004",
+          "path": "skills/deliberate/tests/check_import_closure.py",
+          "claim": "The authoring checker currently owns a detailed scripts census and identifier policy outside production method surfaces."
+        },
+        {
+          "claimType": "observed",
+          "sourceKind": "document",
+          "evidenceId": "E003",
+          "path": "docs/adr/0001-authenticate-deliberate-modules-as-direct-method-surfaces.md",
+          "claim": "The future runtime pre-import census must mirror the Gate-2 layout rules before first-party import."
+        },
+        {
+          "claimType": "inferred",
+          "sourceKind": "source",
+          "evidenceId": "E005",
+          "path": "skills/deliberate/tests/test_import_closure.py",
+          "claim": "The range of negative cases is broad enough that hand-copying the policy into runtime code creates meaningful drift risk."
+        }
+      ],
+      "desiredInvariants": [
+        "Before any first-party production import, runtime execution refuses unexpected loadable artifacts under scripts/.",
+        "The authoring checker and runtime preflight enforce the same boundary policy, and drift is mechanically visible before release.",
+        "Every production Python file that can execute from scripts/ is directly represented in validation.method-surfaces and platform-hashed before helper execution.",
+        "Cache freshness is invocation-private and repo-local bytecode is neither read nor written."
+      ],
+      "proposalPath": "proposals/import-execution-boundary.md",
+      "options": [
+        {
+          "optionId": "keep-current-gates",
+          "title": "Finish the duplicated gate/runtime pair",
+          "kind": "baseline",
+          "summary": "Keep the current authoring checker and implement a separate matching runtime preflight in the v6 entrypoint.",
+          "diagramPaths": {
+            "before": "diagrams/import-execution-boundary-before.mmd",
+            "after": "diagrams/import-execution-boundary-keep-current-gates-after.mmd"
+          },
+          "evidenceCoverage": [
+            {
+              "evidenceId": "E001",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "The runtime can duplicate the repaired cases, but policy drift remains possible."
+            },
+            {
+              "evidenceId": "E002",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "The handoff's runtime-census concern can be implemented directly, with the drift risk accepted."
+            },
+            {
+              "evidenceId": "E003",
+              "effect": "addresses",
+              "tacticalFixRequired": true,
+              "rationale": "This directly implements the current ADR wording."
+            },
+            {
+              "evidenceId": "E004",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "The checker remains the authoring control and supplies the pattern for the runtime duplicate."
+            },
+            {
+              "evidenceId": "E005",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "The regression cases can be duplicated for runtime preflight."
+            },
+            {
+              "evidenceId": "E006",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "The runtime can add the fresh-prefix and direct-bytecode refusals required by the smoke evidence."
+            },
+            {
+              "evidenceId": "E007",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "The method-surface inventory still version-gates the v6 extraction."
+            }
+          ],
+          "tradeoffs": [
+            {
+              "dimension": "security",
+              "direction": "improves",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "Known runtime artifact classes can be refused, but duplicate policy implementations can diverge.",
+              "validationPlan": "Run matching negative cases against authoring checker and runtime preflight."
+            },
+            {
+              "dimension": "performance",
+              "direction": "neutral",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "Adds one filesystem census before helper import, with no process hop.",
+              "validationPlan": "Measure helper startup time before and after runtime preflight."
+            },
+            {
+              "dimension": "memory",
+              "direction": "neutral",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "Uses bounded path sets and a temp cache prefix.",
+              "validationPlan": "Compare peak RSS for representative helper invocations."
+            },
+            {
+              "dimension": "reliability",
+              "direction": "improves",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "Fail-closed refusals improve safety, but duplicate code creates drift-related false positives or false negatives.",
+              "validationPlan": "Inject each forbidden artifact and confirm deterministic refusal before first-party import."
+            },
+            {
+              "dimension": "operability",
+              "direction": "neutral",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "No new service or launcher appears; errors remain checker/runtime refusals.",
+              "validationPlan": "Review refusal messages for clear artifact paths and causes."
+            },
+            {
+              "dimension": "migration",
+              "direction": "neutral",
+              "confidence": "high",
+              "basis": "source-derived",
+              "assessment": "Smallest migration path and easiest rollback.",
+              "validationPlan": "Revert runtime preflight while preserving current Gate-2 checker if needed."
+            }
+          ],
+          "residualRisks": [
+            "Policy drift between checker and runtime preflight.",
+            "Accepted reflection and external sys.path residuals remain."
+          ],
+          "implementationReadiness": {
+            "affectedComponents": [
+              "skills/deliberate/scripts/deliberate-validate.py",
+              "skills/deliberate/tests/check_import_closure.py",
+              "skills/deliberate/tests/test_import_closure.py",
+              "docs/adr/0001-authenticate-deliberate-modules-as-direct-method-surfaces.md"
+            ],
+            "workPackages": [
+              "Implement inline runtime pre-import census.",
+              "Add matching runtime negative tests.",
+              "Run dual-path v6 smoke."
+            ],
+            "acceptanceCriteria": [
+              "Seeded sourceless .pyc refuses before first-party import.",
+              "Disguised zip archive refuses before first-party import.",
+              "No repo-local bytecode is created or read."
+            ],
+            "migrationNotes": [
+              "Preserve existing Gate-2 checker throughout migration."
+            ],
+            "rollback": "Revert runtime preflight and keep v6 physical extraction blocked."
+          }
+        },
+        {
+          "optionId": "policy-contract",
+          "title": "Single-source the boundary policy contract",
+          "kind": "structural",
+          "summary": "Declare the import-boundary policy once and mechanically verify or render both checker and runtime consumers from it.",
+          "diagramPaths": {
+            "before": "diagrams/import-execution-boundary-before.mmd",
+            "after": "diagrams/import-execution-boundary-policy-contract-after.mmd"
+          },
+          "evidenceCoverage": [
+            {
+              "evidenceId": "E001",
+              "effect": "addresses",
+              "tacticalFixRequired": true,
+              "rationale": "The bypass classes become policy entries shared by both consumers instead of hand-copied cases."
+            },
+            {
+              "evidenceId": "E002",
+              "effect": "addresses",
+              "tacticalFixRequired": true,
+              "rationale": "The handoff's reopened v6 frontier gains a drift-control gate before runtime extraction."
+            },
+            {
+              "evidenceId": "E003",
+              "effect": "addresses",
+              "tacticalFixRequired": true,
+              "rationale": "The ADR policy becomes machine-checkable without changing the direct per-file decision."
+            },
+            {
+              "evidenceId": "E004",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "The checker remains useful but no longer silently owns the only executable policy copy."
+            },
+            {
+              "evidenceId": "E005",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "Regression cases become coverage for both the policy contract and its consumers."
+            },
+            {
+              "evidenceId": "E006",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "Cache and interpreter evidence become explicit runtime-policy obligations."
+            },
+            {
+              "evidenceId": "E007",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "Extends the existing contract-data authority pattern without changing method identity semantics."
+            }
+          ],
+          "tradeoffs": [
+            {
+              "dimension": "security",
+              "direction": "improves",
+              "confidence": "high",
+              "basis": "source-derived",
+              "assessment": "Makes policy drift visible and keeps known artifact classes synchronized across authoring and runtime consumers.",
+              "validationPlan": "Mutation-test policy-consumer mismatches by removing one forbidden value from either consumer."
+            },
+            {
+              "dimension": "performance",
+              "direction": "neutral",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "Runtime still performs the same census; policy rendering checks run in tests rather than hot path.",
+              "validationPlan": "Measure helper startup with the runtime preflight using current startup as baseline."
+            },
+            {
+              "dimension": "memory",
+              "direction": "neutral",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "Adds small policy data and bounded in-memory path sets.",
+              "validationPlan": "Compare peak RSS before and after runtime preflight."
+            },
+            {
+              "dimension": "reliability",
+              "direction": "improves",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "Mismatch failures become explicit during validation instead of latent runtime drift.",
+              "validationPlan": "Run structural rendering and mismatch tests in the deliberate validation ladder."
+            },
+            {
+              "dimension": "operability",
+              "direction": "neutral",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "No new service appears; operators see refusal errors plus policy mismatch failures during release checks.",
+              "validationPlan": "Review error messages for policy version, artifact path, and violated invariant."
+            },
+            {
+              "dimension": "migration",
+              "direction": "regresses",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "Adds a small contract surface before the v6 cut, but keeps the direct per-file model intact.",
+              "validationPlan": "Land policy contract separately or as an explicit pre-v6 gate with rollback to current checker."
+            }
+          ],
+          "residualRisks": [
+            "Algorithmic differences can remain even when policy values are shared.",
+            "Accepted reflection and external sys.path residuals remain."
+          ],
+          "implementationReadiness": {
+            "affectedComponents": [
+              "skills/deliberate/references/contract-data.yaml",
+              "skills/deliberate/tests/check_import_closure.py",
+              "skills/deliberate/tests/test_import_closure.py",
+              "skills/deliberate/scripts/deliberate-validate.py",
+              "docs/adr/0001-authenticate-deliberate-modules-as-direct-method-surfaces.md"
+            ],
+            "workPackages": [
+              "Add declarative import-boundary policy.",
+              "Bind or compare the checker to the policy.",
+              "Bind runtime preflight to the policy without unsafe first-party import.",
+              "Add policy drift tests."
+            ],
+            "acceptanceCriteria": [
+              "Checker and runtime consumers expose the same forbidden artifact and identifier policy.",
+              "Removing a policy value from either consumer fails validation.",
+              "Runtime refuses seeded artifacts before first-party import through both delivery paths."
+            ],
+            "migrationNotes": [
+              "Keep the policy small and declarative to avoid recreating aggregate identity machinery."
+            ],
+            "rollback": "Revert the policy contract and runtime consumer; keep the branch's tactical Gate-2 checker as the blocking guard."
+          }
+        },
+        {
+          "optionId": "clean-module-root",
+          "title": "Run from a launcher-prepared clean module root",
+          "kind": "isolation",
+          "summary": "Stage authenticated source files into an invocation-private clean root before running the validator.",
+          "diagramPaths": {
+            "before": "diagrams/import-execution-boundary-before.mmd",
+            "after": "diagrams/import-execution-boundary-launcher-after.mmd"
+          },
+          "evidenceCoverage": [
+            {
+              "evidenceId": "E001",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "A staged runtime root can make source-tree zip artifacts non-import-visible."
+            },
+            {
+              "evidenceId": "E002",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "The handoff's runtime-census frontier is handled by a stronger containment boundary."
+            },
+            {
+              "evidenceId": "E003",
+              "effect": "unknown",
+              "tacticalFixRequired": true,
+              "rationale": "This may require an ADR amendment because runtime source paths differ from source identity paths."
+            },
+            {
+              "evidenceId": "E004",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "The checker remains useful as source-tree admission before staging."
+            },
+            {
+              "evidenceId": "E005",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "The artifact regression set becomes staging rejection coverage."
+            },
+            {
+              "evidenceId": "E006",
+              "effect": "mitigates",
+              "tacticalFixRequired": true,
+              "rationale": "A clean root and fresh cache reduce ambient bytecode and path-identity hazards, but require new dual-path proof."
+            },
+            {
+              "evidenceId": "E007",
+              "effect": "unknown",
+              "tacticalFixRequired": true,
+              "rationale": "The method-surface inventory may need source-to-stage identity rules if runtime paths diverge."
+            }
+          ],
+          "tradeoffs": [
+            {
+              "dimension": "security",
+              "direction": "improves",
+              "confidence": "medium",
+              "basis": "analogous",
+              "assessment": "Ambient source-tree artifacts are no longer import-visible after staging, but launcher correctness becomes trusted.",
+              "validationPlan": "Prove source-tree artifacts cannot be imported from the staged runtime."
+            },
+            {
+              "dimension": "performance",
+              "direction": "regresses",
+              "confidence": "low",
+              "basis": "hypothetical",
+              "assessment": "Staging can add file copies, path mapping, and startup work.",
+              "validationPlan": "Benchmark staged helper startup against current startup and set an acceptance threshold."
+            },
+            {
+              "dimension": "memory",
+              "direction": "regresses",
+              "confidence": "low",
+              "basis": "hypothetical",
+              "assessment": "Invocation roots and staged files add temporary disk and metadata pressure more than heap pressure.",
+              "validationPlan": "Measure temp directory size and peak RSS across representative runs."
+            },
+            {
+              "dimension": "reliability",
+              "direction": "unknown",
+              "confidence": "low",
+              "basis": "hypothetical",
+              "assessment": "Clean roots improve cleanup isolation but add launcher and mapping failure modes.",
+              "validationPlan": "Test partial staging, cleanup failure, interrupted runs, and retry behavior."
+            },
+            {
+              "dimension": "operability",
+              "direction": "regresses",
+              "confidence": "medium",
+              "basis": "source-derived",
+              "assessment": "Operators and reviewers must reason about staging diagnostics and source-to-runtime path mapping.",
+              "validationPlan": "Review failure receipts for source path, staged path, and cleanup status."
+            },
+            {
+              "dimension": "migration",
+              "direction": "regresses",
+              "confidence": "high",
+              "basis": "source-derived",
+              "assessment": "This is the largest compatibility change and likely needs new ADR text.",
+              "validationPlan": "Prototype in a throwaway branch before binding it to v6."
+            }
+          ],
+          "residualRisks": [
+            "Launcher becomes a high-trust component.",
+            "Source-to-stage identity mapping can complicate capsule evidence.",
+            "Accepted external sys.path residuals need redefinition."
+          ],
+          "implementationReadiness": {
+            "affectedComponents": [
+              "skills/deliberate/scripts/deliberate-validate.py",
+              "skills/deliberate/references/contract-data.yaml",
+              "docs/adr/0001-authenticate-deliberate-modules-as-direct-method-surfaces.md"
+            ],
+            "workPackages": [
+              "Prototype launcher staging.",
+              "Define source-to-stage identity mapping.",
+              "Run dual-path staging smoke.",
+              "Decide whether ADR-0001 needs amendment."
+            ],
+            "acceptanceCriteria": [
+              "Runtime sys.path cannot reach source-tree artifacts.",
+              "Capsule method identity still names authoritative source surfaces.",
+              "Interrupted runs clean up staged roots or mark them harmless."
+            ],
+            "migrationNotes": [
+              "Do not combine with the first v6 extraction unless recurrence evidence justifies the larger cut."
+            ],
+            "rollback": "Disable launcher staging and return to in-place runtime preflight."
+          }
+        }
+      ],
+      "recommendedOptionId": "policy-contract",
+      "recommendation": "Use Option 2 under current constraints. It reduces drift between the authoring checker and runtime preflight without changing launch topology during the first v6 extraction."
+    }
+  ],
+  "openQuestions": [
+    "Should the import-boundary policy live inside contract-data.yaml or in a smaller adjacent reference?",
+    "What is the smallest safe runtime mechanism for using contract-derived policy values before first-party import?",
+    "Should the accepted external sys.path residual remain unchanged after the first module split?"
+  ]
+}

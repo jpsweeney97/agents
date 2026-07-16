@@ -1,0 +1,11 @@
+flowchart TD
+  Developer["Developer edits deliberate sources"] --> ADR["ADR-0001 policy text"]
+  Developer --> Checker["Test-only Gate-2 checker"]
+  Checker --> Scripts["scripts/ census before cut"]
+  Checker --> Contract["method-surfaces equality"]
+  Runtime["v6 entrypoint"] --> RuntimeCensus["Separate inline pre-import census"]
+  RuntimeCensus --> Cache["Fresh invocation-private pycache_prefix"]
+  RuntimeCensus --> Import["First first-party import"]
+  Import --> Hashing["Platform-hashed method surfaces"]
+  ADR -. "manually mirrored" .-> Checker
+  ADR -. "manually mirrored" .-> RuntimeCensus

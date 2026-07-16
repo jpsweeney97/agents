@@ -1,0 +1,9 @@
+flowchart TD
+  Source["Authenticated source tree"] --> Launcher["Boundary launcher"]
+  Contract["method-surfaces and import policy"] --> Launcher
+  Launcher --> Census["Refuse unexpected source artifacts"]
+  Census --> Stage["Invocation-private clean root"]
+  Stage --> Cache["Fresh cache prefix"]
+  Cache --> Runtime["Validator runs from staged root"]
+  Runtime --> Capsule["Capsule/restart identity records source surfaces"]
+  Source -. "not on runtime sys.path" .-> Runtime

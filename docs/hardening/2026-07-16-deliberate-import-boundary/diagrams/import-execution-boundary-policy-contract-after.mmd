@@ -1,0 +1,11 @@
+flowchart TD
+  Policy["Import-boundary policy contract"] --> Checker["Test-only Gate-2 checker"]
+  Policy --> RuntimePreflight["Runtime pre-import preflight"]
+  Policy --> Renderings["ADR/spec rendered policy checks"]
+  Developer["Developer edits deliberate sources"] --> Scripts["scripts/"]
+  Checker --> Scripts
+  Checker --> Contract["method-surfaces equality"]
+  RuntimePreflight --> Cache["Fresh invocation-private pycache_prefix"]
+  RuntimePreflight --> Import["First first-party import"]
+  Import --> Hashing["Platform-hashed method surfaces"]
+  Renderings --> Review["Reviewable docs and tests"]
