@@ -734,3 +734,64 @@ def test_runtime_name_predicate_matches_contract_regex() -> None:
     ]
     for name in corpus:
         assert predicate(name) == bool(regex.match(name)), name
+
+
+def test_malformed_policy_values_refuse_instead_of_failing_open() -> None:
+    """Type-confused policy values must refuse, not degrade (2026-07-16 v6
+    implementation-review finding F1): a scalar string in a list-valued key
+    turns frozenset() into character-set semantics and silently disables the
+    rule it renders, so BoundaryPolicy validates value types fail-closed."""
+    from check_import_closure import BoundaryPolicy
+
+    source = SKILL_ROOT / "references" / "contract-data.yaml"
+    cases = [
+        ("banned-identifiers", "__import__, importlib, exec"),
+        ("allowed-data-dirs", "fixtures"),
+        ("forbidden-loader-suffixes", ".pyc"),
+        ("archive-suffixes", ".zip"),
+        ("banned-identifiers", []),
+        ("banned-identifiers", ["exec", 3]),
+        ("allowed-data-dirs", [""]),
+        ("entrypoint", 5),
+        ("entrypoint", ""),
+        ("module-name-pattern", ["^x$"]),
+    ]
+    for key, bad in cases:
+        broken = dict(LIVE_POLICY)
+        broken[key] = bad
+        with pytest.raises(SystemExit, match=f"import-boundary {key} must"):
+            BoundaryPolicy(broken, source)
+
+
+def test_invalid_module_name_regex_refuses() -> None:
+    from check_import_closure import BoundaryPolicy
+
+    broken = dict(LIVE_POLICY)
+    broken["module-name-pattern"] = "["
+    with pytest.raises(SystemExit, match="not a valid regular expression"):
+        BoundaryPolicy(broken, SKILL_ROOT / "references" / "contract-data.yaml")
+
+
+def test_checker_consumes_the_contract_ban_list(tmp_path: Path) -> None:
+    """Binding coverage for a second policy key (review finding F1): the ban
+    list must come from the contract, not constants. An entrypoint naming
+    `exec` passes under a synthetic policy whose ban list omits it and is
+    rejected under the live policy."""
+    weakened = dict(LIVE_POLICY)
+    weakened["banned-identifiers"] = ["__import__"]
+    root = make_layout(
+        tmp_path / "weakened",
+        "exec\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+        policy=weakened,
+    )
+    assert check(root).endswith("1 Python surface(s)")
+    strict = make_layout(
+        tmp_path / "strict",
+        "exec\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+    )
+    with pytest.raises(SystemExit, match="dynamic import machinery"):
+        check(strict)

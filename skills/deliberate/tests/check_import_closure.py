@@ -97,8 +97,41 @@ class BoundaryPolicy:
                 "import-closure check failed: import-boundary keys must be "
                 f"exactly {sorted(required)} in {source}. Got: {sorted(raw)}"
             )
+        for key in ("entrypoint", "module-name-pattern"):
+            if not isinstance(raw[key], str) or not raw[key].strip():
+                raise SystemExit(
+                    f"import-closure check failed: import-boundary {key} must "
+                    f"be a non-empty string in {source}. Got: {raw[key]!r:.100}"
+                )
+        for key in (
+            "allowed-data-dirs",
+            "forbidden-loader-suffixes",
+            "archive-suffixes",
+            "banned-identifiers",
+        ):
+            value = raw[key]
+            if (
+                not isinstance(value, list)
+                or not value
+                or not all(isinstance(item, str) and item.strip() for item in value)
+            ):
+                # A scalar string here would fail open, not closed: frozenset()
+                # over a string yields single characters, silently disabling the
+                # ban/allowlist it renders (2026-07-16 v6 implementation review).
+                raise SystemExit(
+                    f"import-closure check failed: import-boundary {key} must "
+                    f"be a non-empty list of non-empty strings in {source}. "
+                    f"Got: {value!r:.100}"
+                )
         self.entrypoint_name: str = raw["entrypoint"]
-        self.module_name = re.compile(raw["module-name-pattern"])
+        try:
+            self.module_name = re.compile(raw["module-name-pattern"])
+        except re.error as error:
+            raise SystemExit(
+                "import-closure check failed: import-boundary "
+                f"module-name-pattern is not a valid regular expression in "
+                f"{source}. Got: {raw['module-name-pattern']!r:.100} ({error})"
+            ) from error
         self.allowed_data_dirs = frozenset(raw["allowed-data-dirs"])
         self.banned_identifiers = frozenset(raw["banned-identifiers"])
         static = frozenset(s.lower() for s in raw["forbidden-loader-suffixes"])
