@@ -58,6 +58,10 @@ Thin and heavily proof-bounded — **first-to-prune**; the value is **portable**
 
 Prospective hindsight (the Klein effect) fires often and locally in any repo at planning time, so this is not first-to-prune — but watch it actually earn its guarantees over a bare risk-list: if in practice it only restyles "what could go wrong," or drifts into a verdict or a coverage matrix, fold or prune it. The honest differential is reliability plus the forced past-tense frame, not a new capability.
 
+## recheck-investment
+
+Born from the cross-model slim-control retirement (that repo's ADR-0034): a "slim" one-off control grew through thirteen locally-valid repair rounds into a provenance-sensitive evaluation system whose verification cost disproved its own premise — every finding was real, and no lane asked whether the bargain still authorized the next repair. The value is the pause nothing else owns: review lanes validate findings, `agent-facing-design` judges structure, and this skill alone routes "does this still earn another pass?" to a human. Watch three failure shapes: **over-firing** on ordinary second passes — the immediate-resume rule is the guard, and users seeing interruptions with no drift is prune evidence; **self-refutation** — if it accretes scores, schemas, ledgers, or audit machinery, it has become its own counterexample, so strip or prune it; and the **fold signal** — if in practice it only restyles the "are we overdoing it?" a capable agent already asks, fold the routing line into `agent-facing-design` and prune the rest.
+
 ## red-team
 
 Attacker-intent-from-the-defender's-chair fires often in any repo where something is worth attacking (a notch less universal than `premortem` — not every plan has an enemy, but every plan can fail by accident). Watch the no-certificate tightrope in practice: if the ease×payoff order ever drifts into reading as a complete coverage matrix, or the skill slides into a secret/repo scan, fold or sharpen it. The honest differential is the forced adversary posture plus reliability, not a new capability.

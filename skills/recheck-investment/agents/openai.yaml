@@ -1,0 +1,4 @@
+interface:
+  display_name: "Recheck Investment"
+  short_description: "Reprice work before another hardening pass"
+  default_prompt: "Use $recheck-investment to decide whether this work still earns another hardening pass."
