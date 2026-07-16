@@ -32,7 +32,8 @@ Validator boundary (part of the skill contract):
   census of scripts/ refuses unexpected artifacts fail-closed (ADR-0001) —
   layout rules run on os/sys before any shadowable import, then the narrow
   deferred stdlib set performs a structural zip check (zipfile.is_zipfile,
-  after direct shadows are cleared) that catches prefixed archives; bytecode is
+  after direct shadows are cleared) that catches prefixed archives and refuses
+  unreadable inert files; bytecode is
   redirected to a fresh invocation-private cache prefix mechanically verified
   outside the repository (or served skill root when standalone) and retired at
   exit, with repo-, bundle-, scripts-, allowed-data-, symlink-resolved-, and
@@ -249,14 +250,25 @@ atexit.register(shutil.rmtree, sys.pycache_prefix, ignore_errors=True)
 # reads archives; zipimport, banned, loads them) cannot resolve to a scripts/
 # file. is_zipfile locates the trailing end-of-central-directory record the way
 # zipimport does, catching a prefixed/self-extracting zip a magic sniff misses.
+# An inert file the census cannot open refuses rather than passing: is_zipfile
+# swallows OSError into False, and unverifiable content is unsafe — the same
+# errors-are-unsafe posture the containment check above holds.
 import zipfile  # noqa: E402 — safe only after pass 1 cleared every importable shadow
 
 for _inert_path in _boundary_inert_files:
-    if zipfile.is_zipfile(_inert_path):
+    try:
+        with open(_inert_path, "rb") as _inert_handle:
+            if zipfile.is_zipfile(_inert_handle):
+                _boundary_refuse(
+                    "file is a valid zip archive despite an inert suffix (ADR-0001) "
+                    "— a disguised or prefixed archive on sys.path imports as code "
+                    "through zipimport",
+                    _inert_path,
+                )
+    except OSError:
         _boundary_refuse(
-            "file is a valid zip archive despite an inert suffix (ADR-0001) — a "
-            "disguised or prefixed archive on sys.path imports as code through "
-            "zipimport",
+            "inert file under scripts/ could not be read for the structural "
+            "archive check (ADR-0001) — unverifiable content is unsafe",
             _inert_path,
         )
 

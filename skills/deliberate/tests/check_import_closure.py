@@ -296,9 +296,20 @@ def _is_zip_archive(path: Path) -> bool:
     is still caught — the case a four-byte magic sniff misses. That keeps the
     census guarantee — no loadable Python artifact sits uninventoried under
     ``scripts/`` — actually holding, which is what lets the identifier ban stay
-    narrow (attribute names and string literals unscanned).
+    narrow (attribute names and string literals unscanned). A file that cannot
+    be opened refuses rather than passing: ``is_zipfile`` swallows ``OSError``
+    into ``False``, and unverifiable content is unsafe — the same posture the
+    runtime pass-2 check holds, so the two consumers cannot drift on the
+    unreadable edge either.
     """
-    return zipfile.is_zipfile(path)
+    try:
+        with path.open("rb") as handle:
+            return zipfile.is_zipfile(handle)
+    except OSError as error:
+        raise SystemExit(
+            "import-closure check failed: file under scripts/ could not be "
+            f"read for the structural archive check. Got: {path} ({error})"
+        ) from error
 
 
 def census_scripts_layout(scripts_dir: Path, policy: BoundaryPolicy) -> set[Path]:

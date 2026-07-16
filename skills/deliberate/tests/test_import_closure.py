@@ -795,3 +795,18 @@ def test_checker_consumes_the_contract_ban_list(tmp_path: Path) -> None:
     )
     with pytest.raises(SystemExit, match="dynamic import machinery"):
         check(strict)
+
+
+def test_unreadable_inert_file_fails_the_check(tmp_path: Path) -> None:
+    """Checker-side twin of the runtime unreadable-inert refusal (2026-07-16
+    v6 implementation-review finding F2): the two consumers must not drift
+    on the unreadable edge."""
+    root = make_layout(tmp_path, "import os\n", {}, ["scripts/deliberate-validate.py"])
+    hidden = root / "scripts" / "hidden.dat"
+    hidden.write_bytes(b"#!/bin/sh\nplain stub, no archive")
+    hidden.chmod(0)
+    try:
+        with pytest.raises(SystemExit, match="could not be read"):
+            check(root)
+    finally:
+        hidden.chmod(0o644)

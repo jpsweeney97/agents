@@ -374,3 +374,21 @@ def test_second_invocation_never_reuses_prior_bytecode(tmp_path: Path) -> None:
     second = run_cli(root, *probe_args, tmpdir=scoped)
     assert second.returncode == 2
     assert "YAML anchorZ are rejected" in second.stderr
+
+
+def test_unreadable_inert_file_is_refused(tmp_path: Path) -> None:
+    """Pass 2 must refuse an inert file it cannot read (2026-07-16 v6
+    implementation-review finding F2): is_zipfile swallows OSError into
+    False, which would let an unreadable disguised zip pass — unverifiable
+    content is unsafe, matching the containment check's posture."""
+    root = make_bundle(tmp_path)
+    hidden = root / "scripts" / "hidden.dat"
+    hidden.write_bytes(b"#!/bin/sh\n# stub\n" + _zip_bytes())
+    hidden.chmod(0)
+    try:
+        result = run_cli(root, *identity_args(root))
+    finally:
+        hidden.chmod(0o644)
+    assert result.returncode == 2
+    assert "hidden.dat" in result.stderr
+    assert "could not be read" in result.stderr
