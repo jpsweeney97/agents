@@ -76,7 +76,7 @@ If a reviewer runs long enough to block the loop, cancel or drop that reviewer, 
 2. Run the first pass as read-only scrutiny. If `review-family:scrutinize` is available and the target is an ordinary plan, use its standards for evidence, severity, and execution-readiness thinking. This skill adds panel composition and the patch/re-review loop; it does not replace scrutiny with a weaker review method.
 3. Consolidate panel feedback before editing. Re-read the plan around each claim, discard unsupported issues, merge duplicates, and preserve disagreement when the correct patch depends on a user decision.
 4. Track accepted findings as open until a later pass verifies them closed. A new panel cannot erase an older accepted finding by ignoring it.
-5. Patch only the named plan artifact. Do not edit authority files, implementation files, tests, tickets, handoffs, or unrelated docs unless the user explicitly expands the mutation boundary.
+5. Patch only the named plan artifact. Do not edit authority files, implementation files, tests, tickets, handoffs, or unrelated docs unless the user explicitly expands the mutation boundary. One further mutation class is authorized inside the named plan: recording a human-supplied `recheck-investment` ruling as a brief note, written only at the human's direction and scoped to the ruling's named boundary.
 6. After patching, re-read the changed plan and re-review every open finding plus any new risk introduced by the patch.
 7. Stop when a stop condition below is reached. Do not keep looping just because another panel could be invented.
 
@@ -108,6 +108,8 @@ Stop with `defensible for inspected scope` only when every accepted material fin
 Stop with `needs user decision` when findings conflict, the correct patch depends on priorities the plan does not settle, the target or authority is ambiguous, the mutation boundary would need to expand, or patching would risk overwriting unrelated work.
 
 Stop with `iteration cap reached` when the default or user-specified cap is reached while material findings remain. Summarize the remaining findings and the smallest next decision rather than launching another panel.
+
+When the cap is reached with material findings remaining, a third cycle is proposed without a lower cap, or the smallest responsible patch would add a new subsystem, trust boundary, persistent proof surface, or maintenance obligation, route the continue-question to `recheck-investment` (where available) before running another cycle or applying that patch. The named plan stays unpatched while that check runs; finding validity stays with this loop's panel, and the check owns only whether continued investment needs renewed human authorization.
 
 Stop with `not patchable as given` when the plan lacks enough concrete goal, scope, authority, or execution shape for panel feedback to produce a responsible patch. Name the workflow that should clarify it next.
 
