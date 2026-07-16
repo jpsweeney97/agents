@@ -24,10 +24,10 @@ The repaired checker is valuable, and we should not dilute that with a speculati
 
 That split is exactly where the recent failures came from. A zip suffix list was not enough; a disguised zip mattered because the narrowed identifier ban depends on the census being complete. A fresh `sys.pycache_prefix` was necessary but not sufficient because sourceless bytecode can be read directly beside the modules. The safe design move is to make the boundary policy a first-class contract with generated or mechanically checked consumers, rather than letting ADR prose, checker code, and future runtime code evolve by memory.
 
-I recommend Option 2: single-source the boundary policy contract while keeping enforcement local in the authoring gate and runtime preflight. It gives us a concrete drift check before the v6 extraction without adding a separate launcher or process model to the first module split. If delivery urgency dominates, Option 1 can land the v6 cut with duplicated code and strong tests. If we keep finding ambient import mechanisms that escape the in-place model, Option 3 is the stronger containment design.
+I recommend Option 2: single-source the boundary policy contract while keeping enforcement local in the authoring gate and runtime preflight. The policy source must itself stay inside the authenticated method identity, or the runtime must consume only policy values embedded in a pinned surface with a release-time mismatch check. That authentication choice is part of the security design, not a file-layout preference. If delivery urgency dominates, Option 1 can land the v6 cut with duplicated code and strong tests. If we keep finding ambient import mechanisms that escape the in-place model, Option 3 is the stronger containment design.
 
 ## Next Decisions
 
 - Decide whether this hardening opportunity should be handled before or during the first v6 physical extraction.
-- Choose between Option 1 and Option 2 for the immediate v6 cut. Option 3 is a larger architectural bet and should wait for stronger recurrence evidence or a deliberate isolation milestone.
+- Choose between Option 1 and Option 2 for the immediate v6 cut. If Option 2 wins, choose the authenticated policy placement before implementation planning: existing pinned `contract-data.yaml`, a new pinned surface, or embedded values generated from an unpinned editing reference.
 - If Option 2 is selected, the next artifact should be an implementation plan, not source edits in this proposal pass.

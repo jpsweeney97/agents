@@ -12,7 +12,27 @@ This is a derived hardening analysis for the `deliberate` validator modularizati
 - Source drift: none for the checked working tree at the time of inventory; the branch is local-only and ahead of both `main` and `origin/main`.
 - Evidence collection digest: `0f29bee7b7d1270d7cec4d454f536d3ded33c6c8e43fafd66fab10bc79fb1513`
 
-The collection digest is a composite over the target revision, local main revision, origin revision, and the file hashes listed below. The user-supplied conversation summary is included as evidence for intent and reported verification results, but it does not have a stable standalone file hash in this analysis directory.
+The collection digest is reproducible from these UTF-8 lines, in this exact order, with a trailing newline after every line, hashed with SHA-256:
+
+```text
+target=288e4caa9d35a9a172f6e65e2305927e1ae3fcef
+main=c6e5554f02b4308013c0fb4e55cd486e3c47811e
+origin=61583d5b824deb8a977928c4f945a0162e8ecec6
+handoff=f0b4de4702a542dcfff58993e942240496bf021c43a0b47409a81606d6227d8e
+adr=f2afc54310846e4c59bf8a41c67eb6a9c9a44ee25ae83b230847611403d13304
+gate1=c06001627b506adcdb2331160a7c92d929b414c4bf9cd91b9e86c39b27973445
+checker=e682fda0adb7b2f96a75995f93a87fe55a63682e890a3cf7040646f15673870c
+tests=26613210396e6f50ad200444d24766f27d2e7d56c42484532866111d1269a50f
+contract-data=3a8369dfb7a6eae7e79aa881ce6fd5a74319887c30aa5d7272d130cb6a29d62a
+```
+
+The user-supplied conversation summary is included as evidence for intent and reported verification results, but it does not have a stable standalone file hash in this analysis directory.
+
+## Artifact Roles
+
+- Local context: `context.md` is audit context and may contain the local source root path.
+- Distributable artifacts: `hardening.md`, `hardening.json`, `proposals/`, and `diagrams/`. These files must avoid local absolute paths.
+- Schema authority: `hardening.json` follows the `codex-security:propose-security-hardening` proposal format (`documentType: "codex-security.hardening-analysis"`, `schemaVersion: "1.0"`). There is no repo-local JSON Schema file for this format; validation in this analysis is structural and cross-reference based.
 
 ## Evidence Inventory
 

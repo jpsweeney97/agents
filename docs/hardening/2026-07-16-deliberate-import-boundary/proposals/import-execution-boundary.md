@@ -116,9 +116,11 @@ This option is credible if we want the first v6 cut to be mostly about extractin
 
 ### Option 2: Single-source the boundary policy contract
 
-Option 2 keeps enforcement local but makes the policy itself a first-class contract. Instead of relying on ADR prose as the only shared source, we add a machine-readable import-boundary section, likely in `contract-data.yaml` or a tightly adjacent reference, that declares allowed production module names, allowed data directories, forbidden loader suffix families, archive signatures, banned identifiers, and the runtime cache invariants. The authoring checker and runtime preflight either generate their rule tables from that contract or emit mechanically checked renderings from it. The runtime still uses inline pre-import code where necessary, but the policy values and coverage expectations are not hand-copied.
+Option 2 keeps enforcement local but makes the policy itself a first-class contract. Instead of relying on ADR prose as the only shared source, we add a machine-readable import-boundary section that declares allowed production module names, allowed data directories, forbidden loader suffix families, archive signatures, banned identifiers, and the runtime cache invariants. The authoring checker and runtime preflight either generate their rule tables from that contract or emit mechanically checked renderings from it. The runtime still uses inline pre-import code where necessary, but the policy values and coverage expectations are not hand-copied.
 
-The attractive part is that this matches the shape of `deliberate` itself. `E007` already shows `contract-data.yaml` is the machine-readable authority for schema and method identity. We can extend that pattern to the import boundary without changing the authentication model. The authoring checker remains outside `method-surfaces`, but it no longer becomes the sole source of policy truth. The runtime entrypoint can carry a minimal pre-import implementation while tests prove its embedded policy rendering matches the contract data.
+The attractive part is that this matches the shape of `deliberate` itself, but the placement choice is security-relevant. `E007` already shows `contract-data.yaml` is inside `validation.method-surfaces`, so putting the policy there makes the policy hash-authenticated with the rest of the method identity. That is the cleanest trust story, but every policy edit then changes an existing pinned surface and must be classified under the existing method-pin drift rules: value-neutral edits may become restart frontiers, while surface-set, bounds, schema, or tightened-value changes can become hard compatibility cuts. A new adjacent reference can also be safe, but only if it is added to `method-surfaces`, which is itself surface-set expansion and therefore a capsule-breaking v6 contract change. An unpinned adjacent reference is not acceptable as a runtime authority unless the runtime consumes only generated values embedded in an already pinned surface and release checks prove the embedded values match the editable reference.
+
+That authentication requirement is what keeps Option 2 from becoming a softer version of the current split. The authoring checker remains outside `method-surfaces`, but the policy it enforces must not. The runtime entrypoint can carry a minimal pre-import implementation while tests prove its embedded policy rendering matches the authenticated policy source.
 
 The risk is that we add contract machinery before the first extraction. That is not free. A clumsy version could become a second abstraction as heavy as the aggregate identity ADR-0001 rejected. To keep Option 2 proportionate, the policy contract should be small and declarative. It should not try to model all of Python import semantics. It should declare the accepted allowlist and denylist values we already rely on: flat `_deliberate_<domain>.py`, allowed `fixtures/` data, zip magic values, forbidden suffix categories, banned positional identifiers, and cache-prefix obligations.
 
@@ -138,9 +140,9 @@ flowchart TD
 
 | Change | Before | After | Security consequence | Cost |
 | --- | --- | --- | --- | --- |
-| Policy ownership | ADR prose and checker code | Declarative policy contract feeds checker and runtime preflight | Drift becomes mechanically detectable before v6 lands | Adds a small contract surface and rendering/check tests |
+| Policy ownership | ADR prose and checker code | Authenticated declarative policy contract feeds checker and runtime preflight | Drift becomes mechanically detectable before v6 lands, and policy tampering creates method-identity evidence | Adds a small contract surface and rendering/check tests |
 | Runtime implementation | Future handwritten mirror | Inline pre-import logic with contract-derived constants or checked rendering | Runtime keeps pre-import safety without importing the test checker | Some duplication remains at algorithm level |
-| Review posture | Adversarial review reads policy in prose and code | Reviewers can compare one policy source to both consumers | Makes future bypass-class additions harder to miss | Requires discipline to keep the contract small |
+| Review posture | Adversarial review reads policy in prose and code | Reviewers can compare one authenticated policy source to both consumers | Makes future bypass-class additions harder to miss | Requires discipline to keep the contract small and to classify compatibility consequences honestly |
 
 This option does not eliminate every duplicate line, and that is acceptable. The security win is not aesthetic reuse; it is preventing the authoring and runtime consumers from silently disagreeing on which artifacts are forbidden. If a future review adds another loader artifact, we update the policy contract once and the mismatch tests fail until both consumers reflect it.
 
@@ -181,7 +183,7 @@ I would not choose Option 3 for the immediate first module extraction. It become
 | Memory | Neutral; bounded path and metadata sets. | Neutral to slight increase in test/render metadata. | Unknown to slight increase; staged roots and process/temp state retain more files during invocation. |
 | Reliability | Improves fail-closed behavior but duplicate implementations can diverge. | Improves fail-closed behavior and gives clearer drift failures. | Improves cleanup isolation but adds launcher failure modes. |
 | Operability | Low new burden; failures look like current checker/runtime refusals. | Moderate but manageable; failures can point to policy/consumer mismatch. | Higher burden; incidents now include staging, path mapping, and launcher diagnostics. |
-| Migration | Smallest change; easiest rollback. | Moderate change; still compatible with direct per-file identity. | Largest change; requires new dual-path and capsule path proof. |
+| Migration | Smallest change; easiest rollback. | Moderate change; compatible with direct per-file identity only if the policy source is pinned or embedded into a pinned surface and its compatibility effect is classified. | Largest change; requires new dual-path and capsule path proof. |
 
 All three options preserve the tactical branch work. The main difference is where we want to pay complexity: in future review discipline, in a small policy contract, or in a stronger execution topology.
 
@@ -207,9 +209,9 @@ Residual risks remain in every option. Reflection or computed-string gadgets can
 
 ## Migration And Rollout
 
-For Option 2, the rollout should preserve the existing branch fixes as the tactical floor. First, land or rebase the current Gate-2 branch and refresh the live source identity. Next, add the declarative policy contract and a check that the current authoring checker consumes or renders the same values. Then implement the runtime pre-import preflight for the first v6 module extraction with an explicit proof that the embedded or imported policy values match the contract before first-party import occurs. Finally, run the dual-path smoke through both canonical and Claude symlink paths, recording the effective interpreter.
+For Option 2, the rollout should preserve the existing branch fixes as the tactical floor. First, land or rebase the current Gate-2 branch and refresh the live source identity. Next, choose an authenticated policy placement: inside the already pinned `contract-data.yaml`, in a new pinned method surface with the surface-set expansion accepted as part of v6, or in an unpinned editing reference whose generated values are embedded into an already pinned runtime surface and checked at release. The runtime must not consume an unpinned reference directly. Then add the declarative policy contract and a check that the current authoring checker consumes or renders the same values. Then implement the runtime pre-import preflight for the first v6 module extraction with an explicit proof that the embedded or imported policy values match the authenticated contract before first-party import occurs. Finally, run the dual-path smoke through both canonical and Claude symlink paths, recording the effective interpreter.
 
-Rollback is straightforward if we keep the policy contract additive until the runtime consumer exists: revert the policy-contract and runtime-preflight commits, retain the current Gate-2 checker, and keep v6 extraction blocked. During migration, the tactical checker should remain required; the structural work must not weaken the existing branch's negative cases.
+Rollback is straightforward if we keep the policy contract additive until the runtime consumer exists: revert the policy-contract and runtime-preflight commits, retain the current Gate-2 checker, and keep v6 extraction blocked. If the policy lands in `contract-data.yaml`, rollback also restores the prior method-surface hash. If the policy lands as a new pinned file, rollback must remove the added surface from `method-surfaces` and treat that as a surface-set change, not a cosmetic file move. During migration, the tactical checker should remain required; the structural work must not weaken the existing branch's negative cases.
 
 ## Validation Plan
 
@@ -223,6 +225,7 @@ Rollback is straightforward if we keep the policy contract additive until the ru
 ## Implementation Work Packages
 
 - Define the import-boundary policy contract with only values the checker and runtime truly need: module naming regex, allowed data directories, loader suffix families, archive suffixes, archive magic values, banned identifiers, and cache-prefix invariants.
+- Choose an authenticated policy placement. Prefer the existing pinned `contract-data.yaml` unless there is a concrete reason to pay the surface-set expansion cost of a new pinned file; never let the runtime read an unpinned adjacent reference as authority.
 - Wire or mechanically compare the Gate-2 authoring checker against that contract without importing production modules.
 - Implement the v6 runtime pre-import preflight with the policy values embedded or rendered in a way that is checked against the contract before release.
 - Add policy drift tests, runtime preflight negative tests, and dual-path smoke records.
@@ -230,7 +233,7 @@ Rollback is straightforward if we keep the policy contract additive until the ru
 
 ## Open Questions
 
-- Should the policy contract live inside `contract-data.yaml`, which already owns method-surface validation, or in a smaller adjacent reference to avoid bloating the runtime data file?
-- What is the smallest safe way to let runtime preflight use contract-derived values without importing first-party code before the census?
+- Which authenticated placement should own the policy: the already pinned `contract-data.yaml`, a new pinned method surface with accepted surface-set expansion, or generated constants embedded into an existing pinned runtime surface from an unpinned editing reference?
+- What is the smallest safe way to let runtime preflight use contract-derived values without importing first-party code before the census and without reading an unpinned policy file at invocation time?
 - Should Option 2 be part of the first v6 physical extraction, or should the branch land first and the policy-contract work become a separate pre-v6 gate?
 - Is the accepted external `sys.path` residual still acceptable after the first module split, or should future ADR work add a static signal for source-tree `sys.path` mutation?

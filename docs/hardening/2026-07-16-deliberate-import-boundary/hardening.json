@@ -6,9 +6,16 @@
     "kind": "mixed_document_source_collection",
     "label": "Deliberate Gate-2 import-boundary evidence",
     "collectionSha256": "0f29bee7b7d1270d7cec4d454f536d3ded33c6c8e43fafd66fab10bc79fb1513",
+    "collectionSha256Recipe": "SHA-256 over UTF-8 lines with trailing newlines, in this order: target=288e4caa9d35a9a172f6e65e2305927e1ae3fcef; main=c6e5554f02b4308013c0fb4e55cd486e3c47811e; origin=61583d5b824deb8a977928c4f945a0162e8ecec6; handoff=f0b4de4702a542dcfff58993e942240496bf021c43a0b47409a81606d6227d8e; adr=f2afc54310846e4c59bf8a41c67eb6a9c9a44ee25ae83b230847611403d13304; gate1=c06001627b506adcdb2331160a7c92d929b414c4bf9cd91b9e86c39b27973445; checker=e682fda0adb7b2f96a75995f93a87fe55a63682e890a3cf7040646f15673870c; tests=26613210396e6f50ad200444d24766f27d2e7d56c42484532866111d1269a50f; contract-data=3a8369dfb7a6eae7e79aa881ce6fd5a74319887c30aa5d7272d130cb6a29d62a",
     "artifactCount": 7,
     "sourceDrift": "none",
     "targetRevision": "288e4caa9d35a9a172f6e65e2305927e1ae3fcef"
+  },
+  "schemaAuthority": {
+    "format": "codex-security:propose-security-hardening proposal format",
+    "schemaVersion": "1.0",
+    "repoLocalSchema": false,
+    "validationBasis": "JSON parse plus structural and cross-reference checks; no repo-local JSON Schema file exists for this format."
   },
   "assessment": {
     "outcome": "opportunities_identified",
@@ -309,7 +316,7 @@
               "evidenceId": "E007",
               "effect": "mitigates",
               "tacticalFixRequired": true,
-              "rationale": "Extends the existing contract-data authority pattern without changing method identity semantics."
+              "rationale": "Extends the existing contract-data authority pattern if the policy lives in an authenticated surface; placement must account for method-pin drift or surface-set expansion."
             }
           ],
           "tradeoffs": [
@@ -318,8 +325,8 @@
               "direction": "improves",
               "confidence": "high",
               "basis": "source-derived",
-              "assessment": "Makes policy drift visible and keeps known artifact classes synchronized across authoring and runtime consumers.",
-              "validationPlan": "Mutation-test policy-consumer mismatches by removing one forbidden value from either consumer."
+              "assessment": "Makes policy drift visible and keeps known artifact classes synchronized across authoring and runtime consumers, provided the policy source itself is authenticated or embedded into a pinned runtime surface.",
+              "validationPlan": "Mutation-test policy-consumer mismatches by removing one forbidden value from either consumer and tamper with any candidate unpinned policy reference to prove runtime cannot consume it directly."
             },
             {
               "dimension": "performance",
@@ -358,8 +365,8 @@
               "direction": "regresses",
               "confidence": "medium",
               "basis": "source-derived",
-              "assessment": "Adds a small contract surface before the v6 cut, but keeps the direct per-file model intact.",
-              "validationPlan": "Land policy contract separately or as an explicit pre-v6 gate with rollback to current checker."
+              "assessment": "Adds a small policy contract before the v6 cut. If placed in contract-data.yaml it changes an existing pinned surface; if placed in a new pinned file it expands the surface set; if left unpinned it must be edit-time only.",
+              "validationPlan": "Land policy contract separately or as an explicit pre-v6 gate, classify method-identity consequences, and verify rollback restores the prior method-surface state."
             }
           ],
           "residualRisks": [
@@ -375,18 +382,21 @@
               "docs/adr/0001-authenticate-deliberate-modules-as-direct-method-surfaces.md"
             ],
             "workPackages": [
+              "Choose an authenticated policy placement and record its method-identity consequences.",
               "Add declarative import-boundary policy.",
               "Bind or compare the checker to the policy.",
               "Bind runtime preflight to the policy without unsafe first-party import.",
               "Add policy drift tests."
             ],
             "acceptanceCriteria": [
+              "The runtime does not read an unpinned policy reference as authority.",
               "Checker and runtime consumers expose the same forbidden artifact and identifier policy.",
               "Removing a policy value from either consumer fails validation.",
               "Runtime refuses seeded artifacts before first-party import through both delivery paths."
             ],
             "migrationNotes": [
-              "Keep the policy small and declarative to avoid recreating aggregate identity machinery."
+              "Keep the policy small and declarative to avoid recreating aggregate identity machinery.",
+              "Prefer the already pinned contract-data.yaml unless a new pinned file's surface-set expansion is intentionally accepted."
             ],
             "rollback": "Revert the policy contract and runtime consumer; keep the branch's tactical Gate-2 checker as the blocking guard."
           }
@@ -524,12 +534,12 @@
         }
       ],
       "recommendedOptionId": "policy-contract",
-      "recommendation": "Use Option 2 under current constraints. It reduces drift between the authoring checker and runtime preflight without changing launch topology during the first v6 extraction."
+      "recommendation": "Use Option 2 under current constraints. It reduces drift between the authoring checker and runtime preflight without changing launch topology during the first v6 extraction, but only if the policy source is authenticated or runtime-consumed values are embedded in a pinned surface."
     }
   ],
   "openQuestions": [
-    "Should the import-boundary policy live inside contract-data.yaml or in a smaller adjacent reference?",
-    "What is the smallest safe runtime mechanism for using contract-derived policy values before first-party import?",
+    "Which authenticated placement should own the policy: contract-data.yaml, a new pinned method surface, or generated constants embedded into an existing pinned runtime surface from an unpinned editing reference?",
+    "What is the smallest safe runtime mechanism for using contract-derived policy values before first-party import without reading an unpinned policy file at invocation time?",
     "Should the accepted external sys.path residual remain unchanged after the first module split?"
   ]
 }
