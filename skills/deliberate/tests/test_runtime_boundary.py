@@ -392,3 +392,30 @@ def test_unreadable_inert_file_is_refused(tmp_path: Path) -> None:
     assert result.returncode == 2
     assert "hidden.dat" in result.stderr
     assert "could not be read" in result.stderr
+
+
+def test_nested_conforming_module_is_refused_by_the_flat_rule(tmp_path: Path) -> None:
+    """Isolates the flat-placement rule (2026-07-16 v6 implementation-review
+    finding F3): a conforming module name nested under the data allowlist
+    trips only the flat rule — the existing nested test's evil.py also trips
+    the naming rule, so a mutant with the flat rule disabled survived it."""
+    root = make_bundle(tmp_path)
+    (root / "scripts" / "fixtures" / "_deliberate_evil.py").write_text(
+        "VALUE = 1\n", encoding="utf-8"
+    )
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "_deliberate_evil.py" in result.stderr
+    assert "must be flat" in result.stderr
+
+
+def test_scripts_directory_symlink_is_refused(tmp_path: Path) -> None:
+    """scripts/ itself must be a real directory (census precondition; the
+    refusal existed untested — 2026-07-16 v6 implementation-review F3)."""
+    root = make_bundle(tmp_path)
+    real_scripts = tmp_path / "real-scripts"
+    (root / "scripts").rename(real_scripts)
+    (root / "scripts").symlink_to(real_scripts, target_is_directory=True)
+    result = run_cli(root, *identity_args(root))
+    assert result.returncode == 2
+    assert "must be a real directory" in result.stderr
