@@ -69,46 +69,55 @@ from pathlib import Path
 
 import yaml
 
-ENTRYPOINT_NAME = "deliberate-validate.py"
-MODULE_NAME = re.compile(r"^_deliberate_[a-z][a-z0-9_]*\.py$")
-ALLOWED_DATA_DIRS = frozenset({"fixtures"})
-BANNED_IDENTIFIERS = frozenset(
-    {
-        "__import__",
-        "__builtins__",
-        "builtins",
-        "importlib",
-        "zipimport",
-        "runpy",
-        "exec",
-        "eval",
-        "compile",
-    }
-)
-# Every suffix the running interpreter's FileFinder can load, plus the
-# cross-platform forms this platform does not register (.pyw/.pyc/.pyo/.pyd),
-# so a census run on macOS still rejects artifacts another platform loads.
-LOADER_SUFFIXES = frozenset(importlib.machinery.all_suffixes()) | {
-    ".pyc",
-    ".pyo",
-    ".pyd",
-    ".pyw",
-    ".so",
-}
-ARTIFACT_SUFFIXES = tuple(sorted(s.lower() for s in LOADER_SUFFIXES if s != ".py"))
-# Zip-format archives carry no FileFinder loader suffix but are loadable as
-# code through zipimport / path hooks, so the census rejects them too — no
-# importable artifact may sit beside the modules while the gate is green.
-ARCHIVE_SUFFIXES = (".egg", ".whl", ".zip")
-CENSUS_FORBIDDEN_SUFFIXES = tuple(
-    sorted(set(ARTIFACT_SUFFIXES) | set(ARCHIVE_SUFFIXES))
-)
+class BoundaryPolicy:
+    """Census and ban values from the target's pinned contract-data.yaml.
+
+    The static forbidden-suffix family from the contract is unioned with the
+    running interpreter's ``importlib.machinery.all_suffixes()`` — a
+    test-side-only extension (production code may not name importlib), so a
+    census run on macOS still rejects artifacts another platform loads.
+    """
+
+    def __init__(self, raw: object, source: Path) -> None:
+        if not isinstance(raw, dict):
+            raise SystemExit(
+                "import-closure check failed: import-boundary section missing "
+                f"or not a mapping in {source}. Got: {raw!r:.100}"
+            )
+        required = {
+            "entrypoint",
+            "module-name-pattern",
+            "allowed-data-dirs",
+            "forbidden-loader-suffixes",
+            "archive-suffixes",
+            "banned-identifiers",
+        }
+        if set(raw) != required:
+            raise SystemExit(
+                "import-closure check failed: import-boundary keys must be "
+                f"exactly {sorted(required)} in {source}. Got: {sorted(raw)}"
+            )
+        self.entrypoint_name: str = raw["entrypoint"]
+        self.module_name = re.compile(raw["module-name-pattern"])
+        self.allowed_data_dirs = frozenset(raw["allowed-data-dirs"])
+        self.banned_identifiers = frozenset(raw["banned-identifiers"])
+        static = frozenset(s.lower() for s in raw["forbidden-loader-suffixes"])
+        loader_suffixes = frozenset(importlib.machinery.all_suffixes()) | static
+        self.artifact_suffixes = tuple(
+            sorted(s.lower() for s in loader_suffixes if s != ".py")
+        )
+        archive_suffixes = tuple(s.lower() for s in raw["archive-suffixes"])
+        self.census_forbidden_suffixes = tuple(
+            sorted(set(self.artifact_suffixes) | set(archive_suffixes))
+        )
 
 
-def _reject_if_banned(name: str, node: ast.AST, source_path: Path) -> None:
+def _reject_if_banned(
+    name: str, node: ast.AST, source_path: Path, policy: BoundaryPolicy
+) -> None:
     """Fail when any dotted segment of ``name`` is banned import/exec machinery."""
     for segment in name.split("."):
-        if segment in BANNED_IDENTIFIERS:
+        if segment in policy.banned_identifiers:
             line = getattr(node, "lineno", "?")
             raise SystemExit(
                 "import-closure check failed: dynamic import machinery is "
@@ -118,7 +127,9 @@ def _reject_if_banned(name: str, node: ast.AST, source_path: Path) -> None:
             )
 
 
-def reject_banned_identifiers(tree: ast.AST, source_path: Path) -> None:
+def reject_banned_identifiers(
+    tree: ast.AST, source_path: Path, policy: BoundaryPolicy
+) -> None:
     """Fail on named dynamic-import or code-execution machinery.
 
     The ban is positional, not textual: it fires on a banned name used as an
@@ -135,7 +146,7 @@ def reject_banned_identifiers(tree: ast.AST, source_path: Path) -> None:
     """
     for node in ast.walk(tree):
         if isinstance(node, ast.Name):
-            if node.id in BANNED_IDENTIFIERS:
+            if node.id in policy.banned_identifiers:
                 raise SystemExit(
                     "import-closure check failed: dynamic import machinery is "
                     "forbidden in production sources (ADR-0001), because the "
@@ -144,15 +155,17 @@ def reject_banned_identifiers(tree: ast.AST, source_path: Path) -> None:
                 )
         elif isinstance(node, ast.Import):
             for alias in node.names:
-                _reject_if_banned(alias.name, node, source_path)
+                _reject_if_banned(alias.name, node, source_path, policy)
         elif isinstance(node, ast.ImportFrom):
             if node.module:
-                _reject_if_banned(node.module, node, source_path)
+                _reject_if_banned(node.module, node, source_path, policy)
             for alias in node.names:
-                _reject_if_banned(alias.name, node, source_path)
+                _reject_if_banned(alias.name, node, source_path, policy)
 
 
-def classify_first_party(scripts_dir: Path, top: str, source_path: Path) -> bool:
+def classify_first_party(
+    scripts_dir: Path, top: str, source_path: Path, policy: BoundaryPolicy
+) -> bool:
     """True when ``top`` is a flat first-party module; fail on other local forms.
 
     Script-directory resolution tries every loader form, not just
@@ -162,7 +175,7 @@ def classify_first_party(scripts_dir: Path, top: str, source_path: Path) -> bool
     """
     flat = scripts_dir / f"{top}.py"
     other_forms = [scripts_dir / top] + [
-        scripts_dir / f"{top}{suffix}" for suffix in ARTIFACT_SUFFIXES
+        scripts_dir / f"{top}{suffix}" for suffix in policy.artifact_suffixes
     ]
     present = [p for p in other_forms if p.is_symlink() or p.exists()]
     if present:
@@ -180,7 +193,9 @@ def classify_first_party(scripts_dir: Path, top: str, source_path: Path) -> bool
     return flat.is_file()
 
 
-def first_party_import_names(source_path: Path, scripts_dir: Path) -> set[str]:
+def first_party_import_names(
+    source_path: Path, scripts_dir: Path, policy: BoundaryPolicy
+) -> set[str]:
     """Return every first-party module name imported anywhere in the file.
 
     Walks the full AST so conditional and function-scoped imports count:
@@ -190,7 +205,7 @@ def first_party_import_names(source_path: Path, scripts_dir: Path) -> set[str]:
     each would let executed code escape the static closure.
     """
     tree = ast.parse(source_path.read_text(encoding="utf-8"))
-    reject_banned_identifiers(tree, source_path)
+    reject_banned_identifiers(tree, source_path, policy)
     dotted_names: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -207,7 +222,7 @@ def first_party_import_names(source_path: Path, scripts_dir: Path) -> set[str]:
     names: set[str] = set()
     for dotted in dotted_names:
         top = dotted.split(".")[0]
-        if classify_first_party(scripts_dir, top, source_path):
+        if classify_first_party(scripts_dir, top, source_path, policy):
             if "." in dotted:
                 raise SystemExit(
                     "import-closure check failed: dotted import of a "
@@ -219,7 +234,7 @@ def first_party_import_names(source_path: Path, scripts_dir: Path) -> set[str]:
     return names
 
 
-def import_closure(entrypoint: Path) -> set[Path]:
+def import_closure(entrypoint: Path, policy: BoundaryPolicy) -> set[Path]:
     """Root-inclusive transitive first-party import closure, source-derived."""
     scripts_dir = entrypoint.parent
     closure: set[Path] = set()
@@ -229,7 +244,7 @@ def import_closure(entrypoint: Path) -> set[Path]:
         if current in closure:
             continue
         closure.add(current)
-        for name in sorted(first_party_import_names(current, scripts_dir)):
+        for name in sorted(first_party_import_names(current, scripts_dir, policy)):
             resolved = (scripts_dir / f"{name}.py").resolve()
             if resolved not in closure:
                 pending.append(resolved)
@@ -253,7 +268,7 @@ def _is_zip_archive(path: Path) -> bool:
     return zipfile.is_zipfile(path)
 
 
-def census_scripts_layout(scripts_dir: Path) -> set[Path]:
+def census_scripts_layout(scripts_dir: Path, policy: BoundaryPolicy) -> set[Path]:
     """Fail-closed census of everything under scripts/; returns production ``.py`` files.
 
     Rejects every unexpected importable artifact — symlinks, ``__pycache__``,
@@ -284,11 +299,11 @@ def census_scripts_layout(scripts_dir: Path) -> set[Path]:
             )
         if path.is_dir():
             top = path.relative_to(scripts_dir).parts[0]
-            if top not in ALLOWED_DATA_DIRS:
+            if top not in policy.allowed_data_dirs:
                 raise SystemExit(
                     "import-closure check failed: directories under scripts/ "
                     "are forbidden outside the declared data allowlist "
-                    f"{sorted(ALLOWED_DATA_DIRS)} (ADR-0001) — a directory is "
+                    f"{sorted(policy.allowed_data_dirs)} (ADR-0001) — a directory is "
                     f"an importable package. Got: {path}"
                 )
             continue
@@ -305,7 +320,9 @@ def census_scripts_layout(scripts_dir: Path) -> set[Path]:
                     "in scripts/ — packages and nested files are forbidden "
                     f"(ADR-0001). Got: {path}"
                 )
-            if path.name != ENTRYPOINT_NAME and not MODULE_NAME.match(path.name):
+            if path.name != policy.entrypoint_name and not policy.module_name.match(
+                path.name
+            ):
                 raise SystemExit(
                     "import-closure check failed: production module name must "
                     "match _deliberate_<domain>.py (ADR-0001 naming rule). Got: "
@@ -313,7 +330,9 @@ def census_scripts_layout(scripts_dir: Path) -> set[Path]:
                 )
             files.add(path.resolve())
             continue
-        if any(lower_name.endswith(suffix) for suffix in CENSUS_FORBIDDEN_SUFFIXES):
+        if any(
+            lower_name.endswith(suffix) for suffix in policy.census_forbidden_suffixes
+        ):
             raise SystemExit(
                 "import-closure check failed: importable non-source artifact "
                 "is forbidden under scripts/ (ADR-0001) — bytecode, extension "
@@ -330,9 +349,8 @@ def census_scripts_layout(scripts_dir: Path) -> set[Path]:
     return files
 
 
-def inventory_python_surfaces(contract_data: Path) -> set[str]:
+def inventory_python_surfaces(loaded: object, contract_data: Path) -> set[str]:
     """Python entries of validation.method-surfaces, as skill-relative paths."""
-    loaded = yaml.safe_load(contract_data.read_text(encoding="utf-8"))
     try:
         surfaces = loaded["validation"]["method-surfaces"]
     except (TypeError, KeyError) as error:
@@ -352,18 +370,31 @@ def check(skill_root: Path) -> str:
     """Require closure == inventory == on-disk; return the pass message or exit 1."""
     root = skill_root.resolve()
     scripts_dir = root / "scripts"
-    entrypoint = scripts_dir / ENTRYPOINT_NAME
     contract_data = root / "references" / "contract-data.yaml"
-    for required in (entrypoint, contract_data):
-        if not required.is_file():
-            raise SystemExit(
-                f"import-closure check failed: required file missing. Got: {required}"
-            )
+    if not contract_data.is_file():
+        raise SystemExit(
+            f"import-closure check failed: required file missing. Got: {contract_data}"
+        )
+    loaded = yaml.safe_load(contract_data.read_text(encoding="utf-8"))
+    if not isinstance(loaded, dict):
+        raise SystemExit(
+            f"import-closure check failed: contract data is not a mapping. Got: {contract_data}"
+        )
+    policy = BoundaryPolicy(loaded.get("import-boundary"), contract_data)
+    entrypoint = scripts_dir / policy.entrypoint_name
+    if not entrypoint.is_file():
+        raise SystemExit(
+            f"import-closure check failed: required file missing. Got: {entrypoint}"
+        )
     on_disk = {
-        path.relative_to(root).as_posix() for path in census_scripts_layout(scripts_dir)
+        path.relative_to(root).as_posix()
+        for path in census_scripts_layout(scripts_dir, policy)
     }
-    closure = {path.relative_to(root).as_posix() for path in import_closure(entrypoint)}
-    inventory = inventory_python_surfaces(contract_data)
+    closure = {
+        path.relative_to(root).as_posix()
+        for path in import_closure(entrypoint, policy)
+    }
+    inventory = inventory_python_surfaces(loaded, contract_data)
     if closure != inventory:
         missing = sorted(closure - inventory)
         unlisted = sorted(inventory - closure)

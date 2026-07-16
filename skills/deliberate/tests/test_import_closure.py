@@ -11,6 +11,7 @@ import zipfile
 from pathlib import Path
 
 import pytest
+import yaml
 
 from check_import_closure import check, import_closure
 
@@ -24,17 +25,24 @@ def _zip_bytes(arcname: str = "evilmod.py", body: str = "VALUE = 1\n") -> bytes:
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 
+LIVE_POLICY: dict = yaml.safe_load(
+    (SKILL_ROOT / "references" / "contract-data.yaml").read_text(encoding="utf-8")
+)["import-boundary"]
+
 
 def make_layout(
     root: Path,
     entry_body: str,
     modules: dict[str, str],
     surfaces: list[str],
+    policy: dict | None = None,
 ) -> Path:
     """Write a minimal skill layout: entrypoint, modules, contract data.
 
     Module keys are scripts-relative paths; nested keys create the parent
     directories so package layouts can be expressed (to prove rejection).
+    Every layout carries an import-boundary section (default: the live
+    policy) because the checker consumes the contract as its policy source.
     """
     scripts = root / "scripts"
     scripts.mkdir(parents=True)
@@ -45,9 +53,12 @@ def make_layout(
         target.write_text(body, encoding="utf-8")
     references = root / "references"
     references.mkdir()
-    listed = "\n".join(f"    - {surface}" for surface in surfaces)
+    document = {
+        "validation": {"method-surfaces": surfaces},
+        "import-boundary": policy if policy is not None else LIVE_POLICY,
+    }
     (references / "contract-data.yaml").write_text(
-        f"validation:\n  method-surfaces:\n{listed}\n", encoding="utf-8"
+        yaml.safe_dump(document, sort_keys=False), encoding="utf-8"
     )
     return root
 
@@ -367,8 +378,11 @@ def test_import_resolving_to_sourceless_bytecode_is_rejected(tmp_path: Path) -> 
     )
     scripts = root / "scripts"
     (scripts / "_deliberate_hidden.pyc").write_bytes(b"\x00fake-bytecode")
+    from check_import_closure import BoundaryPolicy
+
+    policy = BoundaryPolicy(LIVE_POLICY, root / "references" / "contract-data.yaml")
     with pytest.raises(SystemExit, match=r"never bytecode, a package, or a symlink"):
-        import_closure(scripts / "deliberate-validate.py")
+        import_closure(root / "scripts" / "deliberate-validate.py", policy)
 
 
 def test_import_resolving_to_directory_is_rejected(tmp_path: Path) -> None:
@@ -380,8 +394,11 @@ def test_import_resolving_to_directory_is_rejected(tmp_path: Path) -> None:
         ["scripts/deliberate-validate.py"],
     )
     (root / "scripts" / "fixtures").mkdir()
+    from check_import_closure import BoundaryPolicy
+
+    policy = BoundaryPolicy(LIVE_POLICY, root / "references" / "contract-data.yaml")
     with pytest.raises(SystemExit, match=r"never bytecode, a package, or a symlink"):
-        import_closure(root / "scripts" / "deliberate-validate.py")
+        import_closure(root / "scripts" / "deliberate-validate.py", policy)
 
 
 def test_builtins_import_alias_is_rejected(tmp_path: Path) -> None:
@@ -580,11 +597,92 @@ def test_banned_word_in_prose_is_allowed(tmp_path: Path) -> None:
 
 
 def test_live_tree_passes_with_entrypoint_only_closure() -> None:
-    """Pre-v6 reality: the closure is exactly the entrypoint, and the gate passes."""
+    """Pre-extraction reality: the closure is exactly the entrypoint, and the gate passes."""
+    from check_import_closure import BoundaryPolicy
+
     entrypoint = SKILL_ROOT / "scripts" / "deliberate-validate.py"
-    assert import_closure(entrypoint) == {entrypoint.resolve()}
+    policy = BoundaryPolicy(
+        LIVE_POLICY, SKILL_ROOT / "references" / "contract-data.yaml"
+    )
+    assert import_closure(entrypoint, policy) == {entrypoint.resolve()}
     message = check(SKILL_ROOT)
     assert message == (
         "import closure, on-disk production files, and method-surfaces "
         "agree: 1 Python surface(s)"
     )
+
+
+def test_live_policy_floor_holds_known_hazard_classes() -> None:
+    """Regression floor: single-sourcing must never silently weaken the policy."""
+    assert LIVE_POLICY["entrypoint"] == "deliberate-validate.py"
+    assert LIVE_POLICY["module-name-pattern"] == r"^_deliberate_[a-z][a-z0-9_]*\.py$"
+    assert set(LIVE_POLICY["allowed-data-dirs"]) == {"fixtures"}
+    for suffix in (".pyc", ".pyo", ".pyd", ".pyw", ".so"):
+        assert suffix in LIVE_POLICY["forbidden-loader-suffixes"]
+    assert set(LIVE_POLICY["archive-suffixes"]) == {".egg", ".whl", ".zip"}
+    for name in (
+        "__import__",
+        "__builtins__",
+        "builtins",
+        "importlib",
+        "zipimport",
+        "runpy",
+        "exec",
+        "eval",
+        "compile",
+    ):
+        assert name in LIVE_POLICY["banned-identifiers"]
+
+
+def test_checker_consumes_the_contract_policy_not_constants(tmp_path: Path) -> None:
+    """Weakening a synthetic layout's policy must change checker behavior: the
+    contract is the authority, not hardcoded constants. (On the live tree the
+    floor test above plus the release-time embedded-vs-contract equality test
+    guard against weakening.)
+
+    Weaken `allowed-data-dirs` — a value the checker cannot reconstruct from the
+    interpreter (unlike loader suffixes, which the checker re-unions from
+    `importlib.machinery.all_suffixes()`, or zips, which it detects
+    structurally). With `vendor` allowed, a `scripts/vendor/` directory passes;
+    under the live policy the same directory is rejected."""
+    weakened = dict(LIVE_POLICY)
+    weakened["allowed-data-dirs"] = ["fixtures", "vendor"]
+    root = make_layout(
+        tmp_path,
+        "import os\n",
+        {},
+        ["scripts/deliberate-validate.py"],
+        policy=weakened,
+    )
+    (root / "scripts" / "vendor").mkdir()
+    assert check(root).endswith("1 Python surface(s)")
+
+
+def test_embedded_runtime_policy_matches_contract_section() -> None:
+    """Release-time authentication of the embedded census policy (ADR-0001,
+    2026-07-16 amendment): the entrypoint's `_BOUNDARY_POLICY` must equal the
+    contract's `import-boundary` section minus `banned-identifiers`. A desynced
+    pair cannot ship green, which is what lets `_require_boundary_match` run
+    post-import as defense-in-depth rather than as the authentication gate.
+    Extraction is non-executing: the entrypoint runs its census on import, so
+    the dict is read by AST/`literal_eval`, never by importing production code.
+    """
+    import ast
+
+    entrypoint = SKILL_ROOT / "scripts" / "deliberate-validate.py"
+    tree = ast.parse(entrypoint.read_text(encoding="utf-8"))
+    embedded = None
+    for node in ast.walk(tree):
+        target = None
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            target = node.target.id
+        elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(
+            node.targets[0], ast.Name
+        ):
+            target = node.targets[0].id
+        if target == "_BOUNDARY_POLICY":
+            embedded = ast.literal_eval(node.value)
+            break
+    assert embedded is not None, "_BOUNDARY_POLICY not found in the entrypoint"
+    expected = {k: v for k, v in LIVE_POLICY.items() if k != "banned-identifiers"}
+    assert embedded == expected
