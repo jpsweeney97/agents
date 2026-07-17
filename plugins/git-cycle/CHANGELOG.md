@@ -4,6 +4,16 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.6.0 - 2026-07-17
+
+### Added
+
+- `worktree-task-cycle` helper: pinned `inspect` tokens for lock class, lease ownership class, and lease purpose, plus `fleet-lease-acquire` / `fleet-lease-release` primitives for repo-owned fleet controllers. Fleet leases protect identity space even when a satellite is absent or damaged, keep the owner-record schema inside the helper, fingerprint acquisition state for recovery reporting, and release only from a verified healthy, decommissioned, or bare terminal; ambiguous outcomes retain the lease as the recovery signal.
+
+### Changed
+
+- `worktree-task-cycle` helper: `inspect` and healthy fleet-lease release now share one lifecycle classifier. A checkout that satisfies the four basic parking facts but carries an operation marker, recovery state, dirty tree, or undeleted landed branch cannot be accepted as the healthy terminal; release requires the helper's exact `STATE: PARKED` classification.
+
 ## 1.5.5 - 2026-07-17
 
 ### Changed

@@ -28,6 +28,25 @@ def acquire(h: Harness, sat: Path, branch: str = "feature/t1") -> None:
     assert code == 0, out
 
 
+def acquire_fleet(
+    h: Harness,
+    identity: str,
+    expected: Path,
+    purpose: str = "fleet:repair",
+) -> None:
+    code, out = h.run(
+        "fleet-lease-acquire",
+        str(h.primary),
+        "--identity",
+        identity,
+        "--path",
+        str(expected),
+        "--purpose",
+        purpose,
+    )
+    assert code == 0, out
+
+
 def activate(h: Harness, sat: Path, branch: str = "feature/t1") -> None:
     acquire(h, sat, branch)
     code, out = h.run("activate", str(sat), "--base", "main", "--branch", branch)
@@ -59,6 +78,14 @@ def plant_lease(h: Harness, name: str, owner: dict) -> Path:
     return lease
 
 
+def snapshot_bytes(root: Path) -> "dict[str, bytes]":
+    return {
+        str(path.relative_to(root)): path.read_bytes()
+        for path in sorted(root.rglob("*"))
+        if path.is_file() and not path.is_symlink()
+    }
+
+
 # ---------------------------------------------------------------- inspect
 
 
@@ -72,6 +99,178 @@ def test_inspect_parked(harness: Harness) -> None:
     sat = harness.add_satellite("skill-a")
     code, out = harness.run("inspect", str(sat), "--base", "main")
     assert code == 0 and "STATE: PARKED" in out
+
+
+def test_inspect_emits_canonical_lock_token(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0, out
+    assert "FACT: lock=canonical" in out
+
+
+def test_inspect_emits_absent_lock_token(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a", locked=False)
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0, out
+    assert "FACT: lock=absent" in out
+
+
+def test_inspect_emits_noncanonical_lock_token(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a", reason="initializing")
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0, out
+    assert "FACT: lock=noncanonical" in out
+
+
+def test_inspect_emits_absent_lease_tokens(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0, out
+    assert "FACT: lease=absent" in out
+    assert "FACT: lease-purpose=none" in out
+
+
+def test_inspect_emits_self_task_lease_tokens(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    acquire(harness, sat)
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0, out
+    assert "FACT: lease=self" in out
+    assert "FACT: lease-purpose=task" in out
+
+
+def test_inspect_emits_self_fleet_lease_tokens(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    plant_lease(
+        harness,
+        "wt-skill-a.lease",
+        {
+            "session_id": SESSION,
+            "runtime": "claude-code",
+            "worktree": "skill-a",
+            "branch": None,
+            "purpose": "fleet:repair",
+        },
+    )
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0, out
+    assert "FACT: lease=self" in out
+    assert "FACT: lease-purpose=fleet" in out
+
+
+def test_inspect_emits_foreign_lease_token(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    plant_lease(
+        harness,
+        "wt-skill-a.lease",
+        {
+            "session_id": "other-session",
+            "runtime": "claude-code",
+            "worktree": "skill-a",
+            "branch": "feature/t1",
+            "purpose": "test",
+        },
+    )
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0, out
+    assert "FACT: lease=foreign" in out
+    assert "FACT: lease-purpose=task" in out
+
+
+def test_inspect_emits_unreadable_lease_token(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    lease = harness.leases() / "wt-skill-a.lease"
+    lease.mkdir()
+    (lease / "owner.json").write_text("not-json")
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0, out
+    assert "FACT: lease=unreadable" in out
+    assert "FACT: lease-purpose=unknown" in out
+
+
+def test_inspect_emits_scope_mismatch_lease_token(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    plant_lease(
+        harness,
+        "wt-skill-a.lease",
+        {
+            "session_id": SESSION,
+            "runtime": "claude-code",
+            "worktree": "different-skill",
+            "branch": "feature/t1",
+            "purpose": "test",
+        },
+    )
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0, out
+    assert "FACT: lease=scope-mismatch" in out
+    assert "FACT: lease-purpose=task" in out
+
+
+@pytest.mark.parametrize(
+    ("locked", "reason", "lock_token"),
+    [
+        (True, "parked skill workspace (permanent)", "canonical"),
+        (True, "initializing", "noncanonical"),
+        (False, "parked skill workspace (permanent)", "absent"),
+    ],
+)
+@pytest.mark.parametrize(
+    ("lease_token", "owner"),
+    [
+        ("absent", None),
+        (
+            "self",
+            {
+                "session_id": SESSION,
+                "runtime": "claude-code",
+                "worktree": "skill-a",
+                "branch": "feature/t1",
+                "purpose": "test",
+            },
+        ),
+        (
+            "foreign",
+            {
+                "session_id": "other-session",
+                "runtime": "claude-code",
+                "worktree": "skill-a",
+                "branch": "feature/t1",
+                "purpose": "test",
+            },
+        ),
+        ("unreadable", "not-json"),
+        (
+            "scope-mismatch",
+            {
+                "session_id": SESSION,
+                "runtime": "claude-code",
+                "worktree": "different-skill",
+                "branch": "feature/t1",
+                "purpose": "test",
+            },
+        ),
+    ],
+)
+def test_inspect_lock_by_lease_machine_token_matrix(
+    harness: Harness,
+    locked: bool,
+    reason: str,
+    lock_token: str,
+    lease_token: str,
+    owner: "dict | str | None",
+) -> None:
+    sat = harness.add_satellite("skill-a", locked=locked, reason=reason)
+    if owner is not None:
+        lease = harness.leases() / "wt-skill-a.lease"
+        lease.mkdir()
+        (lease / "owner.json").write_text(
+            json.dumps(owner) if isinstance(owner, dict) else owner
+        )
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0, out
+    assert f"FACT: lock={lock_token}" in out
+    assert f"FACT: lease={lease_token}" in out
 
 
 def test_inspect_freshly_activated_is_contained_unparked(harness: Harness) -> None:
@@ -267,6 +466,19 @@ def test_inspect_runs_without_identity(harness: Harness) -> None:
     assert code == 0 and "STATE: PARKED" in out
 
 
+def test_inspect_with_optional_locks_disabled_is_byte_read_only(
+    harness: Harness,
+) -> None:
+    sat = harness.add_satellite("skill-a")
+    admin = harness.primary / ".git" / "worktrees"
+    before = snapshot_bytes(admin)
+    env = harness.helper_env()
+    env["GIT_OPTIONAL_LOCKS"] = "0"
+    code, out = harness.run("inspect", str(sat), "--base", "main", env=env)
+    assert code == 0, out
+    assert snapshot_bytes(admin) == before
+
+
 # ---------------------------------------------------------------- leases
 
 
@@ -327,6 +539,442 @@ def test_lease_release_when_parked(harness: Harness) -> None:
     code, out = harness.run("lease-release", str(sat), "--base", "main")
     assert code == 0 and "released" in out
     assert not (harness.leases() / "wt-skill-a.lease").exists()
+
+
+def test_fleet_lease_acquire_protects_absent_identity(harness: Harness) -> None:
+    expected = harness.root / "repo-worktrees" / "skill-new"
+    code, out = harness.run(
+        "fleet-lease-acquire",
+        str(harness.primary),
+        "--identity",
+        "skill-new",
+        "--path",
+        str(expected),
+        "--purpose",
+        "fleet:create",
+    )
+    assert code == 0, out
+    lease = harness.leases() / "wt-skill-new.lease"
+    owner = json.loads((lease / "owner.json").read_text())
+    assert owner["worktree"] == "skill-new"
+    assert owner["branch"] is None
+    assert owner["purpose"] == "fleet:create"
+    assert owner["expected_path"] == str(expected)
+    assert owner["fingerprint"]["path_kind"] == "absent"
+    assert owner["fingerprint"]["registered_paths"] == []
+
+
+def test_fleet_lease_reentry_refuses_different_expected_path(
+    harness: Harness,
+) -> None:
+    expected = harness.root / "repo-worktrees" / "skill-new"
+    other = harness.root / "elsewhere" / "skill-new"
+    code, out = harness.run(
+        "fleet-lease-acquire",
+        str(harness.primary),
+        "--identity",
+        "skill-new",
+        "--path",
+        str(expected),
+        "--purpose",
+        "fleet:create",
+    )
+    assert code == 0, out
+    code, out = harness.run(
+        "fleet-lease-acquire",
+        str(harness.primary),
+        "--identity",
+        "skill-new",
+        "--path",
+        str(other),
+        "--purpose",
+        "fleet:create",
+    )
+    assert code == 2, out
+    assert "expected-path" in out and "DIFFERENT scope" in out
+
+
+@pytest.mark.parametrize(
+    ("locked", "reason", "expected_lock"),
+    [
+        (False, "", False),
+        (True, "initializing", True),
+    ],
+)
+def test_fleet_lease_acquire_fingerprints_damaged_registered_identity(
+    harness: Harness,
+    locked: bool,
+    reason: str,
+    expected_lock: bool,
+) -> None:
+    sat = harness.add_satellite(
+        "skill-a",
+        locked=locked,
+        reason=reason or "parked skill workspace (permanent)",
+    )
+    acquire_fleet(harness, "skill-a", sat)
+    owner = json.loads(
+        (harness.leases() / "wt-skill-a.lease" / "owner.json").read_text()
+    )
+    assert owner["fingerprint"]["path_kind"] == "directory"
+    assert owner["fingerprint"]["registered_paths"] == [str(sat.resolve())]
+    assert owner["fingerprint"]["lock"][0]["locked"] is expected_lock
+
+
+def test_fleet_lease_acquire_fingerprints_stale_admin(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    sat.rename(harness.root / "moved-aside")
+    acquire_fleet(harness, "skill-a", sat)
+    owner = json.loads(
+        (harness.leases() / "wt-skill-a.lease" / "owner.json").read_text()
+    )
+    assert owner["fingerprint"]["path_kind"] == "absent"
+    assert owner["fingerprint"]["registered_paths"] == [str(sat.resolve())]
+
+
+def test_fleet_lease_acquire_fingerprints_symlink_without_following(
+    harness: Harness,
+) -> None:
+    expected = harness.root / "repo-worktrees" / "skill-a"
+    expected.parent.mkdir()
+    outside = harness.root / "outside"
+    outside.mkdir()
+    expected.symlink_to(outside, target_is_directory=True)
+    acquire_fleet(harness, "skill-a", expected)
+    owner = json.loads(
+        (harness.leases() / "wt-skill-a.lease" / "owner.json").read_text()
+    )
+    assert owner["expected_path"] == str(expected)
+    assert owner["fingerprint"]["path_kind"] == "symlink"
+    assert owner["fingerprint"]["registered_paths"] == []
+
+
+def test_fleet_lease_acquire_refuses_unsafe_identity(harness: Harness) -> None:
+    expected = harness.root / "repo-worktrees" / "skill-a"
+    code, out = harness.run(
+        "fleet-lease-acquire",
+        str(harness.primary),
+        "--identity",
+        "../escape",
+        "--path",
+        str(expected),
+        "--purpose",
+        "fleet:repair",
+    )
+    assert code == 2, out
+    assert "one safe path segment" in out
+    assert not any(harness.leases().iterdir())
+
+
+def test_fleet_lease_release_accepts_bare_terminal_shape(harness: Harness) -> None:
+    expected = harness.root / "repo-worktrees" / "skill-new"
+    code, out = harness.run(
+        "fleet-lease-acquire",
+        str(harness.primary),
+        "--identity",
+        "skill-new",
+        "--path",
+        str(expected),
+        "--purpose",
+        "fleet:create",
+    )
+    assert code == 0, out
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-new",
+        "--path",
+        str(expected),
+    )
+    assert code == 0, out
+    assert "terminal=bare" in out
+    assert not (harness.leases() / "wt-skill-new.lease").exists()
+
+
+def test_fleet_lease_release_accepts_healthy_terminal_shape(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    code, out = harness.run(
+        "fleet-lease-acquire",
+        str(harness.primary),
+        "--identity",
+        "skill-a",
+        "--path",
+        str(sat),
+        "--purpose",
+        "fleet:repair",
+    )
+    assert code == 0, out
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-a",
+        "--path",
+        str(sat),
+    )
+    assert code == 0, out
+    assert "terminal=healthy" in out
+    assert not (harness.leases() / "wt-skill-a.lease").exists()
+
+
+def test_fleet_lease_release_accepts_decommissioned_terminal_shape(
+    harness: Harness,
+) -> None:
+    sat = harness.add_satellite("skill-a")
+    code, out = harness.run(
+        "fleet-lease-acquire",
+        str(harness.primary),
+        "--identity",
+        "skill-a",
+        "--path",
+        str(sat),
+        "--purpose",
+        "fleet:retire",
+    )
+    assert code == 0, out
+    sh(
+        "git",
+        "worktree",
+        "unlock",
+        str(sat),
+        cwd=harness.primary,
+        env=harness.git_env(),
+    )
+    sh(
+        "git",
+        "worktree",
+        "remove",
+        str(sat),
+        cwd=harness.primary,
+        env=harness.git_env(),
+    )
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-a",
+        "--path",
+        str(sat),
+    )
+    assert code == 0, out
+    assert "terminal=decommissioned" in out
+    assert not (harness.leases() / "wt-skill-a.lease").exists()
+
+
+def test_fleet_lease_release_retains_lease_on_ambiguous_state(
+    harness: Harness,
+) -> None:
+    sat = harness.add_satellite("skill-a")
+    code, out = harness.run(
+        "fleet-lease-acquire",
+        str(harness.primary),
+        "--identity",
+        "skill-a",
+        "--path",
+        str(sat),
+        "--purpose",
+        "fleet:retire",
+    )
+    assert code == 0, out
+    sh(
+        "git",
+        "worktree",
+        "unlock",
+        str(sat),
+        cwd=harness.primary,
+        env=harness.git_env(),
+    )
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-a",
+        "--path",
+        str(sat),
+    )
+    assert code == 2, out
+    assert "STATE: FLEET-OP" in out
+    assert "lease retained for recovery" in out
+    assert (harness.leases() / "wt-skill-a.lease").is_dir()
+
+
+def test_fleet_lease_release_requires_exact_parked_state(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    acquire_fleet(harness, "skill-a", sat, purpose="fleet:repair")
+    gitdir = Path(sh("git", "rev-parse", "--git-dir", cwd=sat, env=harness.git_env()))
+    if not gitdir.is_absolute():
+        gitdir = (sat / gitdir).resolve()
+    (gitdir / "rebase-merge").mkdir()
+
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-a",
+        "--path",
+        str(sat),
+    )
+
+    assert code == 2, out
+    assert "STATE: FLEET-OP" in out
+    assert "helper state ACTIVE-CONFLICT is not PARKED" in out
+    assert "lease retained for recovery" in out
+    assert (harness.leases() / "wt-skill-a.lease").is_dir()
+
+
+def test_task_lease_release_refuses_fleet_purpose(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    code, out = harness.run(
+        "fleet-lease-acquire",
+        str(harness.primary),
+        "--identity",
+        "skill-a",
+        "--path",
+        str(sat),
+        "--purpose",
+        "fleet:repair",
+    )
+    assert code == 0, out
+    code, out = harness.run("lease-release", str(sat), "--base", "main")
+    assert code == 2, out
+    assert "fleet-purposed" in out
+    assert (harness.leases() / "wt-skill-a.lease").is_dir()
+
+
+def test_task_activation_refuses_fleet_purpose(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    acquire_fleet(harness, "skill-a", sat)
+    code, out = harness.run(
+        "activate", str(sat), "--base", "main", "--branch", "feature/t1"
+    )
+    assert code == 2, out
+    assert "fleet-purposed" in out
+    assert (harness.leases() / "wt-skill-a.lease").is_dir()
+
+
+def test_fleet_lease_release_refuses_absent_lease(harness: Harness) -> None:
+    expected = harness.root / "repo-worktrees" / "skill-new"
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-new",
+        "--path",
+        str(expected),
+    )
+    assert code == 2, out
+    assert "nothing to release" in out
+
+
+def test_fleet_lease_release_refuses_foreign_owner(harness: Harness) -> None:
+    expected = harness.root / "repo-worktrees" / "skill-new"
+    acquire_fleet(harness, "skill-new", expected)
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-new",
+        "--path",
+        str(expected),
+        env=harness.helper_env(session="other-session"),
+    )
+    assert code == 2, out
+    assert "FOREIGN" in out
+    assert (harness.leases() / "wt-skill-new.lease").is_dir()
+
+
+def test_fleet_lease_release_refuses_unreadable_owner(harness: Harness) -> None:
+    expected = harness.root / "repo-worktrees" / "skill-new"
+    acquire_fleet(harness, "skill-new", expected)
+    owner = harness.leases() / "wt-skill-new.lease" / "owner.json"
+    owner.write_text("not-json")
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-new",
+        "--path",
+        str(expected),
+    )
+    assert code == 2, out
+    assert "unreadable ownership" in out
+    assert owner.read_text() == "not-json"
+
+
+def test_fleet_lease_release_refuses_task_purpose(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    acquire(harness, sat)
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-a",
+        "--path",
+        str(sat),
+    )
+    assert code == 2, out
+    assert "not fleet-purposed" in out
+    assert (harness.leases() / "wt-skill-a.lease").is_dir()
+
+
+def test_fleet_lease_release_refuses_scope_mismatch(harness: Harness) -> None:
+    expected = harness.root / "repo-worktrees" / "skill-new"
+    acquire_fleet(harness, "skill-new", expected)
+    owner_file = harness.leases() / "wt-skill-new.lease" / "owner.json"
+    owner = json.loads(owner_file.read_text())
+    owner["branch"] = "feature/not-null"
+    owner_file.write_text(json.dumps(owner))
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-new",
+        "--path",
+        str(expected),
+    )
+    assert code == 2, out
+    assert "scope mismatch" in out
+    assert owner_file.is_file()
+
+
+def test_fleet_lease_release_refuses_expected_path_mismatch(
+    harness: Harness,
+) -> None:
+    expected = harness.root / "repo-worktrees" / "skill-new"
+    other = harness.root / "elsewhere" / "skill-new"
+    acquire_fleet(harness, "skill-new", expected)
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-new",
+        "--path",
+        str(other),
+    )
+    assert code == 2, out
+    assert "expected-path mismatch" in out
+    assert (harness.leases() / "wt-skill-new.lease").is_dir()
+
+
+def test_fleet_lease_release_retains_lease_when_parked_proof_fails(
+    harness: Harness,
+) -> None:
+    sat = harness.add_satellite("skill-a")
+    acquire_fleet(harness, "skill-a", sat)
+    (sat / "dirty.txt").write_text("dirty\n")
+    code, out = harness.run(
+        "fleet-lease-release",
+        str(harness.primary),
+        "--identity",
+        "skill-a",
+        "--path",
+        str(sat),
+    )
+    assert code == 2, out
+    assert "FACT: tree: dirty" in out
+    assert "helper state UNMAPPABLE is not PARKED" in out
+    assert (harness.leases() / "wt-skill-a.lease").is_dir()
 
 
 # ---------------------------------------------------------------- activate
