@@ -1,6 +1,6 @@
 ---
 name: exiting-worktrees
-description: "Use when the user explicitly asks to exit, remove, or clean up a worktree after work has landed, or confirms cleanup after a merged PR or branch. Uses native `git worktree` removal (with Claude Code's ExitWorktree as an optimization when available), landed-work verification, and user confirmation before removal. Do not use for ordinary git hygiene, branch cleanup alone, manual worktree experiments, or unlanded work."
+description: "Use when the user explicitly asks to exit, remove, or clean up a worktree after work has landed, or confirms cleanup after a merged PR or branch. Uses native `git worktree` removal (with Claude Code's ExitWorktree as an optimization when available), landed-work verification, and user confirmation before removal. Do not use for ordinary git hygiene, branch cleanup alone, manual worktree experiments, unlanded work, or persistent locked satellite worktrees (parked skill workspaces — `worktree-task-cycle` where available)."
 ---
 
 # Exiting Worktrees
@@ -47,9 +47,12 @@ Run these checks in order. Stop and resolve any that fail.
 
 ```bash
 git worktree list
+git worktree list --porcelain   # shows lock state and the lock reason
 ```
 
 If only one entry (the main repo), you're not in a worktree — nothing to exit.
+
+If the porcelain listing shows the worktree as `locked` with a parked-skill-workspace reason, stop: it is a permanent satellite, parked between tasks — not removed through this skill. Route to `worktree-task-cycle` where available; satellite retirement happens only on the user's explicit instruction through the owning repo's procedure.
 
 ### 2. Check for uncommitted changes
 

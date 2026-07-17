@@ -4,6 +4,18 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.5.0 - 2026-07-17
+
+### Added
+
+- `worktree-task-cycle`: durable owner of the persistent-satellite task lifecycle (per `docs/specs/2026-07-16-skill-worktree-system.md` in the source repo) — activate a fresh task branch from the verified integration branch in a parked, locked satellite worktree; bind validation to the exact tip SHA; land fast-forward through the primary checkout; re-park with proofs; classify interrupted states from git facts. All guard machinery is single-sourced in the skill's `scripts/worktree_cycle.py` (stdlib-only Python): guarded verbs `inspect`, `lease-acquire`, `lease-release`, `activate`, `record-validation`, `land`, `park`, `delete-branch`; session-scoped cooperative leases with staged-atomic acquisition; ff-only merge of the validated SHA; fail-closed labeled output; destructive recovery is never auto-chosen.
+
+### Changed
+
+- `merge-branch`: routing boundary added — a source branch cut in a persistent, locked satellite worktree belongs to `worktree-task-cycle` where available (new Do-Not-Use bullet plus one sentence at the step-2 target-checked-out-elsewhere stop).
+- `exiting-worktrees`: routing boundary plus protective floor — a `locked` worktree with a parked-skill-workspace reason is never removed through this skill; description Do-not-use extended and a Pre-Exit Checklist step-1 stop added.
+- Plugin manifest description, longDescription, and defaultPrompt name the new satellite-lifecycle capability.
+
 ## 1.4.2 - 2026-07-13
 
 ### Changed
