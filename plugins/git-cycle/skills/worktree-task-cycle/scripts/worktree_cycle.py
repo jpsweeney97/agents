@@ -73,13 +73,18 @@ def policy(message: str) -> None:
 _CLEANUPS: "list" = []
 
 
-def _run_cleanups() -> None:
+def _run_cleanups() -> "list[str]":
+    # a failed cleanup must not mask a refusal already in flight; on a verb's
+    # ok path the caller must check the returned failures before claiming ok
+    failures: "list[str]" = []
     while _CLEANUPS:
         callback = _CLEANUPS.pop()
         try:
             callback()
-        except Exception as exc:  # a failed cleanup must not mask the verb's outcome
+        except Exception as exc:
             say("POLICY", f"cleanup failed: {exc}")
+            failures.append(str(exc))
+    return failures
 
 
 def refuse(message: str, *, state: Optional[str] = None) -> "SystemExit":
@@ -606,6 +611,7 @@ def upstream_read(topo: Topology, base: str) -> None:
 def cmd_inspect(args: argparse.Namespace) -> int:
     topo = discover(Path(args.anchor))
     base: str = args.base
+    pin_base(topo, base)
     ident = maybe_identity()
     if ident is None:
         policy(
@@ -766,6 +772,17 @@ def cmd_inspect(args: argparse.Namespace) -> int:
             "uncommitted work present; never route a dirty tree to park or delete — adjudicate with the user"
         )
         return finish_ok()
+    if lease_status != "absent" and lease_class not in ("SELF", "SELF-SCOPE-MISMATCH"):
+        # ahead of the containment split: every route out of an active branch
+        # needs the worktree lease, so a lease this session cannot verify as its
+        # own is the dominant fact — owner adjudication comes first
+        say("STATE", "LEASE-ORPHANED")
+        policy(
+            "lease present but not verified SELF (foreign, unreadable, or owner "
+            "unknown without session identity); surface the owner facts — only the "
+            "user may authorize the break"
+        )
+        return finish_ok()
     if contained:
         rec_proves = (
             rec_status == "ok"
@@ -907,9 +924,9 @@ def cmd_record_validation(args: argparse.Namespace) -> int:
             )
         policy(f"superseding prior record (validated_tip {previous['validated_tip']})")
     elif status == "unreadable":
-        policy(
-            f"existing record file {path.name} is unreadable; superseding it with a "
-            "fresh record for this branch"
+        refuse(
+            f"existing record file {path.name} is unreadable; fail closed — its bytes "
+            "are preserved as evidence; adjudicate with the user before touching it"
         )
     record = {
         "branch": branch,
@@ -931,7 +948,7 @@ def cmd_land(args: argparse.Namespace) -> int:
 
     payload = owner_payload(session, runtime, "integration", identity, args.branch)
     integration = topo.leases / INTEGRATION_LEASE
-    acquire_lease(topo, integration, payload, session, runtime, purpose_in_scope=False)
+    acquire_lease(topo, integration, payload, session, runtime, purpose_in_scope=True)
     proof("integration lease held")
 
     def _release_integration() -> None:
@@ -941,7 +958,13 @@ def cmd_land(args: argparse.Namespace) -> int:
             and owner is not None
             and classify_owner(owner, session, runtime) == "SELF"
         ):
-            trash(integration)
+            try:
+                trash(integration)
+            except Exception as exc:
+                raise RuntimeError(
+                    f"integration lease release failed: {exc}; "
+                    f"lease remains at {integration}"
+                ) from exc
             fact("integration lease released")
 
     _CLEANUPS.append(_release_integration)
@@ -1022,7 +1045,16 @@ def cmd_land(args: argparse.Namespace) -> int:
             )
         proof(f"landed: {rec['validated_tip']} is ancestor of {args.base!r}")
     finally:
-        _run_cleanups()
+        cleanup_failures = _run_cleanups()
+    if cleanup_failures or integration.exists():
+        refuse(
+            "landing completed (see PROOF lines) but the integration lease was NOT "
+            "released: "
+            + ("; ".join(cleanup_failures) or "lease dir still present")
+            + f" — {integration} remains; re-running this land from this session "
+            "re-enters and releases it, or a user-authorized `trash` of it is "
+            "required from any other session"
+        )
     return finish_ok()
 
 

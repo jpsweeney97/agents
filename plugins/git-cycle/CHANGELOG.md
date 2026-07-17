@@ -4,6 +4,17 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.5.1 - 2026-07-17
+
+### Fixed
+
+- `worktree-task-cycle` helper repairs from the 2026-07-17 execution-fidelity review (four contract violations plus one recovery-routing defect; each pinned by a regression test proven red against the 1.5.0 helper before the fix):
+  - `land` can no longer report `RESULT: ok` while the integration lease remains: a cleanup failure — or a lease dir still present after cleanup — exits nonzero with the landed-but-unreleased state labeled (the ff-only merge that already completed is reported truthfully, never re-claimed as clean success).
+  - `record-validation` refuses an unreadable existing record (exit 2) instead of overwriting it; the unreadable bytes are preserved as adjudication evidence.
+  - `inspect` now enforces the `--base` pin the skill body already promised: a `--base` that does not match the primary checkout's live branch refuses instead of classifying satellite state (previously the same parked satellite read `PARKED` with the correct base and `PARKED-ORPHAN` with a wrong one, both exit 0).
+  - `land`'s integration-lease SELF re-entry requires the full scope match — satellite, branch, **and purpose**; a same-session lease with a different purpose refuses as DIFFERENT scope instead of admitting the merge.
+  - `inspect` maps an active task branch under a foreign or unverifiable lease to `STATE: LEASE-ORPHANED` (owner adjudication first), placed ahead of the containment split: it covers both the uncontained case (previously `COMMITTED-UNLANDED`, whose recovery route began with a lease-acquire guaranteed to refuse) and the contained crash-between-land-and-park case (previously `LANDED-UNPARKED`/`CONTAINED-UNPARKED`, whose park route was equally guaranteed to refuse).
+
 ## 1.5.0 - 2026-07-17
 
 ### Added

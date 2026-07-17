@@ -178,6 +178,65 @@ def test_inspect_identityless_lease_on_parked_is_lease_orphaned(
     assert "owner unknown" in out or "not verified SELF" in out
 
 
+def test_inspect_refuses_unpinned_base(harness: Harness) -> None:
+    # the review counterexample: 'other' EXISTS but is not the primary's branch,
+    # and the satellite tip is not contained in it — 1.5.0 classified this
+    # PARKED-ORPHAN at exit 0 instead of refusing the unpinned base
+    sh("git", "branch", "other", cwd=harness.primary, env=harness.git_env())
+    (harness.primary / "advance.txt").write_text("x\n")
+    harness.commit("advance main")
+    sat = harness.add_satellite("skill-a")
+    code, out = harness.run("inspect", str(sat), "--base", "other")
+    assert code == 2 and "does not match the primary checkout's branch" in out
+    assert "STATE:" not in out, "no lifecycle state may be asserted from a wrong base"
+
+
+def test_inspect_active_branch_foreign_lease_is_lease_orphaned(
+    harness: Harness,
+) -> None:
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    work_and_record(harness, sat)
+    owner_file = harness.leases() / "wt-skill-a.lease" / "owner.json"
+    owner = json.loads(owner_file.read_text())
+    owner["session_id"] = "someone-else"
+    owner_file.write_text(json.dumps(owner))
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0 and "STATE: LEASE-ORPHANED" in out
+    assert "COMMITTED-UNLANDED" not in out
+
+
+def test_inspect_landed_unparked_foreign_lease_is_lease_orphaned(
+    harness: Harness,
+) -> None:
+    # crash between land and park, recovered by a different session: the
+    # foreign lease outranks the contained-healthy classification
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    work_and_record(harness, sat)
+    code, out = harness.run(
+        "land", str(sat), "--base", "main", "--branch", "feature/t1"
+    )
+    assert code == 0, out
+    code, out = harness.run(
+        "inspect", str(sat), "--base", "main", env=harness.helper_env(session="rescuer")
+    )
+    assert code == 0 and "STATE: LEASE-ORPHANED" in out
+    assert "LANDED-UNPARKED" not in out
+
+
+def test_inspect_landed_unparked_under_self_lease(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    work_and_record(harness, sat)
+    code, out = harness.run(
+        "land", str(sat), "--base", "main", "--branch", "feature/t1"
+    )
+    assert code == 0, out
+    code, out = harness.run("inspect", str(sat), "--base", "main")
+    assert code == 0 and "STATE: LANDED-UNPARKED" in out
+
+
 # ---------------------------------------------------------------- identity
 
 
@@ -424,6 +483,18 @@ def test_record_validation_reports_ignored_residue_class(harness: Harness) -> No
     assert "__pycache__/x.pyc" in record["ignored_state"]
 
 
+def test_record_validation_unreadable_record_fails_closed(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    (sat / "w.txt").write_text("w\n")
+    harness.commit("w", cwd=sat)
+    record = harness.validations() / "feature--t1.json"
+    record.write_text("not json")
+    code, out = harness.run("record-validation", str(sat), "--ladder", "x")
+    assert code == 2 and "unreadable" in out
+    assert record.read_text() == "not json", "evidence bytes must be preserved"
+
+
 # ---------------------------------------------------------------- land
 
 
@@ -604,6 +675,59 @@ def test_land_merges_validated_sha_not_ref(
     assert merges == [("merge", "--ff-only", tip)], (
         "the ff-only merge must target the record's validated_tip SHA, never the ref name"
     )
+
+
+def test_land_cleanup_failure_is_nonzero_and_never_ok(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    tip = work_and_record(harness, sat)
+    fake_trash = harness.bindir / "trash"
+    fake_trash.write_text(
+        "#!/bin/sh\n"
+        'for p in "$@"; do\n'
+        '  case "$p" in *integration.lease*) echo "simulated integration trash failure" >&2; exit 1;; esac\n'
+        f'  mv "$p" "{harness.trashed}/$(basename "$p").$$" || exit 1\n'
+        "done\n"
+    )
+    fake_trash.chmod(0o755)
+    code, out = harness.run(
+        "land", str(sat), "--base", "main", "--branch", "feature/t1"
+    )
+    assert code != 0, out
+    assert "RESULT: ok" not in out
+    assert (harness.leases() / "integration.lease").exists()
+    main_tip = sh(
+        "git", "rev-parse", "main", cwd=harness.primary, env=harness.git_env()
+    )
+    assert main_tip == tip, "the merge itself completed before the cleanup failure"
+
+
+def test_land_integration_reentry_requires_purpose_match(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    work_and_record(harness, sat)
+    base_before = sh(
+        "git", "rev-parse", "main", cwd=harness.primary, env=harness.git_env()
+    )
+    plant_lease(
+        harness,
+        "integration.lease",
+        {
+            "session_id": SESSION,
+            "runtime": "claude-code",
+            "worktree": "skill-a",
+            "branch": "feature/t1",
+            "purpose": "WRONG-PURPOSE",
+        },
+    )
+    code, out = harness.run(
+        "land", str(sat), "--base", "main", "--branch", "feature/t1"
+    )
+    assert code == 2 and "DIFFERENT scope" in out
+    main_tip = sh(
+        "git", "rev-parse", "main", cwd=harness.primary, env=harness.git_env()
+    )
+    assert main_tip == base_before, "the merge must not run under a wrong-purpose lease"
 
 
 # ---------------------------------------------------------------- park / delete
