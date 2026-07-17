@@ -65,6 +65,63 @@ RESULT: ok
 
 The row's real task is this evidence file's first commit; the uninterrupted tail (`record-validation` → `land` → `park` → `delete-branch`, then closing `inspect`) runs after this commit and its verbatims land in cycle B's commit.
 
+### Row 1 — the uninterrupted tail (recorded in cycle B's commit)
+
+The real task committed as `b03b96393c1b49edd7c918c6c7a551af868ac544`; the tail then ran uninterrupted, every verb exit 0:
+
+```text
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+POLICY: satellite ignored residue: none present
+PROOF: validation record bound: 'chore/wtc-152-rows-a' @ b03b96393c1b49edd7c918c6c7a551af868ac544
+RESULT: ok
+
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+PROOF: integration lease held
+PROOF: primary is on 'main' (re-read live under the integration lease)
+PROOF: primary clean (status --porcelain empty)
+PROOF: no operation markers in primary
+FACT: upstream read: ahead 7, behind 0 (ahead-only is the allowed steady state)
+PROOF: freshness: 'main' is ancestor of 'chore/wtc-152-rows-a'
+PROOF: branch tip == validated_tip (b03b96393c1b49edd7c918c6c7a551af868ac544)
+POLICY: satellite ignored residue: none present
+PROOF: satellite clean
+FACT: satellite currently on: 'chore/wtc-152-rows-a'
+PROOF: landed: b03b96393c1b49edd7c918c6c7a551af868ac544 is ancestor of 'main'
+FACT: integration lease released
+RESULT: ok
+
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+FACT: base pinned: primary checkout is on 'main'
+POLICY: satellite ignored residue: none present
+PROOF: containment: HEAD is ancestor of 'main'
+PROOF: detached HEAD at b03b96393c1b49edd7c918c6c7a551af868ac544
+POLICY: satellite ignored residue: none present
+PROOF: clean per ignored-state policy
+PROOF: HEAD is ancestor of main
+PROOF: rev-list --count main..HEAD = 0
+FACT: worktree lease for 'decision-record' released (proven re-park)
+RESULT: ok
+
+FACT: base pinned: primary checkout is on 'main'
+PROOF: 'chore/wtc-152-rows-a' is not checked out in any worktree
+PROOF: 'chore/wtc-152-rows-a' is ancestor of 'main'
+PROOF: branch 'chore/wtc-152-rows-a' safe-deleted
+FACT: validation record for 'chore/wtc-152-rows-a' trashed
+RESULT: ok
+
+FACT: base pinned: primary checkout is on 'main'
+FACT: satellite 'decision-record' at /Users/jp/.agents-worktrees/decision-record locked=True reason='parked skill workspace (permanent)'
+FACT: head: detached at b03b96393c1b49edd7c918c6c7a551af868ac544
+FACT: op markers: none
+FACT: tree: clean (porcelain 0, unknown-ignored 0, reported-ignored 0)
+FACT: ancestry: HEAD is ancestor of 'main'; ahead 0
+FACT: lease wt-decision-record.lease: absent
+STATE: PARKED
+RESULT: ok
+```
+
+**Row 1 (Claude half, 1.5.2): PASS.**
+
 ## Row 4 — carried forward from the 1.5.1 record (not rerun): the explicit proof boundary
 
 Row 4 (fabricated-foreign-lease adjudication on `work-router`) is carried forward on JP's stated condition. The boundary, verified two ways: (1) the 1.5.2 diff (`main..78b4418`, files `plugins/git-cycle/skills/worktree-task-cycle/scripts/worktree_cycle.py` + `tests/test_worktree_cycle.py` + the three lockstep docs) touches exactly five helper regions — the `discover` store gate, `load_record`'s symlink/non-regular classification, the new `write_record`, `record-validation`'s dispatch and write call, and `delete-branch`'s record handling; `read_owner`, `classify_owner`, `scope_matches`, `acquire_lease`, `require_self_wt_lease`, `session_identity`, and every lease verb carry zero hunks — lease classification, scope matching, and state mapping are byte-identical to 1.5.1; (2) the independent regression-lens review confirmed the same from the diff ("Row-4 carry-forward: CONFIRMED"). The only new code on row 4's execution path is the `discover`-time store-integrity gate, which is upstream of and orthogonal to lease adjudication, passes trivially against the real store, and is separately exercised by the symlinked-root/store regressions. Row 4's 1.5.1 PASS therefore stands for 1.5.2 lease/state behavior; it is a carried result, never a 1.5.2 execution claim.
