@@ -4,6 +4,18 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.5.2 - 2026-07-17
+
+### Fixed
+
+- `worktree-task-cycle` helper: validation-record symlink fail-open (JP's 2026-07-17 Gate-B readiness review; each defect pinned by a regression test proven red against the extracted 1.5.1 helper before the fix):
+  - a symlink at a validation-record path — dangling or live — now classifies as `symlink` (lstat-based, never followed) and every consumer fails closed: `record-validation` refuses before mutation with the symlink and its target preserved as evidence (1.5.1 classified a dangling symlink as absent and wrote the record through it, creating a file outside the validation store while printing `RESULT: ok`; a live symlink to a valid same-branch record was superseded through the link, rewriting the aliased outside target); `land` refuses (`READY-INVALID`) instead of authorizing an integration off an aliased record; `delete-branch` refuses before the branch mutation, leaving branch, link, and target untouched for user adjudication.
+  - `record-validation`'s existing-record dispatch is restructured default-deny: only a readable matching record (supersede) or true absence proceeds to the write; any other status refuses with the status named truthfully.
+  - the record write opens with `O_NOFOLLOW`, enforcing the no-symlink rule at the write itself rather than only at the pre-check. Deliberate side effect: any `open()` failure at the record path (not only a raced-in link) now refuses with the reason labeled (exit 2) instead of tracebacking (exit 1); nothing is written on any failure path.
+  - a hardlinked record (link count > 1) refuses before the write: the `O_TRUNC` supersede would rewrite the shared inode's bytes reachable outside the store, and `O_NOFOLLOW` cannot detect hardlinks. Read paths deliberately still classify a hardlinked record `ok` — shared-inode bytes are genuine store content, so a read cannot be aliased into lying; disclosed as a ridden design question.
+  - a non-regular file (FIFO, socket, directory) at a record path classifies `unreadable` and refuses instead of blocking at open — 1.5.1 hung indefinitely on a planted FIFO, worst under `land` where the hang held the integration lease.
+  - `discover` proves the store chain — `skill-worktree/` and `skill-worktree/validations/` — is real, non-symlink directories under the resolved git common dir before any verb proceeds (previously a symlinked validations root or store parent aliased every record path outside the store). Lease machinery is otherwise byte-untouched; the leases directory's own symlink handling is a disclosed open item.
+
 ## 1.5.1 - 2026-07-17
 
 ### Fixed

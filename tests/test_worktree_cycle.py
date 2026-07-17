@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -495,6 +496,143 @@ def test_record_validation_unreadable_record_fails_closed(harness: Harness) -> N
     assert record.read_text() == "not json", "evidence bytes must be preserved"
 
 
+def test_record_validation_dangling_symlink_fails_closed(harness: Harness) -> None:
+    # 1.5.1 fail-open: Path.exists() classified a dangling symlink as absent,
+    # then write_text() followed it and created the outside target
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    (sat / "w.txt").write_text("w\n")
+    harness.commit("w", cwd=sat)
+    outside = harness.root / "outside-target.json"
+    record = harness.validations() / "feature--t1.json"
+    record.symlink_to(outside)
+    code, out = harness.run("record-validation", str(sat), "--ladder", "x")
+    assert code == 2 and "symlink" in out
+    assert record.is_symlink(), "the planted symlink must be preserved as evidence"
+    assert os.readlink(record) == str(outside)
+    assert not outside.exists(), "the outside target must not be created"
+
+
+def test_record_validation_live_symlink_fails_closed(harness: Harness) -> None:
+    # a live symlink to a valid same-branch record: 1.5.1 read it as ok and
+    # superseded through the link, rewriting the aliased outside target
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    (sat / "w.txt").write_text("w\n")
+    harness.commit("w", cwd=sat)
+    outside = harness.root / "outside-live.json"
+    original = json.dumps(
+        {
+            "branch": "feature/t1",
+            "validated_tip": "a" * 40,
+            "ladder": "x",
+            "ignored_state": "none present",
+            "timestamp": "2026-01-01T00:00:00Z",
+        }
+    )
+    outside.write_text(original)
+    record = harness.validations() / "feature--t1.json"
+    record.symlink_to(outside)
+    code, out = harness.run("record-validation", str(sat), "--ladder", "x")
+    assert code == 2 and "symlink" in out
+    assert record.is_symlink()
+    assert outside.read_text() == original, "aliased target bytes must be unchanged"
+
+
+def test_record_validation_hardlinked_record_fails_closed(harness: Harness) -> None:
+    # a hardlink is invisible to both the symlink checks and O_NOFOLLOW; the
+    # O_TRUNC supersede would rewrite the shared inode's bytes outside the store
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    (sat / "w.txt").write_text("w\n")
+    harness.commit("w", cwd=sat)
+    outside = harness.root / "outside-hard.json"
+    original = json.dumps(
+        {
+            "branch": "feature/t1",
+            "validated_tip": "a" * 40,
+            "ladder": "x",
+            "ignored_state": "none present",
+            "timestamp": "2026-01-01T00:00:00Z",
+        }
+    )
+    outside.write_text(original)
+    record = harness.validations() / "feature--t1.json"
+    os.link(outside, record)
+    code, out = harness.run("record-validation", str(sat), "--ladder", "x")
+    assert code == 2 and "hardlink" in out
+    assert outside.read_text() == original, "shared-inode bytes must be unchanged"
+    assert record.exists() and record.stat().st_nlink == 2
+
+
+def test_load_record_nonregular_file_is_unreadable(tmp_path: Path) -> None:
+    # a FIFO (or any non-regular file) at a record path must classify
+    # unreadable instead of blocking at open; consumers then fail closed
+    module = load_helper(tmp_path)
+    fifo = tmp_path / "record.json"
+    os.mkfifo(fifo)
+    status, data = module.load_record(fifo)
+    assert status == "unreadable" and data is None
+
+
+def test_write_record_refuses_symlink_at_write_time(tmp_path: Path) -> None:
+    # in-process pin for the O_NOFOLLOW write guard: even with every upstream
+    # symlink check bypassed, the write itself must refuse a link
+    module = load_helper(tmp_path)
+    outside = tmp_path / "outside.json"
+    link = tmp_path / "record.json"
+    link.symlink_to(outside)
+    with pytest.raises(SystemExit) as exc:
+        module.write_record(link, "{}\n")
+    assert exc.value.code == 2
+    assert link.is_symlink()
+    assert not outside.exists(), "O_NOFOLLOW must not create the link target"
+
+
+def test_record_validation_write_goes_through_symlink_guarded_writer(
+    harness: Harness, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # wiring pin: the record write must go through write_record (the
+    # O_NOFOLLOW guard), never a raw write that follows links
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    (sat / "w.txt").write_text("w\n")
+    harness.commit("w", cwd=sat)
+    module = load_helper(tmp_path)
+    calls: "list[Path]" = []
+    real_write = module.write_record
+
+    def spy(path: Path, payload: str) -> None:
+        calls.append(path)
+        real_write(path, payload)
+
+    monkeypatch.setattr(module, "write_record", spy)
+    for key, value in harness.helper_env().items():
+        monkeypatch.setenv(key, value)
+    monkeypatch.delenv("CODEX_THREAD_ID", raising=False)
+    rc = module.main(["record-validation", str(sat), "--ladder", "x"])
+    assert rc == 0
+    assert [p.name for p in calls] == ["feature--t1.json"], (
+        "the validation-record write must run through the guarded writer"
+    )
+
+
+def test_record_validation_create_and_supersede_still_succeed(
+    harness: Harness,
+) -> None:
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    tip1 = work_and_record(harness, sat)
+    record = harness.validations() / "feature--t1.json"
+    assert not record.is_symlink()
+    assert json.loads(record.read_text())["validated_tip"] == tip1
+    (sat / "more.txt").write_text("more\n")
+    tip2 = harness.commit("more work", cwd=sat)
+    code, out = harness.run("record-validation", str(sat), "--ladder", "x")
+    assert code == 0 and "superseding prior record" in out
+    assert json.loads(record.read_text())["validated_tip"] == tip2
+
+
 # ---------------------------------------------------------------- land
 
 
@@ -730,6 +868,39 @@ def test_land_integration_reentry_requires_purpose_match(harness: Harness) -> No
     assert main_tip == base_before, "the merge must not run under a wrong-purpose lease"
 
 
+def test_land_refuses_symlink_record(harness: Harness) -> None:
+    # a symlinked record must never authorize an integration: 1.5.1 followed
+    # the link, read a valid record, and ran the merge
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    (sat / "w.txt").write_text("w\n")
+    tip = harness.commit("w", cwd=sat)
+    base_before = sh(
+        "git", "rev-parse", "main", cwd=harness.primary, env=harness.git_env()
+    )
+    outside = harness.root / "outside-rec.json"
+    outside.write_text(
+        json.dumps(
+            {
+                "branch": "feature/t1",
+                "validated_tip": tip,
+                "ladder": "x",
+                "ignored_state": "none present",
+                "timestamp": "2026-01-01T00:00:00Z",
+            }
+        )
+    )
+    (harness.validations() / "feature--t1.json").symlink_to(outside)
+    code, out = harness.run(
+        "land", str(sat), "--base", "main", "--branch", "feature/t1"
+    )
+    assert code == 2 and "symlink" in out
+    main_tip = sh(
+        "git", "rev-parse", "main", cwd=harness.primary, env=harness.git_env()
+    )
+    assert main_tip == base_before, "no merge may run off a symlinked record"
+
+
 # ---------------------------------------------------------------- park / delete
 
 
@@ -892,6 +1063,42 @@ def test_delete_branch_nothing_to_do(harness: Harness) -> None:
     assert code == 2 and "nothing to do" in out
 
 
+def test_delete_branch_refuses_symlink_record(harness: Harness) -> None:
+    # a symlink at the record path must refuse BEFORE the branch mutation:
+    # an adjudication note on a RESULT: ok is the weakest signal in the
+    # output contract, so nothing may mutate until the link is adjudicated
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    work_and_record(harness, sat)
+    code, out = harness.run(
+        "land", str(sat), "--base", "main", "--branch", "feature/t1"
+    )
+    assert code == 0, out
+    code, out = harness.run("park", str(sat), "--base", "main")
+    assert code == 0, out
+    record = harness.validations() / "feature--t1.json"
+    outside = harness.root / "outside-del.json"
+    outside.write_text(record.read_text())
+    record.unlink()
+    record.symlink_to(outside)
+    original = outside.read_text()
+    code, out = harness.run(
+        "delete-branch", str(sat), "--base", "main", "--branch", "feature/t1"
+    )
+    assert code == 2 and "symlink" in out
+    survived = sh(
+        "git",
+        "rev-parse",
+        "--verify",
+        "refs/heads/feature/t1",
+        cwd=harness.primary,
+        env=harness.git_env(),
+    )
+    assert survived, "the branch must survive the refusal"
+    assert record.is_symlink(), "a symlinked record is never trashed"
+    assert outside.read_text() == original
+
+
 # ---------------------------------------------------------------- store layout & misc
 
 
@@ -904,6 +1111,38 @@ def test_missing_store_layout_fails_closed(harness: Harness, tmp_path: Path) -> 
     sh("git", "commit", "-m", "i", cwd=bare, env=harness.git_env())
     code, out = harness.run("inspect", str(bare), "--base", "main")
     assert code == 2 and "no skill-worktree store" in out
+
+
+def test_symlinked_validation_root_fails_closed(harness: Harness) -> None:
+    # the same escape one level up: validations/ itself aliased outside the store
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    (sat / "w.txt").write_text("w\n")
+    harness.commit("w", cwd=sat)
+    outside_dir = harness.root / "outside-validations"
+    outside_dir.mkdir()
+    real = harness.validations()
+    real.rmdir()
+    real.symlink_to(outside_dir)
+    code, out = harness.run("record-validation", str(sat), "--ladder", "x")
+    assert code == 2 and "symlink" in out
+    assert list(outside_dir.iterdir()) == [], "outside directory must stay unchanged"
+
+
+def test_symlinked_store_parent_fails_closed(harness: Harness) -> None:
+    sat = harness.add_satellite("skill-a")
+    activate(harness, sat)
+    (sat / "w.txt").write_text("w\n")
+    harness.commit("w", cwd=sat)
+    store = harness.primary / ".git" / "skill-worktree"
+    outside_store = harness.root / "outside-store"
+    store.rename(outside_store)
+    store.symlink_to(outside_store)
+    code, out = harness.run("record-validation", str(sat), "--ladder", "x")
+    assert code == 2 and "symlink" in out
+    assert list((outside_store / "validations").iterdir()) == [], (
+        "no record may be written through the aliased store"
+    )
 
 
 def test_malformed_record_treated_unreadable(harness: Harness) -> None:

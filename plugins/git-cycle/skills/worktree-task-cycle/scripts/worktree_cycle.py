@@ -225,6 +225,13 @@ def discover(anchor: Path) -> Topology:
             f"{str(primary.path)!r} != common-dir parent {str(common.parent)!r}"
         )
     topo = Topology(common, primary, worktrees)
+    for component in (topo.store, topo.validations):
+        if component.is_symlink():
+            refuse(
+                f"store integrity failed: {component} is a symlink; every "
+                "skill-worktree store component must be a real directory under "
+                "the git common dir — records must never resolve outside it"
+            )
     if not topo.leases.is_dir() or not topo.validations.is_dir():
         refuse(
             "this repository has no skill-worktree store "
@@ -557,8 +564,16 @@ def record_file(topo: Topology, branch: str) -> Path:
 
 
 def load_record(path: Path) -> "tuple[str, Optional[dict]]":
+    # lstat-based check first: a symlink at a record path — live or dangling —
+    # is never followed and never classified absent; records are regular files
+    if path.is_symlink():
+        return "symlink", None
     if not path.exists():
         return "absent", None
+    if not path.is_file():
+        # a FIFO, socket, or directory at a record path must classify
+        # unreadable instead of blocking or erroring at open
+        return "unreadable", None
     try:
         data = json.loads(path.read_text())
     except (OSError, json.JSONDecodeError):
@@ -571,6 +586,39 @@ def load_record(path: Path) -> "tuple[str, Optional[dict]]":
     if not re.fullmatch(r"[0-9a-f]{40}", data["validated_tip"]):
         return "unreadable", None
     return "ok", data
+
+
+def write_record(path: Path, payload: str) -> None:
+    # a hardlinked record shares its inode with another name, so the O_TRUNC
+    # write would mutate bytes reachable outside the store; O_NOFOLLOW cannot
+    # see this — check the link count before opening
+    if path.exists() and not path.is_symlink():
+        if not path.is_file():
+            refuse(
+                f"record path {path.name} is not a regular file; fail closed — "
+                "adjudicate with the user"
+            )
+        if path.stat().st_nlink > 1:
+            refuse(
+                f"record path {path.name} has {path.stat().st_nlink} filesystem "
+                "links; a hardlinked record aliases bytes outside the validation "
+                "store — fail closed; adjudicate with the user"
+            )
+    # O_NOFOLLOW makes the no-symlink rule an enforcement at the write itself,
+    # not only a pre-check: a link at the final component fails open() instead
+    # of being followed
+    try:
+        fd = os.open(
+            str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644
+        )
+    except OSError as exc:
+        refuse(
+            f"record write refused: open {path.name} failed: {exc}; "
+            "nothing was written through the record path"
+        )
+        raise AssertionError("unreachable")
+    with os.fdopen(fd, "w") as fh:
+        fh.write(payload)
 
 
 def primary_op_markers(topo: Topology) -> "list[str]":
@@ -923,9 +971,16 @@ def cmd_record_validation(args: argparse.Namespace) -> int:
                 f"branch {previous['branch']!r}, not {branch!r}; fail closed"
             )
         policy(f"superseding prior record (validated_tip {previous['validated_tip']})")
-    elif status == "unreadable":
+    elif status == "symlink":
         refuse(
-            f"existing record file {path.name} is unreadable; fail closed — its bytes "
+            f"record path {path.name} is a symlink; records are regular files "
+            "inside the validation store and are never written through a link — "
+            "the symlink and its target are preserved as evidence; adjudicate "
+            "with the user"
+        )
+    elif status != "absent":
+        refuse(
+            f"existing record file {path.name} is {status}; fail closed — its bytes "
             "are preserved as evidence; adjudicate with the user before touching it"
         )
     record = {
@@ -935,7 +990,7 @@ def cmd_record_validation(args: argparse.Namespace) -> int:
         "ignored_state": tree.ignored_state,
         "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
-    path.write_text(json.dumps(record, separators=(",", ":")) + "\n")
+    write_record(path, json.dumps(record, separators=(",", ":")) + "\n")
     proof(f"validation record bound: {branch!r} @ {sha}")
     return finish_ok()
 
@@ -1134,7 +1189,7 @@ def cmd_delete_branch(args: argparse.Namespace) -> int:
             )
         if rec_status != "ok" or rec is None:
             refuse(
-                f"orphan record for {args.branch!r} is unreadable; adjudicate with the user"
+                f"orphan record for {args.branch!r} is {rec_status}; adjudicate with the user"
             )
             raise AssertionError("unreachable")
         if rec["branch"] != args.branch:
@@ -1153,6 +1208,11 @@ def cmd_delete_branch(args: argparse.Namespace) -> int:
         trash(rec_path)
         fact(f"orphan validation record for {args.branch!r} trashed")
         return finish_ok()
+    if rec_status == "symlink":
+        refuse(
+            f"record path {rec_path.name} is a symlink; adjudicate with the user "
+            "before deletion — the branch and the link are left untouched"
+        )
     if not is_ancestor(args.branch, args.base, cwd=topo.primary.path):
         refuse(
             f"{args.branch!r} is not contained in {args.base!r}: unlanded work — deletion "
@@ -1175,7 +1235,7 @@ def cmd_delete_branch(args: argparse.Namespace) -> int:
         policy(
             f"record file {rec_path.name} kept: "
             + (
-                "unreadable"
+                rec_status
                 if rec_status != "ok" or rec is None
                 else f"it belongs to branch {rec['branch']!r}, not {args.branch!r} (filename collision)"
             )
