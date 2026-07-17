@@ -1,6 +1,6 @@
 # worktree-task-cycle — Claude proving rows 1, 2, 4, 5, 6
 
-- **Status at this commit:** rows 4, 5, and 6 PASS; rows 1+2's real task in flight (this commit). Rows 0/3 and all Codex halves remain post-Gate-B.
+- **Status at this commit:** **Claude rows 1, 2, 4, 5, 6 all PASS.** Rows 0/3 and all Codex halves remain post-Gate-B (this commit is the documentation-only cycle E; see the closing note).
 - **Date:** 2026-07-17
 - **Target:** the Claude half of the proving matrix (design v3 §7; commissioned by JP's 2026-07-17 review: "run and durably record Claude rows 1, 2, 4, 5, and 6 against the pilot satellites") for `worktree-task-cycle` at **git-cycle 1.5.1**, landed on `main` at `56e382988c330235e5afa8c122f8edf92c02d277`.
 - **Helper under proof:** invoked strictly at the installed path `/Users/jp/.claude/skills/git-cycle/skills/worktree-task-cycle/scripts/worktree_cycle.py` for every verb (row 2's path-resolution record is in §Rows 1+2).
@@ -170,6 +170,27 @@ landed sha256: 7fa1cfd9abfba94754bd9fc65a6e77ac8d313df44e4b7a1a70e1b586652dc683
 
 The Claude runtime presents the skill through the `~/.claude/skills/git-cycle` symlink into the repo source; the invoked helper is byte-identical (sha256 above) to `main`'s landed blob. **Row 2 (Claude half): PASS.** The Codex half — whether a firing Codex agent recovers its own installed cache directory at fire time — remains the row-0 unknown, post-Gate-B.
 
-Row 1 (normal path, no interruption) — this cycle: `lease-acquire` (exit 0) then `activate` (`activated 'chore/wtc-claude-proving-rows-final' from explicit 'main' ref; tip == 0b1696f2295acf3916d1142cb828792a93d4841e`, exit 0), then this commit as the real work. Truth boundary at this commit: the uninterrupted tail — `record-validation` → `land` → `park` → `delete-branch` — necessarily runs **after** this commit; its verbatim outputs land in the final documentation-only evidence commit (cycle E), which also appends the ledger completion line. Cycle E is not itself a proving row; its own lifecycle outputs live in the session transcript.
+Row 1 (normal path, no interruption) — cycle D on `decision-record`: `lease-acquire` (exit 0), `activate` (`activated 'chore/wtc-claude-proving-rows-final' from explicit 'main' ref; tip == 0b1696f2295acf3916d1142cb828792a93d4841e`, exit 0), real work committed as `926bdf4588627aa86484003a3ca6ec3d6d23cbe1`, then the uninterrupted tail, all exit 0. `record-validation` bound the record (`validation record bound: 'chore/wtc-claude-proving-rows-final' @ 926bdf45…`). `land`:
+
+```text
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+PROOF: integration lease held
+PROOF: primary is on 'main' (re-read live under the integration lease)
+PROOF: primary clean (status --porcelain empty)
+PROOF: no operation markers in primary
+FACT: upstream read: ahead 4, behind 0 (ahead-only is the allowed steady state)
+PROOF: freshness: 'main' is ancestor of 'chore/wtc-claude-proving-rows-final'
+PROOF: branch tip == validated_tip (926bdf4588627aa86484003a3ca6ec3d6d23cbe1)
+POLICY: satellite ignored residue: none present
+PROOF: satellite clean
+FACT: satellite currently on: 'chore/wtc-claude-proving-rows-final'
+PROOF: landed: 926bdf4588627aa86484003a3ca6ec3d6d23cbe1 is ancestor of 'main'
+FACT: integration lease released
+RESULT: ok
+```
+
+`park` (four PARKED proofs, `worktree lease for 'decision-record' released (proven re-park)`), `delete-branch` (`branch 'chore/wtc-claude-proving-rows-final' safe-deleted`, record trashed), closing `inspect` → `STATE: PARKED`. **Row 1 (Claude half): PASS.**
+
+Closing note — cycle E (this commit): documentation only, not a proving row. It lands this completed evidence file plus the ledger completion line through the same lifecycle on `work-router` (branch `chore/wtc-claude-proving-rows-docs`); its own lifecycle outputs live in the session transcript only, and both satellites end PARKED with the lease root and validations dir empty. Across the five cycles the 1.5.1 helper executed 5 landings, 5 parks, 5 branch deletions, 2 interrupted-state reconstructions, and 1 foreign-lease adjudication — every proof line green, no refusal improvised around.
 
 Cycle plan for the remaining evidence commits: cycle C (row 6) lands row 5's verbatims; cycle D (rows 1+2) lands row 6's verbatims; a final documentation-only cycle E lands cycle D's own post-commit verbatims and the ledger completion line — each commit only claims what has already happened at its commit time.
