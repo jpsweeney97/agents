@@ -4,6 +4,12 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.5.4 - 2026-07-17
+
+### Fixed
+
+- README skill inventory reconciled with the live plugin: the arc list said "Seven skills" and omitted `resolve-conflicts`, `worktree-task-cycle`, and `release-cut`; it now says ten and describes all of them. Docs-only — no skill body changed. Drift surfaced by a sealed-probe finding in the 2026-07-17 cross-model methodology adjudication and host-verified against the frozen corpus before repair.
+
 ## 1.5.3 - 2026-07-17
 
 ### Fixed
