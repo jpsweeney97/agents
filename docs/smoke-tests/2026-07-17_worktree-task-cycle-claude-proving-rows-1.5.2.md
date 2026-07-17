@@ -1,6 +1,6 @@
 # worktree-task-cycle — Claude proving rows 1, 2, 5, 6 rerun at git-cycle 1.5.2
 
-- **Status at this commit (cycle A):** the 1.5.2 repair is landed on `main`; row 2 (helper path resolution) is recorded below; cycle A (row 1's uninterrupted cycle) is open and lands this file — its own tail verbatims can only appear in the next cycle's commit. Rows 5 and 6 follow in cycles B and C; a documentation-only closing cycle lands the final verbatims. Row 4 is carried forward, not rerun — boundary stated below.
+- **Status at this commit:** **Claude rerun complete — rows 1, 2, 5, 6 all PASS at 1.5.2; row 4 carried forward under the stated boundary.** This commit is the documentation-only closing cycle; rows 0/3 and all Codex halves remain post-Gate-B (see the closing note).
 - **Date:** 2026-07-17
 - **Authorization:** JP's 2026-07-17 Gate-B readiness review: Gate A granted for the narrow 1.5.1 → 1.5.2 symlink-record repair; "Rerun Claude rows 1, 2, 5, and 6 because they exercise record creation or helper identity. Row 4 may carry forward if lease/state behavior remains untouched and that proof boundary is stated explicitly." Gates B and C remain withheld; no publish, mirror, or push in any of these runs.
 - **Target:** rows 1, 2, 5, 6 of the proving matrix (design v3 §7) for `worktree-task-cycle` at **git-cycle 1.5.2**, landed on `main` at `78b4418e983a3c10ccbd56bc10710d3d761dab2c`. The prior full Claude record at 1.5.1 is `docs/smoke-tests/2026-07-17_worktree-task-cycle-claude-proving-rows.md`.
@@ -179,3 +179,45 @@ RESULT: ok
 ```
 
 `park` re-parked with all four proofs and released the lease (`worktree lease for 'decision-record' released (proven re-park)`, exit 0); `delete-branch` ancestry-proved the `-d` and trashed the record (`branch 'chore/wtc-152-rows-b' safe-deleted`, exit 0). **Row 5 (Claude half, 1.5.2): PASS.** Composition note: with row 4 carried forward, the stale-foreign variant remains proven by composition (rows 4+5) as at 1.5.1, stated as composition, never as a whole-path run.
+
+## Row 6 — interrupted LANDED-UNPARKED resume (satellite `work-router`, cycle C — recorded in this closing commit)
+
+The row's real task was the evidence commit `84f556f5647c3509c7d45904ebea2b142fb72a63` on branch `chore/wtc-152-rows-c` (activated from explicit `main` at `9312b4c…` — a stale-parked activation: the satellite sat detached at `efc545e` and the branch cut at the live `main` tip). `record-validation` bound the record (exit 0: `validation record bound: 'chore/wtc-152-rows-c' @ 84f556f…`), then `land` completed (exit 0):
+
+```text
+PROOF: SELF worktree lease held for 'work-router' with matching scope
+PROOF: integration lease held
+PROOF: primary is on 'main' (re-read live under the integration lease)
+PROOF: primary clean (status --porcelain empty)
+PROOF: no operation markers in primary
+FACT: upstream read: ahead 9, behind 0 (ahead-only is the allowed steady state)
+PROOF: freshness: 'main' is ancestor of 'chore/wtc-152-rows-c'
+PROOF: branch tip == validated_tip (84f556f5647c3509c7d45904ebea2b142fb72a63)
+POLICY: satellite ignored residue: none present
+PROOF: satellite clean
+FACT: satellite currently on: 'chore/wtc-152-rows-c'
+PROOF: landed: 84f556f5647c3509c7d45904ebea2b142fb72a63 is ancestor of 'main'
+FACT: integration lease released
+RESULT: ok
+```
+
+The cycle then **stopped deliberately before park** (the row's interruption point — no fixture manipulation needed). Fresh `inspect <work-router> --base main` mapped the state (exit 0), record still present so provenance is proven:
+
+```text
+FACT: base pinned: primary checkout is on 'main'
+FACT: satellite 'work-router' at /Users/jp/.agents-worktrees/work-router locked=True reason='parked skill workspace (permanent)'
+FACT: head: branch 'chore/wtc-152-rows-c' at 84f556f5647c3509c7d45904ebea2b142fb72a63
+FACT: op markers: none
+FACT: tree: clean (porcelain 0, unknown-ignored 0, reported-ignored 0)
+FACT: ancestry: HEAD is ancestor of 'main'; ahead 0
+FACT: lease wt-work-router.lease: SELF — session_id='115269ae-01b7-4d13-90ef-f38c8bb51877' runtime='claude-code' worktree='work-router' branch='chore/wtc-152-rows-c' purpose='1.5.2 Claude proving rows evidence (cycle C, row 6)' acquired_at='2026-07-17T15:24:33Z'
+FACT: validation record for 'chore/wtc-152-rows-c': ok, tip-match=True
+STATE: LANDED-UNPARKED
+RESULT: ok
+```
+
+Resume per the recovery table: `park` re-parked with all four proofs and released the lease (`worktree lease for 'work-router' released (proven re-park)`, exit 0); `delete-branch` ancestry-proved the `-d` and trashed the record (`branch 'chore/wtc-152-rows-c' safe-deleted`, exit 0); final `inspect` → `STATE: PARKED` (exit 0). **Row 6 (Claude half, 1.5.2): PASS.**
+
+## Closing note — this commit (documentation-only cycle, satellite `decision-record`)
+
+This commit lands cycle C's verbatims, the completed-status header, and the ledger completion update through the same lifecycle on `decision-record` (branch `chore/wtc-152-rows-docs`); its own lifecycle outputs live in the session transcript only. Across the 1.5.2 landing cycle plus four rerun cycles the helper executed 5 landings, 5 parks, 5 branch deletions, 2 interrupted-state reconstructions, and 1 clean-record supersede after residue cleanup — every proof line green, no refusal improvised around. Both satellites end `STATE: PARKED` with the lease root and validations dir empty. Rows 0/3 and every Codex half remain open pending Gate B (local `codex-plugins-sync.sh --publish git-cycle`, then a fresh Codex session against the republished 1.5.2 cache); Gate C (mirror + push) follows the completed matrix.
