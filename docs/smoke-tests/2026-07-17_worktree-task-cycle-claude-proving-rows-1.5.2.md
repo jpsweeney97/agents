@@ -131,3 +131,51 @@ Row 4 (fabricated-foreign-lease adjudication on `work-router`) is carried forwar
 - Row 5 (interrupted COMMITTED-UNLANDED reconstruction, satellite `decision-record`): real task commit + `record-validation`, then the lease-absent state manufactured by explicitly authorized direct fixture manipulation (design v3 §7 row 5's authorized `trash` of the session's own lease dir — deliberately not `lease-release`, which refuses mid-task by design; JP's rerun instruction re-invokes that row as defined); fresh `inspect` must map `COMMITTED-UNLANDED`; re-lease; `land`; `park`; `delete-branch`.
 - Row 6 (interrupted LANDED-UNPARKED resume, satellite `work-router`): real task commit, `record-validation`, `land`, deliberate stop before `park`; fresh `inspect` must map `LANDED-UNPARKED`; resume `park`; `delete-branch`.
 - Closing documentation-only cycle: lands cycle C's verbatims, the completed-status header flip, and the ledger completion update — so no commit ever claims its own future landing.
+
+## Row 5 — interrupted COMMITTED-UNLANDED reconstruction (satellite `decision-record`, cycle B — recorded in cycle C's commit)
+
+The row's real task was the evidence commit `9312b4c656c675903efcf7bd89db5befe20ee56b` on branch `chore/wtc-152-rows-b` (activated from explicit `main` at `b03b963…`). `record-validation` bound the record to that exact tip (exit 0):
+
+```text
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+POLICY: satellite ignored residue: none present
+PROOF: validation record bound: 'chore/wtc-152-rows-b' @ 9312b4c656c675903efcf7bd89db5befe20ee56b
+RESULT: ok
+```
+
+The lease-absent interruption was manufactured by the agent `trash`ing its own lease dir directly (authority: design v3 §7 row 5's explicitly authorized direct fixture manipulation, re-invoked by JP's 2026-07-17 rerun instruction — "Rerun Claude rows 1, 2, 5, and 6"; deliberately **not** `lease-release`, which refuses mid-task by design). Fresh `inspect <decision-record> --base main` mapped the state (exit 0), the 1.5.2 helper live:
+
+```text
+FACT: base pinned: primary checkout is on 'main'
+FACT: satellite 'decision-record' at /Users/jp/.agents-worktrees/decision-record locked=True reason='parked skill workspace (permanent)'
+FACT: head: branch 'chore/wtc-152-rows-b' at 9312b4c656c675903efcf7bd89db5befe20ee56b
+FACT: op markers: none
+FACT: tree: clean (porcelain 0, unknown-ignored 0, reported-ignored 0)
+FACT: ancestry: HEAD is NOT ancestor of 'main'; ahead 1
+FACT: lease wt-decision-record.lease: absent
+FACT: validation record for 'chore/wtc-152-rows-b': ok, tip-match=True
+STATE: COMMITTED-UNLANDED
+FACT: lease state at interruption: absent
+RESULT: ok
+```
+
+Re-lease succeeded (`worktree lease for 'decision-record': acquired (branch 'chore/wtc-152-rows-b')`, exit 0), then `land` completed the reconstruction (exit 0):
+
+```text
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+PROOF: integration lease held
+PROOF: primary is on 'main' (re-read live under the integration lease)
+PROOF: primary clean (status --porcelain empty)
+PROOF: no operation markers in primary
+FACT: upstream read: ahead 8, behind 0 (ahead-only is the allowed steady state)
+PROOF: freshness: 'main' is ancestor of 'chore/wtc-152-rows-b'
+PROOF: branch tip == validated_tip (9312b4c656c675903efcf7bd89db5befe20ee56b)
+POLICY: satellite ignored residue: none present
+PROOF: satellite clean
+FACT: satellite currently on: 'chore/wtc-152-rows-b'
+PROOF: landed: 9312b4c656c675903efcf7bd89db5befe20ee56b is ancestor of 'main'
+FACT: integration lease released
+RESULT: ok
+```
+
+`park` re-parked with all four proofs and released the lease (`worktree lease for 'decision-record' released (proven re-park)`, exit 0); `delete-branch` ancestry-proved the `-d` and trashed the record (`branch 'chore/wtc-152-rows-b' safe-deleted`, exit 0). **Row 5 (Claude half, 1.5.2): PASS.** Composition note: with row 4 carried forward, the stale-foreign variant remains proven by composition (rows 4+5) as at 1.5.1, stated as composition, never as a whole-path run.
