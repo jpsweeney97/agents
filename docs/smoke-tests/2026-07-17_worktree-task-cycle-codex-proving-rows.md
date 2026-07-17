@@ -60,9 +60,9 @@ STATE: PARKED
 RESULT: ok
 ```
 
-## Rows 1 + 2 and row 3 — cycles A and B opened from the same base
+## Row 2 and row 3 setup — cycles A and B opened from the same base
 
-Both satellites were activated before either task committed, each from explicit `main` at `b81cea9`. Cycle A (`decision-record`) is the normal row-1/2 task; cycle B (`work-router`) is the row-3 stale-base task. Its `land` must refuse with `STATE: STALE-BASE` after A lands, then B must rebase, revalidate, and land. Later commits record those outputs.
+Both satellites were activated before either task committed, each from explicit `main` at `b81cea9`. Cycle A (`decision-record`) supplies the at-fire evidence and the first task that advances `main`; cycle B (`work-router`) is the row-3 stale-base task. After A lands, B's `land` must refuse with `STATE: STALE-BASE`, then B must rebase, revalidate, and land. Cycle C later supplies the uninterrupted normal row-1 lifecycle; row 2's installed-helper identity covers every Codex lifecycle verb. Later commits record the outputs.
 
 ```text
 FACT: worktree lease for 'decision-record': acquired (branch 'chore/wtc-codex-rows-a')
