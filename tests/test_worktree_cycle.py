@@ -507,7 +507,7 @@ def test_record_validation_dangling_symlink_fails_closed(harness: Harness) -> No
     record = harness.validations() / "feature--t1.json"
     record.symlink_to(outside)
     code, out = harness.run("record-validation", str(sat), "--ladder", "x")
-    assert code == 2 and "symlink" in out
+    assert code == 2 and "is a symlink" in out and "never written through a link" in out
     assert record.is_symlink(), "the planted symlink must be preserved as evidence"
     assert os.readlink(record) == str(outside)
     assert not outside.exists(), "the outside target must not be created"
@@ -534,7 +534,7 @@ def test_record_validation_live_symlink_fails_closed(harness: Harness) -> None:
     record = harness.validations() / "feature--t1.json"
     record.symlink_to(outside)
     code, out = harness.run("record-validation", str(sat), "--ladder", "x")
-    assert code == 2 and "symlink" in out
+    assert code == 2 and "is a symlink" in out and "never written through a link" in out
     assert record.is_symlink()
     assert outside.read_text() == original, "aliased target bytes must be unchanged"
 
@@ -894,7 +894,7 @@ def test_land_refuses_symlink_record(harness: Harness) -> None:
     code, out = harness.run(
         "land", str(sat), "--base", "main", "--branch", "feature/t1"
     )
-    assert code == 2 and "symlink" in out
+    assert code == 2 and "is symlink; READY-INVALID" in out
     main_tip = sh(
         "git", "rev-parse", "main", cwd=harness.primary, env=harness.git_env()
     )
@@ -1085,7 +1085,7 @@ def test_delete_branch_refuses_symlink_record(harness: Harness) -> None:
     code, out = harness.run(
         "delete-branch", str(sat), "--base", "main", "--branch", "feature/t1"
     )
-    assert code == 2 and "symlink" in out
+    assert code == 2 and "is a symlink" in out and "before deletion" in out
     survived = sh(
         "git",
         "rev-parse",
@@ -1125,7 +1125,10 @@ def test_symlinked_validation_root_fails_closed(harness: Harness) -> None:
     real.rmdir()
     real.symlink_to(outside_dir)
     code, out = harness.run("record-validation", str(sat), "--ladder", "x")
-    assert code == 2 and "symlink" in out
+    # gate phrases, not a bare "symlink" substring: this test's 30-char tmp_path
+    # basename contains "symlink" and the refusal embeds the store path, so the
+    # bare substring assert was self-satisfying via the path echo
+    assert code == 2 and "store integrity failed" in out and "is a symlink" in out
     assert list(outside_dir.iterdir()) == [], "outside directory must stay unchanged"
 
 
@@ -1139,7 +1142,8 @@ def test_symlinked_store_parent_fails_closed(harness: Harness) -> None:
     store.rename(outside_store)
     store.symlink_to(outside_store)
     code, out = harness.run("record-validation", str(sat), "--ladder", "x")
-    assert code == 2 and "symlink" in out
+    # same live path-echo hazard as the symlinked-validations-root test
+    assert code == 2 and "store integrity failed" in out and "is a symlink" in out
     assert list((outside_store / "validations").iterdir()) == [], (
         "no record may be written through the aliased store"
     )
