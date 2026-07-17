@@ -1,6 +1,6 @@
 # worktree-task-cycle — Codex proving rows 0, 1, 2, and 3 at git-cycle 1.5.4
 
-- **Status at this commit:** **Codex rows 0, 2, and 3 complete — PASS; the normal row-1 cycle is pending.** Cycle C is the designated final normal task: after this commit, it must run `record-validation` → `land` → `park` → `delete-branch` without interruption. A later documentation task records that tail and the dated Gate-B ledger completion.
+- **Status at this commit:** **Codex rows 0, 1, 2, and 3 complete — PASS.** This final documentation task lands the row-1 tail and the dated Gate-B ledger completion. Its own post-commit lifecycle tail remains in the session transcript; it makes no claim about its own future landing.
 - **Date:** 2026-07-17
 - **Authorization:** JP granted Gate B at `git-cycle` 1.5.4 in the 2026-07-17 Claude session transcript. The grant ratifies the app-server auto-synced publish, confirms the installed cache is byte-identical to `main` at `b81cea9`, and authorizes rows 0, 3, and the Codex halves of rows 1/2. Gate C (mirror and push) remains withheld and separate.
 - **Target:** the Codex half of the design-v3 §7 proving matrix, as reconstructed in `docs/smoke-tests/2026-07-17_worktree-task-cycle-claude-proving-rows.md`, against the two existing pilot satellites only.
@@ -149,6 +149,53 @@ Row 2 shares row 0's at-fire proof: the active Codex session resolved the physic
 
 Cycles A and B were activated from the same `b81cea9` base. After A landed, B's validation-bound `land` safely refused with `STATE: STALE-BASE`; B then rebased, bound its rewritten tip, and landed. The complete refusal and recovery record is in `docs/smoke-tests/2026-07-17_worktree-task-cycle-codex-stale-base.md`; the second satellite ended re-parked with its branch and validation record safely removed.
 
-## Cycle C — the pending normal row-1 task
+## Row 1 — normal full lifecycle (Codex half): PASS
 
-This commit is the real work for the normal Codex row-1 task on `decision-record` (branch `chore/wtc-codex-rows-docs`). After it commits, its validation, landing, re-park, and safe deletion must run uninterrupted. A final documentation task will then land Cycle C's verbatim tail plus the dated ledger completion. Gate C remains withheld throughout: no mirror update, push, PR, or other external publication is part of this work.
+Cycle C's real task was `2640aae451a04dcbb1880c2ec92747d3f029a1d0` on `decision-record` (branch `chore/wtc-codex-rows-docs`). Unlike the supporting cycle A, its validation, land, re-park, and safe-deletion sequence ran without intervening task work:
+
+```text
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+POLICY: satellite ignored residue: none present
+PROOF: validation record bound: 'chore/wtc-codex-rows-docs' @ 2640aae451a04dcbb1880c2ec92747d3f029a1d0
+RESULT: ok
+
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+PROOF: integration lease held
+PROOF: primary is on 'main' (re-read live under the integration lease)
+PROOF: primary clean (status --porcelain empty)
+PROOF: no operation markers in primary
+FACT: upstream read: ahead 19, behind 0 (ahead-only is the allowed steady state)
+PROOF: freshness: 'main' is ancestor of 'chore/wtc-codex-rows-docs'
+PROOF: branch tip == validated_tip (2640aae451a04dcbb1880c2ec92747d3f029a1d0)
+POLICY: satellite ignored residue: none present
+PROOF: satellite clean
+FACT: satellite currently on: 'chore/wtc-codex-rows-docs'
+PROOF: landed: 2640aae451a04dcbb1880c2ec92747d3f029a1d0 is ancestor of 'main'
+FACT: integration lease released
+RESULT: ok
+```
+
+```text
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+FACT: base pinned: primary checkout is on 'main'
+POLICY: satellite ignored residue: none present
+PROOF: containment: HEAD is ancestor of 'main'
+PROOF: detached HEAD at 2640aae451a04dcbb1880c2ec92747d3f029a1d0
+POLICY: satellite ignored residue: none present
+PROOF: clean per ignored-state policy
+PROOF: HEAD is ancestor of main
+PROOF: rev-list --count main..HEAD = 0
+FACT: worktree lease for 'decision-record' released (proven re-park)
+RESULT: ok
+
+FACT: base pinned: primary checkout is on 'main'
+PROOF: 'chore/wtc-codex-rows-docs' is not checked out in any worktree
+PROOF: 'chore/wtc-codex-rows-docs' is ancestor of 'main'
+PROOF: branch 'chore/wtc-codex-rows-docs' safe-deleted
+FACT: validation record for 'chore/wtc-codex-rows-docs' trashed
+RESULT: ok
+```
+
+## Closing note — this documentation task
+
+This commit lands Cycle C's normal-row tail and the Gate-B completion update through the same `worktree-task-cycle` lifecycle on `work-router` (branch `chore/wtc-codex-rows-closeout`). Its own lifecycle output lives in this session's transcript only. Gate C remains withheld: this work performs no mirror update, push, PR, or other external publication.
