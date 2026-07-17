@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
-# Guards the Codex plugin delivery invariant for the unified plugin source.
+# Reports Codex plugin source/cache equality for the unified plugin source.
 #
 # Canonical plugin sources live at plugins/<name>/ in this repo (Claude
 # format: .claude-plugin/plugin.json). Codex discovers the personal
 # marketplace implicitly at ~/.agents/plugins/marketplace.json and serves
 # installed plugins from the versioned cache at
-# ~/.codex/plugins/cache/turbo-mode/<name>/<version>/ — not from the
-# source tree. Source edits are invisible to Codex until republished;
-# --check reports that drift, --publish repairs it.
+# ~/.codex/plugins/cache/turbo-mode/<name>/<version>/ — not directly from the
+# source tree. For local-marketplace plugins, however, ChatGPT Desktop's
+# embedded Codex app-server can synchronize a drifted source to this cache
+# when it serves `plugin/list`, including pruning older version directories
+# (confirmed 2026-07-17; see docs/agents/codex-plugin-list-cache-sync-2026-07-17.md).
+# `--publish` is an explicit CLI refresh route, not the only cache-changing
+# mechanism. `--check` reports source/cache equality only at invocation; it
+# never establishes installation or activation, provenance or consent, or an
+# applicable Gate B.
 #
 # External contracts (verified 2026-06-09 on Codex 0.137.0):
 #   - ~/.agents/plugins/marketplace.json is discovered implicitly; its
@@ -23,8 +29,8 @@
 #     the version is unchanged, so it doubles as the refresh lever.
 #
 # Usage:
-#   codex-plugins-sync.sh [--check]        report drift; exit 1 if any (default)
-#   codex-plugins-sync.sh --publish NAME   codex plugin add NAME@turbo-mode, then re-check
+#   codex-plugins-sync.sh [--check]        report source/cache inequality; exit 1 if any (default)
+#   codex-plugins-sync.sh --publish NAME   explicitly run codex plugin add NAME@turbo-mode, then re-check
 #
 # Bootstrap / recovery (fresh machine or restored repo):
 #   1. Clone the repo to ~/.agents; Codex finds the marketplace by itself.
