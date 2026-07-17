@@ -95,6 +95,18 @@ Pilot success authorizes nothing beyond the pilot. Full rollout requires a separ
 
 Checkpoint 3 begins only after a clean-on-`main` live `check` reports exactly 92 `MISSING`, zero drift, and exit 3. The attended sequence is: create the first missing identity as a canary (the commitment boundary) → run a full read-only reconciliation → only if every invariant is green, run stop-on-first-failure `create-missing` for the remainder. Post-flight requires `check` exit 0 with runtime recorded, 95 total worktrees (primary + 94 satellites), and both delivery canaries green. Live batch evidence is intentionally absent from this checkpoint-2 amendment and will be appended only after separate authorization and execution.
 
+### Checkpoint-3 live batch evidence (2026-07-17)
+
+Executed in the attended Claude Code session that verified checkpoint 2 with fresh proof (186/186 combined suite, source/cache equality exit 0, live pre-batch `check` matching the rollout premise exactly); JP granted the batch authorization in that session's transcript and the sequence below ran verb-for-verb as contracted, with every output read at execution time.
+
+- **Preflight:** primary clean on `main` at `7494fbc`, ahead 2 / behind 0 of `origin/main`; baseline `check` = 2 `OK-PARKED`, 92 `MISSING`, zero drift, exit 3, 0.75s.
+- **Canary (the commitment boundary):** `create acceptance-map` → `RESULT: CREATED`, post-proven `OK-PARKED` (exact path, canonical lock, helper `STATE: PARKED`), exit 0.
+- **Canary reconciliation:** full read-only `check` = 3 `OK-PARKED` (canary + both pilots), 91 `MISSING`, zero drift, exit 3 — every invariant green.
+- **Remainder:** `create-missing` = 91 `CREATED`, `refused=none untouched=none`, exit 0, 43.0s wall; stop-on-first-failure never triggered.
+- **Post-flight:** full `check` = 94 `OK-PARKED`, zero other findings, **exit 0**, 19.6s wall — the measured full-inventory health sweep required by the scale boundary; `git worktree list` = 95 entries (primary + 94 satellites); both delivery canaries (`claude-skills-sync.sh --check`, `codex-plugins-sync.sh --check`) exit 0; lease root empty; primary still clean at `7494fbc`, nothing pushed or mirrored.
+
+The inventory-scale gate is discharged: every live-census skill has a locked, parked, health-proven permanent satellite. Fleet growth from here follows the add/rename/retire contracts above (`MISSING` catch-up via `create`, retirement and unwind on explicit instruction only).
+
 ## Pilot design (scope: Git lifecycle only)
 
 Two satellites — A `decision-record`, B `work-router` — and three tasks: T1 `fix/decision-record--stale-registration` (real skill fix, full skill ladder); T2 `chore/skill-worktree-spec` (this document, docs ladder), activated from the same `main` as T1 to force stale-base reconciliation when T1 lands first; T3 `chore/skill-worktree-pilot-evidence` (evidence append, proving directory reuse). Plus a foreign-session lease probe. The pilot proves reuse, fresh-branch-from-verified-main, lease-serialized integration, stale-base reconciliation, parking proofs, deletion-after-ancestry, and delivery-integrity preservation. It does not prove Claude-only delivery-root behavior, branch-local runtime behavior (a satellite's edit is invisible to both runtimes until landed), or inventory scale.
