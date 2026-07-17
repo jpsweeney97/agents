@@ -1,6 +1,6 @@
 # worktree-task-cycle — Codex proving rows 0, 1, 2, and 3 at git-cycle 1.5.4
 
-- **Status at this commit:** **Cycle A open.** Row 0's installed-cache probe is recorded below, and this commit is the real task for the Codex row-1/2 normal cycle. The post-commit lifecycle tail and row-3 result are recorded only by later evidence commits; this commit makes no future-completion claim.
+- **Status at this commit:** **Codex rows 0, 2, and 3 complete — PASS; the normal row-1 cycle is pending.** Cycle C is the designated final normal task: after this commit, it must run `record-validation` → `land` → `park` → `delete-branch` without interruption. A later documentation task records that tail and the dated Gate-B ledger completion.
 - **Date:** 2026-07-17
 - **Authorization:** JP granted Gate B at `git-cycle` 1.5.4 in the 2026-07-17 Claude session transcript. The grant ratifies the app-server auto-synced publish, confirms the installed cache is byte-identical to `main` at `b81cea9`, and authorizes rows 0, 3, and the Codex halves of rows 1/2. Gate C (mirror and push) remains withheld and separate.
 - **Target:** the Codex half of the design-v3 §7 proving matrix, as reconstructed in `docs/smoke-tests/2026-07-17_worktree-task-cycle-claude-proving-rows.md`, against the two existing pilot satellites only.
@@ -93,3 +93,62 @@ PROOF: branch name 'chore/wtc-codex-rows-b' is free
 PROOF: activated 'chore/wtc-codex-rows-b' from explicit 'main' ref; tip == b81cea9054f44b64f613e29e1bb55dcca5165429
 RESULT: ok
 ```
+
+## Supporting cycle A — at-fire evidence and row-3 predecessor (not a row-1 pass)
+
+Cycle A's real task was this file's opening commit, `eec012e3580702e6b6a4cc5a004047ea5ad7b81a`, on `decision-record`. Its validation and landing succeeded, but its re-park was deliberately delayed while cycle B observed its stale-base refusal. Cycle A therefore had a `LANDED-UNPARKED` interval and is **not** counted as the uninterrupted normal Codex row-1 execution. The outputs below remain supporting lifecycle evidence only:
+
+```text
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+POLICY: satellite ignored residue: none present
+PROOF: validation record bound: 'chore/wtc-codex-rows-a' @ eec012e3580702e6b6a4cc5a004047ea5ad7b81a
+RESULT: ok
+
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+PROOF: integration lease held
+PROOF: primary is on 'main' (re-read live under the integration lease)
+PROOF: primary clean (status --porcelain empty)
+PROOF: no operation markers in primary
+FACT: upstream read: ahead 17, behind 0 (ahead-only is the allowed steady state)
+PROOF: freshness: 'main' is ancestor of 'chore/wtc-codex-rows-a'
+PROOF: branch tip == validated_tip (eec012e3580702e6b6a4cc5a004047ea5ad7b81a)
+POLICY: satellite ignored residue: none present
+PROOF: satellite clean
+FACT: satellite currently on: 'chore/wtc-codex-rows-a'
+PROOF: landed: eec012e3580702e6b6a4cc5a004047ea5ad7b81a is ancestor of 'main'
+FACT: integration lease released
+RESULT: ok
+```
+
+```text
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+FACT: base pinned: primary checkout is on 'main'
+POLICY: satellite ignored residue: none present
+PROOF: containment: HEAD is ancestor of 'main'
+PROOF: detached HEAD at 2dfe0bcab163c4b955a0d2f76bca787c464247f2
+POLICY: satellite ignored residue: none present
+PROOF: clean per ignored-state policy
+PROOF: HEAD is ancestor of main
+PROOF: rev-list --count main..HEAD = 0
+FACT: worktree lease for 'decision-record' released (proven re-park)
+RESULT: ok
+
+FACT: base pinned: primary checkout is on 'main'
+PROOF: 'chore/wtc-codex-rows-a' is not checked out in any worktree
+PROOF: 'chore/wtc-codex-rows-a' is ancestor of 'main'
+PROOF: branch 'chore/wtc-codex-rows-a' safe-deleted
+FACT: validation record for 'chore/wtc-codex-rows-a' trashed
+RESULT: ok
+```
+
+## Row 2 — installed helper identity (Codex half): PASS
+
+Row 2 shares row 0's at-fire proof: the active Codex session resolved the physical cache path and ran every lifecycle verb from its installed helper. The cache manifest and helper both matched the landed source byte-for-byte, with helper SHA-256 `614019ea922e38a6168d5e68ab8d9bb8a52c79b90c482ab6e4fe1dd771949a33`. Unlike the prior Claude row, the path is a physical Codex cache directory rather than a Claude symlink.
+
+## Row 3 — stale-base across both satellites (Codex): PASS
+
+Cycles A and B were activated from the same `b81cea9` base. After A landed, B's validation-bound `land` safely refused with `STATE: STALE-BASE`; B then rebased, bound its rewritten tip, and landed. The complete refusal and recovery record is in `docs/smoke-tests/2026-07-17_worktree-task-cycle-codex-stale-base.md`; the second satellite ended re-parked with its branch and validation record safely removed.
+
+## Cycle C — the pending normal row-1 task
+
+This commit is the real work for the normal Codex row-1 task on `decision-record` (branch `chore/wtc-codex-rows-docs`). After it commits, its validation, landing, re-park, and safe deletion must run uninterrupted. A final documentation task will then land Cycle C's verbatim tail plus the dated ledger completion. Gate C remains withheld throughout: no mirror update, push, PR, or other external publication is part of this work.
