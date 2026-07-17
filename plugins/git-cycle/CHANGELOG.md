@@ -4,6 +4,12 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.5.5 - 2026-07-17
+
+### Changed
+
+- `release-cut`: landing a cut is now treated as publish intent where the versioned unit's runtime serves or auto-syncs landed source (local-marketplace plugins: Claude serves landed source live; the Codex app-server syncs a landed bump to its cache unprompted — probe evidence in `docs/agents/codex-plugin-list-cache-sync-2026-07-17.md`). New step-4 guidance: land a cut only at publish intent; when an open gate must hold publication, land the work without the cut and cut the release as a follow-up at grant time. The publish-train bullet carries the matching local-republish carve-out. Adopted per the 2026-07-17 version-bump-at-publish-intent amendment in `docs/agents/contract-decisions.md`.
+
 ## 1.5.4 - 2026-07-17
 
 ### Fixed
