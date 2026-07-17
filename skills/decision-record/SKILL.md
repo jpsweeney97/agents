@@ -23,7 +23,7 @@ Read the whole source first — the live conversation, a pasted transcript, a PR
 
 Point to the existing format; restate none of it. The body links `../grill-with-docs/ADR-FORMAT.md` as the single source of the template, the `proposed | accepted | deprecated | superseded by ADR-NNNN` status vocabulary, the scan-highest-and-increment numbering, the lazy `docs/adr/` creation, and the three-part worth-recording gate — the same way `improve-codebase-architecture` already consumes it. decision-record adds only what that file lacks: standalone capture from any source, and the genealogy maintenance below. Its output is indistinguishable from any other ADR in the directory — no parallel dialect.
 
-Because there is now a third consumer, register it: extend the maintenance note in `grill-with-docs/SKILL.md` (the one naming `improve-codebase-architecture`) to include `decision-record`, so a future rename of the format file updates every consumer. The format file lives under `grill-with-docs`; reference it in place — do not relocate it in v1 (moving it touches two existing consumers for no gain). If decision-record proves the natural home for the ADR lifecycle, flag relocation as a future cleanup.
+decision-record is registered as a consumer in `grill-with-docs/SKILL.md`'s maintenance note alongside `improve-codebase-architecture`, so a future rename of the format file updates every consumer's reference. The format file lives under `grill-with-docs`; reference it in place — do not relocate it (moving it touches every consumer for no gain). If decision-record proves the natural home for the ADR lifecycle, flag relocation as a future cleanup.
 
 ## The genealogy mechanism (the job nothing else owns)
 
