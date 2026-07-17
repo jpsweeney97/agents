@@ -1,6 +1,6 @@
 # worktree-task-cycle — Claude proving rows 1, 2, 4, 5, 6
 
-- **Status at this commit:** row 4 PASS; row 5's real task in flight (this commit); rows 6, 1, 2 pending. Rows 0/3 and all Codex halves remain post-Gate-B.
+- **Status at this commit:** rows 4 and 5 PASS; row 6's real task in flight (this commit); rows 1, 2 pending. Rows 0/3 and all Codex halves remain post-Gate-B.
 - **Date:** 2026-07-17
 - **Target:** the Claude half of the proving matrix (design v3 §7; commissioned by JP's 2026-07-17 review: "run and durably record Claude rows 1, 2, 4, 5, and 6 against the pilot satellites") for `worktree-task-cycle` at **git-cycle 1.5.1**, landed on `main` at `56e382988c330235e5afa8c122f8edf92c02d277`.
 - **Helper under proof:** invoked strictly at the installed path `/Users/jp/.claude/skills/git-cycle/skills/worktree-task-cycle/scripts/worktree_cycle.py` for every verb (row 2's path-resolution record is in §Rows 1+2).
@@ -70,9 +70,57 @@ Lease root empty after release (`ls` count 0). **Row 4: PASS.** Note the `FACT: 
 
 Design v3 §7 row 5: real task, commit + record-validation, then manufacture the lease-absent state by explicitly authorized direct fixture manipulation — `trash` of the lease dir under the proving plan's authority, quoted in the transcript — not via `lease-release` (which refuses mid-task release by design); fresh `inspect` maps the state; re-lease; land.
 
-Status at this commit (truth boundary): the lease-acquire, activation, and this very commit are the row's real task and have already run (`activated 'chore/wtc-claude-proving-rows' from explicit 'main' ref; tip == 56e382988c330235e5afa8c122f8edf92c02d277`). The manufactured interruption, the COMMITTED-UNLANDED mapping, the re-lease, and this branch's landing necessarily happen **after** this commit; their verbatim outputs land in the next evidence commit (cycle C, row 6's task).
+The row's real task was the evidence commit `ad5928a618e36ad6ded0ef532713c370a0bd97c2` on branch `chore/wtc-claude-proving-rows` (activated from explicit `main` at `56e38298…`; the file's prior commit records the truth boundary). `record-validation` bound the record to that exact tip (exit 0):
 
-## Row 6 — interrupted LANDED-UNPARKED resume (satellite `work-router`) — pending; runs as cycle C after this branch lands
+```text
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+POLICY: satellite ignored residue: none present
+PROOF: validation record bound: 'chore/wtc-claude-proving-rows' @ ad5928a618e36ad6ded0ef532713c370a0bd97c2
+RESULT: ok
+```
+
+The lease-absent interruption was then manufactured by the agent `trash`ing its own lease dir directly (authority: design v3 §7 row 5's explicitly authorized direct fixture manipulation, re-authorized by JP 2026-07-17 — "The previously scoped fabricated-lease manipulations remain authorized only for those proving fixtures"; deliberately **not** `lease-release`, which refuses mid-task by design). Fresh `inspect <decision-record> --base main` mapped the state (exit 0):
+
+```text
+FACT: base pinned: primary checkout is on 'main'
+FACT: satellite 'decision-record' at /Users/jp/.agents-worktrees/decision-record locked=True reason='parked skill workspace (permanent)'
+FACT: head: branch 'chore/wtc-claude-proving-rows' at ad5928a618e36ad6ded0ef532713c370a0bd97c2
+FACT: op markers: none
+FACT: tree: clean (porcelain 0, unknown-ignored 0, reported-ignored 0)
+FACT: ancestry: HEAD is NOT ancestor of 'main'; ahead 1
+FACT: lease wt-decision-record.lease: absent
+FACT: validation record for 'chore/wtc-claude-proving-rows': ok, tip-match=True
+STATE: COMMITTED-UNLANDED
+FACT: lease state at interruption: absent
+RESULT: ok
+```
+
+Re-lease succeeded (`worktree lease for 'decision-record': acquired`, exit 0), then `land` completed the reconstruction (exit 0):
+
+```text
+PROOF: SELF worktree lease held for 'decision-record' with matching scope
+PROOF: integration lease held
+PROOF: primary is on 'main' (re-read live under the integration lease)
+PROOF: primary clean (status --porcelain empty)
+PROOF: no operation markers in primary
+FACT: upstream read: ahead 2, behind 0 (ahead-only is the allowed steady state)
+PROOF: freshness: 'main' is ancestor of 'chore/wtc-claude-proving-rows'
+PROOF: branch tip == validated_tip (ad5928a618e36ad6ded0ef532713c370a0bd97c2)
+POLICY: satellite ignored residue: none present
+PROOF: satellite clean
+FACT: satellite currently on: 'chore/wtc-claude-proving-rows'
+PROOF: landed: ad5928a618e36ad6ded0ef532713c370a0bd97c2 is ancestor of 'main'
+FACT: integration lease released
+RESULT: ok
+```
+
+`park` re-parked with all four proofs and released the lease (`worktree lease for 'decision-record' released (proven re-park)`, exit 0); `delete-branch` ancestry-proved the `-d` and trashed the record (`branch 'chore/wtc-claude-proving-rows' safe-deleted`, exit 0). **Row 5: PASS.** Composition note: together with row 4 this proves the stale-*foreign* reconstruction variant by composition (foreign-lease adjudication + lease-absent reconstruction), stated as composition, not claimed as a whole-path run.
+
+## Row 6 — interrupted LANDED-UNPARKED resume (satellite `work-router`, this file's second commit is the row's real task)
+
+Design v3 §7 row 6: after a real landing, stop before park; fresh `inspect` maps the state (record still present → provenance proven); resume park + delete-branch.
+
+Status at this commit (truth boundary): lease-acquire and activation of `chore/wtc-claude-proving-rows-2` from explicit `main` at `ad5928a…` have run, and this commit is the row's real task. The landing, the deliberate stop, the LANDED-UNPARKED mapping, and the resume necessarily happen **after** this commit; their verbatim outputs land in the next evidence commit (cycle D, rows 1+2's task).
 
 ## Rows 1 + 2 — normal full cycle + helper path resolution (satellite `decision-record`) — pending; runs as cycle D
 
