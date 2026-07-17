@@ -1145,6 +1145,44 @@ def test_symlinked_store_parent_fails_closed(harness: Harness) -> None:
     )
 
 
+def test_symlinked_lease_root_fails_closed(harness: Harness) -> None:
+    # 1.5.2 fail-open: discover() proved store and validations non-symlink but
+    # not leases; a live symlinked lease root let lease-acquire create the
+    # lease dir and owner.json outside the store while printing RESULT: ok
+    sat = harness.add_satellite("skill-a")
+    outside_dir = harness.root / "outside-leases"
+    outside_dir.mkdir()
+    real = harness.leases()
+    real.rmdir()
+    real.symlink_to(outside_dir)
+    code, out = harness.run(
+        "lease-acquire", str(sat), "--branch", "feature/t1", "--purpose", "test"
+    )
+    # pin on message phrases a tmp_path echo cannot satisfy: this test's own
+    # name (embedded in the store path pytest prints) contains "symlink"
+    assert code == 2 and "store integrity failed" in out and "is a symlink" in out
+    assert real.is_symlink(), "the planted symlink must be preserved as evidence"
+    assert list(outside_dir.iterdir()) == [], "outside directory must stay unchanged"
+
+
+def test_dangling_symlinked_lease_root_fails_closed(harness: Harness) -> None:
+    # dangling variant: 1.5.2 read leases.is_dir() False and refused with the
+    # untruthful "no skill-worktree store" classification; the symlink gate
+    # must name the real condition and leave the absent target uncreated
+    sat = harness.add_satellite("skill-a")
+    target = harness.root / "absent-leases"
+    real = harness.leases()
+    real.rmdir()
+    real.symlink_to(target)
+    code, out = harness.run(
+        "lease-acquire", str(sat), "--branch", "feature/t1", "--purpose", "test"
+    )
+    # same path-echo hazard as the live pin: assert the gate's own phrases
+    assert code == 2 and "store integrity failed" in out and "is a symlink" in out
+    assert real.is_symlink()
+    assert not target.exists(), "the dangling target must never be created"
+
+
 def test_malformed_record_treated_unreadable(harness: Harness) -> None:
     sat = harness.add_satellite("skill-a")
     activate(harness, sat)

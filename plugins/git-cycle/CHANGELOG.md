@@ -4,6 +4,12 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.5.3 - 2026-07-17
+
+### Fixed
+
+- `worktree-task-cycle` helper: lease-root symlink fail-open (JP's 2026-07-17 second Gate-B readiness review; pinned by regression tests proven red against the extracted 1.5.2 helper before the fix). `discover`'s 1.5.2 store-integrity gate proved `skill-worktree/` and `skill-worktree/validations/` are real non-symlink directories but never `skill-worktree/leases/`; its later `leases.is_dir()` followed a planted symlink, so a live symlink at the lease root let a normal `lease-acquire` create the lease directory and `owner.json` outside the git state store while printing `RESULT: ok` (exit 0), and a dangling lease-root symlink refused with the untruthful classification "no skill-worktree store". `topo.leases` now joins the same `discover`-time non-symlink invariant, closing the owned state chain: every state-root component — `skill-worktree/`, `leases/`, and `validations/` — must be a real directory under the resolved git common dir, enforced before any mutation on every verb, with the planted symlink preserved as evidence and the outside target left unchanged (live) or uncreated (dangling); the refusal message now names lease and record state. Two regression pins (live + dangling) assert the gate's own phrases rather than a bare "symlink" substring — pytest embeds the test name in the store path it prints, so a substring assert would self-satisfy; the guard-excision mutant is killed by both pins, and the ordinary real-lease-root control is the existing acquire/release test. Lease acquisition/release logic, record handling, and state routing are byte-untouched: the diff touches only the shared `discover` invariant.
+
 ## 1.5.2 - 2026-07-17
 
 ### Fixed

@@ -225,12 +225,13 @@ def discover(anchor: Path) -> Topology:
             f"{str(primary.path)!r} != common-dir parent {str(common.parent)!r}"
         )
     topo = Topology(common, primary, worktrees)
-    for component in (topo.store, topo.validations):
+    for component in (topo.store, topo.leases, topo.validations):
         if component.is_symlink():
             refuse(
                 f"store integrity failed: {component} is a symlink; every "
                 "skill-worktree store component must be a real directory under "
-                "the git common dir — records must never resolve outside it"
+                "the git common dir — lease and record state must never "
+                "resolve outside it"
             )
     if not topo.leases.is_dir() or not topo.validations.is_dir():
         refuse(
