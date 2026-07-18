@@ -19,6 +19,8 @@ Phase 1 of `methodology-critique`. Everything here is read-only contact with the
 
 ## Rig
 
-- Fan out with a dynamic workflow: one reader per transcript; Sonnet agents at high effort are the proven default.
+- Fan out with a small dynamic workflow, and only when the corpus earns one — a handful of transcripts is an inline read, not a fan-out.
+- Keep the crew small: batch transcripts per reader (short or same-venue transcripts share a reader; only a genuinely long transcript gets its own), so a full corpus needs a handful of readers, not one each.
+- Every agent this lane dispatches gathers evidence — the judgment is never delegated — so none inherits the session model. Sonnet at high effort is the proven default reader; escalate a single read to Opus only when Sonnet's classification of it comes back ambiguous or contradictory. The same rule covers re-runs and non-transcript evidence agents (history, consumers, method context).
 - Return contracts: plain-Markdown headings, not strict structured-output schemas — schema-heavy returns from large transcript reads hit retry caps; re-run failed readers as direct agents.
 - Re-verify firsthand: any floor breach, the strongest positive claims, and every finding the verdict will lean on. A reader's summary is testimony; the verdict cites what you re-read yourself.

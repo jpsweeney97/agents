@@ -29,7 +29,7 @@ Fold in any emphases JP passed at invocation.
 
 ## Phase 1 — Evidence
 
-Load [references/evidence-recipe.md](references/evidence-recipe.md) and follow it: the full commit history back to founding, the complete fire corpus on both runtimes, consumers and blast radius, and the method context around the target. Fan out with a dynamic workflow; re-verify firsthand anything the verdict will lean on. Body-loaded proves the body was in context, not a completed run — classify what each transcript actually contains.
+Load [references/evidence-recipe.md](references/evidence-recipe.md) and follow it: the full commit history back to founding, the complete fire corpus on both runtimes, consumers and blast radius, and the method context around the target. Fan out with a small dynamic workflow crewed on cheap models — the recipe's rig sets the size and model rules; re-verify firsthand anything the verdict will lean on. Body-loaded proves the body was in context, not a completed run — classify what each transcript actually contains.
 
 ## Phase 2 — Critique
 
