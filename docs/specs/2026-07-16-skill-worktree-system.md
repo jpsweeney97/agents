@@ -147,3 +147,12 @@ Boundary honored throughout: no push, no publish, no sync `--link`, no mirror/ca
 ### Live smoke contract (evidence appended after wiring)
 
 Seven attended rows, recorded verbatim in `docs/smoke-tests/` when executed: (1) Claude primary-skill edit deny with route text; (2) Codex primary-skill `apply_patch` deny; (3) parked-satellite edit deny; (4) Claude subagent edit deny; (5) primary-`main` skill edit with both guards active, route reaching the model; (6) edit through the `~/.claude/skills` symlink path denied by physical resolution; (7) one full routed micro-task — bounce → lifecycle → land → park. Live evidence is intentionally absent from this amendment at landing and will be appended only after wiring and attended execution.
+
+### Live smoke evidence (2026-07-18)
+
+All seven rows executed and **PASS**, recorded verbatim at `docs/smoke-tests/2026-07-18_skill-route-guard-smokes.md`; the guard under proof was sha256-matched to `main`'s landed blob at `22f81d8` before the rows ran.
+
+- Rows 1–6 ran in the first hook-hot sessions on each runtime: Claude primary-skill deny with full route text (row 1, isolated on a working branch), Codex `apply_patch` deny via headless `codex exec` post-trust with the identical route text (row 2), parked-satellite activate-first deny (row 3, with `require-gitflow`'s non-blocking detached-HEAD advisory alongside), subagent deny proving hook inheritance live (row 4), and the symlink-farm edit denied by physical resolution naming the repo-relative target (row 6).
+- Row 5 settled the design's open observation: one hook message surfaces per denied attempt, in settings config order — `require-gitflow` wins the first bounce on `main`, and the guard's route arrives on the working-branch retry. The adjudicated two-bounce worst case is exactly what occurs; the route reached the model.
+- Row 7 is the smoke record's own landing: the bounced route followed literally through `worktree-task-cycle` in the `making-recommendations` satellite (stale-parked at `7494fbc`, activated from explicit current `main` at `22f81d8`), the evidence commit validated and landed ff-only through the primary, the satellite re-parked. The commit's presence on `main` is the row's proof; closing-verb outputs post-date the commit by construction and live in the session transcript.
+- Bounds unchanged: Bash-mediated mutations, hosted tools, and hook-opt-out paths remain disclosed non-coverage; the row-5 ordering observation is specific to the current hook array order.
