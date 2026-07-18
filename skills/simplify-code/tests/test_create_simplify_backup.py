@@ -183,6 +183,56 @@ def test_failed_run_leaves_no_artifact_and_reports_real_args(tmp_path: Path) -> 
     assert not backup_root.exists() or not any(backup_root.iterdir())
 
 
+def test_planned_verification_must_begin_with_strength_label(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path)
+    write(repo / "pkg" / "orders.py", "VALUE = 5\n")
+    commit_all(repo)
+
+    cmd = [
+        sys.executable,
+        str(BACKUP),
+        "--scope-slug",
+        "orders",
+        "--planned-verification",
+        "uv run pytest tests/test_orders.py -q",
+        "pkg/orders.py",
+    ]
+    result = run(cmd, repo, check=False)
+
+    assert result.returncode == 2
+    assert "must begin with" in result.stderr
+    assert "uv run pytest" in result.stderr
+    backup_root = repo / ".backup"
+    assert not backup_root.exists() or not any(backup_root.iterdir())
+
+
+def test_planned_verification_accepts_label_with_detail(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path)
+    write(repo / "pkg" / "orders.py", "VALUE = 6\n")
+    commit_all(repo)
+
+    cmd = [
+        sys.executable,
+        str(BACKUP),
+        "--scope-slug",
+        "orders",
+        "--planned-verification",
+        "strong plan: focused tests then full suite",
+        "pkg/orders.py",
+    ]
+    result = run(cmd, repo, check=False)
+    assert result.stdout, result.stderr
+    payload = json.loads(result.stdout)
+
+    assert result.returncode == 0, result.stderr
+    assert payload["ok"] is True
+    artifact = Path(str(payload["artifact_path"]))
+    manifest = (artifact / "manifest.txt").read_text(encoding="utf-8")
+    assert (
+        "planned_verification: strong plan: focused tests then full suite" in manifest
+    )
+
+
 def test_explicit_subdir_root_still_uses_git_root(tmp_path: Path) -> None:
     repo = init_repo(tmp_path)
     source = write(repo / "app" / "module.py", "VALUE = 2\n")

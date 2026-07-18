@@ -21,6 +21,7 @@ from typing import Literal
 SCRIPT_DIR = Path(__file__).resolve().parent
 SCANNER = SCRIPT_DIR / "scoped_safety_scan.py"
 DEFAULT_RETENTION = "keep until simplification review is complete"
+PLANNED_VERIFICATION_LABELS = ("strong plan", "moderate plan", "weak plan")
 
 GitState = Literal["git", "non-git"]
 
@@ -433,7 +434,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--planned-verification",
         required=True,
-        help="Planned verification strength, such as 'strong plan' or 'moderate plan'.",
+        help=(
+            "Planned verification strength; must begin with 'strong plan', "
+            "'moderate plan', or 'weak plan' (detail may follow the label)."
+        ),
     )
     parser.add_argument(
         "--retention", default=DEFAULT_RETENTION, help="Retention/cleanup expectation."
@@ -446,7 +450,13 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "paths", nargs="+", type=Path, help="Explicit editable files to back up."
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if not args.planned_verification.startswith(PLANNED_VERIFICATION_LABELS):
+        parser.error(
+            "--planned-verification must begin with 'strong plan', 'moderate plan', "
+            f"or 'weak plan'. Got: {args.planned_verification!r:.100}"
+        )
+    return args
 
 
 def create_backup(args: argparse.Namespace, cwd: Path) -> tuple[int, dict[str, object]]:
