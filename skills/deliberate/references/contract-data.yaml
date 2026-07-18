@@ -648,8 +648,16 @@ brief-extras:
     lean — from the frame, constraints, values, soft preferences, authority
     notes, and survivor wordings — BEFORE reading the `surface` and
     `consequences` packet items, and record both leans in the envelope's
-    `registered-leans` artifact. Read the mechanically derived order-provenance
-    label honestly: `generate-produced` is non-evaluative and never evidence of
+    `registered-leans` artifact. Each registered lean names its evidential
+    basis from this packet — an authority note's lean language, or, absent
+    any, exactly what you used (e.g. seed authorship). An empty survivor
+    authority-note set means any stated user lean rode out of your sight by
+    design: record the `user-visible-lean` as limited to its named basis, and
+    scope every close sentence that claims agreement with the user's lean to
+    that basis — never an unqualified "your visible lean" — leaving
+    stated-lean challenges to the exclusion check. Read the mechanically
+    derived order-provenance label honestly: `generate-produced` is
+    non-evaluative and never evidence of
     user lean; insertion provenance is positional bookkeeping only, never
     evidence of user lean.
     Any disclosed budget overflow in your packet names an unpriced trade: pose
