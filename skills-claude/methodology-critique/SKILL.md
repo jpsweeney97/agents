@@ -1,23 +1,31 @@
 ---
 name: methodology-critique
-description: "Use when JP commissions the methodology-and-philosophy treatment of a skill in this library: max-effort pressure on the skill's epistemology, stance, and implicit theory of its own method, tested against its full history and recovered fire corpus, adjudicated by JP, then whatever repairs the critique warrants, landed and pushed with a docs/reviews brief. Claude-only, expensive by design — the fire-tested treatment methodology-check escalates to when how the target fires in its real transcripts is the crux. Do not use for execution-altitude skill-contract review (scrutinize-skill), the cheap text-and-census methodology pass (methodology-check), quantitative benchmarking (skill-benchmark), routine skill editing, or targets outside this library."
+description: "Use when JP commissions the methodology-and-philosophy treatment of a skill in this library: max-effort pressure on the skill's epistemology, stance, and implicit theory of its own method, tested against its full history and recovered fire corpus, adjudicated by JP, then whatever repairs the critique warrants, landed and pushed with a docs/reviews brief. Treatments span sessions; re-invoking resumes an in-flight one from its workspace. Claude-only, expensive by design — the fire-tested treatment methodology-check escalates to when how the target fires in its real transcripts is the crux. Do not use for execution-altitude skill-contract review (scrutinize-skill), the cheap text-and-census methodology pass (methodology-check), quantitative benchmarking (skill-benchmark), routine skill editing, or targets outside this library."
 ---
 
 # Methodology Critique
 
 The treatment: pressure on a skill's methodology and philosophy — the epistemology, the stance, the implicit theory of what the method is and what it can know — honestly adjudicated, then whatever rebuild the critique actually warrants. The target is the method itself, tested against its own text, its history, and its recorded fires; frontmatter and routing scrutiny belong to other lanes.
 
-The genre's record lives in `docs/reviews/*-methodology-critique.md`. Read it fresh each run; never carry the tally or the precedents' findings from memory or from this file. A hold and an inversion are equally legitimate results, and the deliverable is an adjudicated written critique that becomes the design brief for same-session repairs.
+The genre's record lives in `docs/reviews/*-methodology-critique.md`. Read it fresh each run; never carry the tally or the precedents' findings from memory or from this file. A hold and an inversion are equally legitimate results, and the deliverable is an adjudicated written critique that becomes the design brief for the repairs.
 
 Run at maximum effort, single register — there is no light mode. The cheaper passes already exist: `scrutinize-skill` detects premise-class doubts at contract altitude and routes them to `methodology-check`, which adjudicates the method on text and a fire census and escalates here when how the target fires in its real transcripts is the load-bearing question.
 
+## Session Spanning
+
+A full treatment does not fit one session; the lane owns its seams instead of improvising rescue handoffs. At commission, create the treatment workspace — `.agents/treatments/<date>-<target>/` under this repo's root, a durable gitignored sibling of the handoff store, never the session scratchpad — and give every artifact the run produces its home there from birth: the sealed dossier, the evidence reports and census, the critique text, and a short `STATE.md` naming the target, pinned commit, working branch, phases complete, and next action.
+
+Any phase boundary is a legitimate seam — including inside Phase 3, critique delivered but verdict pending — except the landing train, which runs whole in one session. At a seam, bring `STATE.md` current and save a handoff; an interrupted session resumes from the last seam, not mid-phase.
+
+Resuming is the same gesture as commissioning: JP re-invokes the skill. Before commissioning fresh, check `.agents/treatments/` for an in-flight workspace on the target and pick up at `STATE.md`'s recorded phase. The sealed dossier is immutable on resume, and a session that renders judgment on evidence it did not gather re-verifies firsthand from the workspace reports and the raw corpus before leaning on any of it. Loading the seam handoff is a valid second entrance; both land in this same resume path. After landing, the committed brief is the durable record and the workspace is disposable history.
+
 ## Phase 0 — Commission (seal before evidence)
 
-Work on a working branch (`git status --short --branch` first). Pin the target's current commit; every line citation resolves against it.
+Check `.agents/treatments/` for an in-flight workspace on this target first — if one exists, this is a resume, not a new commission (see Session Spanning). Otherwise: work on a working branch (`git status --short --branch` first). Pin the target's current commit; every line citation resolves against it. Create the treatment workspace before anything else lands on disk.
 
 1. Verify the bundle shape yourself — list the target directory; never assume `references/`, `examples/`, or `agents/openai.yaml`. Determine the delivery flow from the path: `skills/` and `skills-claude/` are live-served source with no publish train (do not invent one); `plugins/` follows the Plugin Layout publish path. Grep `scripts/` for CANON assertions on the target's text.
 2. Compute the honest record: enumerate the precedent briefs, tally inversions and holds, read every TLDR, the two nearest-register briefs in full, the latest treatment handoff, and the throughline's treatment-arc paragraph — as calibration of register, depth, and honesty, never as a findings template.
-3. Before reading any fire or transcript, write the commission dossier to a scratch file, present it in chat, and treat it as sealed. The run continues by default; JP interrupts if the commission is off. The dossier carries:
+3. Before reading any fire or transcript, write the commission dossier to the treatment workspace, present it in chat, and treat it as sealed. The run continues by default; JP interrupts if the commission is off. The dossier carries:
    - The pressure questions this target's own text invites. Its self-descriptions — what it owns, why it deserves to exist, how it classifies itself — are claims to test, not facts.
    - Pre-registered expectations: what you currently guess the evidence will show. The critique must later say, in writing, where the evidence corrected these.
    - The named groove hazard for this run: after consecutive holds, hunger for an inversion; after inversions, a genre signature that writes the verdict; a target adjoining prior findings' territory, the remix trap. Name the one that applies now.
@@ -41,13 +49,13 @@ Single-mind and never delegated: subagents gather evidence; the judgment is your
 - What authority do its artifacts carry downstream, and did the method earn it?
 - Where is the thinking provoked — what would a bare careful agent lose without this text?
 
-Earn every finding from this target's text and these fires; a finding that arrives only by analogy to a precedent is a hypothesis to test or drop, never a conclusion to import. End where the evidence ends.
+Earn every finding from this target's text and these fires; a finding that arrives only by analogy to a precedent is a hypothesis to test or drop, never a conclusion to import. End where the evidence ends. Draft the critique in the workspace — it is the text Phase 6 later commits.
 
 Floors the brief must carry: line citations against the pinned commit; where the record holds no observed casualty of the method, that is said plainly; the sealed commission corrected in writing wherever the evidence disagreed with it; a close naming what survives and the honest reframe; frontmatter per `docs/reviews/README.md`; an Evidence Boundary and Bounds section that owns what was not inspected and acknowledges the critique is itself a single-judge argued pass — JP's adjudication is its verification layer.
 
 ## Phase 3 — Adjudication (hard stop)
 
-Deliver the critique in chat and stop. JP endorses, amends, or rejects it; the endorsed critique is the design brief for the repairs. Do not begin repairs, and do not write the brief to `docs/reviews/`, before the adjudication.
+Deliver the critique in chat and stop. JP endorses, amends, or rejects it; the endorsed critique is the design brief for the repairs. The stop is a seam: the verdict may arrive this session or a later one — record it in `STATE.md` when it lands. Do not begin repairs, and do not write the brief to `docs/reviews/`, before the adjudication.
 
 ## Phase 4 — Repairs
 
