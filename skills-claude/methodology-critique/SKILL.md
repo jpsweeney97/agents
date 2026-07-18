@@ -55,7 +55,7 @@ Scale to what the endorsed critique warrants — edge repairs for a hold, a rebu
 
 ## Phase 5 — Validation
 
-Validate every edited surface per the AGENTS.md ladder. Forward-test with blind, non-mutating subagent proxies aimed at whatever instruments changed; a proxy pass is uptake evidence, never value evidence, and simulated assent is noise twice over. Grade whatever proxies cannot reach as untested, honestly, in the commit message.
+Validate every edited surface per the AGENTS.md ladder. Forward-test with blind, non-mutating subagent proxies aimed at whatever instruments changed, crewed under the rig's model rule — Sonnet by default, never the session model; a proxy pass is uptake evidence, never value evidence, and simulated assent is noise twice over. Grade whatever proxies cannot reach as untested, honestly, in the commit message.
 
 ## Phase 6 — Landing
 
