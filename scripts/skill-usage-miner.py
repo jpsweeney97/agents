@@ -23,6 +23,20 @@ tokens that alias a canonical skill (e.g. `handoff:load` -> `handoff:load-handof
 merged via ALIASES, and rows are classified into current-roster / archived / non-roster
 sections by scanning this repo's live skill roots.
 
+Summary-time collapse (T1 over-count repair, 2026-07-19): the summary reads a collapsed
+view of the raw rows — session-fork replays (a forked session file replays earlier records
+under a new sessionId; the replayed record keeps its globally unique uuid/tool_use_id, so
+rows sharing a key tail are one historical fire) and rapid re-invokes (rows for the same
+session and skill within BURST_WINDOW_S, including the typed-command + Skill-call double
+record one fire can leave) each count once. Codex rows are exempt from fork collapse:
+their key tails (`ts:skill`) are not globally unique across sessions, and Codex resumes
+are verified not to replay fires. Raw rows are untouched; the collapse is disclosed in
+the summary output.
+
+The summary also prints a standing T1 blindness footnote (see FOOTNOTE): the ledger is
+blind in both directions — rows are invocation/load markers, not proven fires — and any
+re-read (the 2026-08-01 read in particular) must carry those caveats.
+
 Usage: skill-usage-miner.py [--ledger PATH] [--summary-only]
 """
 
@@ -31,6 +45,7 @@ import json
 import re
 import sys
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 
 LEDGER_DEFAULT = Path.home() / ".claude" / "logs" / "skill-usage-ledger.jsonl"
@@ -52,6 +67,32 @@ ALIASES = {
 COMMAND_RE = re.compile(r"<command-name>([^<]+)</command-name>")
 CODEX_SKILL_RE = re.compile(r"<skill>\s*<name>([^<\n]+)</name>")
 PREFILTER = ('"Skill"', '"SlashCommand"', "<command-name>")
+
+# Rows for the same session+skill closer than this are one fire (retries, double
+# invokes, and the typed-command + Skill-call double record). Known specimen: the
+# 13s double-invoke pair in session 5c843a6a (2026-07-06).
+BURST_WINDOW_S = 60.0
+
+FOOTNOTE = """\
+== T1 blindness footnote — read before treating rows as fires ==
+The ledger is blind in both directions; rows are invocation/load markers, never proven fires.
+- over-count: a Codex <skill> row records the capsule LOAD, not execution — known specimens
+  where the agent declined the skill (routing questions) or the card was re-injected by a
+  prose echo (simplify-code census, 2026-07-18). The summary collapses fork replays and
+  <=60s re-invokes; semantic echo rows beyond that remain counted.
+- under-count (no row can exist): Claude-side skills exercised with no Skill call and no
+  typed command (handoff-resumed arcs — e.g. the 07-18/19 methodology-critique treatment
+  sessions before mining); Codex-side untagged self-invoked cycles, multi-cycle chains
+  (one tag -> many cycles), and harness-driven runs (simplify-code census); skills whose
+  realistic configurations bypass both instruments (e.g. deliberate's pipeline).
+- lag: the live hook records Skill-tool calls only; typed commands and everything else
+  land only when this miner runs (launchd ~5 days).
+- endogeneity: a fire census is an intervention — treatments can summon the fires they
+  count (Era 109/113); treat post-treatment fire surges as partially endogenous before
+  crediting or debiting any skill for them.
+Sources: docs/reviews/2026-07-18-deliberate-methodology-critique.md (T1),
+docs/reviews/2026-07-18-simplify-code-methodology-critique.md (census, observer effect),
+docs/reviews/2026-07-19-methodology-critique-methodology-critique.md (unledgered fires)."""
 
 
 def norm_skill(name: str) -> str:
@@ -187,6 +228,70 @@ def load_ledger(ledger: Path):
     return records
 
 
+def parse_ts(ts: object) -> "datetime | None":
+    if not ts:
+        return None
+    try:
+        return datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def collapse(records: list[dict]) -> "tuple[list[dict], dict[str, int]]":
+    """Collapsed summary view of raw rows; the ledger itself is never rewritten.
+
+    Fork-replay collapse: Claude keys are `{session}:{uuid}:{skill}` (mined user),
+    `{session}:{tool_use_id}` (mined model / hook) — the tail after the session is
+    globally unique, so two rows sharing a tail are one historical fire replayed
+    into a forked session file. Codex keys (`codex:{session}:{ts}:{skill}`) are
+    exempt: their tails are not globally unique and Codex resumes do not replay
+    fires. Hook fallback tails (`hook-{ts}`, written when tool_use_id was absent)
+    are exempt for the same reason.
+
+    Burst collapse: within one (session, bare canonical skill name), rows within
+    BURST_WINDOW_S of the last kept row collapse into it — retries, double
+    invokes, and the typed-command + Skill-call double record of a single fire.
+    Rows without a parseable ts never burst-collapse.
+    """
+    kept: list[dict] = []
+    stats = {"fork": 0, "burst": 0}
+    seen_tails: set[str] = set()
+    for r in records:
+        key = str(r.get("key") or "")
+        if key and not key.startswith("codex:") and ":" in key:
+            tail = key.split(":", 1)[1]
+            if not tail.startswith("hook-"):
+                if tail in seen_tails:
+                    stats["fork"] += 1
+                    continue
+                seen_tails.add(tail)
+        kept.append(r)
+
+    def burst_group(r: dict) -> "tuple[object, str]":
+        token = str(r.get("skill"))
+        return r.get("session"), ALIASES.get(token, token).rsplit(":", 1)[-1]
+
+    groups: defaultdict[tuple, list[tuple[datetime, int]]] = defaultdict(list)
+    for i, r in enumerate(kept):
+        t = parse_ts(r.get("ts"))
+        if t is not None:
+            groups[burst_group(r)].append((t, i))
+    drop: set[int] = set()
+    for timed in groups.values():
+        timed.sort()
+        last_kept = None
+        for t, i in timed:
+            if (
+                last_kept is not None
+                and (t - last_kept).total_seconds() <= BURST_WINDOW_S
+            ):
+                drop.add(i)
+                stats["burst"] += 1
+            else:
+                last_kept = t
+    return [r for i, r in enumerate(kept) if i not in drop], stats
+
+
 class SkillStats:
     def __init__(self) -> None:
         self.total = 0
@@ -211,7 +316,9 @@ def roster_names() -> set[str]:
             raise SystemExit(
                 f"roster scan failed: expected skill root missing. Got: {str(root)!r:.100}"
             )
-        names.update(p.name for p in root.iterdir() if p.is_dir() and not p.name.startswith("."))
+        names.update(
+            p.name for p in root.iterdir() if p.is_dir() and not p.name.startswith(".")
+        )
     return names
 
 
@@ -228,6 +335,13 @@ def summarize(records: list[dict]) -> None:
             raise SystemExit(
                 f"alias merge failed: alias key shadows a roster skill. Got: {alias!r:.100}"
             )
+    raw_n = len(records)
+    records, cstats = collapse(records)
+    print(
+        f"view: {raw_n} raw rows -> {len(records)} fires "
+        f"(collapsed {cstats['fork']} fork replays, "
+        f"{cstats['burst']} rapid re-invokes <={BURST_WINDOW_S:.0f}s)\n"
+    )
     by_skill: defaultdict[str, SkillStats] = defaultdict(SkillStats)
     for r in records:
         token = str(r["skill"])
@@ -263,7 +377,10 @@ def summarize(records: list[dict]) -> None:
     for title, key in (
         ("current-roster skills", "roster"),
         ("archived skills (skills-archive/)", "archived"),
-        ("non-roster tokens (built-in commands, plugin-qualified externals, retired/unknown)", "other"),
+        (
+            "non-roster tokens (built-in commands, plugin-qualified externals, retired/unknown)",
+            "other",
+        ),
     ):
         sec = [(skill, s) for skill, s in rows if section(skill) == key]
         counts[key] = len(sec)
@@ -280,6 +397,8 @@ def summarize(records: list[dict]) -> None:
         f"{len(rows)} distinct skills, {len(records)} fires total "
         f"(roster {counts['roster']}, archived {counts['archived']}, non-roster {counts['other']})"
     )
+    print()
+    print(FOOTNOTE)
 
 
 def main() -> int:
