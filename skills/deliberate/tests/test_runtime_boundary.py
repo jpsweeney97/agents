@@ -14,6 +14,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+import pytest
+
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -301,9 +303,6 @@ def test_cache_prefix_is_external_private_retired_and_unsafe_roots_refuse(
     repo_tmp = repo / "tmp"  # inside Git root, outside the served bundle
     repo_tmp.mkdir()
     cases.append(("repo", repo_root, repo_tmp))
-    case_alias = repo.parent / repo.name.swapcase() / "tmp"
-    if case_alias.exists() and os.path.samefile(case_alias, repo_tmp):
-        cases.append(("case-alias", repo_root, case_alias))
 
     link_root = make_bundle(tmp_path / "symlink")
     link_target = link_root / "tmp"
@@ -335,6 +334,43 @@ def test_cache_prefix_is_external_private_retired_and_unsafe_roots_refuse(
         assert list(tmp_path.rglob("*.pyc")) == [], label
         assert list((case_root / "scripts").rglob("__pycache__")) == [], label
         assert list((case_root / "scripts").rglob("*.pyc")) == [], label
+
+
+def test_case_aliased_repo_tmp_refuses(tmp_path: Path) -> None:
+    """The case-aliased spelling of a temp root inside the Git root must refuse
+    like its canonical twin. Constructible only on a case-insensitive
+    filesystem; elsewhere it must skip visibly, never vanish silently from the
+    case list."""
+    repo = tmp_path / "repo"
+    (repo / ".git").mkdir(parents=True)
+    repo_root = make_bundle(repo / "skills" / "deliberate")
+    (repo_root / ".git").mkdir()  # inner marker must not narrow the outer root
+    repo_tmp = repo / "tmp"
+    repo_tmp.mkdir()
+    case_alias = repo.parent / repo.name.swapcase() / "tmp"
+    if not (case_alias.exists() and os.path.samefile(case_alias, repo_tmp)):
+        pytest.skip("case-aliased path unconstructible: filesystem is case-sensitive")
+    marker = tmp_path / "case-alias.marker"
+    shared = repo_root / "scripts" / "_deliberate_shared.py"
+    text = shared.read_text(encoding="utf-8")
+    needle = "from __future__ import annotations\n"
+    assert text.count(needle) == 1
+    shared.write_text(
+        text.replace(
+            needle,
+            needle + f"\nopen({str(marker)!r}, 'w').write('ran')\n",
+            1,
+        ),
+        encoding="utf-8",
+    )
+    result = run_cli(repo_root, *identity_args(repo_root), tmpdir=case_alias)
+    assert result.returncode == 2
+    assert "cache temp root must resolve outside" in result.stderr
+    assert not marker.exists()
+    assert list(tmp_path.rglob("deliberate-pycache-*")) == []
+    assert list(tmp_path.rglob("*.pyc")) == []
+    assert list((repo_root / "scripts").rglob("__pycache__")) == []
+    assert list((repo_root / "scripts").rglob("*.pyc")) == []
 
 
 def test_sourceless_shadow_of_shared_module_is_refused(tmp_path: Path) -> None:

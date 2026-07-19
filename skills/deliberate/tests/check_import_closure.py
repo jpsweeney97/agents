@@ -297,10 +297,13 @@ def _is_zip_archive(path: Path) -> bool:
     census guarantee — no loadable Python artifact sits uninventoried under
     ``scripts/`` — actually holding, which is what lets the identifier ban stay
     narrow (attribute names and string literals unscanned). A file that cannot
-    be opened refuses rather than passing: ``is_zipfile`` swallows ``OSError``
-    into ``False``, and unverifiable content is unsafe — the same posture the
+    be opened refuses rather than passing: because ``is_zipfile`` swallows
+    ``OSError`` into ``False``, this check opens the file itself and refuses on
+    an open failure — unverifiable content is unsafe, the same posture the
     runtime pass-2 check holds, so the two consumers cannot drift on the
-    unreadable edge either.
+    unreadable edge either. A read-time ``OSError`` raised inside
+    ``is_zipfile`` after a successful open still collapses to ``False``; that
+    residual sliver is accepted and shared by both consumers.
     """
     try:
         with path.open("rb") as handle:

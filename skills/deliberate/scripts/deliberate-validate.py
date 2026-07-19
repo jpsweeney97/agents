@@ -65,7 +65,7 @@ import sys
 # archive check. Unsafe ambient temp roots refuse before prefix creation; the
 # created prefix is resolved and checked again before assignment. Pass 2 runs
 # `zipfile.is_zipfile` on the collected inert files — the same detector the
-# Gate-2 checker uses (43065ca), so a prefixed/self-extracting zip is caught and
+# Gate-2 checker uses (672abb5), so a prefixed/self-extracting zip is caught and
 # the two consumers cannot drift on zip detection. Every first-party and other
 # import waits until pass 2 returns. The census consumes only the embedded
 # policy, authenticated by this entrypoint's own method-surface hash; a
@@ -250,9 +250,12 @@ atexit.register(shutil.rmtree, sys.pycache_prefix, ignore_errors=True)
 # reads archives; zipimport, banned, loads them) cannot resolve to a scripts/
 # file. is_zipfile locates the trailing end-of-central-directory record the way
 # zipimport does, catching a prefixed/self-extracting zip a magic sniff misses.
-# An inert file the census cannot open refuses rather than passing: is_zipfile
-# swallows OSError into False, and unverifiable content is unsafe — the same
-# errors-are-unsafe posture the containment check above holds.
+# An inert file the census cannot open refuses rather than passing: because
+# is_zipfile swallows OSError into False, this pass opens each file itself and
+# refuses on an open failure — unverifiable content is unsafe, the same
+# errors-are-unsafe posture the containment check above holds. A read-time
+# OSError raised inside is_zipfile after a successful open still collapses to
+# False; that residual sliver is accepted and shared by both consumers.
 import zipfile  # noqa: E402 — safe only after pass 1 cleared every importable shadow
 
 for _inert_path in _boundary_inert_files:
@@ -2453,6 +2456,24 @@ def validate_envelope_shape(document: object, contract: Contract) -> dict:
                 )
             continue
         _check_artifact_shape(entry, value, stage, contract)
+    if stage == "recommend" and status.startswith("exit: field not ready"):
+        # The field-not-ready class requires a seed and no close (the terminal
+        # check); enforced here too so the conflicting envelope is rejected at
+        # validation instead of stranding an accepted store with no reachable
+        # capsule terminal (first observed live 2026-07-18, Codex run 1).
+        if _is_produced(artifacts["close"]):
+            raise fail(
+                op,
+                "a `field not ready` exit is close-less: the exit statement is the "
+                "envelope status and `close` renders `not produced: field not ready` "
+                "— a produced close leaves no reachable capsule terminal",
+            )
+        if not isinstance(artifacts["provisional-seed"], dict):
+            raise fail(
+                op,
+                "a `field not ready` exit requires the provisional rerun seed in "
+                "`provisional-seed`",
+            )
     _check_retrievals(document["retrievals"], contract, op)
     encounters = document["encounters"]
     if encounters != "none":
@@ -7923,6 +7944,64 @@ def cmd_fixtures(args: argparse.Namespace) -> int:
             "check-first Recommend envelope accepts explicit conditional empties",
             "pass",
             check_first_recommend_envelope,
+            results,
+        )
+
+        def _field_not_ready_envelope(close: object, seed: object) -> None:
+            validate_envelope_shape(
+                {
+                    "schema": ENVELOPE_SCHEMA,
+                    "stage": "recommend",
+                    "status": "exit: field not ready",
+                    "artifacts": {
+                        "close": close,
+                        "registered-leans": {
+                            "agent-first-lean": "Option A",
+                            "user-visible-lean": "No reliable visible lean.",
+                        },
+                        "disposition-records": "not applicable",
+                        "provisional-seed": seed,
+                    },
+                    "retrievals": "none",
+                    "encounters": "none",
+                    "pins": "none",
+                    "model": "unknown",
+                },
+                contract,
+            )
+
+        _provisional_seed = {
+            "wording": "Option Z — the cohort seed reshaped to comparable depth",
+            "handle": "reshaped cohort",
+            "core-idea": "develop the under-shaped seed before comparing",
+            "distinct-bet": "the cohort bet deserves a comparably shaped field",
+        }
+
+        _expect(
+            "field-not-ready exit with a produced close rejected (close-less branch)",
+            "block",
+            lambda: _field_not_ready_envelope(
+                "field not ready\n\nThe cohort seed is materially less shaped.",
+                copy.deepcopy(_provisional_seed),
+            ),
+            results,
+        )
+
+        _expect(
+            "field-not-ready exit without the provisional seed rejected",
+            "block",
+            lambda: _field_not_ready_envelope(
+                "not produced: field not ready", "not applicable"
+            ),
+            results,
+        )
+
+        _expect(
+            "close-less field-not-ready exit with the provisional seed accepted",
+            "pass",
+            lambda: _field_not_ready_envelope(
+                "not produced: field not ready", copy.deepcopy(_provisional_seed)
+            ),
             results,
         )
 

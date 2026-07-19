@@ -14,7 +14,7 @@ uv run --script scripts/deliberate-validate.py identity --data references/contra
 
 `--as-evidence` plans its complete named-evidence argv set, enforces the descendant-count and expanded-byte bounds from metadata, and only then reads or hashes any content. `--as-in-packet` does the same across its complete argv set of exact stored payload files, enforcing the in-packet byte bound before hashing. On either bounded form, every returned identity entry carries its measured `bytes`; the complete pins body and capsule retain those measurements, and their validators re-sum the whole evidence or in-packet list against the canonical aggregate bound. One complete-set call or combined outputs from multiple calls therefore meet the same mechanical aggregate check; a missing measurement or an over-bound combined list refuses.
 
-The validator's own identifier is verified with the platform hasher, never with itself: `shasum -a 256 scripts/deliberate-validate.py` (or equivalent) before every invocation.
+The validator's own identifiers — the entrypoint and every imported production module — are verified with the platform hasher, never with the validator itself: `shasum -a 256 scripts/deliberate-validate.py scripts/_deliberate_shared.py` (or equivalent) before every invocation.
 
 ## Declared bounds
 

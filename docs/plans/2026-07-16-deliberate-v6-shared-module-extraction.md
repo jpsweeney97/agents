@@ -950,7 +950,7 @@ import sys
 # archive check. Unsafe ambient temp roots refuse before prefix creation; the
 # created prefix is resolved and checked again before assignment. Pass 2 runs
 # `zipfile.is_zipfile` on the collected inert files — the same detector the
-# Gate-2 checker uses (43065ca), so a prefixed/self-extracting zip is caught and
+# Gate-2 checker uses (672abb5), so a prefixed/self-extracting zip is caught and
 # the two consumers cannot drift on zip detection. Every first-party and other
 # import waits until pass 2 returns. The census consumes only the embedded
 # policy, authenticated by this entrypoint's own method-surface hash; a

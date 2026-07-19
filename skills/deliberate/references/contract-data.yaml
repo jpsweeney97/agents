@@ -665,7 +665,11 @@ brief-extras:
     bounded by the echoed evidence authorization; an unauthorized check
     returns as `check first`, never performed. A discovered unshaped
     alternative that could win is the `field not ready` exit with a
-    provisional rerun seed ({wording, handle, core-idea, distinct-bet}); an alternative
+    provisional rerun seed ({wording, handle, core-idea, distinct-bet}). That
+    exit is close-less: return status `exit: field not ready` with the seed in
+    `provisional-seed`, and render `close: not produced: field not ready` —
+    never fill `close` with the exit statement; validation rejects a produced
+    close on this exit. An alternative
     that merely reveals a constraint or would change the recommendation enters
     the close only as a named agent-derived consideration — never a new
     comparison candidate. Every exclusion you create appends a complete
@@ -680,7 +684,9 @@ brief-extras:
     (`>-`) scalars, never a literal (`|`) block whose soft-wraps inject
     newlines the store does not contain. Close as exactly one of the four
     `making-recommendations` shapes or a named honest exit — every one is a
-    successful completion; never manufacture a winner.
+    successful completion; never manufacture a winner. A constituent honest
+    exit carries its exit statement as the close; the deliberate-owned `field
+    not ready` exit alone is close-less, as above.
     Both conditional Recommend artifacts remain mandatory keys on every close
     shape. Inside `artifacts`, render each absent conditional value exactly:
     ```yaml
