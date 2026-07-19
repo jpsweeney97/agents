@@ -25,11 +25,11 @@ Check `.agents/treatments/` for an in-flight workspace on this target first — 
 
 1. Verify the bundle shape yourself — list the target directory; never assume `references/`, `examples/`, or `agents/openai.yaml`. Determine the delivery flow from the path: `skills/` and `skills-claude/` are live-served source with no publish train (do not invent one); `plugins/` follows the Plugin Layout publish path. Grep `scripts/` for CANON assertions on the target's text.
 2. Compute the honest record: enumerate the precedent briefs, tally inversions and holds, read every TLDR, the two nearest-register briefs in full, the latest treatment handoff, and the throughline's treatment-arc paragraph — as calibration of register, depth, and honesty, never as a findings template.
-3. Before reading any fire or transcript, write the commission dossier to the treatment workspace, present it in chat, and treat it as sealed. The run continues by default; JP interrupts if the commission is off. The dossier carries:
+3. Before reading any fire or transcript, write the commission dossier to the treatment workspace, present it in chat, and treat it as sealed. The run continues by default; JP interrupts if the commission is off. The sealed self-commission replaced the bespoke era's structurally independent commissioner — the charter admission records that trade — and a pre-registered lean is a disclosure, not an elimination: evidence routinely corrects sealed guesses about facts, and no run has yet moved off its sealed lean about the verdict; carry that asymmetry consciously. The dossier carries:
    - The pressure questions this target's own text invites. Its self-descriptions — what it owns, why it deserves to exist, how it classifies itself — are claims to test, not facts.
    - Pre-registered expectations: what you currently guess the evidence will show. The critique must later say, in writing, where the evidence corrected these.
    - The named groove hazard for this run: after consecutive holds, hunger for an inversion; after inversions, a genre signature that writes the verdict; a target adjoining prior findings' territory, the remix trap. Name the one that applies now.
-   - The circularity traps, concretely: never route the critique through `scrutinize-skill`; never conduct the critique as the target's own genre — name what that would look like for this target and refuse it; never cheaply re-litigate a law that was adversarially won, since overturning it needs evidence of the weight that won it.
+   - The circularity traps, concretely: never route the critique through `scrutinize-skill`; never conduct the critique as the target's own genre — name what that would look like for this target and refuse it; never cheaply re-litigate a law that was adversarially won, since overturning it needs evidence of the weight that won it. When the target is this lane itself, the genre-conduct trap cannot be satisfied literally and the mandated calibration reading is itself fire contact: disclose the leak at sealing and reconstruct the operative refusal, rather than claiming a clean seal.
    - Privacy boundaries for the expected fire venues, per the evidence recipe.
    - The settled-decisions fence: the charter dispositions, mining decisions, and carve boundaries that stand undisturbed without new evidence.
 
@@ -37,7 +37,7 @@ Fold in any emphases JP passed at invocation.
 
 ## Phase 1 — Evidence
 
-Load [references/evidence-recipe.md](references/evidence-recipe.md) and follow it: the full commit history back to founding, the complete fire corpus on both runtimes, consumers and blast radius, and the method context around the target. Fan out with a small dynamic workflow crewed on cheap models — the recipe's rig sets the size and model rules; re-verify firsthand anything the verdict will lean on. Body-loaded proves the body was in context, not a completed run — classify what each transcript actually contains.
+Load [references/evidence-recipe.md](references/evidence-recipe.md) and follow it: the full commit history back to founding, the fire corpus on both runtimes (complete as the instruments allow), consumers and blast radius, and the method context around the target. Fan out with a small dynamic workflow crewed on cheap models — the recipe's rig sets the size and model rules; re-verify firsthand anything the verdict will lean on. Body-loaded proves the body was in context, not a completed run — classify what each transcript actually contains.
 
 ## Phase 2 — Critique
 
@@ -51,7 +51,9 @@ Single-mind and never delegated: subagents gather evidence; the judgment is your
 
 Earn every finding from this target's text and these fires; a finding that arrives only by analogy to a precedent is a hypothesis to test or drop, never a conclusion to import. End where the evidence ends. Draft the critique in the workspace — it is the text Phase 6 later commits.
 
-Floors the brief must carry: line citations against the pinned commit; where the record holds no observed casualty of the method, that is said plainly; the sealed commission corrected in writing wherever the evidence disagreed with it; a close naming what survives and the honest reframe; frontmatter per `docs/reviews/README.md`; an Evidence Boundary and Bounds section that owns what was not inspected and acknowledges the critique is itself a single-judge argued pass — JP's adjudication is its verification layer.
+Scope the verdict to what the search can warrant: a hold is a fact about this treatment's search at this commit, and the genre tally is history, never evidence about the next target. A standing boundary, kept as a fact to keep testing rather than a law: inversion-grade evidence has so far come only from text, history, and provenance — the fire layer has funded findings, never yet a verdict. The genre also has a house TLDR signature — "the Nth hold, with a shape none of the prior holds wore" — sign it consciously or depart from it; never let it write the verdict.
+
+Floors the brief must carry: line citations against the pinned commit; where the record holds no observed casualty of the method, that is said plainly; the sealed commission corrected in writing wherever the evidence disagreed with it; a close naming what survives and the honest reframe; frontmatter per `docs/reviews/README.md`; an Evidence Boundary and Bounds section that owns what was not inspected and acknowledges the critique is itself a single-judge argued pass — JP's adjudication is its authorization gate, not its verification; verification, where it exists, arrives downstream — later fires, re-treatment, JP's re-reads — and the brief states which of those its claims have had (at delivery, normally none yet).
 
 ## Phase 3 — Adjudication (hard stop)
 
