@@ -53,3 +53,13 @@ Fold for the seal: the prereg's instrumentation clause ("runtime token counts on
 ## Probe hygiene
 
 The synthetic packet and probe outputs live only in session scratch; probe sessions were unpersisted (`--no-session-persistence` / `--ephemeral`); the temporary auth-only `CODEX_HOME` copy was trashed immediately after the codex probes. Total probe cost: five small dispatches (two haiku probes, one safe-mode haiku probe, two codex probes).
+
+## Addendum (2026-07-22): OS-wrapper probe for cross-family judges — enforced read confinement achieved
+
+Provenance: run by the seal session on JP's ratified authorization (the seal-parameter packet's check-first item), answering check 2's open question ("OS wrapper possible, untested"). Method: a fresh synthetic judgment packet (fictional pool-scheduling decision, apparatus-unrelated), an SBPL profile denying `file-read*` on `~/.agents`, `~/.claude`, `~/.codex`, `~/personal`, and `~/.t2-sealed` and denying `file-write*` outside the run scratch root, dispatched with bare `HOME` + auth-only `CODEX_HOME` from the packet cwd.
+
+- **Nesting fails, as suspected:** `codex exec --sandbox read-only` inside `sandbox-exec` cannot run its shell tool at all ("shell execution was denied by the sandbox") — the judge could not even read the packet; no judgment produced.
+- **Wrapper-replaces-sandbox passes end-to-end:** `codex exec --sandbox danger-full-access` inside the wrapper — the OS profile carries the entire confinement — read the packet, produced the strict-JSON judgment, and exposed token usage in `turn.completed`. The in-dispatch differential held at OS level: `head -1 /Users/jp/.agents/AGENTS.md` → "Operation not permitted" (exit 1); `touch /Users/jp/probe-write-test.txt` → "Operation not permitted" (exit 1).
+- **Fold for the seal (supersedes check 2's asymmetry framing):** the sealed cross-family dispatch shape is the wrapper shape above; codex-side read confinement is now OS-enforced at the same enumerated-tree grain as the Claude-side deny profiles — parity, not asymmetry. Disclosed limits: enumerated-tree denial is not positive confinement to the packet directory (the executed packet leak probe stays the operative defense for content outside the denied trees), the wrapper leaves network open (judge dispatches need the API), and `sandbox-exec` is deprecated-but-functional on macOS 26.5.2 — the sealed run re-verifies the differential at run start.
+
+Probe artifacts live in session scratch (ephemeral); the auth-only `CODEX_HOME` copy was trashed immediately after the probe; this addendum is the durable record.
