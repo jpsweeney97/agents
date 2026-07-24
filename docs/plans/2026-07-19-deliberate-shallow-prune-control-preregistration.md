@@ -204,3 +204,19 @@ Forward correction, disclosed per the dated-appendix discipline; nothing above t
 3. The close scan stays mechanical end to end. The operator renders no per-close judgment on seam grounds in either direction, which is why the discard set admits no confirmation route and the domain set admits no discard route.
 4. The merge seam-word scan, its eighteen-word list, its flag-and-confirm remedy, and the five organic confirmations already logged are untouched by this amendment.
 5. The final report discloses that the close-scan vocabulary was undeclared at seal, states the declared set, and reports the descriptive domain-word counts alongside the ARM C close-shape measures.
+
+## Amendment 4 — confirmed-echo exemption in the close scan [ratified by JP 2026-07-24]
+
+Forward correction, disclosed per the dated-appendix discipline; nothing above this section is rewritten. This amendment qualifies Amendment 3 clause 1 and nothing else.
+
+**Event record.** Amendment 3 gave the close-scan discard set no confirmation route. Applied literally at the third ARM C rep wave it discarded three reps whose closes each used one structure word — a word occurring in that case's own rendered brief and already operator-confirmed organic at merge stage (logged 2026-07-24T03:27:29Z, domain usage), for a reason unrelated to leakage.
+
+**Evidence, gathered outcome-blind before referral.** No extraction had run for any case and no winner-set existed anywhere. Across all twenty-eight closes collected to that point there was **not one structure word novel to a close**: every structure hit echoed vocabulary already present in that case's own brief, so no instance of apparatus leakage had occurred. Four of the eight cases carry structure words confirmed organic in their own material at merge stage, including the **positive-control case**, whose confirmed words are the most apparatus-shaped entries on the list yet were confirmed as ordinary domain usage. Under the literal rule the positive control stood to lose reps for echoing its own case vocabulary, which would jeopardise the CALIBRATED precondition — the run's only means of separating "prune is safe" from "instrument is blind" — on grounds having nothing to do with the leak the scan exists to catch. No available option disturbed any already-accepted rep, since none carried a novel structure hit.
+
+**Ruling (JP, 2026-07-24, AskUserQuestion on the session transcript, ratified as stated).**
+
+1. **Confirmed-echo exemption.** A close-scan discard-set hit does **not** discard the rep when that word appears on that case's own merge-stage organic allowlist. Every other discard-set hit discards and re-runs the rep, with no confirmation route, exactly as Amendment 3 provides.
+2. The exemption is a **lookup against a dated confirmation made before any close existed**, not a fresh judgment: the operator renders no per-close decision in either direction, preserving Amendment 3 clause 3.
+3. A structure word **novel to the close**, or present in the brief but never confirmed organic at merge stage, still discards. Mere presence in the brief is **not** sufficient — the broader brief-presence test was offered and declined.
+4. Exempted echoes are recorded descriptively per rep, alongside the domain-word mentions of Amendment 3 clause 2.
+5. The final report discloses this amendment, states that no structure word novel to a close was observed anywhere in the run, and reports exempted-echo counts with the descriptive close measures.
