@@ -237,3 +237,20 @@ Forward correction, disclosed per the dated-appendix discipline; nothing above t
 4. Voiding a rep does **not** route the case to per-case INCONCLUSIVE. The stricter consequence was offered and declined: with the reserve pool closed and N capped at 7, losing a whole case to a formatting artifact would drop the run to exactly the 6-of-8 readable floor, one further loss from INCONCLUSIVE outright.
 5. The cap governs mechanical, content-independent failures. A substantive failure — a leans mismatch with substantive text deltas, a key-structure difference, or a seam discard — is not a mechanical retry and does not consume the cap; those follow their own sealed rules.
 6. The final report discloses this amendment, the observed failure rate against the mini-pilot's priced rate, its structural cause in the sealed transport rule, and any case reported at reduced k.
+
+## Amendment 6 — seeded-candidate matching for the positive control [ratified by JP 2026-07-24]
+
+Forward correction, disclosed per the dated-appendix discipline; nothing above this section is rewritten. This amendment supplies a missing evaluation path and adds no new rule.
+
+**Event record.** The positive control's catch criterion is "ARM C crowning the seeded candidate," but the sealed ledger records that candidate **by description, not by a crosswalk ID**. This was chronologically unavoidable: the ledger entry was written at case construction, before Generate ran and before the stem-freeze crosswalk existed, so no crosswalk ID could have been recorded. A fixed-pattern structural probe of the entry confirmed zero occurrences of the crosswalk's candidate-ID format, against which all of the case's crosswalk keys conform. No rule in the sealed document or its appendices maps the description to an ID, so the CALIBRATED precondition had no mechanical evaluation path.
+
+**Operator position preserved at referral.** The operator had not read the ledger entry text and had not read the case's crosswalk wordings, and said so before the ruling. Reading either would have made the operator the matcher and destroyed the cleanest remedy, so the gap was referred while that blindness still held.
+
+**Ruling (JP, 2026-07-24, AskUserQuestion on the session transcript, ratified as stated).**
+
+1. The seeded candidate is matched to a crosswalk ID by **two sandboxed matcher agents**, blind to the hypothesis and to every winner set, close, and extraction output. Each receives only the ledger's seeded-candidate record and the case's crosswalk wordings.
+2. They apply **Appendix A's already-sealed matching rule verbatim** — verbatim or near-verbatim wording, a label the text ties to a matching wording, or an unambiguous short handle matching exactly one listed candidate; if no exactly-one match exists, return no-match and do not guess. **No new matching rule is created by this amendment.**
+3. Agreement between the two matchers yields the ID. **Disagreement, or a no-match from either**, leaves the positive control **undetermined**, which the sealed Pass/fail rule already routes to INCONCLUSIVE.
+4. The operator is excluded from the matching and does not read the ledger entry text or the crosswalk wordings; the packet is assembled mechanically by script and the result is compared mechanically.
+5. **Disclosed blindness bound on the matcher role:** the packet carries the ledger record as written, which contains construction-time apparatus vocabulary. The matcher therefore learns that a seeded control candidate exists. It never sees the hypothesis, any close, any winner set, or any arm identity, and its sole output is one candidate ID. The report states this bound rather than claiming full matcher blindness.
+6. The operator-direct alternative was offered and declined, on the ground that it places operator judgment on the run's most consequential input — the same failure the pilot was criticised for and the design panel removed from the winner-set mapping.
