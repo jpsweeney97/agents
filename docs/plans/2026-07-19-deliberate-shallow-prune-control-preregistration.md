@@ -254,3 +254,19 @@ Forward correction, disclosed per the dated-appendix discipline; nothing above t
 4. The operator is excluded from the matching and does not read the ledger entry text or the crosswalk wordings; the packet is assembled mechanically by script and the result is compared mechanically.
 5. **Disclosed blindness bound on the matcher role:** the packet carries the ledger record as written, which contains construction-time apparatus vocabulary. The matcher therefore learns that a seeded control candidate exists. It never sees the hypothesis, any close, any winner set, or any arm identity, and its sole output is one candidate ID. The report states this bound rather than claiming full matcher blindness.
 6. The operator-direct alternative was offered and declined, on the ground that it places operator judgment on the run's most consequential input — the same failure the pilot was criticised for and the design panel removed from the winner-set mapping.
+
+## Amendment 7 — extraction agreement criterion declared [ratified by JP 2026-07-24]
+
+Forward correction, disclosed per the dated-appendix discipline; nothing above this section is rewritten. This amendment declares an undeclared criterion and resolves one ambiguity in the same sentence pair.
+
+**Event record.** Winner-set extraction states that "inter-rater agreement is measured and reported; disagreement routes that case-rep to INCONCLUSIVE," but never states which of the codebook's four coded fields must agree. The Replication section adds that "the run is readable only when at least 6 of the 8 rate-gate cases … pass the case floor with agreed extraction," without saying whether that requires every rep to agree or the floor to be met among agreed reps. Both are gate inputs.
+
+**Evidence that the choice is consequential.** Under a provisional all-four-fields reading, agreement stood at 41 of 56 collected closes, and the first case recomputed at 6 of 8 where the interrupted session had recorded 7 of 8 for byte-identical artifacts — the discrepancy is itself evidence that the earlier session applied a looser, gate-bearing criterion. Under an all-reps-agreed reading of the readable-run sentence, one case of seven qualified and the run was unreadable outright.
+
+**Ruling (JP, 2026-07-24, AskUserQuestion on the session transcript, ratified as stated).**
+
+1. A close counts as **agreed** when both extractors assign the same `shape` and the same `primary-winner-set`.
+2. Disagreement on `secondary-heads` or `complements` is **recorded descriptively** and does not disqualify a close. Rationale: the primary gate reads shape (health floor and close-shape tiering) and primary-winner-set (divergence) only; secondary-heads and complements feed the labeled secondary channel and the descriptive measures, which no gate reads.
+3. The **ARM C health floor is computed among agreed reps**, and a case is readable when it meets that floor. A single disagreeing rep does not make its case unreadable — the sealed remedy routes the case-**rep** to INCONCLUSIVE, not the case.
+4. Both the stricter all-four-fields criterion and the looser shape-only criterion were offered and declined; shape-only was declined because it would admit closes whose raters disagree about which candidate was crowned, which the divergence test reads directly.
+5. Inter-rater agreement is reported under this criterion, and the all-four-fields figure is reported alongside it so a reader can see what the criterion cost or bought.
