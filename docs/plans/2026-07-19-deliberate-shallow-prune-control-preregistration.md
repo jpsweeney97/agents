@@ -220,3 +220,20 @@ Forward correction, disclosed per the dated-appendix discipline; nothing above t
 3. A structure word **novel to the close**, or present in the brief but never confirmed organic at merge stage, still discards. Mere presence in the brief is **not** sufficient — the broader brief-presence test was offered and declined.
 4. Exempted echoes are recorded descriptively per rep, alongside the domain-word mentions of Amendment 3 clause 2.
 5. The final report discloses this amendment, states that no structure word novel to a close was observed anywhere in the run, and reports exempted-echo counts with the descriptive close measures.
+
+## Amendment 5 — mechanical-retry cap declared [ratified by JP 2026-07-24]
+
+Forward correction, disclosed per the dated-appendix discipline; nothing above this section is rewritten. This amendment fills the second open bracket the seal left and declares no parameter beyond it.
+
+**Event record.** The Attrition section pre-registers "ARM C batch or envelope failure → a declared cap of mechanical retries with fresh agents, then void-and-replace", but the cap number was declared nowhere in the sealed document or its appendices. The gap was found and disclosed at first envelope failure while still non-binding, and bound when one ARM C rep failed a second time on the same class.
+
+**Nature of the failure that forced it, recorded because it bears on the ruling.** The failure is `artifact validation (recommend.registered-leans) failed` — a formatting artifact of the sealed transport rule itself: pass 1 lets the dispatched agent choose its own lean shape, Appendix C requires that shape carried into the envelope unchanged, and the contract rejects a nested mapping where a string is required. The agent is obeying the transport rule when it fails. The failure is therefore **content-independent**: it carries no information about the case, its field, or its candidates, so re-dispatching until an envelope validates does not select a favourable draw the way re-running on a substantive failure would. Appendix C is sealed protocol and byte-exact prompt identity across reps is the transport rule, so the pass-1 prompt cannot be amended to constrain the shape. Observed rate: 7 of roughly 46 ARM C rep dispatches, materially above the 7.5 percent the mini-pilot priced.
+
+**Ruling (JP, 2026-07-24, AskUserQuestion on the session transcript, ratified as stated).**
+
+1. The cap is **3 mechanical retries per unit** on the identical brief with fresh agents — four attempts in total.
+2. A rep that exhausts the cap is **voided**, and its case proceeds at **reduced k** (6 rather than 7) with the shortfall and its effect on that case's reproduction power disclosed per case in the report.
+3. The reproduction bar stays **≥2 of k** as sealed. Reduced k weakens only that case's power, stated honestly; it does not alter the bar, the FALSIFIED threshold, the health floor, or the readable-run floor.
+4. Voiding a rep does **not** route the case to per-case INCONCLUSIVE. The stricter consequence was offered and declined: with the reserve pool closed and N capped at 7, losing a whole case to a formatting artifact would drop the run to exactly the 6-of-8 readable floor, one further loss from INCONCLUSIVE outright.
+5. The cap governs mechanical, content-independent failures. A substantive failure — a leans mismatch with substantive text deltas, a key-structure difference, or a seam discard — is not a mechanical retry and does not consume the cap; those follow their own sealed rules.
+6. The final report discloses this amendment, the observed failure rate against the mini-pilot's priced rate, its structural cause in the sealed transport rule, and any case reported at reduced k.
