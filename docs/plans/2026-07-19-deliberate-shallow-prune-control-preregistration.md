@@ -270,3 +270,117 @@ Forward correction, disclosed per the dated-appendix discipline; nothing above t
 3. The **ARM C health floor is computed among agreed reps**, and a case is readable when it meets that floor. A single disagreeing rep does not make its case unreadable — the sealed remedy routes the case-**rep** to INCONCLUSIVE, not the case.
 4. Both the stricter all-four-fields criterion and the looser shape-only criterion were offered and declined; shape-only was declined because it would admit closes whose raters disagree about which candidate was crowned, which the divergence test reads directly.
 5. Inter-rater agreement is reported under this criterion, and the all-four-fields figure is reported alongside it so a reader can see what the criterion cost or bought.
+
+## Results [composed 2026-07-25, after the human arm closed]
+
+Composed per §Sequencing, which permits composition only once the human arm closes. It closed **unadministered**: JP declined to fund an operator-hours extension for the adjudication layer and the cold-judge arm (2026-07-25). Every figure below is machine-derived from the run workspace; the operator log `~/.t2-run/logs/run-facts.md` is the primary record and carries the timestamped rulings, dispositions, breaches, and kills that this section summarises.
+
+### Verdict
+
+**INCONCLUSIVE (W2)**, on two independent grounds, either sufficient alone:
+
+1. **The positive control is undetermined.** Its seeded candidate's identity was never recorded in a matchable form, so the CALIBRATED precondition could not be evaluated — see *The positive control was never evaluable* below.
+2. **The adjudication layer did not run.** The 15-operator-hour ceiling was reached, and judge dispatches are data collection, so no rate-gate event could be established. FALSIFIED requires an adjudicated excluded winner with cross-family corroboration and was therefore also unreachable.
+
+The verdict is **not** an exoneration and **not** a falsification. Per the null-honesty clause, it says nothing about whether the delegated shallow prune discards winners.
+
+### What was collected
+
+- **N = 7** rate-gate cases (S1, S2, S4, S5, S6, S7, S8), capped from 8 by the reserve-pool exhaustion ruling, plus the positive control. S3, R1 and R2 were routed per-case INCONCLUSIVE by the sealed attrition rule after ARM P prune honest exits (three such exits occurred; honest exits are never re-run).
+- **Both arms complete on all seven cases plus the control, every one at full k = 7.** No case was reported at reduced k; Amendment 5's retry cap was never exhausted.
+- **49 ARM C rep closes** and 7 ARM P closes, all accepted through four gates: Appendix C two-pass ordering, registered-leans structural equality, the close seam scan, and the shipped validator.
+- **322 of 400 dispatches** committed; **≈14.9 of 15 operator-hours**. The run stopped on the hours ceiling, not the dispatch ceiling. Four sessions: the 2026-07-22 original (died at context exhaustion, workspace subsequently lost), the 2026-07-23 recovery, and two 2026-07-24/25 collection sessions.
+
+### Primary gate
+
+| Measure | Result |
+| --- | --- |
+| Divergent rep-closes (agreed winner-set contains a both-reps-excluded candidate) | **1 of 49** |
+| Cases with ≥1 divergent rep | 1 of 7 (S2) |
+| Candidates reaching the ≥2-of-k reproduction bar | **0** |
+| Cases qualifying for hardened adjudication | **0** |
+| Readable cases (health floor met among agreed reps) | 6 of 7 — floor is 6 |
+| Rate-gate events | **0** (none could be established; adjudication did not run) |
+
+Because no case reached the reproduction bar, **the adjudication layer would have had zero qualifying packets and the human arm would have closed empty even if fully funded.** The sealed rule already provides for this outcome ("at zero real divergences the human arm closes empty"), so the decision not to fund the extension forfeited nothing.
+
+### Descriptive measures
+
+Reported per §Descriptive measures. The firewall held: the verdict above was computed from adjudicated counts alone — of which there are none — and recorded before any measure here was consulted. No measure below reclassifies or mitigates it.
+
+- **Exclusion-set union versus intersection.** ARM P's prune was large and highly reproducible across its two reps: 10–15 candidates excluded in both reps per case, with intersection/union ratios from 0.52 to 1.00 and two cases at perfect agreement (S1 12/12, S4 13/13). The both-reps qualification was not the binding constraint on detection.
+- **ARM C close-shape distribution** across agreed ARM C closes: 32 clear-call, 3 conditional-call, 8 check-first, 2 your-call, 2 honest-exit.
+- **Committal rate: 35 of 49 = 0.71 per rep.** See *The power calculation was wrong* below; this is the run's most reusable number.
+- **Inter-extractor agreement: 54 of 56 closes (96.4%)** on the criterion declared in Amendment 7, and 41 of 56 (73.2%) on the stricter all-four-fields reading, both reported per that amendment's clause 5. Disclosed discrepancy: S1 computes 8/8 under the declared criterion where the interrupted session recorded 7/8 on byte-identical artifacts, so that session applied a third, intermediate criterion whose exact definition is unrecoverable. This is stated rather than reconciled.
+- **Whether the divergent candidate's own Prune record anticipated the challenge — yes.** The single divergent candidate was cut on a `survivor budget` basis with epistemic-status recorded as `contestable sketch-depth judgment`, carrying both a `revive-if` condition and a `strongest-case`. The pipeline's own disclosed honesty bound therefore flagged precisely the cut that ARM C later crowned.
+- **Whether Contest surfaced the eventual winner — no.** The ARM P Contest stage for that case does not name the candidate. The pilot's headline descriptive finding — the prune record anticipates what Contest misses — thus **reproduced at run scale**, on the single instance available (n=1).
+- **Attrition and kills.** Thirteen quarantined units, preserved rather than deleted: eight mechanical envelope kills (all the nested-lean-shape class), one Appendix C kill for a substantive lean alteration between passes, one seam discard, one erroneously-discarded-then-restored rep with its superseded replacement draw, and two incomplete extractor outputs.
+
+### The positive control was never evaluable
+
+The catch criterion is "ARM C crowning the seeded candidate," but the sealed ledger records the control case by a **case-level construction hash**, not by any candidate identity. This was chronologically unavoidable: the ledger entry was written at case construction, before Generate ran and before the stem-freeze crosswalk existed, so no crosswalk ID could have been recorded. Two independent recovery routes were exhausted, both mechanically and with the operator blind to candidate content:
+
+1. Dual sandboxed matchers under Appendix A's sealed matching rule (Amendment 6) **both independently returned no-match** against the control's 22-candidate crosswalk.
+2. The sandboxed builder's verbatim output, recovered from the preserved dispatch transcript, carries **no designation field at all** — no seeded-candidate key, no seed identifier, no "dominant"/"designed to dominate"/"intended winner" phrasing, and no structure; a single incidental mention of "survivor budget" is its only relevant token.
+
+Identifying the seed from either source would require inference, which Appendix A forbids in terms. **This is a bookkeeping failure, not an instrument failure.** It does not show the instrument is blind; it means the run cannot tell whether the instrument is blind. Every statement about CALIBRATED must carry that distinction, and the null-honesty clause now applies with no discriminator available.
+
+**Partial substitute, with its limit.** A recommender that crowned in 32 of 47 agreed closes is demonstrably capable of crowning, which is evidence against one blindness mechanism — systematic refusal to name a winner. It is **not** evidence against the mechanism §Arms names explicitly: attention dilution over ARM C's much wider surface suppressing the *excluded* candidates specifically. The null is therefore better supported than a bare zero-divergence result, and still is not exoneration.
+
+### The power calculation was wrong, in the favourable direction
+
+The sealed design's power figure (≈0.46 at k=7, restated at seal) rested on the mini-pilot's measured per-rep crowning rate of **≈0.21**, which is also what the k=9-versus-k=7 deliberation turned on. The observed committal rate at full run scale is **0.71 per rep — 3.4× the assumed value.** Consequences:
+
+- The reproduction gate was **far better powered than designed**. k = 7 was generous; k = 3–4 would very likely have sufficed, and the freed budget was the run's largest recoverable waste.
+- The mini-pilot's "check-first attractor is the detection bottleneck" finding **did not survive at scale**: check-first accounts for 8 of 47 agreed closes, not the dominant mode.
+- A two-case mini-pilot mis-estimated its headline instrument parameter by a factor of three, and the sealed design inherited that error without a validity check. Pilot-derived parameters should be re-measured at scale before they are allowed to size a design.
+
+### Protocol failures
+
+The 2026-07-22 seal fixed ten parameters and still shipped **eight defects**, seven of which required JP-ratified amendments during execution. Six were repairable; two were not.
+
+| # | Defect | Disposition |
+| --- | --- | --- |
+| 1 | Session death and workspace loss mid-run | Amendment 1 — mechanical transcript recovery, durable relocation |
+| 2 | Dispatch ceiling mis-sized: the mini-pilot could not price the adjudication layer, recovery redos, or reserve-case attrition | Amendment 2 — raised 300 → 400, declared final |
+| 3 | Close-scan seam vocabulary never declared; existed only as a word list inside a helper written for a *different* instrument | Amendment 3 — structure-only discard set declared |
+| 4 | That vocabulary, applied literally, discarded reps for echoing their own case's merge-confirmed domain words, and would have exposed the positive control to the same | Amendment 4 — confirmed-echo exemption |
+| 5 | Mechanical-retry cap referenced by §Attrition, declared nowhere | Amendment 5 — 3 retries, then reduced k with disclosure |
+| 6 | Positive control's catch criterion had no mechanical evaluation path | Amendment 6 — dual blind matchers; **remedy failed on the record below** |
+| 7 | Extraction agreement criterion undeclared; readable-run sentence ambiguous | Amendment 7 — gate-bearing fields, floor among agreed reps |
+| 8 | **The seeded candidate's identity was never recorded matchably** | **Unrepairable** — no ruling can recover an unrecorded measurement |
+
+Defects 2–7 share a shape: a parameter the sealing session believed fixed, which turned out to be named but never valued, or valued only inside a script. Defect 8 is different in kind and is the one that cost the verdict — a pre-registration can supply a missing threshold after the fact, but it cannot supply a measurement that was never taken.
+
+### Blinding and disclosure record
+
+**Six operator disclosures reached JP-visible channels.** The blinding-relevant consequence: any cold-judge packet from **S1, S2, S8 or PC** would have arrived carrying a disclosed blindness-compromise note — four of eight cases, including the positive control. Because the human arm closed unadministered, no packet was ever issued and no judgment was contaminated; had it been funded, its discriminating power would have been materially reduced before administration.
+
+The pattern is consistent and diagnosable. Five of six occurred when the operator improvised inspection of an artifact type it had not probed before — envelope fields, validator error bodies, extraction schema — and none occurred inside a purpose-built probe. The sixth passed *through* a purpose-built script, via an unguarded library exception whose message quoted the input it failed to parse. Two structural rules were adopted in response and held thereafter: all artifact inspection runs through scripts emitting only fixed allowlisted labels, counts, types and status classes, with a separate stricter rule for extraction artifacts (where a collection length *is* a winner-set cardinality); and every parse of model output or sealed content is wrapped so that only the exception **type** is reported. One further custody violation is recorded: a fragment of sealed ledger entry #1 — a construction phrase, a dispatch number, and the leading digits of a case hash — reached the transcript through that same exception. It carried no candidate identity, so the sealed map's blinding-relevant content was not disclosed.
+
+**Sealed-store custody otherwise held.** The map verifies at 1662 B, SHA-256 `b200a409…52aa216`, matching this document's frontmatter; the ledger's HMAC chain verifies against `chain_0`. The seed was never printed.
+
+### What held
+
+Not everything degraded, and the instruments that worked are the run's transferable output.
+
+- **The extraction codebook is the strongest instrument in the design.** 96.4% dual-blind agreement at full scale, matching the mini-pilot's 15/16 — vindicating the design panel's replacement of the pilot's operator-judgment mapping.
+- **Exclusion-wording-to-crosswalk resolution was fully mechanical**, zero failures across seven cases, needing no matcher and no operator judgment.
+- **Three sealed instruments fired on live data**, not merely in fixtures: the close seam-leak scan (one novel-to-close structure word, discarded, cleanly re-run), the Appendix C two-pass transport (one substantive lean alteration between passes — exactly the fault mini-pilot finding #3 introduced it to catch), and the codebook.
+- **Mechanical recovery worked twice under Amendment 1**: the blind extractor prompt was recovered verbatim from a dead session's transcript, and a lost label map was reconstructed *exactly* — the close-id is a hash of the close, so hashing the stores regenerates it; the routine cross-checked against six surviving maps and agreed with all of them.
+- **Agents behaved better than the harness.** Stage agents refused to fabricate when denied their brief, refused to build an envelope on a non-registration, and self-killed honestly on transport gaps. Every operator-caused failure in this run was the operator's.
+
+### Design intelligence for a successor test
+
+The observed divergence base rate is **1 in 49 (≈2%)**. A rate gate over 7 cases with a threshold of 2 was never going to fire at that base rate — the design was built to detect a ≈25% case-level damage rate and the phenomenon, if present, is an order of magnitude rarer. A successor should invert the design:
+
+1. **Make seeded-dominator detection the experiment, not a side-check.** Run many cheap seeded cases and measure the instrument's sensitivity directly, rather than waiting for spontaneous divergence at a 2% base rate.
+2. **Record the seeded candidate's crosswalk ID at stem-freeze**, not at construction. This single fix would have saved this run.
+3. **Drop k to 3–4** on the measured 0.71 committal rate and spend the freed budget on more seeded cases.
+4. **Re-measure pilot-derived parameters at scale before they size a design.** A two-case pilot mis-estimated the crowning rate threefold here.
+5. **Price the layer where the verdict is actually made.** The ceiling was sized from a pilot that never exercised adjudication, and the run died of hours inside collection.
+6. **Give every probe a purpose-built, allowlist-only inspection script before collection starts.** Improvised inspection caused five of six disclosures.
+
+### Honest bounds on everything above
+
+Every figure is bounded to these 7 cases × 7 reps, one model family, this synthetic full-field shaping procedure, this harness, and this environment. ARM C remains a **synthetic instrument** — the shipped product has no full-field shaping mode — so no claim here reaches "full shaping" unqualified. The divergence count is **unadjudicated**: divergence alone is never damage, and the single observed divergence was never tested against ARM P's winner by any judge. Seven amendments were ratified mid-execution, so this run is a weaker pre-registration than its seal claimed; that is itself the most robust finding it produced.
