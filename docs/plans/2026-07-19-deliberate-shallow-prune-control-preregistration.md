@@ -4,7 +4,7 @@ project: agents
 created: 2026-07-19
 revised: 2026-07-21
 sealed: 2026-07-22
-status: "SEALED 2026-07-22 — this revision is the seal; the commit landing it is the seal event. The sealed run executes only on JP's separate, explicit authorization (sequencing step 5). Sealed-map SHA-256: b200a4095ff21d26da6a494d524d3884f689a455e58058b4d0aa8bf6c52aa216"
+status: "SEALED 2026-07-22 — this revision is the seal; the commit landing it is the seal event. The sealed run executes only on JP's separate, explicit authorization (sequencing step 5). Sealed-map SHA-256: b200a4095ff21d26da6a494d524d3884f689a455e58058b4d0aa8bf6c52aa216 || RUN CLOSED 2026-07-25 — authorized 2026-07-22, executed across four sessions, stopped on the 15-operator-hour ceiling at 322/400 dispatches. Verdict INCONCLUSIVE (W2): positive control undetermined and adjudication unrun. Human arm closed unadministered; results composed into the Results section. Amendments 1-7 ratified during execution. Prior status text preserved verbatim above per the no-rewrite discipline."
 source: "T2 decision (JP, 2026-07-18, deliberate treatment close-out); gate: docs/specs/2026-07-13-deliberate.md:442; brief: docs/reviews/2026-07-18-deliberate-methodology-critique.md T2; method: docs/agents/contract-evaluation-methodology.md; pilot: docs/plans/2026-07-19-deliberate-t2-pilot-report.md; panel: docs/plans/2026-07-21-deliberate-t2-design-panel-report.md"
 ---
 
