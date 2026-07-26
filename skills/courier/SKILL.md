@@ -1,6 +1,6 @@
 ---
 name: courier
-description: "Use when the user is hand-carrying work between this session and another model or session — `give me a paste packet`, `prep this for Codex`, `a prompt I can paste`, `courier this` — or pastes the other side's reply back mid-relay. Composes self-contained outbound packets, then adjudicates inbound replies against local evidence before composing the next leg. Do not use when a driver automates the exchange (`/synapsis` where available), for explicit full-rigor adjudication of a supplied review (`/review-reviewer`), or for first-pass review of local work."
+description: "Use when the user is hand-carrying work between this session and another model or session — `give me a paste packet`, `prep this for Codex`, `a prompt I can paste`, `courier this` — or pastes the other side's reply back mid-relay. Composes self-contained outbound packets, then adjudicates inbound replies against local evidence before composing the next leg. Do not use when a driver automates the exchange (`/synapsis` where available), for explicit full-rigor adjudication of a supplied review (`/review-reviewer`), for first-pass review of local work, or for a multi-leg exchange between sessions sharing this filesystem (`relay-by-reference`)."
 argument-hint: "[what to carry outbound | paste the other side's reply]"
 ---
 
@@ -12,7 +12,9 @@ Invocation: `/courier` or `$courier`, or a plain ask for something to paste else
 
 ## The human is the wire
 
-That is what picks this lane. When a driver automates the exchange, this is the wrong skill — `/synapsis` (where available) runs a capped, certificate-producing deliberation with the machine as transport, and courier adds nothing to it. When the user pastes a formal review and wants a verdict on *that review* rather than a reply to send back, the full-rigor lane is `/review-reviewer`, and an explicit invocation of it always wins over this skill. Courier owns the round trip: adjudication here is instrumental, and exists to compose the next leg.
+That is what picks this lane — but it is the wire, not the freight. When the far side shares this disk, the human still carries the leg while the payload need not travel at all: `relay-by-reference` stages each leg as a sha-stamped file and hands over one pointer line. Reach for it once an exchange runs several legs, or the body grows large enough that carrying its bytes is itself the risk — truncation, hand-transcription drift, and two sessions burning context on the same text are what that lane exists to stop. Compose the leg here under the contract below and let that skill carry it.
+
+When a driver automates the exchange, this is the wrong skill — `/synapsis` (where available) runs a capped, certificate-producing deliberation with the machine as transport, and courier adds nothing to it. When the user pastes a formal review and wants a verdict on *that review* rather than a reply to send back, the full-rigor lane is `/review-reviewer`, and an explicit invocation of it always wins over this skill. Courier owns the round trip: adjudication here is instrumental, and exists to compose the next leg.
 
 ## Outbound — build the packet
 
