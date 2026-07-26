@@ -13,11 +13,11 @@ are here to decide *whether* the mode applies, you are in the wrong file.
   take it apart — the correction is usually the sharpest teaching in the piece,
   and it inoculates the reader against precisely the version they'd have invented
   on their own. Giving him a *second* swing that lands is stronger still.
-- **Knife selection loosens on Dennis.** He normally centers every scene by
-  owning the correct-definition slot, so making him the victim too doubles down.
-  This mode displaces him from that slot — the straight explanation already
-  delivered the definition — so it is the one mode where Dennis-as-victim does
-  not over-center.
+- **Knife selection loosens on Dennis.** Dennis-as-victim over-centers a scene
+  whenever he is also carrying the explanation, and the pull to hand him the
+  explanation never fully goes away. This mode kills that pull at the root — the
+  definition was spent before anybody spoke — so it is the one mode where
+  stabbing Dennis costs nothing.
 - **The audit becomes scorekeeping.** The straight explanation already did the
   audit's usual job, so the five-line correction is redundant. Replace it with a
   short ledger of what the scene distorted *deliberately* — and record where a

@@ -15,7 +15,9 @@ its own.
 
 Line economy has been passed against the real scripts: composed comebacks broken
 or dumbed down per the crafted-riposte check in SKILL.md's Register. Lines that
-still run long are payload slots or Dennis holding the floor, both licensed.
+still run long are payload slots, or Dennis holding a floor he has already been
+publicly knocked off once — which is the condition on that license, not an
+exemption from it.
 
 ---
 
@@ -194,32 +196,41 @@ holding a mop.*
 
 ```
 — THE ACTUAL THING —
-Dennis was right about:   Survivorship bias is conditioning on the outcome. When
-                          you select a sample by survival and then search it for
-                          the cause of survival, every shared trait you find is
+What it actually is:      Survivorship bias is conditioning on the outcome. Select
+                          a sample by survival, then search it for the cause of
+                          survival, and every shared trait you find is
                           uninformative until you check the dead ones for it too.
-Mac was wrong about:      A bigger sample. Enlarging a sample that was selected on
+                          — Dee, in one shout, from the taps. Dennis annexed it a
+                          beat later and supplied the vocabulary.
+The trap:                 A bigger sample. Enlarging a sample that was selected on
                           the outcome makes you more confident, not more correct —
                           a hundred surviving bars is the same bias, tighter.
-Charlie's metaphor holds: You can't tell "tough" from "lucky" by looking only at
-                          the glasses still on the shelf; you need the bag.
-                          Where it breaks: sometimes survival really is caused by
-                          the trait, and the survivors really are tougher. The bias
-                          isn't that survivors are unremarkable — it's that looking
-                          only at survivors can't distinguish the two cases.
-Dee's caveat:             The fix is usually not "also study the failures,"
+                          — Mac walked into it; Dee closed it.
+Where the analogy breaks: The glasses hold: you can't tell "tough" from "lucky"
+                          looking only at what's still on the shelf. They break
+                          where survival really is caused by the trait and the
+                          survivors really are tougher. The bias isn't that
+                          survivors are unremarkable — it's that survivors alone
+                          can't distinguish the two cases. — Charlie. Nobody in
+                          the bar found the break; Mac got the bag backwards.
+The edge case:            The fix is usually not "also study the failures,"
                           because the failures are structurally unreachable —
                           closed bars have nobody to answer the phone, dead funds
                           get delisted, the planes that didn't come back are on
                           the seabed. When the missing data is missing by
                           construction you have to reason about the selection
                           mechanism instead of collecting more.
-Frank's exploit:          The split-list prediction scam. Mail both calls to
+                          — nobody. The scene stages this one instead of saying
+                          it: Dennis's entire scheme is a six-week drive to go
+                          interview bars that cannot be interviewed.
+How it gets abused:       The split-list prediction scam. Mail both calls to
                           halves of a list, drop the half you got wrong, repeat.
                           The last cohort has watched you be right six times
-                          running and will pay for the system. Any performance
-                          record that only reports the entities still operating
-                          is the same trick with better manners.
+                          running and will pay for the system — they are holding a
+                          track record manufactured by deleting the losses. Any
+                          performance record that reports only the entities still
+                          operating is the same trick with better manners.
+                          — Frank, who has obviously run it.
 ```
 
 ---
@@ -245,11 +256,11 @@ Frank's exploit:          The split-list prediction scam. Mail both calls to
 
 **Knife selection.** Dennis, at one step: measurement and evaluation, and the
 machinery for asking *or did that just happen?* aimed at a man who needs to be
-exceptional. Worth noting because it looks like a violation: Dennis normally
-centers every scene by owning the correct-definition slot, so making him the
-knife too would double down. Straight-first mode displaces him from that slot —
-the straight explanation already carried the definition — so this is the one mode
-where Dennis-as-victim doesn't over-center.
+exceptional. Worth noting because it looks risky: Dennis-as-victim over-centers
+the moment he is also carrying the explanation, and the pull to hand him the
+explanation is constant. Straight-first mode kills that pull outright — the
+definition was spent before anybody spoke — which is what makes him safe to stab
+here.
 
 **Closing image.** Dennis alone, colder than the start. Dennis's sincere beats are
 horror rather than pathos, and the same is true of his endings.

@@ -22,7 +22,7 @@ Two corollaries, both load-bearing:
   beating Mac. Dee isn't caveating, she's clawing at rank. Frank isn't teaching,
   he's casing the thing. Nobody in this bar has ever wanted to inform anyone.
 
-Two complete runs live in [examples.md](examples.md) — one standard, one
+Two complete runs live in `${CLAUDE_SKILL_DIR}/examples.md` — one standard, one
 straight-first — each with the knife reasoning that produced it. Read one for
 calibration on length, density, and how hard the register should hit.
 
@@ -75,7 +75,7 @@ found. That's the better placement of the two.
 **Having a victim creates the one temptation this format cannot survive:** you
 start wanting to give them a *moment*. The show does have those — maybe one a
 season, and it never lets a single one accomplish anything. **Zero is the normal
-number.** If you take one, read [sincere-beat.md](sincere-beat.md) first: it
+number.** If you take one, read `${CLAUDE_SKILL_DIR}/sincere-beat.md` first: it
 carries four binding clauses, and a sincere beat without them is a warm scene,
 which is not a scene from this show.
 
@@ -86,7 +86,7 @@ Four dials each. *Lens* is the delusion they force the concept through;
 
 **DENNIS** — co-owner, "the looks"
 - *Wants:* to be the only one who understands it, and to hold that over everyone.
-- *Lens:* control over people. He will systematize it, ideally with an acronym. Cf. the D.E.N.N.I.S. System.
+- *Lens:* control over people. He doesn't explain a thing, he *annexes* it — renames it, systematizes it, ideally with an acronym, and pitches the result at whoever is cornered. Cf. the D.E.N.N.I.S. System.
 - *Escalates:* icy → surgical → **detonation at full volume** → recomposes inside one breath → returns quieter and worse. He never loses; he relocates the fight to ground he wins on.
 - *Wound:* a terrifyingly fragile ego under the Golden God. He hasn't begun to peak and needs you to agree.
 
@@ -122,13 +122,34 @@ five padded ones — cut, don't pad.
 different direction. Correcting the default is where the payload gets sharp.**
 
 **Dennis is not the authority.** Certainty and correctness are independent
-variables; in the show he is confidently, catastrophically wrong all the time. He
-delivers the correct framework **and is blind to the place it indicts him** — go
+variables; in the show he is confidently, catastrophically wrong all the time.
+When he does hold the framework he is **blind to the place it indicts him** — go
 find that place, it is usually the sharpest line available. He explains that sunk
 costs are irrelevant and stays for reasons that aren't forward-looking either. He
 never states the blindness and the room never notices; it is for the reader.
 Without it he is a smug professor, and he silently becomes the protagonist of
 every scene regardless of who the knife is.
+
+**And he is not the narrator — this is the failure that actually ships.** The
+concept drifts to him because he's the only one who can hold a sentence together,
+and what comes back is a man reciting an encyclopedia at four people who didn't
+ask. Three things keep him off it:
+
+- **He annexes, never defines.** The framework is *his*, and the whole reason to
+  say it out loud is that nobody else in this bar has it. Second person and
+  imperatives, aimed at the one person he is currently beating — never at the
+  room, and never at the reader over their heads.
+- **The room takes the floor back.** **Register** licenses him a long speech only
+  because everyone visibly stops listening, so put the not-listening *on the
+  page*: interrupted, talked over, derailed by Charlie chasing something
+  unrelated. A Dennis paragraph that reaches its own last word is the tell.
+- **The clarity is not his.** The turn belongs to Charlie's metaphor or Frank
+  naming the exploit — see **Structure**. Hand Dennis the definition *and* the
+  turn and he is the only informed man in the scene; domination follows from that
+  asymmetry no matter how nasty you write him.
+
+**The paste test:** drop a Dennis line into the concept's Wikipedia article. If it
+sits there unnoticed, it was never a Dennis line — nothing in it was about him.
 
 **Mac gets the strongest wrong answer, not the dumbest.** The slot earns its space
 only by naming a trap someone would actually fall into — nobody is at risk of
@@ -261,16 +282,31 @@ about a different concept, you imported it. Rewrite it out of *this* bar's histo
 
 ## Then break character. Always.
 
+**Write it last, from the draft in front of you — never forward from the
+template.** It reports what the scene managed to establish and who happened to
+establish it. Read the other direction it becomes a call sheet, and a call sheet
+is the thing Step 1 already forbade: the row reading *the definition* turns into
+Dennis reciting one.
+
 ```
 — THE ACTUAL THING —
-Dennis was right about:   [the correct definition]
-Mac was wrong about:      [the misconception, corrected in one line]
-Charlie's metaphor holds: [where the analogy works — and where it breaks]
-Dee's caveat:             [the real edge case]
-Frank's exploit:          [the real abuse case or failure mode — and who ends up
-                           holding the bag, which is the half Dennis's line can't
-                           already be carrying]
+What it actually is:      [the definition]                          — who got there: ___
+The trap:                 [the misconception, corrected in one line]           — ___
+Where the analogy breaks: [what the metaphor stops covering]                   — ___
+The edge case:            [the real caveat]                                    — ___
+How it gets abused:       [the failure mode, and who ends up holding the bag —
+                           the half the definition row can't already be
+                           carrying]                                           — ___
 ```
+
+Fill the attributions off the draft, and expect them scrambled: Charlie stumbling
+into the definition, Dee naming the abuse case, the trap corrected by nobody and
+left standing in the bar. Scrambled is the healthy result. **Five rows reading
+Dennis/Mac/Charlie/Dee/Frank in order means the template wrote your scene.**
+
+A row the scene never established is left empty and stated straight underneath.
+Empty rows are cheap. A row back-filled by a line invented to fill it is the
+entire failure.
 
 Non-negotiable. Without it the reader keeps Mac's model, and Mac's model is
 *always* wrong. The comedy earns its keep by getting audited. (One exception —
@@ -299,7 +335,7 @@ retract a joke the reader already enjoyed. Three checkable tells:
 None of these is "the concept is hard." Hard concepts survive this format fine.
 These are about *which slot* the danger lands in.
 
-**If one fires, read [straight-first.md](straight-first.md)** — the mode inverts
+**If one fires, read `${CLAUDE_SKILL_DIR}/straight-first.md`** — the mode inverts
 what the scene is for, and the audit becomes a different artifact.
 
 ## Register
@@ -325,7 +361,8 @@ comedy is stupidity, commitment, and escalation, not wit. **The crafted-riposte
 check:** a line that reads as a polished comeback belongs to a smarter room —
 break it with an interruption or dumb it down. Long speeches belong to Dennis,
 and only because he's the type to hold the floor while everyone visibly stops
-listening.
+listening — which has to be staged, not assumed. If he reaches the end of a
+paragraph unpunctured, the scene handed him a lectern.
 
 Two line devices straight off the real pages, cheap and instantly the show:
 
