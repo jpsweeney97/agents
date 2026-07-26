@@ -25,7 +25,7 @@ Name the file `YYYY-MM-DD-<target>-<purpose>-prompt.md`:
 - **target** — a short slug for the repo or area it gets pasted into: `agents` for `~/.agents`, `career` for `~/career`.
 - **purpose** — the subject of the commission, hyphenated. Name the thing, not the action taken on it: `stage-prompt-bootstrap`, `design-exploration-methodology-critique`.
 
-If `~/prompts` is absent, create it before writing: `git init`, an `archive/` directory, and a README pointing back to this skill as the owner of the format. Never add a remote and never push — publishing is the user's gate, offered rather than assumed.
+If `~/prompts` is absent, it is far more likely un-cloned than new: clone it from the user's remote rather than initializing a fresh one, because a `git init` beside an existing remote builds a divergent history the push cannot reconcile. Initialize only when there is genuinely no remote to clone — `git init`, an `archive/` directory, and a README pointing back to this skill as the owner of the format — and leave adding a remote to the user.
 
 ## Self-containment is the hard rule
 
@@ -62,11 +62,13 @@ The body carries as much of what follows as the commission actually has. This is
 
 Write the file, then commit it **in `~/prompts`** — not in the repo this session is working in. Stage only the prompt file; message `stage <purpose> commission for <target>`.
 
-Commit on the prompts repo's own default branch. It is a flat single-branch store, and the protected-branch floors that govern working repos are theirs, not this one's: do not import a branch-first rule here and refuse the commit. Never push.
+Commit on the prompts repo's own default branch. It is a flat single-branch store, and the protected-branch floors that govern working repos are theirs, not this one's: do not import a branch-first rule here and refuse the commit.
+
+Then push it. The remote is private and exists as backup, so pushing here is not publishing — and a commit that never leaves the machine is exactly as lost as one never made. Push fast-forward only: never `--force`, never `--force-with-lease`. A rejected push is a hard stop, not something to reconcile — do not fetch, pull, rebase, or retry. Report the rejection, say the prompt is committed locally and unpushed, and hand the reconciliation back.
 
 ## Archive
 
-Only when the user says a commission was consumed: `git mv` it into `archive/` and commit with `archive <purpose> commission`.
+Only when the user says a commission was consumed: `git mv` it into `archive/`, commit with `archive <purpose> commission`, and push under the same rules as above.
 
 Never infer consumption, scan for it, or check on it unprompted. Sessions in other repos owe this repo nothing — no callback, no status write-back — and that absence is what keeps the convention cheap enough to hold.
 
