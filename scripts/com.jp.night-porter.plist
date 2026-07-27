@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!--
+    Night porter: nightly digest of the failure ledger
+    (~/.claude/logs/failure-ledger.jsonl, live-fed by the PostToolUseFailure
+    hook ~/.claude/hooks/failure-ledger.py). Runs scripts/failure-digest.py:
+    writes ~/.claude/logs/failure-digest.md, keeps cursor/signature state, and
+    posts a macOS notification when the window has new failures (always on
+    Sundays, as a liveness heartbeat).
+
+    Source of truth: /Users/jp/.agents/scripts/com.jp.night-porter.plist
+    (deliberately not stow-managed: LaunchAgents here follow the plain-file
+    precedent of com.jp.skill-usage-miner and com.jp.vault-reading-desk, and
+    ~/Library targets cannot be stowed from Claude Code's sandbox).
+
+    Install/update:
+      cp /Users/jp/.agents/scripts/com.jp.night-porter.plist ~/Library/LaunchAgents/
+      launchctl bootout gui/$(id -u)/com.jp.night-porter 2>/dev/null
+      launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.jp.night-porter.plist
+    Run now:    launchctl kickstart gui/$(id -u)/com.jp.night-porter
+    Uninstall:  launchctl bootout gui/$(id -u)/com.jp.night-porter
+                trash ~/Library/LaunchAgents/com.jp.night-porter.plist
+
+    If the Desktop scheduled-task upgrade is ever registered (phone push;
+    see scripts/night-porter-task-prompt.md), uninstall this agent first —
+    one reader per ledger, or the two split the digest windows between them.
+
+    /usr/bin/python3 on purpose: the digest script is stdlib-only, and mise
+    install paths are version-keyed (a pinned mise path dies silently on
+    runtime upgrades). 08:07 local, not 08:00: off the round hour by habit,
+    and launchd fires a missed calendar event once on wake, so a sleeping
+    Mac gets its digest at wake time instead of skipping the day.
+  -->
+  <key>Label</key>
+  <string>com.jp.night-porter</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>/Users/jp/.agents/scripts/failure-digest.py</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>8</integer>
+    <key>Minute</key><integer>7</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>LowPriorityIO</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/jp/.claude/logs/night-porter.launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/jp/.claude/logs/night-porter.launchd.log</string>
+</dict>
+</plist>
