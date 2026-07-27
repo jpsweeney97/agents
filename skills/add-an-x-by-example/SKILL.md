@@ -1,6 +1,6 @@
 ---
 name: add-an-x-by-example
-description: "Use when the task is to add another instance of a category this repo already has — an endpoint, CLI command, event type, migration, error code, config key — and sibling instances exist in git history. Derives the empirical touchpoint checklist from the commits that added the last few siblings, then closes with a mandatory completeness diff of your change against it. Do not use when the category has no existing siblings, to map acceptance checks from a settled spec (`acceptance-map`), or for whole-repo orientation (`explain-codebase`)."
+description: "Use when the task is to add another instance of a category this repo already has — an endpoint, CLI command, event type, migration, error code, config key — and sibling instances exist in git history. Derives the empirical touchpoint checklist from the commits that added the last few siblings, then closes with a mandatory completeness diff of your change against it. Do not use when the category has no existing siblings, to surface what habitually co-changes with an existing file under edit (`co-change-radar`), to map acceptance checks from a settled spec (`acceptance-map`), or for whole-repo orientation (`explain-codebase`)."
 ---
 
 # Add An X By Example
