@@ -149,6 +149,8 @@ Required before declaring done:
 - [ ] Throwaway prototypes removed with `trash` (never `rm`), or moved to a clearly-marked debug location
 - [ ] The hypothesis that turned out correct is stated in the commit / PR message — so the next debugger learns
 
+**The confirmed cause is also a search key.** Before declaring done, `bug-epidemiology` (where available) hunts the defect's twins — copy-paste clones, the same API misused elsewhere, the parallel implementation with the parallel flaw — because the fixed instance is a sample, not a unit.
+
 **Then ask: what would have prevented this bug?** If the answer involves architectural change (no good test seam, tangled callers, hidden coupling) hand off to the `improve-codebase-architecture` skill with the specifics. Make the recommendation **after** the fix is in, not before — you have more information now than when you started.
 
 For a durable, dated, blameless retrospective that outlives this commit-line — an incident with real impact, a timeline worth recording, or non-code aspects — hand off to `/postmortem` (`$postmortem`). This Phase 6 note is the one-line version, not that.
