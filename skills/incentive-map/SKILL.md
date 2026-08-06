@@ -1,6 +1,6 @@
 ---
 name: incentive-map
-description: "Use when proposing or vetting a structure other people will live under — a metric, quota, review gate, policy, process, automation, leaderboard, SLA, a partner-program tier, a listing or intake requirement — to predict how ordinary participants will adapt before it ships. Enumerates actors and what each is actually paid (in money, status, or comfort) to do, predicts each actor's cheapest adaptation and the equilibrium after everyone adjusts, and flags Goodhart paths (metric moves, goal doesn't) and cobra paths (intervention worsens its own target) with tripwires. Renders no ship/don't-ship verdict. Not for motivated external adversaries attacking the system (red-team, where available), accidental failure of a committed plan (premortem, where available), or access-control design."
+description: "Use when proposing or vetting a structure other people will live under — a metric, quota, review gate, policy, automation, SLA, a program tier or intake requirement — to predict how ordinary participants will adapt before it ships: each actor's real payoff, their cheapest adaptation, the equilibrium after everyone adjusts, and the Goodhart and cobra paths with tripwires. Renders no ship/don't-ship verdict. Not for motivated external adversaries (red-team, where available), accidental failure of a committed plan (premortem, where available), or access-control design."
 ---
 
 # Incentive Map

@@ -1,6 +1,6 @@
 ---
 name: decision-flip
-description: "Use when a conclusion that leans on estimates is about to circulate or drive a decision — a business case, performance analysis, forecast, capacity plan — or when deliberation keeps polishing numbers: find which single input, moved within its honest pre-registered range, flips the conclusion. Renders one of three stability verdicts: robust (no honest range flips it — stop refining and decide), one crux (the only input worth chasing, with its break-even value and cheapest probe), or estimate-driven (several flip it — the numbers cannot carry the conclusion). Uses only the analysis's own numbers moved within stated ranges — never invented weights or manufactured probabilities. Do not use to choose among options (making-recommendations, where available), set the prior for a single estimate (outside-view, where available), or surface a plan's non-numeric assumptions (assumption-check, where available)."
+description: "Use when a conclusion that leans on estimates is about to circulate or drive a decision — a business case, forecast, capacity plan — or when deliberation keeps polishing numbers: find which single input, moved within its honest pre-registered range, flips the conclusion, and render a stability verdict (robust / one crux / estimate-driven). Do not use to choose among options (making-recommendations, where available), set the prior for a single estimate (outside-view, where available), or surface non-numeric assumptions (assumption-check, where available)."
 ---
 
 # Decision Flip

@@ -1,6 +1,6 @@
 ---
 name: soundcheck
-description: Use when the user invokes /soundcheck or says the always-loaded instructions are fading, not being followed, or not salient enough — "you're drifting", "reread your instructions", "the contract isn't landing". Re-reads every always-loaded instruction file fresh, audits recent replies against them with quoted receipts and a cause read, restates the at-risk rules as applied to the current work, and logs one ledger line per ring. When a violation traces to the rule text itself, drafts a self-contained patch note — recommendation only, never an edit. With an argument (/soundcheck reply-shape), amplifies only that named rule. Do not use to author new rules or land durable rewrites (friction-to-guards), and not for "too loud" (that is the reply-register restate the Reply Shape contract itself owns).
+description: "Use when the user invokes /soundcheck or $soundcheck, or says the always-loaded instructions are fading or not being followed — 'you're drifting', 'reread your instructions'. Re-reads every always-loaded instruction file fresh, audits recent replies against them with quoted receipts, re-anchors the at-risk rules, and logs one ledger line per ring; textual causes get a recommendation-only patch note. With an argument, amplifies only the named rule. Do not use to author new rules or land durable rewrites (friction-to-guards), or for 'too loud' (owned by the Reply Shape contract itself)."
 ---
 
 # Soundcheck
@@ -11,9 +11,9 @@ Being rung means drift was *felt*. Do not open by disputing that. The audit may 
 
 ## Moves
 
-No-arg default is all moves. With an argument (`/soundcheck <rule>`), run the same moves against only the named rule or contract.
+No-arg default is all moves. With an argument (`/soundcheck <rule>` or `$soundcheck <rule>`), run the same moves against only the named rule or contract.
 
-1. **Fresh Read, not recall.** Read the live always-loaded instruction files with actual Read calls, now: `~/.claude/CLAUDE.md`, the project `CLAUDE.md`(s) in scope, and any file those declare as always-loaded (charters, rule docs — not conditional consult-when-X references). Never quote a rule from memory. This skill deliberately contains no rule text, so there is nothing here to restate from.
+1. **Fresh Read, not recall.** Read the live always-loaded instruction files with actual Read calls, now: the user-level instructions for this runtime (`~/.claude/CLAUDE.md` on Claude Code, `~/.codex/AGENTS.md` on Codex), the project `AGENTS.md` or `CLAUDE.md`(s) in scope, and any file those declare as always-loaded (charters, rule docs — not conditional consult-when-X references). Never quote a rule from memory. This skill deliberately contains no rule text, so there is nothing here to restate from.
 2. **Audit with receipts.** Check your last 3–5 replies against the rules the recent work actually exercised — not the whole rulebook. Name the worst violation first, with a short quote of your own offending words beside the rule it broke. Max three receipts. Nothing found → "clean", plus the rule you judge most at risk anyway.
 3. **Cause read.** One added line per receipt: what the rule lost to. Two causes exist. *Attention* — momentum, session mass, register gravity; the default. *Text* — the rule is ambiguous, collides with a competing rule, or misses a case. The drafter is the offender and "the rule was ambiguous" is always the flattering diagnosis, so a textual cause must quote the specific competing or missing text. No quote, no textual cause.
 4. **Restate applied.** Restate the one or two rules that matter most for the work in front of you, phrased as what you will do differently in this session's next replies — not abstract rule text.

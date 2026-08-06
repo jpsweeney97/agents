@@ -1,6 +1,6 @@
 ---
 name: outside-view
-description: "Use when about to produce or accept an estimate — duration, effort, success odds, capacity — especially one embedded in a plan. Sets the prior from a reference class before inside-view reasoning adjusts it: name the class of similar past attempts, pull its base rate from reachable records (git history, pipeline or CRM records, contract logs, past plans versus actuals, tracker cycle times, published data), then argue this case's deltas from that base. If no reference class is reachable, says so and widens the interval — never manufactures a rate. Not for updating an existing position under challenge (hold-or-fold, where available), choosing between options (making-recommendations, where available), or surfacing a plan's assumptions (assumption-check, where available)."
+description: "Use when about to produce or accept an estimate — duration, effort, success odds, capacity — especially one embedded in a plan. Sets the prior from a reference class before inside-view reasoning adjusts it: name the class of similar past attempts, pull its base rate from reachable records, then argue this case's deltas from that base; if no class is reachable, says so and widens the interval — never manufactures a rate. Not for updating a position under challenge (hold-or-fold, where available), choosing between options (making-recommendations, where available), or surfacing a plan's assumptions (assumption-check, where available)."
 ---
 
 # Outside View

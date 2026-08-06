@@ -1,6 +1,6 @@
 ---
 name: decision-owner-map
-description: "Use when a decision is floating without a clear owner, stalled between functions, bundled inside a larger question, or about to be routed — 'who decides this?', 'who owns this call?', 'this needs a decision' — to produce a routable decision packet: the decision in decidable form, the accountable owner with the evidence for their ownership, what they need to decide well, the minimal consult/inform cast, the deadline with the named drift outcome, and what fires once the decision lands. Splits bundled questions into separately-owned decisions. Never makes the decision or assigns ownership by fiat. Do not use to choose among options (making-recommendations, where available), surface a plan's assumptions (assumption-check, where available), or pressure-test a settled plan."
+description: "Use when a decision is floating without a clear owner, stalled between functions, bundled inside a larger question, or about to be routed — 'who decides this?', 'who owns this call?' — to produce a routable decision packet: the decision in decidable form, the evidenced owner, what they need, the minimal consult/inform cast, the deadline with its named drift outcome. Splits bundles; never makes the decision or assigns ownership by fiat. Do not use to choose among options (making-recommendations, where available), surface a plan's assumptions (assumption-check, where available), or pressure-test a settled plan."
 ---
 
 # Decision-Owner Map
