@@ -67,7 +67,9 @@ Produce:
 1. **Recommended production rewrite:** the shortest version that preserves the non-negotiable image identity and essential realism or reference controls. Remove repetition, low-leverage embellishment, and unnecessary prohibitions.
 2. **Comprehensive control rewrite:** a complete reference formulation that preserves all compatible explicit detail and repairs spatial or logical problems. State plainly that more detail does not automatically make it the better-performing version.
 
-If the target generator is unresolved, label both rewrites `portable`; do not call them model-ready. If the two versions would be materially identical, provide one production rewrite and explain why a second formulation would add no control.
+Place the recommended production rewrite and the comprehensive control rewrite in separate fenced code blocks. Each block must contain only its prompt text. Keep headings, `portable` labels, rationale, caveats, and tradeoff explanations outside the blocks so copying either block copies only its prompt.
+
+If the target generator is unresolved, label both rewrites `portable`; do not call them model-ready. If the two versions would be materially identical, still provide both code blocks and explain outside them why the comprehensive formulation adds no further control.
 
 ## Present the review
 
@@ -79,6 +81,6 @@ Use the smallest useful shape:
 4. `Protected elements` — effective instructions the rewrites must retain.
 5. `Priority edit order` — up to eight high-effect changes when sequencing helps; do not merely repeat the findings.
 6. `Prompt-specific tradeoffs` — before the rewrites when a genuine tradeoff such as precision versus naturalism, completeness versus compliance, or candidness versus compositional control governs how a conflict is resolved.
-7. `Rewrites` — recommended production rewrite first, then the comprehensive version when it adds value.
+7. `Rewrites` — recommended production rewrite first, then the comprehensive control rewrite, each in its required standalone fenced code block.
 
-Omit optional sections that would be empty. If no material defect survives scrutiny, say so, preserve what works, and offer only a genuinely beneficial rewrite. End with the proof boundary: the prompt was reviewed and rewritten, not generated or visually validated.
+Omit optional sections that would be empty. If no material defect survives scrutiny, say so, preserve what works, and keep both rewrite blocks faithful to the original rather than inventing changes merely to differentiate them. End with the proof boundary: the prompt was reviewed and rewritten, not generated or visually validated.
