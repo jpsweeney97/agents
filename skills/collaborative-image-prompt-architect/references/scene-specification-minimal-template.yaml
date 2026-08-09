@@ -1,0 +1,12 @@
+intent_version: "1.0"
+
+contract:
+  subject: ""
+  event: ""
+  viewpoint: ""
+  frozen_moment: ""
+
+visual_thesis: ""
+salience_budget: []
+locks: []
+references: []

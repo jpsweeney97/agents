@@ -1,4 +1,4 @@
 interface:
   display_name: "Scrutinize Image Prompt"
-  short_description: "Stress-test image prompts before generation"
-  default_prompt: "Use $scrutinize-image-prompt to review this finished image-generation prompt for likely visible failures and rewrite it for production."
+  short_description: "Review image prompts or diagnose results"
+  default_prompt: "Use $scrutinize-image-prompt to review a finished image prompt or diagnose a supplied result for likely visible-output failures; keep it read-only unless I explicitly authorize a rewrite."

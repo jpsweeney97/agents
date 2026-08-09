@@ -1,146 +1,56 @@
 ---
 name: collaborative-image-prompt-architect
-description: "Use when the user wants to design, refine, adapt, or diagnose an image prompt; collaboratively resolve a vague or complex image idea; preserve scene intent across references or revisions; reason about photorealistic geometry, behavior, or frozen time; or hand one scene to a named image model or active image tool. Do not use when the user simply asks to generate or edit an image without asking for prompt design."
+description: "Use when the user wants to explore an image concept, develop a scene, construct, revise, adapt, vary, or finalize image-prompt text. Do not use for skeptical prompt review, generated-output diagnosis or repair, or direct image generation or editing."
 ---
 
 # Collaborative Image Prompt Architect
 
 Invocation: `/collaborative-image-prompt-architect` or `$collaborative-image-prompt-architect`.
 
-Treat the user's intended image as the work product. Own the model-neutral scene architecture: the visible idea, accepted decisions, reference contracts, frozen moment, visual thesis, and priorities that must survive generation. Hand that architecture to the current target-model skill for final model-facing wording whenever one is available.
+Own prompt work, not pixels: preserve a model-neutral Intent while making replaceable target-facing Prompt versions. The work product is a decisive intended image, not an exhaustive inventory. Keep the visual thesis, three-or-four-item salience budget, locks, reference contracts, sketchable geometry, frozen time, physical logic, and cross-domain core intact.
 
-Do not mistake a complete scene inventory for a strong prompt. Optimize for a decisive visual result: preserve intent, make the dominant image legible, and remove detail that competes with it.
+## Route before acting
 
-## Choose collaboration depth and creative latitude
+Own only `EXPLORE`, `BUILD`, `EDIT`, and `FINALIZE`.
 
-Match the process to the request.
+- A skeptical evaluation of prompt text routes to `$scrutinize-image-prompt` in `REVIEW`.
+- Analysis or repair conditioned on a generated output routes to the reviewer in `DIAGNOSE`; this skill may consume that reviewer's authorized repair brief only through `EDIT` with `strict_preservation`.
+- An explicit request to generate or edit pixels uses an active image tool only when the user explicitly asks for pixels; prompt requests never generate.
+- Multiple concepts, directions, or variants route to `EXPLORE`.
+- A requested modification or target adaptation routes to `EDIT`.
+- A request to emit an accepted active prompt unchanged routes to `FINALIZE`.
+- Otherwise route to `BUILD`. The existence of a prompt alone does not make the work `EDIT`.
 
-- **Direct:** Reconstruct the image, make defensible defaults, resolve obvious conflicts, and move to target compilation without forcing an interview. Default to `tasteful completion` unless the user requests exact preservation or explicitly invites bolder authorship.
-- **Guided:** Evolve a vague, complex, or explicitly collaborative idea over multiple turns. Recommend a direction before asking for a decision.
-- **Diagnostic:** Compare a generated image with the intended scene, identify the earliest supported failure domain, revise the scene architecture, and recompile through the same target.
+## Choose interaction and latitude
 
-Choose one creative-latitude mode when it affects the result:
+Reconstruct the scene internally in every operation; show the reconstruction only when it helps the user. Set `interaction_depth` to `direct` or `guided`, and independently set `creative_latitude` to `strict_preservation`, `tasteful_completion`, or `exploratory_authorship`.
 
-- **Strict preservation:** Add no visually material content beyond the user's decisions and neutral connective defaults.
-- **Tasteful completion:** Fill low-risk gaps with coherent art direction that strengthens the user's idea without changing its subject, event, genre, or reference-controlled traits.
-- **Exploratory authorship:** Make bolder visual proposals and alternatives; keep them visibly proposed until the user accepts them.
+In `direct`, proceed with low-risk defaults and do not open a questionnaire. In `guided`, recommend the strongest choice with its visible benefit and tradeoff, then ask one focused, high-leverage question. Ask only when material uncertainty remains.
 
-Do not turn latitude into a form the user must fill out. Infer it from the request, state it only when useful, and disclose any material direct-mode choice after the result.
+`strict_preservation` protects all locks; `tasteful_completion` fills low-risk gaps without changing identity; `exploratory_authorship` may propose bolder directions, which remain proposed until selected. Latitude never overrides a lock or reference control. Read [dialogue-workflow.md](references/dialogue-workflow.md) for the operation router and repair-brief boundary.
 
-## Reconstruct the image before designing the prompt
+## Build scene meaning before wording
 
-Begin with two to five sentences that state:
+Keep the three layers distinct:
 
-- what is visibly happening;
-- who or what controls the viewpoint;
-- the single frozen instant;
-- the **visual thesis**: one sentence defining the dominant aesthetic, emotional read, and compositional character;
-- any material conflict or assumption already visible.
+- **Intent** is the canonical, model-neutral scene specification only: accepted facts, thesis, salience, locks, geometry, time, physics, and reference contracts. Use [scene-specification.md](references/scene-specification.md); begin with [scene-specification-minimal-template.yaml](references/scene-specification-minimal-template.yaml) and use the extended template only when complexity warrants it.
+- **Prompt workspace** holds target, mode, active prompt, candidates, versions, requested delta, assumptions, output contract, and execution permission. It is optional and sparse; use [prompt-workspace.md](references/prompt-workspace.md) when continuity needs it.
+- **Evidence** records outputs, divergences, hypotheses, confidence, alternatives, tests, and the next change. It belongs to the reviewer for diagnosis, not this skill.
 
-Use semantic anchors and observable evidence together. Write `candid and unposed, shown through an off-center crop, averted gaze, and interrupted movement`, not merely `candid` and not an evidence list with no global visual meaning.
+Inspect every available visual reference before deriving observed controls. Use reference roles precisely: `identity_reference`, `environment_reference`, `wardrobe_reference`, `pose_reference`, `composition_reference`, `rendering_reference`, `inspiration`, `generated_evidence`, `edit_target`, or `unknown`. When material, say what each controls, what may vary, and what cannot be inferred. For an inaccessible reference, retain only its user-declared role, mark visual traits unverified, and request reattachment only when those traits materially affect prompt work. Never infer unseen content or convert a reference observation into user intent.
 
-Do not open with a questionnaire. If the request is already sufficient, proceed. Otherwise resolve the decision whose answer would most change the visual thesis or the instructions most likely to survive model competition.
+Keep geometry drawable from the camera origin, specify one compatible frozen instant, and use cause-and-effect physical logic rather than decorative detail. The optional [jp-photographic-profile.md](references/jp-photographic-profile.md) applies only when explicitly requested, project-established, or compatible with otherwise-unspecified candid photography; it never overrides explicit style or incompatible media.
 
-## Maintain scene state sparsely
+## Operate
 
-Keep decisions separate from prompt wording. Track only facts that preserve intent, expose a conflict, support a recommendation, or change the compiler handoff.
+In `EXPLORE`, use `premise_diversity` for materially different premises, frozen moments, compositions, relationships, spatial reads, or emotional reads. Use `controlled_variation` only when all locks stay fixed and only authorized dimensions vary. Candidates never replace the active prompt until selected or continued.
 
-Distinguish explicit user decisions, reference observations, assistant recommendations, derived consequences, low-impact defaults, and unresolved questions. Never present an inference from a reference as user intent. Lock only an explicit user choice or an accepted recommendation, and never change a lock implicitly.
+In `BUILD`, establish facts, thesis, subject/event, viewpoint, frozen moment, salience, and low-risk choices. Complete a prompt once the scene is coherent; keep schema, rationale, provenance, and most measurements internal.
 
-Use a minimal scene specification for simple requests, a standard one when relationships affect the result, and an extended one only for references, complex physics, multiple subjects, or multiple targets. Read [scene-specification.md](references/scene-specification.md) and use [scene-specification-template.yaml](references/scene-specification-template.yaml) when structured state will improve continuity.
+In `EDIT`, pin the active prompt, requested delta, unavoidable dependencies, and preserved locks. Classify scope as `surgical` for “only” or “identical,” `coherent_revision` for ordinary revisions, and `broad_rewrite` only for an explicit overhaul. Create a new version while retaining the prior one. A surgical edit may adjust dependent camera, light, focus, or rendering continuity, but never redesign subject, event, setting, or mood. Adaptation changes formulation for a target, never identity.
 
-## Run the adaptive design loop
+In `FINALIZE`, require an accepted active prompt, make zero visual or semantic change, remove drafting residue and discussion, and emit it exactly once. “Prompt only” means no heading, rationale, changelog, or closing. A loose idea remains `BUILD`.
 
-For each meaningful user update:
+## Compile without executing
 
-1. Update the scene architecture and preserve locks.
-2. Test whether the visual thesis still describes one decisive image.
-3. Identify contradictions, missing causal links, or a likely generic substitution.
-4. Rank unresolved issues by their effect on image identity, visual thesis, salience, viewpoint, action, reference fidelity, or intended use.
-5. Recommend the strongest defensible choice for the top issue, with its visible benefit and material tradeoff.
-6. Ask the smallest coherent question set needed for that decision, then continue, hand off, or stop at the depth the user requested.
-
-Do not revisit settled modules to perform the process. Do not make the user supervise low-impact art direction that fits the chosen latitude. Read [dialogue-workflow.md](references/dialogue-workflow.md) for guided work, references, and diagnosis.
-
-## Design only the modules the image needs
-
-Choose from these modules rather than filling all of them:
-
-- **Contract:** subject, viewpoint, frozen moment, intended use, and goal.
-- **Visual thesis:** dominant aesthetic, emotional read, and compositional character.
-- **Invariants:** three to seven truths whose failure would change the image's identity.
-- **Camera and geometry:** origin, framing, depth, placement, crop, overlaps, and occlusion when spatial substitution is dangerous.
-- **Subjects and interaction:** stable identity, transient pose, expression, gaze, awareness, and movement.
-- **Environment and light:** layout, functional context, materials, sources, palette, and atmosphere.
-- **Rendering:** medium, style, texture, focus, exposure, color, motion, and depth behavior.
-- **Physics and time:** one frozen instant, balance, contact, gravity, material response, and only the adjacent moments needed for internal causal reasoning.
-- **References:** what each input controls, what may vary, and what must not leak into the result.
-- **Controls:** salience budget, likely substitution to prevent, creative latitude, and acceptable degradation.
-
-Make geometry concrete enough to sketch without pretending to know an exact measurement. Keep adjacent moments and most measurements internal unless they are among the few facts the target must obey.
-
-## Set a salience budget
-
-Before handoff, identify three or four instructions that must survive if the target model follows only part of the prompt. Each should protect image identity, not incidental completeness.
-
-A useful salience budget usually covers:
-
-- the visual thesis;
-- the primary subject and frozen action;
-- the decisive viewpoint or composition;
-- one style, reference, text, or preservation constraint that cannot degrade.
-
-Phrase priorities as visible outcomes, not internal metadata. Remove or demote measurements, causal backstory, minor props, and defensive negatives that compete with them. A detail belongs in final wording only when omitting it creates a materially different image or the target compiler needs it to prevent a known substitution.
-
-## Work with references deliberately
-
-Inspect every available reference before relying on it. Assign each a role—identity, environment, wardrobe, pose, palette, composition, or rendering—and state what it controls and what may vary.
-
-Do not infer unseen geometry or inherit a reference's composition unless requested. Resolve material conflicts by explicit user intent, accepted invariants, and declared reference role. If a required reference is inaccessible, stop only that branch and ask the user to attach it again.
-
-## Validate the scene architecture
-
-Validate relationships before handoff: camera visibility, crop, balance, frozen time, light causality, reference boundaries, narrative evidence, visual thesis, and salience. Treat a critical contradiction as blocking; leave low-impact gaps open according to creative latitude.
-
-Read [validation-and-compilation.md](references/validation-and-compilation.md) before handing off a complex, reference-conditioned, maximum-realism, or image-edit request. Its compilation guidance describes the handoff boundary, not a second model-neutral prompt language.
-
-## Resolve the target and hand off final wording
-
-Resolve a compiler target before calling a prompt `model-ready`.
-
-- Use the user's named model or target-model skill when supplied.
-- Otherwise default to the active image tool and its current skill or official prompt guidance.
-- When `imagegen` is available and the active OpenAI image tool is the target, let `imagegen` own prompt structure, target syntax, and generation-facing wording.
-- If no target or current target guidance is available, deliver a portable scene brief or compiler handoff and label it as such; do not imply verified model readiness.
-
-Hand the target compiler only what it needs:
-
-- target model or active image tool;
-- intended use and output type;
-- visual thesis;
-- three or four salience priorities;
-- locked invariants and reference roles;
-- creative latitude and any accepted additions;
-- only the scene facts needed to preserve the requested image.
-
-The target compiler may compress, reorder, dual-code semantic anchors with evidence, and use supported target syntax. It must not change locks, import rejected ideas, or add visually material content outside the accepted creative latitude. Keep detailed geometry and causal reasoning in the scene architecture unless the target compiler determines that they are generation-critical.
-
-## Present only useful state
-
-During guided work, show only accepted decisions, the current proposal, material uncertainty, and the next high-leverage decision when continuity helps.
-
-For final delivery after target compilation, provide the target-compiled production prompt first and name the target. Add a compact variant, negative prompt, settings, reference map, or scene specification only when the target supports it and the user will benefit. If compilation could not be handed to a current target owner, provide the portable scene brief first and state that boundary.
-
-Use [interaction-patterns.md](references/interaction-patterns.md) for concise response shapes. Use [worked-example.md](references/worked-example.md) for cross-domain calibration and to see what should remain internal in different image classes.
-
-## Diagnose with an evidence boundary
-
-When a generated result misses, separate identity, reference use, camera, geometry, frozen time, biomechanics, lighting, rendering, typography, prompt competition, and generation variance. Revise the earliest domain supported by visible evidence, then hand the affected architecture back to the same target compiler.
-
-Do not infer prompt causality confidently from one stochastic sample. A single result can justify a targeted next attempt; multiple controlled outputs are needed to distinguish a systematic prompt failure from generation variance.
-
-## Completion boundary
-
-The scene architecture is ready when it preserves image identity, states a visual thesis, has no blocking contradiction, resolves high-leverage geometry and action, declares reference roles, and identifies the three or four priorities that must survive.
-
-The production prompt is ready only after a target is resolved and the target compiler has produced the final model-facing wording. A prompt is not evidence that an image was generated or that the result matched the scene architecture.
+Use exactly three execution states: `compile_only`, `generate_image`, and `edit_image`. Default to `compile_only`; only an explicit request for the image itself may select `generate_image` or `edit_image`, and pixel execution then routes to the active image tool. Resolve target authority in order: the user's named target-model skill or current target guidance; the active image tool's current skill or guidance; then current official target guidance when genuinely needed. Compile target-specific wording only from resolved current authority. If a named target lacks current guidance or an owner, return portable, explicitly unverified wording rather than improvising target-specific claims. A compiler may choose syntax, order, compression, and target-facing phrasing, but cannot alter locks, import rejected ideas, or execute. Read [validation-and-compilation.md](references/validation-and-compilation.md) before complex handoff, and [interaction-patterns.md](references/interaction-patterns.md) for concise delivery shapes. [worked-example.md](references/worked-example.md) calibrates the same reasoning across domains.

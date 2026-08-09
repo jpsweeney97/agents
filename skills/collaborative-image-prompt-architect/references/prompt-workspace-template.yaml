@@ -1,0 +1,20 @@
+workspace_version: "1.0"
+
+operation: BUILD
+interaction_depth: direct
+creative_latitude: tasteful_completion
+target:
+  generator: null
+  version: null
+  generation_mode: null
+# compile_only | generate_image | edit_image
+execution_permission: compile_only
+active_prompt_id: null
+active_prompt: null
+candidates: []
+previous_versions: []
+latest_revision_delta: null
+unavoidable_dependencies: []
+preserved_locks: []
+target_assumptions: []
+output_contract: null

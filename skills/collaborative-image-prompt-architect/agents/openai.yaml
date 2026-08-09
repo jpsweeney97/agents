@@ -1,4 +1,4 @@
 interface:
   display_name: "Collaborative Image Prompt Architect"
-  short_description: "Architect scenes for target-specific image prompts"
-  default_prompt: "Use $collaborative-image-prompt-architect to shape my image idea, preserve its visual priorities, and hand it to the active image tool for target-specific prompt wording."
+  short_description: "Develop and revise image-prompt concepts"
+  default_prompt: "Use $collaborative-image-prompt-architect to explore, build, revise, adapt, or finalize my image prompt while preserving its visual intent."

@@ -1,0 +1,26 @@
+# Optional internal template. Do not persist or expose automatically.
+intended_image_summary: ""
+source_prompt_id: ""
+target:
+  generator: ""
+  version: ""
+  generation_mode: ""
+references:
+  - id: ""
+    role: unknown
+    controls: []
+    may_vary: []
+    non_inferable: []
+settings: {}
+outputs: []
+supported_hypotheses: []
+causal_confidence: ""
+alternative_explanations: []
+tested_changes: []
+next_controlled_change: ""
+intent:
+  locks: []
+  assumptions: []
+prompt:
+  exact_text: ""
+proof_boundary: ""

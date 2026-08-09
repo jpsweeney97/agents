@@ -1,115 +1,65 @@
 # Interaction Patterns
 
-Use these as adaptable response shapes. Omit empty sections and do not expose internal state when a sentence will do.
+Use these only when they make the response clearer. Keep internal state internal unless continuity or a material choice needs exposure.
 
-## Reconstruction and next move
+## Guided recommendation
 
 ```markdown
-You are aiming for <two-to-five-sentence reconstruction of the visible image and frozen instant>.
+You are aiming for <brief visible reconstruction and frozen instant>.
 
-Visual thesis: <dominant aesthetic, emotional read, and compositional character>.
+I recommend <strongest choice>. It preserves <visible benefit>; the tradeoff is <tradeoff>.
 
-The highest-leverage open decision is <decision>, because <visible downstream consequence>.
-
-I recommend <choice>. It preserves <benefit>. The tradeoff is <tradeoff>.
-
-<One focused question.>
+<One focused high-leverage question.>
 ```
 
-Do not show a separate thesis line when it reads more naturally inside the reconstruction.
-
-## Compact continuity update
+## EXPLORE: premise diversity
 
 ```markdown
-Locked: <accepted decisions that matter now>.
+Here are <n> materially different directions:
 
-Proposed: <current recommendation>.
+- <direction>: <different premise, frozen moment, composition, relationship, spatial read, or emotional read>.
+- <direction>: <materially different premise>.
 
-Still unresolved: <one material uncertainty>.
-
-Next decision: <highest-leverage choice and why it matters>.
+These are candidates, not replacements for the active prompt. Which should I continue?
 ```
 
-Use this only when the user benefits from continuity.
-
-## Creative-latitude disclosure
+## EXPLORE: controlled variation
 
 ```markdown
-Creative latitude: <strict preservation | tasteful completion | exploratory authorship>. <One sentence explaining what may be added or must remain untouched.>
+Locks retained: <locks>.
+Authorized variation: <only the allowed dimensions>.
+
+- Candidate A: <variation>.
+- Candidate B: <variation>.
 ```
 
-State this when the mode is not obvious or another plausible mode would materially change the image. Do not make it a routine form field.
+Use only when every lock remains fixed.
 
-## Coupled framing decision
+## EDIT
 
 ```markdown
-I recommend <aspect ratio> with <crop>. Together they preserve <visual benefit>.
+Active prompt: <version or source>.
+Scope: <surgical | coherent_revision | broad_rewrite>.
+Requested delta: <change>.
+Preserved: <unrelated locks>.
+Necessary continuity changes: <camera/light/focus/rendering only when forced>.
 
-The alternative, <other pairing>, preserves <competing benefit> but costs <tradeoff>.
-
-Should I lock the recommendation, or is <specific competing need> more important?
+<Complete revised prompt, unless the user asked for a patch.>
 ```
 
-## Reference contract
+## FINALIZE
+
+For `prompt only`, emit the accepted active prompt exactly once with no title, rationale, changelog, or closing. Otherwise a compact label is allowed, but the prompt itself remains unchanged.
+
+## Portable compiler handoff
 
 ```markdown
-I will use the references this way:
-
-- **Reference 1 — identity:** preserve <traits>; do not copy <pose/background/lighting>.
-- **Reference 2 — environment:** preserve <layout/materials>; allow <incidental details> to vary.
-
-I cannot infer <unseen or ambiguous property>. <Focused question if material.>
-```
-
-## Compiler handoff
-
-Use this compactly and usually keep it internal:
-
-```markdown
-Target: <model, active image tool, or target skill>
-Intended use: <use>
+Target: <target or unresolved>
+Execution permission: compile_only
 Visual thesis: <one sentence>
-Must survive:
-- <salience priority>
-- <salience priority>
-- <salience priority>
-Locked: <invariants and reference controls>
-Creative latitude: <mode>
-Supporting facts: <only what the compiler needs>
+Must survive: <three or four salience priorities>
+Locks and references: <only material controls>
+Supporting facts: <only generation-relevant facts>
 ```
 
-Do not hand the target compiler the complete scene specification by default.
-
-## Final delivery after target compilation
-
-```markdown
-## Production prompt — <target>
-
-<target-compiled prompt>
-
-Assumption: <one material direct-mode assumption, if any>.
-```
-
-Add settings, a negative prompt, reference map, compact variant, or scene specification only when the target supports it and the user will benefit.
-
-## Portable scene brief when no target is resolved
-
-```markdown
-## Portable scene brief
-
-<visual thesis, salience priorities, invariants, and minimum supporting scene facts>
-
-Compiler boundary: No current target model or target-specific guidance was resolved, so this is a portable brief rather than a verified model-ready prompt.
-```
-
-## Diagnostic response
-
-```markdown
-The earliest supported failure is **<domain>**: <visible evidence>.
-
-That may explain <downstream symptoms>. I would revise <source scene facts>, preserve <unaffected locks>, and return those changes to <target compiler>.
-
-Next controlled change: <one targeted revision>.
-```
-
-For a single stochastic sample, say `supported hypothesis` rather than claiming proven prompt causality.
+The compiler may choose target syntax, order, compression, and phrasing. It cannot change locks, import rejected ideas, or execute. With no target, say the wording is portable and unverified, untested, unoptimized, and not model-ready.

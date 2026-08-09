@@ -1,0 +1,16 @@
+# Optional internal template. Do not persist or expose automatically.
+source_prompt_id: ""
+operation: EDIT
+creative_latitude: strict_preservation
+edit_scope: coherent_revision
+edit_scope_justification: ""
+retained_findings: []
+required_changes: []
+protected_elements: []
+unaffected_locks: []
+prohibited_additions: []
+target:
+  generator: ""
+  version: ""
+  generation_mode: ""
+rewrite_authorization: production

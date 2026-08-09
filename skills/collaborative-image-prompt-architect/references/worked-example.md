@@ -8,6 +8,11 @@ These examples calibrate scene architecture, compiler handoff, and selective omi
 - [Stylized editorial illustration](#stylized-editorial-illustration)
 - [Product-marketing hero](#product-marketing-hero)
 - [Reference-conditioned image edit](#reference-conditioned-image-edit)
+- [Premise-diversity exploration](#premise-diversity-exploration)
+- [Controlled variation](#controlled-variation)
+- [Surgical edit](#surgical-edit)
+- [Finalization](#finalization)
+- [Authorized repair brief](#authorized-repair-brief)
 - [Cross-domain lesson](#cross-domain-lesson)
 
 ## Photorealistic candid action
@@ -33,7 +38,7 @@ These examples calibrate scene architecture, compiler handoff, and selective omi
 
 ### Compiler handoff
 
-Target the active OpenAI image tool through the current `imagegen` skill. Pass the visual thesis, four salience priorities, restaurant reference roles, portrait framing, and only the biomechanics needed to prevent the symmetric `hands beside face` substitute.
+Target the active OpenAI image tool only through its current `imagegen` skill or current guidance. Pass the visual thesis, four salience priorities, restaurant reference roles, portrait framing, and only the biomechanics needed to prevent the symmetric `hands beside face` substitute. If that authority is unavailable, provide a portable unverified handoff rather than claiming target-specific readiness.
 
 ### Illustrative target-compiler output
 
@@ -45,6 +50,7 @@ Target the active OpenAI image tool through the current `imagegen` skill. Pass t
 - exact frame percentages and secondary table distances;
 - provenance labels, decision history, and validation rationale;
 - repeated negatives naming every unwanted genre.
+- storefront visual controls if the restaurant references are inaccessible; retain only the user-declared environment role and request reattachment if those controls are material.
 
 ## Stylized editorial illustration
 
@@ -147,6 +153,26 @@ Use the target image-edit skill, not a general scene-generation compiler. Pass t
 - global art direction that invites regeneration;
 - invented garment accessories or styling changes;
 - camera and scene geometry already fixed by the edit target.
+
+## Premise-diversity exploration
+
+For the commuter illustration, three candidates may all preserve the theme of urban loneliness while materially changing the image: the commuter under a station canopy watching rain on the tracks; the commuter framed in a warm shop doorway as an elevated train passes; and the commuter seen as a small reflection in a bus shelter. These differ in premise, relationship to the city, composition, and emotional read, so they are `premise_diversity` candidates. None replaces the active prompt until selected.
+
+## Controlled variation
+
+For the mug hero, keep the matte ceramic mug, right-side placement, left copy space, soft studio light, and no-logo rule locked. Vary only the neutral surface from warm gray to pale stone and the shadow direction from lower right to lower left. This is `controlled_variation`: it cannot introduce lifestyle props, a new finish, or a different product composition.
+
+## Surgical edit
+
+For the jacket edit, “make only the jacket dark olive and otherwise identical” is `surgical`. The active prompt and Image 1 remain the source. The new version changes the jacket color and allows only dependent fabric highlights, folds, and local shadow response; it does not re-art-direct the photograph, the person, the background, or the mood.
+
+## Finalization
+
+When the user accepts the edited jacket prompt and says “prompt only,” `FINALIZE` removes its explanatory lead-in and emits the accepted prompt once, character-for-character in visual and semantic meaning. It does not improve, compress, or re-target it.
+
+## Authorized repair brief
+
+An authorized reviewer brief might say: “Implement only: preserve the original restaurant prompt and protected employee viewpoint, but clarify that the customer’s outward hand is farther from camera than the cheekward hand; keep strict preservation.” The architect treats this as `EDIT`, retains the source prompt, adds that single geometric clarification and any required continuity wording, then returns a new prompt version. It does not inspect the output or claim why the output failed.
 
 ## Cross-domain lesson
 

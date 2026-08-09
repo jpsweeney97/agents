@@ -1,113 +1,39 @@
-ssl_version: "1.1"
-
-project:
-  title: ""
-  objective: ""
-  generation_mode: text_to_image
-  intended_use: ""
-  creative_latitude: tasteful_completion
+intent_version: "1.0"
 
 contract:
   subject: ""
+  event: ""
   viewpoint: ""
-  moment: ""
-  goal: ""
+  frozen_moment: ""
+  intended_use: ""
 
 visual_thesis: ""
 salience_budget: []
-invariants: []
+locks: []
 
 scene:
-  identity:
-    medium: ""
-    scene_type: ""
-    setting_summary: ""
-    event_summary: ""
-    visual_character: ""
-
-  camera:
-    holder: ""
-    physical_origin: ""
-    height: ""
-    orientation: ""
-    distance_to_primary_subject: ""
-    field_of_view: ""
-    capture_motivation: ""
-    device_behavior: ""
-
-  environment:
-    location_type: ""
-    layout: []
-    materials: []
-    functional_objects: []
-    lighting_sources: []
-    time_weather: ""
-    occupancy_atmosphere: ""
-
+  identity: {}
+  environment: {}
   geometry:
-    camera_position: {}
-    depth_planes: {}
-    entities: []
-    foreground_occlusions: []
-    crop: {}
-    constraints: []
-
+    camera_origin: ""
+    depth_planes: []
+    crop: ""
+    overlaps_and_contacts: []
   subjects: []
-
   time:
     trigger: ""
     immediately_before: ""
     frozen_instant: ""
     immediately_after: ""
-    prohibited_blends: []
-
-  interaction:
-    awareness: []
-    gaze_relationships: []
-    interpersonal_distances: []
-    camera_awareness: ""
-
-  composition:
-    aspect_ratio: ""
-    primary_placement: ""
-    visual_hierarchy: []
-    frame_shares: {}
-    negative_space: ""
-
-  rendering:
-    lens_and_focus: ""
-    exposure_and_dynamic_range: ""
-    white_balance_and_color: ""
-    motion_and_sharpness: ""
-    noise_and_compression: ""
-    depth_behavior: ""
-
-  physics:
-    causal_motion_chain: []
-    anatomy_and_balance: []
-    contact_and_material_response: []
-    lighting_consistency: []
-
-  narrative_read:
-    intended_inference: ""
-    acceptable_secondary_reads: []
-    prohibited_reads: []
+  interaction: {}
+  composition: {}
+  rendering: {}
+  lighting: {}
+  physics: {}
+  narrative_read: {}
 
 references: []
-
-controls:
-  failure_prevention: []
-  escape_hatches: []
-
-state:
-  metadata: {}
-  assumptions: []
-  questions: []
-  conflicts: []
-  decisions: []
-  validation: {}
-
-compiler:
-  target: active_image_tool
-  owner: target_model_skill
-  handoff_notes: []
+assumptions: []
+questions: []
+conflicts: []
+decisions: []
