@@ -82,6 +82,11 @@ publish() {
     exit 1
   fi
   codex plugin add "$name@$MARKETPLACE"
+  echo "REMINDER: this publish pruned the previous version directory, but ChatGPT" >&2
+  echo "Desktop's Codex keeps a version-pinned skill inventory in-process: sessions" >&2
+  echo "started before it refreshes will link the pruned path and report the skill" >&2
+  echo "file absent (recovery finds the installed copy). To close the window now," >&2
+  echo "restart ChatGPT Desktop or open its plugin list. Observed 2026-08-23." >&2
   check
 }
 
