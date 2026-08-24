@@ -23,13 +23,16 @@ PATHS_TARGETS=(
   "plugins/handoff/skills/throughline/SKILL.md"
 )
 
-# The project-root resolution two-step, inlined identically by all four skills.
-ROOT_CANON='1. Use `git rev-parse --show-toplevel` when the current directory is inside a git repository. 2. Otherwise use the current working directory.'
+# The project-root resolution two-step, inlined identically by all four skills
+# and the plugin README. Since 3.3.0 it resolves linked worktrees to the main
+# working tree so all worktrees of one repository share one pile.
+ROOT_CANON='1. Use the main working tree of the repository when the current directory is inside a git repository: the first path listed by `git worktree list`. This equals `git rev-parse --show-toplevel` except inside a linked worktree, where the main tree is used so all worktrees of one repository share one handoff location. If the first listed entry is a bare repository, use `git rev-parse --show-toplevel` instead. 2. Otherwise use the current working directory.'
 ROOT_TARGETS=(
   "plugins/handoff/skills/load-handoff/SKILL.md"
   "plugins/handoff/skills/save-handoff/SKILL.md"
   "plugins/handoff/skills/search-handoffs/SKILL.md"
   "plugins/handoff/skills/throughline/SKILL.md"
+  "plugins/handoff/README.md"
 )
 
 fail=0
