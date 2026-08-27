@@ -4,6 +4,16 @@ All notable changes to the Review Family plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.11.1 - 2026-08-27
+
+### Fixed
+
+- Documentation and metadata repairs from the 0.11.0 gap review (`docs/reviews/2026-08-26-review-family-gap-review.md` — five review dimensions over all twenty surfaces, one refute-default adversarial verifier per finding, 14 confirmed of 28). No skill behavior contract changed: both CANON cores, all five frontmatter descriptions, every verdict vocabulary, and `plugin.json`'s starter list are deliberately untouched. Four items. (1) README's `review-reviewer` Trigger cell now leads with the explicit-only invocation gate it was the sole surface omitting (finding 7); the Description cell at `:29` is left alone, because it makes no firing claim. (2) `PRIVACY.md` and `TERMS.md` de-Codexed at exactly the four defective mentions, with `plugins/git-cycle` as the neutral wording model (finding 8); `PRIVACY` para 1 and `TERMS` para 1 stay verbatim, because only Codex has a versioned install cache and neutralizing those would assert a falsehood. (3) `scrutinize`'s `references/review-format.md` Full Template now emits the nine section names `SKILL.md:80` declares, with the dropped scope moved into each bracketed gloss (finding 10) — single-sourcing hygiene against dual-maintenance staleness, not a routing fix, since nothing string-matches these headings. (4) `scrutinize-skill`'s `agents/openai.yaml` starter prompt gains its `$` token, the sole outlier among all 34 `default_prompt` values across the repo, and README's usage examples at `:50` and `:78` likewise (finding 11); `plugin.json`'s starter list is untouched, because four of its six entries are bare by design and only `review-reviewer`'s two carry a token — tracking that it is explicit-only and unreachable by natural language.
+
+### Removed
+
+- Four stray `.DS_Store` files from the source tree (plugin root, `skills/`, `skills/scrutinize/`, `skills/system-design-review/`). They were gitignored and untracked, so git history is unaffected, but `codex plugin add` had copied them into the install cache; this release's republish clears them from it.
+
 ## 0.11.0 - 2026-07-18
 
 ### Added
