@@ -39,6 +39,17 @@ BOUNDED_TARGETS=(
   "$SKILLS_DIR/implementation-review/SKILL.md"
 )
 
+# Verdict scope-and-expiry gloss — shared by the two skills whose ordinary enum
+# carries `Defensible`. Each names its own clearance tokens as a rider around it;
+# the enums themselves stay per-skill by design and are not asserted.
+# implementation-review's `Ship` is exempt: its target is snapshot-identified by
+# construction (gap review 2026-08-26, refutation 11).
+EXPIRY_CANON='a clearance verdict claims serious search was exhausted without a disqualifying find — it does not certify soundness, and it expires when the artifact changes'
+EXPIRY_TARGETS=(
+  "$SKILLS_DIR/scrutinize/SKILL.md"
+  "$SKILLS_DIR/scrutinize-skill/SKILL.md"
+)
+
 fail=0
 check() {
   local canon="$1" label="$2"; shift 2
@@ -56,6 +67,25 @@ check() {
 
 check "$READONLY_CANON" "read-only boundary core" "${READONLY_TARGETS[@]}"
 check "$BOUNDED_CANON" "bounded-review core" "${BOUNDED_TARGETS[@]}"
+check "$EXPIRY_CANON" "verdict scope-and-expiry core" "${EXPIRY_TARGETS[@]}"
+
+# Within-skill heading agreement — every `### ` heading review-format.md's
+# templates emit must be a section SKILL.md declares (backticked). This is the
+# drift class the 0.11.1 heading repair fixed by hand.
+SCRUTINIZE_SKILL_MD="$ROOT/$SKILLS_DIR/scrutinize/SKILL.md"
+SCRUTINIZE_FMT="$ROOT/$SKILLS_DIR/scrutinize/references/review-format.md"
+heading_count=0
+while IFS= read -r h; do
+  heading_count=$((heading_count + 1))
+  if ! grep -Fq "\`$h\`" "$SCRUTINIZE_SKILL_MD"; then
+    echo "HEADING DRIFT: review-format.md emits '### $h' but scrutinize SKILL.md never declares \`$h\`" >&2
+    fail=1
+  fi
+done < <(sed -n 's/^### //p' "$SCRUTINIZE_FMT")
+if [ "$heading_count" -eq 0 ]; then
+  echo "HEADING CHECK BROKEN: no '### ' headings extracted from review-format.md" >&2
+  fail=1
+fi
 
 if [ "$fail" -ne 0 ]; then
   {
@@ -63,8 +93,9 @@ if [ "$fail" -ne 0 ]; then
     echo "Canonical cores (single textual source, in this script):"
     echo "  read-only: $READONLY_CANON"
     echo "  bounded:   $BOUNDED_CANON"
+    echo "  expiry:    $EXPIRY_CANON"
     echo "Fix the drifted copy to match exactly, or change CANON here AND every target."
   } >&2
   exit 1
 fi
-echo "OK: read-only core consistent across ${#READONLY_TARGETS[@]} review skills; bounded-review core across ${#BOUNDED_TARGETS[@]}"
+echo "OK: read-only core consistent across ${#READONLY_TARGETS[@]} review skills; bounded-review core across ${#BOUNDED_TARGETS[@]}; expiry core across ${#EXPIRY_TARGETS[@]}; $heading_count template headings declared"
