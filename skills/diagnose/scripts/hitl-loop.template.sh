@@ -11,6 +11,10 @@
 #   capture VAR "<question>"      → show question, read response into VAR
 #
 # At the end, captured values are printed as KEY=VALUE for the agent to parse.
+#
+# `capture` echoes its value back to the terminal, where the agent reads it:
+# capture observations only. Anything requiring a credential (signing in,
+# pasting a token) is a `step` for the user, never a `capture`.
 
 set -euo pipefail
 

@@ -1,5 +1,7 @@
 # ADR Format
 
+Detect the repo's existing ADR convention before writing, and match it: location, file extension and markup (Markdown vs reStructuredText), numbering and filename pattern, and section headings. Read existing ADRs, project instructions, and ADR tooling config (`.adr-dir`, adr-tools, MADR layouts). When sources conflict, surface the conflict rather than silently starting a second scheme. The defaults below apply only when no convention can be established.
+
 ADRs live in `docs/adr/` and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
 
 Create the `docs/adr/` directory lazily — only when the first ADR is needed.

@@ -22,6 +22,7 @@ These are the load-bearing invariants; the sections below add depth rather than 
 - Nothing is settled until it has survived at least one priced trade (see Load-Testing the Want).
 - Convergence is the user restating the want in their own words; assent to your text is weak evidence (see Settled, Dissolved, or Routed).
 - Keep the lane read-only, and hand off by name when the work shifts (see Exits).
+- This method needs a live, responsive human: never run it from a subagent, hook, cron, or other unattended context. When the ask is underspecified and no one is there to correct the read, say what the shaping would have surfaced and stop — report the underspecification rather than interviewing an absent user and treating your own read as their want.
 
 ## Type the Mud
 
@@ -85,6 +86,7 @@ This lane prepares; it does not design, decide, critique, or implement. When the
 | Criteria and two or more serious options are clear enough to compare | `making-recommendations`            |
 | The field of options is too thin to want anything yet                | `ideate`                            |
 | The answer lives in reality, not introspection                       | `prototype`, or gather the evidence |
+| The blocking unknown is knowledge only one named person can close    | `to-questionnaire`                  |
 | The user wants sustained pressure on weak answers                    | `grill-me`                          |
 | The user asks for a complete critique, report, review, or audit      | the relevant review skill           |
 | The want dissolved, parked, or needs no downstream lane              | conversational closure (no handoff) |
@@ -99,6 +101,7 @@ At a handoff point, or when the user asks to summarize, close with a short prose
 - what is still open, to be treated as live rather than decided
 - the direction the user is leaning, only if one actually emerged
 - the binding constraints and the trades the user already accepted
+- what the shaping ruled out — exclusions the user actually confirmed, since silent disagreement about what is *not* being pursued is a large share of downstream misalignment
 - the named next move, offered for the user to accept or decline
 
 Omit any beat with no real content rather than manufacture one. The capsule carries no authority the shaping never earned, and briefs are chat-only: write a file, ticket, or durable artifact only when the user explicitly asks.

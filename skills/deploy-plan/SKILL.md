@@ -13,7 +13,7 @@ This skill advises the operator and authors the go/no-go gauge; it never execute
 
 **Before push — set the gauge.**
 
-- **Rollout shape** — choose and justify: all-at-once / canary (with % steps) / staged / flag-gated. The forcing question: *what is the smallest blast radius that still ships this?*
+- **Rollout shape** — choose and justify: all-at-once / canary (with % steps) / staged / flag-gated. The forcing question: *what is the smallest blast radius that still ships this?* When the shape is flag-gated, the flag is not free: name its owner and its removal condition and date at the same moment you set the gauge — the moment the flag is proposed, not later; both flag states must actually work (not one tested path plus one assumed path); no nested flags. Detecting a flag that already outlived its rollout is `tech-debt-scan`'s job.
 - **Rollback path** — characterize how this change is undone and how cleanly, in `runbook-authoring`'s graded / multi-PONR vocabulary **by reference**: clean rollback, lossy-but-available recovery (with its cost), or forward-only past a point — and name each point of no return, never assume one (`runbook-authoring:35,37,51`). When a durable rollback procedure is warranted, route to `runbook-authoring` to author it; never re-derive or copy the taxonomy.
 - **Pre-register the gauge** — fix, before push: the **smallest signal set** that would reveal this change is failing; the **abort threshold** per signal (the value that means "roll back, do not wait"); and the **bake window** (how long to watch before calling it). Write the thresholds down now; do not move them once the data is in.
 - **Go/no-go** — state it explicitly: GO (with the gauge above), or NO-GO (and what must change first).

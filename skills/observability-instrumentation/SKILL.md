@@ -13,12 +13,14 @@ A proactive pass over one concrete target — a service or a live diff — that 
 
 First, **confirm the stack**: the language, and the metrics / tracing / logging backend (Prometheus, Datadog, OpenTelemetry, ELK, …) — cardinality cost and propagation mechanics differ by backend. Confirm rather than assume one backend's defaults, but do not block on the answer: proceed on a clearly-labeled default and flag what would change under another backend. Then the principles below apply concretely instead of as an encyclopedia.
 
+Next, **pre-register the on-call questions**: write the 2–4 questions an on-call engineer will actually ask about this target, and require every log event, metric, and span chosen afterwards to answer one of them — telemetry without a question is noise. Route by signal type: metrics say *that* something is wrong, traces say *where*, logs say *why*. Not-ready-to-instrument is a legitimate stop: if the questions cannot be named, the pass has not started.
+
 Then walk the concerns the target warrants — each as a forcing question, not a fill-in:
 
 - **Log events** — structured, named fields, at the decision points a future debugger will need. *Which events would you wish existed while reading this code at 3am?* Floor: no PII or secrets in fields; no per-request spam on the hot path.
-- **Metrics** — RED (rate, errors, duration) for request paths, USE (utilization, saturation, errors) for resources, under a **fixed label set with an explicit cardinality budget**. *What is the smallest label set that still answers the questions you will ask — and does any label (user ID, URL, raw input) make the series unbounded?*
+- **Metrics** — RED (rate, errors, duration) for request paths, USE (utilization, saturation, errors) for resources, under a **fixed label set with an explicit cardinality budget**. *What is the smallest label set that still answers the questions you will ask — and does any label (user ID, URL, raw input) make the series unbounded?* Latency is a distribution, not a number: emit duration as a histogram so p50/p95/p99 are queryable, and track percentiles, never averages — an average hides the 1% having a terrible time.
 - **Traces / correlation IDs** — generate an ID at the entry point and thread it through every boundary (async, queue, RPC). *Where does the request cross a boundary that would drop the trace?* This is the check most often skipped and least retrofittable.
-- **Alerts** — page on the **symptom the user feels** (error rate, latency, SLO burn), never on a bare cause (CPU, one host). *If this paged at 3am, is it worth waking someone — and does it tell them what the user is experiencing?* Reference SLO / error-budget burn for framing; this skill does not define the SLO.
+- **Alerts** — page on the **symptom the user feels** (error rate, latency, SLO burn), never on a bare cause (CPU, one host). *If this paged at 3am, is it worth waking someone — and does it tell them what the user is experiencing?* Reference SLO / error-budget burn for framing; this skill does not define the SLO. Hygiene floor: if the standing response is "ignore it, it self-heals", the alert is deleted, not tuned; every alert links to a runbook (its contents are `runbook-authoring`'s); threshold and duration are justified by an SLO or historical data, never guessed; exactly two severities — page (user-facing, act now) and ticket (degradation, act this week) — a third tier trains people to ignore all of them. Test-firing a new alert is a live-signal act this skill cannot perform: name it as a handoff item for the human.
 
 Close by **checking the footguns off** explicitly: cardinality bounded, IDs threaded, no PII/secrets, alerts symptom-framed, no hot-path spam, RED/USE complete for the in-scope paths and resources. An unchecked footgun is the finding.
 
@@ -43,6 +45,8 @@ This skill authors the signals; it cannot confirm they actually emit, scrape, or
 ## Done when
 
 - The stack/backend is confirmed, and the pass covers the concerns the target warrants (logs, metrics, traces, alerts — only those it needs), each posed as a per-system judgment rather than filled in with boilerplate.
+- The 2–4 on-call questions are pre-registered and every chosen signal answers one of them — or the pass stopped at not-ready-to-instrument and said so.
+- Any new alert meets the hygiene floor (actionable, runbook-linked, justified threshold, page/ticket only), with its test-fire named as a handoff item for the human.
 - Every footgun is explicitly checked: cardinality bounded, correlation/trace IDs threaded, no PII/secrets in logs, alerts symptom-framed and page-worthy, no hot-path spam, RED/USE complete for the in-scope paths and resources.
 - The output is delivered in the mode the invocation implies (applied edits or recommendations), with the proof boundary stated — what was instrumented, and what stays unverified until it is seen flowing.
 - When the instrumented change ships as a risky rollout, hand forward to `/deploy-plan` (or `$deploy-plan`) — the signals just laid down are the gauge it pre-registers and reads.
