@@ -12,7 +12,9 @@
 #                              (plugin-shared references/ live two levels up),
 #                              falling back to the repo root so a cited root
 #                              path (e.g. scripts/check-library-integrity.sh)
-#                              is not a false dangle
+#                              is not a false dangle; glob patterns cited as
+#                              prose (e.g. scripts/check-*.sh) are not path
+#                              citations and are skipped
 #   3. orphan support files  — every git-tracked file under a skill's
 #                              references/ scripts/ examples/ is mentioned
 #                              somewhere else in that skill's bundle
@@ -137,8 +139,12 @@ while IFS= read -r d; do
       bad "dangling ref: $d/SKILL.md -> $tok"
       dangling=$((dangling + 1))
     fi
-  done < <(grep -ohE '(\.\./)*(references|scripts|examples)/[A-Za-z0-9][A-Za-z0-9._/-]*' "$d/SKILL.md" 2>/dev/null \
-             | sed -E 's/[.,:;]+$//' | sort -u)
+  # `*` is in the char class so a glob like scripts/check-*.sh is captured whole
+  # instead of truncating to scripts/check-; after stripping a trailing bold
+  # marker (**), any token still holding a `*` is a glob cited as prose, not a
+  # path citation — skip it.
+  done < <(grep -ohE '(\.\./)*(references|scripts|examples)/[A-Za-z0-9][A-Za-z0-9._/*-]*' "$d/SKILL.md" 2>/dev/null \
+             | sed -E 's/[.,:;]+$//; s/\*\*+$//' | grep -v '\*' | sort -u)
 done < <(skill_dirs)
 [ "$dangling" -eq 0 ] && pass "self-referenced paths resolve ($tokens tokens)"
 
