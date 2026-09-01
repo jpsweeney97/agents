@@ -63,6 +63,16 @@ Two fresh agents; full returns at `mining-artifacts/pass2/coverage-census.md` an
 7. **git-cycle hold** (recommended) versus spending a publish train on one availability-conditional routing clause.
 8. Standing from pass 1, unchanged by this pass: the `grill-me` serialize-versus-batch design question.
 
+## Adjudication (2026-09-01)
+
+JP ratified and decided the same day this report landed. This section is the durable pointer for the ledger entries that land with the work; the Decisions list above is preserved as put.
+
+- **The three flips are ratified**: web-performance audit → the merged frontend park; docs-grounded framework code → park, with the vendor-lane alternative recorded but not decided; weakened-checks scan → reject, with the named reopen trigger. The final admit set from passes 1+2 is `perf-optimize` and `to-questionnaire`.
+- **Ledger granularity**: three per-repo pass entries covering folds, rejects, and parks collectively, written at landing with commit pointers; each built admit takes its own entry at build.
+- **Build order**: `perf-optimize` first, then `to-questionnaire`.
+- **git-cycle hold confirmed**: its one clause rides the next natural bump, phrased availability-conditionally.
+- **Left open, explicitly undecided**: the Apple/SwiftUI vendor lane (decision 2); queueing `build-macos-apps@0.1.4` for mining (decision 3); C1, the `prototype` capture reversal (the fold does not land absent JP's explicit word); C2, the cache-lever home (decided at that fold's landing).
+
 ## Evidence boundary
 
 What this report rests on: the six recovered agent returns (journal-confirmed complete; copied to the durable store), the two fresh coverage returns, and the reporting session's own eight live spot-checks — `contract-decisions.md:17`; `implementation-review:113-116`; `dependency-upgrade:14`; markdown-reader `AGENTS.md:23-31`; the 2026-07-17 perf-audit handoff; the athena-kb-local questionnaire tree; the zero-web-frontend find; and the `/code-review` Angle B text verbatim in CLI binary 2.1.252. What it does not rest on: re-running the five stress skeptics (each verdict is one high-effort skeptic, not a panel — the eight spot-checks are the corroboration layer); the old parks-and-limits agent's jobs (the park-trigger audit of this pass's parks and the six pre-existing mattpocock parks remains undone); re-verification of the ~200 pass-1 citations beyond the samples above (the build-time re-verify rule stands); and any executed fold, build, or forward test. The stress returns' charter line citations predate the `17dc693` amendment and may be off by a few lines against the live charter; no verdict turns on the amended text.
