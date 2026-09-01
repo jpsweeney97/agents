@@ -1,0 +1,4 @@
+interface:
+  display_name: "athenahealth Brand System"
+  short_description: "Apply athenahealth brand standards to content"
+  default_prompt: "Use $athenahealth-brand-system to create a polished, on-brand athenahealth deliverable."
