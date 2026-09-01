@@ -91,4 +91,4 @@ Or "None - can start immediately" if no blockers.
 
 Do NOT close or modify any parent issue.
 
-After publishing, name the next lane and stop: the `ready-for-agent` issues are now execution's to pick up, and the `ready-for-human` issues await a human. Do not implement them yourself unless the user asks.
+After publishing, name the next lane and stop: the `ready-for-agent` issues are now `implement-issue`'s to pick up (one issue per fresh session), and the `ready-for-human` issues await a human. Do not implement them yourself unless the user asks.
