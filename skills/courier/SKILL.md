@@ -25,7 +25,7 @@ Settle one question before composing: **does the far side have the repo?** If it
 Compose one fenced block the user can copy whole.
 
 1. **Objective** — one sentence naming what the far side is being asked to do: review, refute, decide, extend.
-2. **Context capsule** — only what the far side cannot infer: the binding constraint, the decision already taken and not up for re-litigation, what the artifact is for. Ruthlessly minimal; no session narration.
+2. **Context capsule** — only what the far side cannot infer: the binding constraint, the decision already taken and not up for re-litigation, what the artifact is for. Ruthlessly minimal; no session narration. Withhold your own answer to the question you are asking: settled decisions travel, but a stated conclusion on the live question biases the far side toward agreeing with it, and what comes back is validation of your reasoning rather than an independent read.
 3. **The artifact** — the thing itself, verbatim and complete enough to judge, or exact pinned paths when the far side can read them. Never a paraphrase of the thing under review.
 4. **Response contract** — state inside the packet the shape the reply must come back in: numbered findings, each with severity, the evidence that would settle it, a proposed fix if any, and a mark on anything they could not check. An unstructured essay wastes the return trip, and an unmarked "I couldn't verify this" comes back indistinguishable from a confident assertion.
 

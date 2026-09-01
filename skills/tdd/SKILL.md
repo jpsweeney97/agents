@@ -55,6 +55,7 @@ Before writing any code:
 - [ ] Identify opportunities for [deep modules](deep-modules.md) (small interface, deep implementation)
 - [ ] Design interfaces for [testability](interface-design.md)
 - [ ] List the behaviors to test (not implementation steps)
+- [ ] Resolve this repo's real focused-test and full-suite commands — `keep-green`'s resolution rule (caller input first, else repo convention) owns how; prefer checked-in wrappers (`./gradlew`, `make test`, a repo script) over globally installed tools — and use those commands for every RED, GREEN, and closure run, never a default like `npm test`
 - [ ] Get user approval on the plan
 
 Ask: "What should the public interface look like? Which behaviors are most important to test?"

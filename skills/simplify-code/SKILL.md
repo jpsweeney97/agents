@@ -21,7 +21,7 @@ Use full-safety lane for dirty or untracked files, non-git roots, broad scopes, 
 
 Read-only unless explicitly opted in after the exact risk property is named: migrations, schemas/persistence, security/auth/billing/permissions/data-loss, concurrency/locking, generated/vendor, dependency, package, plugin, app, project, or release manifests, external/public contracts, release/packaging, and binaries. Naming one of these paths as the target is not enough opt-in by itself. Behavior change is not simplification; stop and label it `not a simplification: behavior change required`, explain the benefit and consequence, and ask whether to switch tasks.
 
-Broad scopes need reconnaissance first: patch and verify one high-value coherent slice, then report remaining candidates.
+Broad scopes need reconnaissance first: patch and verify one high-value coherent slice, then report remaining candidates. When the cleanup is one uniform mechanical edit repeated across many sites — uniformity is the trigger, not line count; roughly 500+ lines or enough sites that hand-editing becomes error-prone is the tell — switch instruments rather than only narrowing scope: prefer a codemod, AST transform, or scripted rewrite, and route the sharded, verified application to `migration-campaign`. Reconnaissance-plus-one-slice remains the path for heterogeneous cleanups, where each site needs its own judgment.
 
 ## Closeout
 

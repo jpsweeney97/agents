@@ -78,3 +78,7 @@ test("createUser makes user retrievable", async () => {
   expect(retrieved.name).toBe("Alice");
 });
 ```
+
+## DAMP Over DRY
+
+Duplication in test bodies is acceptable when it makes each test independently readable. Extracting shared setup to avoid repeating an input shape obscures what the test actually verifies — a reader should see the arrange, act, and assert without chasing helpers. Factor out only what is genuinely incidental to the behavior under test. This is a counter-default: the instinct is to factor the repetition out; in tests, resist it.

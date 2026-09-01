@@ -16,10 +16,10 @@ Write an implementation plan a skilled engineer with zero context for this codeb
 ## Plan Standards
 
 - Ground the plan first: read the settled source design, spec, or PRD in full, and inspect the actual repo — existing file layout, conventions, and the build/test commands — so every path, pattern, and command the plan names is one you verified, not one you assumed.
-- If the source design covers multiple independent subsystems, flag it and split into one plan per subsystem; each plan should yield working, verifiable software on its own.
+- If the source design covers multiple independent subsystems, flag it and split into one plan per subsystem; each plan should yield working, verifiable software on its own. The detection tells and the cycle test for whether a split is real live in `design-exploration`'s scope check — apply them there rather than re-deriving.
 - Map the file structure before tasks: which files are created or modified and each one's single responsibility. Follow existing repo patterns.
 - Number the tasks and order them so each is buildable and verifiable given only the tasks before it; when a task depends on earlier work, an earlier-numbered task must satisfy that dependency. The executor runs them in document order.
-- Decompose into tasks that produce self-contained, verifiable changes. Within tasks, bite-sized steps — one action each: write the failing test, run it and watch it fail, implement minimally, run and watch it pass, commit. Keep test-shaped steps consistent with the `tdd` skill.
+- Decompose into tasks that produce self-contained, verifiable changes. Four tells that a task is still too big — a break-it-down provocation, not a size ladder: it would take more than one focused session; its acceptance criteria will not fit in three or fewer bullets; it touches two or more independent subsystems; its title needs an "and" (that is two tasks). Within tasks, bite-sized steps — one action each: write the failing test, run it and watch it fail, implement minimally, run and watch it pass, commit. Keep test-shaped steps consistent with the `tdd` skill.
 - Exact file paths always. Complete code in every code step. Exact commands with expected output.
 - No placeholders. "TBD", "add appropriate error handling", "write tests for the above", and "similar to Task N" are plan failures: show the actual content, and repeat it rather than cross-referencing — the executor may read tasks out of order. Reference no type, function, or method that no task defines.
 
