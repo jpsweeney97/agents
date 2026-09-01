@@ -1,0 +1,90 @@
+---
+type: review
+date: 2026-09-01
+scope: "Charter Supersession comparison: the mattpocock/skills composition layer as a whole design (router, main flow, phase-boundary doctrine, artifact contracts, invocation partition) versus the incumbent house lifecycle composition"
+candidate_pin: 6654f6b60cd9d5be8b54c6fafe44346dabeb3b76
+candidate_pin_note: "equal to upstream HEAD at comparison time (2026-08-24 commit date), and equal to the mining pass-1/pass-2 pin, so all prior citations remain current"
+incumbent_commit: a675547
+method: "Multi-agent workflow wf_2bcadf6c-8e6: 3 mapping/evidence agents (candidate map, incumbent map, observed-work miner over the 6,821-fire usage ledger plus handoffs), 4 comparison agents on separate dimensions (stage coverage, composition mechanics, safety/authority, evidence/burden), 3 refute-default verifiers re-deriving every claim against live files. 10 agents, 1.59M subagent tokens, 344 tool calls, 0 errors. 58 claims, all verified: 45 CONFIRMED, 13 WEAKENED with corrections, 0 unverified."
+posture: "Comparison and recommendation, not a decision. The charter's Supersession path (charter.md:44) puts the whole-design call to JP with this comparison; the case-(d) ledger entry follows JP's decision and cites this report."
+---
+
+# Supersession Comparison: mattpocock Composition Layer vs the House Lifecycle Composition
+
+## Commission and question
+
+JP commissioned this comparison 2026-09-01 after asking why runs repeatedly do not adopt mattpocock/skills, given that its skills "compose together very well." The prior mining passes (2026-07-05/08, 2026-08-31/09-01) adjudicated the repo skill by skill; none compared the composition layer — the phase model, the router, the artifact flow, the context doctrine — as one design against the house's own. This is the first run of the charter's Supersession path (`17dc693`), which requires: comparison on the job's real work grounded in observed work, burden on the candidate, tie keeps the incumbent, separable wins are folds, every material regression disclosed, runtime-bundled incumbents fixed terrain.
+
+## Verdict recommendation
+
+**Keep the incumbent composition. The candidate's burden is unmet on every dimension, and the comparison did not even reach the tie-keeps-incumbent rule: the incumbent wins outright on the job's observed real work.** 25 incumbent-win claims and 21 regression claims survived refute-default verification, against 12 candidate wins of which four are folds that already happened (2026-07-08 and 2026-09-01), three are settled parks/rejects the composition frame strengthens rather than reopens, and the remainder are small separable fold candidates — none is a replacement argument. No whole-design adoption is recommended; three residual folds are offered below as JP options.
+
+The commissioning claim itself was tested and is true with a scope limit: **the candidate's skills do compose well — for a ~25-skill, single-author, public plugin. The mechanisms that make it compose either already live in the incumbent by prior adoption, or do not transfer to a 121-skill, two-runtime, build-and-prune library whose observed workload never runs the candidate's central flow.**
+
+## What the observed work shows (the ground both designs were judged on)
+
+From the usage ledger (6,821 fires, 2026-01-07 → 2026-09-01, 2,452 sessions) and the handoff corpus, re-derived by verifiers:
+
+- **Session continuity is the dominant real workload**: the handoff family totals 2,878 fires — 61.5% of all lifecycle fires — and load→work→save(→throughline) bookending is the top observed multi-skill session shape under every counting method tried. The candidate's promoted layer ships one continuity surface: a save-only handoff to the OS temp directory whose own doctrine excludes routine same-repo resume; no load, search, or throughline counterpart exists.
+- **The candidate's central premise is not this user's work shape**: "most paths run along one main flow" (ask-matt:11) is falsified locally — in 8 months the full shaping→spec→planning→execution→review→landing pipeline ran **zero** times, ~99% of stage-touching sessions touched only 1–2 stages, and observed chains form 267 distinct shapes with 185 singletons. The spec corridor the candidate's flow makes mandatory for multi-session work was touched in ~5 sessions total (to-prd 0 fires ever, to-issues 5).
+- **Roughly 88% of observed lifecycle load sits in stages the candidate's promoted layer does not serve**: continuity (2,878), review adjudication and scrutiny (623, including review-reviewer 207 and combined scrutinize 371), recommendation/decision work (making-recommendations 299, outcome-shaping 137), and the landing/PR lifecycle (~320: gh-pr-review-loop 172, merge-branch 78, land 25, pr-description 22, closeout-check 14, release-cut 9).
+- **79.5% of lifecycle fires happen outside `~/.agents`** — on athena-kb-local, cross-model, codex-tool-dev, markdown-reader, and kin — so skill-carried safety floors (the git-cycle inline protected-branch copies) are the operative protection where most work happens; only the user-level edit hook also travels, and it gates edits, not commits, and not Codex sessions.
+- **The candidate's own design DNA is ~22% of the incumbent's observed middle**: grill-me 57, triage 51, grill-with-docs 30, tdd 27, improve-codebase-architecture 33, to-issues 5, setup-matt-pocock-skills 3 — all mattpocock-descendant designs re-authored to house form, firing mostly on real project repos. The candidate's superiority evidence, where it exists, is evidence for folds that were already executed.
+- **The unadopted composition distinctives have zero fire history by construction** — ask-matt, the to-spec→to-tickets→implement chain run as a chain, wayfinder, the phase-boundary doctrine — never installed, so untested rather than found wanting. The one live adoption contact (wayfinder, 2026-07-08) ended in a park that stands, with a named skill-squad-class un-park cost.
+- **No recorded composition-layer friction exists for the candidate to fix**: targeted absence searches ("wrong skill", "should have used", "stalled between", "lost context", manual-stitch vocabulary) across all `.agents` handoffs and reviews returned zero relevant hits, re-run independently by a verifier. An honest null with a known undercount direction (the corpus vocabulary skews toward routing-precision meta-work), but under the burden rule a null keeps the incumbent.
+
+## Where the incumbent wins (25 claims, most-material first)
+
+1. **Landing**: the candidate has no promoted owner for push, merge, PR, release, closeout, or worktree exit — its main flow terminates at `implement`'s entire landing contract, "Commit your work to the current branch" (implement/SKILL.md:15), with `resolving-merge-conflicts` its only landing-stage member. The incumbent fields a full stage (git-cycle + land) with observed traffic (~320 fires) and a complete authorization contract: non-inferential single authorization, ff-only, never-force, rejected-push-is-a-hard-stop, publish-train named-but-never-fired.
+2. **Session continuity**: four-skill dual-runtime plugin with redaction, live-reality-checked load, regenerable throughline, repo-durable storage — the single most-used capability in the library — versus a temp-dir save-only file.
+3. **Review span**: generate/adjudicate/apply (review-family + review-reviewer + apply-findings, 623+ fires) versus a generate-only two-report skill that stops at aggregation; the sub-stages the candidate lacks carry the heaviest observed review traffic.
+4. **Shaping breadth**: interrogation-only (grilling and two wrappers) versus interrogation plus muddy-want clarification, option development, field-widening, and comparison/recommendation — the last two request shapes have no candidate owner at all and are among the most-fired non-handoff skills (299 + 137).
+5. **Routing at this scale**: work-router inspects the live description corpus at fire time and cannot go stale; ask-matt is a hand-maintained 90-line prose map whose own repo doctrine concedes the failure mode ("a router that lies", candidate AGENTS.md:21). At 25 single-author skills that is a maintainable obligation; at 121 skills under build-and-prune churn it is a standing ambient maintenance contract of exactly the class this charter gates — and the observed 185-singleton chain diversity is served by per-skill descriptions, not a narrated main path.
+6. **Context budget**: measured occupancy with a named denominator (context-checkpoint) versus a hardcoded "~150k smart zone" constant that is factually wrong terrain here (a recorded 493,557-token session exists).
+7. **Unattended and failure doctrine**: attended-only lifecycle verbs, hard stops with partial-state reporting, interrupted-state recovery tables, labeled proof boundaries — versus promoted skills with near-zero failure branches and beta machinery (implement-spec, claude-handoff) whose unattended dispatch was already rejected here on exactly that ground.
+8. **Self-repair instruments**: behavior-smoke-test, skill-benchmark, differential forward tests, and the adversarial skill-review lane have caught and closed real routing/contract bugs (the making-recommendations 2/5→0/5 misroute; the review-reviewer disposition fall-through, ca92f7c); the candidate ships no eval or forward-test machinery for its flows.
+
+## Regressions a whole-design adoption would take (21 confirmed/weakened claims, condensed)
+
+- Deletion of the protected-branch floor at the execution terminus in the repos where ~78–80% of work happens (narrowed by verification: the user-level edit hook still covers Claude Code edit-tool writes everywhere, but not the commit act, Bash-authored writes, or Codex sessions).
+- Loss of the entire push/publish authorization contract; "push it" would run on bare harness defaults.
+- Conflict resolution loses the user-askable abort and the protected-branch confirm ("Always resolve; never --abort" + "Stage everything and commit") — composed with unattended merger subagents, an agent forbidden to back out of a conflicted merge is a failure-mode amplifier.
+- Spec publication loses its consent gate (to-spec publishes and labels ready-for-agent with "no need for additional triage"; the incumbent's gate was deliberately re-derived in the 2026-07-08 rebase because upstream lacked it).
+- Continuity downgrades to compact-as-default plus /clear-between-tickets with no deviation write-back and temp-dir files subject to OS cleanup — against the candidate's own stated one-way cost of a wrong clear.
+- The review stage narrows to generate-only; done-claim governance loses verdict shapes and proof-boundary labels.
+- ~88% of observed lifecycle load is orphaned (partial promoted surfaces exist only for a save-side handoff and first-pass diff review).
+- The candidate's review entry cannot even land under its own name: `code-review` collides with the runtime-bundled skill (fixed terrain) and the AGENTS.md name exclusion, so every flow edge routing to it would need rewiring — a landing cost the design nowhere accounts for.
+- The invocation partition, adopted wholesale, would forbid user-invoked→user-invoked handoffs and break wired incumbent sequences with 350+ observed adjacent-transition fires (land→save-handoff→throughline).
+
+## Where the candidate wins (12 claims, dispositioned)
+
+**Already executed — credit recorded, no action** (the fold rule working retroactively): handoff redaction (→ save-handoff, 2026-07-09); credential capture-vs-step and the wizard no-plaintext-echo floor (→ diagnose fold + wizard park, 2026-09-01); primary-source lossiness cost and the no-context carve-out (→ context-checkpoint, 2026-09-01); the ~22% adopted-descendant middle and the setup-stage owner (setup-matt-pocock-skills, referenced live by three house skills) — all landed under the 2026-07-08 and 2026-09-01 entries.
+
+**Settled dispositions the composition frame strengthens, not reopens**: wayfinder's coverage of multi-session investigation planning is real and the incumbent has no equivalent, but the park stands — this comparison's evidence contains zero instances of its reopen trigger. The git-guardrails hook is a deterministic-enforcement mechanism class the incumbent lacks for remote mutation, but it is safety-by-absence in a design where no skill owns pushing; its extraction reject (2026-07-08) stands. The candidate's emphasis diagnosis — context-boundary management as first-class — is corroborated by the fire distribution (61.5% handoff bookending), but corroborated emphasis cannot convert to supersession against 2,878 fires of live incumbent machinery.
+
+**Residual separable folds, offered as options** (all design-analysis-only — no observed local friction backs any of them):
+
+1. **Invocation-permission doctrine** (MECH-C1, CONFIRMED): the candidate documents a library-wide user-invoked/model-invoked axis with a pairing rule and the "could the model usefully reach for this autonomously?" test; the incumbent applies the same frontmatter mechanism on 9 skills with no written convention. Fold target: `agent-facing-design` (build-and-prune surface). Smallest, cleanest, most likely to pay.
+2. **Phase-boundary five-move ordered tree, residue** (COV-C2/MECH-C2, CONFIRMED): the ordered ranking (continue → clear → handoff → subagent → compact-last) with boundary-only timing remains un-folded after pass 1 took the lossiness cost; Codex sessions have no boundary doctrine at all (context-checkpoint is Claude-only by declaration). Fold target: a short dual-runtime reference in `plugins/handoff`, stripped of the ~150k constant, framed as residue of the pass-1 FOLD row (plugin path: version bump + republish).
+3. **Per-issue execution consumer gap** (COV-C1, CONFIRMED): nothing incumbent consumes a `ready-for-agent` tracker issue — the label ends at its three producers, verified by behavior-level grep. Fold shape: widen `execute-plan`'s input contract or a thin consumer skill. Weakest case: the whole lane has near-zero observed traffic, and route-absence cannot decide whether that marks a gap or a non-job.
+
+**Flagged JP-only, recommend decline**: grilling's non-blocking fact-dispatch clause (MECH-C3, WEAKENED) — verification found both incumbent grill lanes already carry the facts-are-the-agent's-job rule; the genuine residue is only the non-blocking parallel dispatch mechanic, and landing even that reopens the settled 2026-07-05 zero-fold reject of `grilling`.
+
+## Honest limits
+
+- The candidate's composition distinctives are untested-by-construction here: zero fires because never installed, not tested-and-found-wanting. The supportable verdict is "burden unmet," never "candidate composition disproven." The no-full-pipeline finding cannot distinguish "not JP's work shape" from "no drawn flow ever invited it."
+- No differential incident data exists on either side: zero recorded protected-branch violations, destructive-git accidents, or lost-context events; the incumbent's most safety-critical valves have thin or zero fire (resolve-conflicts 0, closeout-check 14, land 25). Safety superiority rests on design analysis plus settled prior adjudications.
+- Fire counts measure the house-adapted forks, never unmodified upstream, and the hook-fed ledger is blind to invocations where the hook did not run; fires measure invocation, not value per fire.
+- The friction corpus vocabulary skews toward routing-precision meta-work; silently absorbed composition friction would be invisible to the searches run. ~700 non-.agents handoffs were grepped, not read in full.
+- Verifier corrections applied throughout: handoff-family total is 2,878 (not 2,885); combined scrutinize (371) is the most-fired review skill, review-reviewer (207) second; chain-shape counts are methodology-dependent (session-level ~485 load→save, ~304 load→save→throughline; strict-adjacent 193/109); the incumbent roster is 121 skills; `resolving-merge-conflicts` is a real candidate landing-stage member; "the word push never appears" claims were corrected to behavior-level statements.
+
+## Charter posture and next step
+
+This report is the comparison the Supersession path requires be put to the user. The recommendation is **decline the whole-design replacement (keep the incumbent), with the three residual folds as separate JP options**. Whatever JP decides is a charter case-(d) decision on third-party material at the composition altitude and takes one `docs/agents/contract-decisions.md` entry citing this report as its evidence pointer; if any fold is taken, it lands through its owning lane (`agent-facing-design` gate for obligations; the plugin publish path for `plugins/handoff`).
+
+## Evidence pointers
+
+- Workflow `wf_2bcadf6c-8e6` (10 agents; journal at the session transcript dir `subagents/workflows/wf_2bcadf6c-8e6/journal.jsonl`, session `cd0a77c9-7b01-47b0-955a-f802b7f788a1`); key figures reproduced inline above so this report stands alone.
+- Candidate source: `mattpocock/skills` @ `6654f6b60cd9d5be8b54c6fafe44346dabeb3b76` (re-clone to re-read; scratch clone was session-local).
+- Prior adjudications: `docs/agents/contract-decisions.md` entries 2026-07-05/08/09 and 2026-09-01; `docs/reviews/2026-09-01-skill-repo-mining-pass-1.md`, `-pass-2.md`; `docs/plans/2026-07-08-mattpocock-readoption-inventory.md`.
+- Charter: `docs/agents/charter.md` @ `17dc693` (Supersession, charter.md:44).
