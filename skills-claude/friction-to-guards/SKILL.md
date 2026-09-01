@@ -14,6 +14,8 @@ Collect candidate friction from the surfaces available, and say which were check
 - Corrections and pushback in the current conversation.
 - Memory entries, especially `feedback`-type files, in the project memory directory.
 - Recent handoffs under `<project_root>/.agents/handoffs/` when present.
+- Tool-economy friction the human pays for silently and never reports as a correction: calls that return far more than the task needs — a custom CLI or MCP server dumping whole result sets, an unscoped query. Scope this to token waste, never to depth: a call that is expensive because it reads the extra file or runs the fuller check is chosen depth, not friction.
+- Information-access gaps: a crucial fact the agent could not reach at all (unteed dev-server logs, no read-only access to a service), visible as the agent working around the gap rather than as anything the human corrects. The remedy is access plumbing — route it to `update-config` (settings, permissions, hooks) rather than a new guard tier.
 - Anything the user names directly.
 
 ## Separate Recurring From One-Off

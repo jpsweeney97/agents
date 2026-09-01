@@ -83,14 +83,15 @@ Use this order as a fast scan, not a report template:
 
 1. **Unjustified**: the obligation does not protect meaningful user work.
 2. **Vague**: it lacks a concrete trigger, action, evidence, boundary, or stop condition (trust prose; judgment prose is graded by the per-part bar under Edit Gate).
-3. **Unclear**: a future agent cannot tell exactly what to do or what satisfies the instruction.
-4. **Overbuilt**: lighter context, examples, defaults, or boundaries would do the job without extra machinery.
-5. **Unbounded**: scope, time, lifecycle, ownership, or downstream responsibility spreads farther than the user asked.
-6. **False-proof**: the required evidence does not support the claim, or structural checks are allowed to imply any of the proof classes separated under Output.
-7. **Conflicting**: another authority, skill, workflow, or user request can beat it, but the text does not say how to resolve the conflict.
-8. **Duplicated**: the same rule lives in more than one place — another section, file, or companion surface — and the copies have drifted or are free to. Single-home the rule and point to it, carrying every copy's scope into the home before collapsing any; copies already diverged are the strongest signal.
-9. **Negated**: the instruction steers by prohibition where a positive instruction would do the work — naming the forbidden behavior drags it into context and makes it more available, not less. Rewrite to state the target behavior; keep a prohibition only as a hard guardrail you cannot phrase positively, and pair it with its positive target. Routing non-use boundaries ("Do not use for...") in descriptions are exempt: they are selection contracts, not behavior steering.
-10. **Accreted**: qualifiers, parentheticals, or a two-sided fence stacked clause by clause, each patching one past misfire or finding. Rewrite the governing sentence to carry its cases natively instead of appending another clause; one-logical-line formatting hides this growth in diffs, so look for it deliberately.
+3. **Undemanding**: a completion criterion is clear but requires nothing — the checkable bound can be met without the legwork it exists to force, so it invites premature completion. Demand is a property distinct from clarity. The ordered defense: sharpen the bound first; split the sequence only when the bound is irreducibly fuzzy and the rush is actually observed — and hiding later steps works only across a real context boundary, never an inline call.
+4. **Unclear**: a future agent cannot tell exactly what to do or what satisfies the instruction.
+5. **Overbuilt**: lighter context, examples, defaults, or boundaries would do the job without extra machinery.
+6. **Unbounded**: scope, time, lifecycle, ownership, or downstream responsibility spreads farther than the user asked.
+7. **False-proof**: the required evidence does not support the claim, or structural checks are allowed to imply any of the proof classes separated under Output.
+8. **Conflicting**: another authority, skill, workflow, or user request can beat it, but the text does not say how to resolve the conflict.
+9. **Duplicated**: the same rule lives in more than one place — another section, file, or companion surface — and the copies have drifted or are free to. Single-home the rule and point to it, carrying every copy's scope into the home before collapsing any; copies already diverged are the strongest signal.
+10. **Negated**: the instruction steers by prohibition where a positive instruction would do the work — naming the forbidden behavior drags it into context and makes it more available, not less. Rewrite to state the target behavior; keep a prohibition only as a hard guardrail you cannot phrase positively, and pair it with its positive target. Routing non-use boundaries ("Do not use for...") in descriptions are exempt: they are selection contracts, not behavior steering.
+11. **Accreted**: qualifiers, parentheticals, or a two-sided fence stacked clause by clause, each patching one past misfire or finding. Rewrite the governing sentence to carry its cases natively instead of appending another clause; one-logical-line formatting hides this growth in diffs, so look for it deliberately.
 
 ## Review-Only
 

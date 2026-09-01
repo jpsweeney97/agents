@@ -19,6 +19,11 @@
 #   4. frontmatter sweep     — every delivered SKILL.md passes quick_validate.py,
 #                              filtering the AGENTS.md-accepted argument-hint /
 #                              disable-model-invocation "unexpected key" complaint
+#   5. version lockstep      — each plugin's .claude-plugin/plugin.json version
+#                              equals the newest CHANGELOG.md section, because a
+#                              landed bump is the publish signal on both runtimes,
+#                              so a disagreeing pair publishes a release whose own
+#                              record contradicts it
 #
 # DELEGATED (covered elsewhere — invoked, never duplicated):
 #   check-protected-set.sh, check-handoff-paths.sh, check-review-family.sh
@@ -189,9 +194,30 @@ else
   skip "frontmatter sweep (python3 or quick_validate.py unavailable: $QV)"
 fi
 
+# --- 5: plugin manifest-to-CHANGELOG version lockstep ---
+lockbad=0 plugincount=0
+for pj in "$REPO"/plugins/*/.claude-plugin/plugin.json; do
+  [ -f "$pj" ] || continue
+  plugincount=$((plugincount + 1))
+  pdir="$(dirname "$(dirname "$pj")")"
+  pname="$(basename "$pdir")"
+  mver="$(sed -nE 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' "$pj" | head -1)"
+  cl="$pdir/CHANGELOG.md"
+  if [ ! -f "$cl" ]; then
+    bad "version lockstep: plugins/$pname has no CHANGELOG.md (manifest '$mver')"
+    lockbad=$((lockbad + 1)); continue
+  fi
+  cver="$(grep -m1 -oE '^## [0-9]+\.[0-9]+\.[0-9]+' "$cl" | awk '{print $2}')"
+  if [ -z "$mver" ] || [ -z "$cver" ] || [ "$mver" != "$cver" ]; then
+    bad "version lockstep: plugins/$pname manifest '$mver' != newest CHANGELOG section '$cver'"
+    lockbad=$((lockbad + 1))
+  fi
+done
+[ "$lockbad" -eq 0 ] && pass "plugin manifest/CHANGELOG version lockstep ($plugincount plugins)"
+
 echo
 if [ "$fail" -ne 0 ]; then
   echo "FAIL: library integrity found defects (see [FAIL] lines above)" >&2
   exit 1
 fi
-echo "OK: library integrity clean (4 structural checks + 5 delegated canaries)"
+echo "OK: library integrity clean (5 structural checks + 5 delegated canaries)"

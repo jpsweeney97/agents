@@ -29,9 +29,9 @@ Look at the current repo to understand its starting state. Read whatever exists;
 
 ### 2. Present findings and ask
 
-Summarise what's present and what's missing. Then walk the user through the three decisions **one at a time** — present a section, get the user's answer, then move to the next. Don't dump all three at once.
+Summarise what's present and what's missing. Then put the decisions to the user, each **led by the recommended answer** drawn from the exploration so it can be accepted in a word. Batch independent sections into a single ask — Sections A–C rarely depend on each other's answers — and sequence only where an answer genuinely changes the next question (the PRs follow-up depends on the tracker choice). Skip any section the exploration already settled, stating what you found and the answer you inferred so the user can correct it, and skip a section entirely when the skills it configures are not installed.
 
-Assume the user does not know what these terms mean. Each section starts with a short explainer (what it is, why these skills need it, what changes if they pick differently). Then show the choices and the default.
+Assume the user does not know what these terms mean. Give a section's short explainer (what it is, why these skills need it, what changes if they pick differently) only where the choice genuinely branches; an accepted recommendation needs no lecture. Then show the choices and the default.
 
 **Section A — Issue tracker.**
 

@@ -55,11 +55,15 @@ That floor is calibrated from checkpoints taken between 39% and 54% of a 200k wi
 
 **Continue is a real verdict.** A high number is not by itself a reason to stop, and a session with room for the arc in front of it should be told so plainly. A checkpoint skill that only ever counsels stopping is a nag, and gets ignored exactly when it is right.
 
+**Name the lossiness cost when it exists.** When the next arc needs this session as a primary source — a review the next phase must quote, an exploration whose detail a summary would flatten — the handoff itself is lossy, and the verdict must say what checkpointing here would destroy. That cost is an input the user weighs, never a room-independent reason to continue: the forecast still drives the verdict.
+
 ## On approval
 
 Ask exactly one question — **which thread deserves emphasis in the handoff?** — then invoke `handoff:save-handoff`, carrying the answer as its brief.
 
 One question, not an interview. Everything else a handoff needs is `save-handoff`'s to gather, and when the session is ending its own throughline suggestion does that job.
+
+One carve-out, shared with `land`: when the session genuinely holds no context worth preserving — the arc landed, the exploration led nowhere — say so and recommend a fresh start with no handoff rather than routing into `save-handoff` to write an empty one. The old session stays resumable either way.
 
 ## Bounds
 

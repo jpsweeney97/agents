@@ -74,6 +74,12 @@ A tool's response is context the calling agent acts on next, so the same distinc
 - Silent truncation or a dropped page is a wrong value the agent cannot see; signal what was cut. This is the Keep case on a return: the wrong value degrades the work.
 - An error that names what to try next is context; one that only reports what broke leaves the agent guessing. The repo's `{operation} failed: {reason}. Got: {input!r:.100}` is one such shape, not a required one.
 
+### Fan-Outs And Orchestration
+
+Before designing a parallel fan-out, answer four questions: can every branch run at once with no ordering dependency; does each branch produce a different *kind* of finding rather than the same finding from another angle; will merging their outputs fit in the caller's remaining context; is the wall-clock wait long enough for parallelism to be worth the extra contexts? Any "no" means one agent, or a sequence.
+
+Cap orchestration depth at one hop and keep the merge in the calling agent: a delegate that itself delegates must summarize to hand off, so each added layer costs context fidelity and tokens while adding no decision. When a fan-out's results need combining, the caller combines them; it does not spawn a combiner. This consolidates what `plan-panel-loop` (no nested panels), `improve-codebase-architecture` (subagents return findings; the caller writes the report), and `design-exploration` (read the load-bearing files yourself; never design from summaries alone) each already state for their own lane.
+
 ### Reader Capability
 
 The presumption against machinery prices agent judgment as worth preserving, which presumes a reader whose judgment is strong. Ask who actually reads the surface, at what capability, under what load: a small subagent in a fan-out, a degraded end-of-context session, or a cross-model reader may need firmer shapes than a frontier main loop would tolerate, and structure that would insult the strongest reader can be load-bearing for the weakest. Schema-forced returns at machine seams — a subagent's structured output, a typed findings report — are this case working as designed: deterministic transport of judgments still made in prose, not a violation of the gate. The bet runs in both directions: as the readers of a surface strengthen, so does the presumption against machinery, and a shape built for a weaker reader is worth revisiting when the reader changes.
