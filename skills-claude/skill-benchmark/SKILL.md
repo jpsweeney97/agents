@@ -42,6 +42,8 @@ baseline:   claude -p --setting-sources project,local \
               --model <session-model> --output-format stream-json --max-budget-usd <cap>
 ```
 
+**Prompt delivery.** Write each trial's prompt to a file and pipe it through stdin (`claude -p < prompt.txt`); never interpolate it into a shell-quoted argument — realistic prompts carry backticks, `$(...)`, and quote characters that truncate the argument or execute in the shell, corrupting the trial silently. The Isolation and authorization rules above stay in force for what the subprocess may touch.
+
 Both arms hold the built-ins constant; only `--plugin-dir` toggles the target. `--plugin-dir` needs an actual plugin directory, not a bare skill folder: the path must contain `.claude-plugin/plugin.json` with the skill under `skills/<name>/SKILL.md`. A lone `<name>/SKILL.md` loads nothing — the with-skill arm then comes back identical to the baseline and the isolation signal correctly reports the target absent, so confirm the layout before trusting a null result. `--disable-slash-commands` and `--safe-mode` look like baselines but suppress `--plugin-dir` too, so they cannot form a matched pair. Pin `--model` to the model under test and confirm it from `init.model`.
 
 ## Performance benchmark

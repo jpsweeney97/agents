@@ -30,7 +30,7 @@ Machinery removes or narrows judgment: required fields, status systems, fixed wo
 
 The sharpest form of the cut is who makes the semantic decision, not the format: prose that pre-makes the call is machinery however gently it reads, and a deterministic mechanic that pre-makes nothing is a lighter design, not a threat — format only sets how hard the constraint is to override.
 
-If the change is only context, keep it clear and proceed — but context is not free: it spends the same future-reader attention machinery does and accretes with no gate of its own, so on a surface that has already grown, prefer replacing prose to adding more.
+If the change is only context, keep it clear and proceed — but context is not free: it spends the same future-reader attention machinery does and accretes with no gate of its own, so on a surface that has already grown, prefer replacing prose to adding more. One cheap test for a context line that restates the environment: the environment is a source of truth, and a document restating it is a cache that earns its load only when the lookup is expensive — cache the unwritten convention, the reason behind a choice, the gotcha no config confesses; leave one-file, one-command lookups (a restated build command, a directory listing) to the environment, where they cannot go stale. A deliberate, justified restatement stays — judged by whether it still earns its load, not by being a restatement.
 
 If the change adds machinery, ask the smaller question:
 
