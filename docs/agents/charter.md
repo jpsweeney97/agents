@@ -37,9 +37,11 @@ This test governs **gated** contracts only — always-loaded instructions and th
 
 Merit decides, authorship-blind: a better contract is a better contract, wherever it was found. Before admitting a new contract — authored or extracted — answer:
 
-- What work does it own that no existing lane owns? Name the closest existing contract and why this work is not its job.
+- What work does it own? Name the closest existing contract. When no lane owns the work, say why it is not that contract's job. When an existing lane owns it, the candidate proceeds only as a proposed replacement under Supersession below — never as a second owner.
 - What misroute or failure does it prevent that lighter context — an AGENTS.md line, a reference file in an existing skill — would not?
 - Can it be authored to house standards — Use-when/Do-not-use boundaries, proof-class discipline, availability-conditioned routing, dual-runtime phrasing where it applies — and does it say plainly what an agent who encounters it must do? The test applies to the contract as it will land here, not the source's current form.
+
+Supersession. A candidate for owned work is a proposed replacement, not a second owner. Compare the candidate as it would land here against the incumbent on the job's real work — grounded in observed work per the paragraph below, never in synthetic cases alone — with the burden on the candidate: a tie keeps the incumbent, a win confined to separable clauses is a fold into the incumbent, and every material regression is disclosed, never traded silently. A whole-design replacement is put to the user with the comparison; it is never applied silently. When the user chooses the replacement, admission and the incumbent's loss of the job are one decision: a build-and-prune incumbent is pruned, a gated incumbent retires as superseded (see Retirement), and the single ledger entry carries the comparison as its evidence pointer. Runtime-bundled incumbents are fixed terrain (see Scope) and are never superseded.
 
 Run the test on observed work, not the routing graph. A genuine gap and a non-job both show zero inbound routes, so "nothing routes to that lane" never decides a rejection. Rejecting a candidate takes the same evidence discipline as admitting one: name the friction you looked for — misroutes, repeated corrections, work handled badly ad hoc — and where in observed work you looked without finding it. Rejections are cheap and admissions are paid for; do not let that asymmetry stand in for the merit call.
 
@@ -59,7 +61,7 @@ Installed third-party contracts are subject to this rule retroactively: curation
 
 ## Retirement
 
-A skill or command is build-and-prune: trash it the moment it stops earning its place — no evidence ceremony, and archiving to `skills-archive/` is optional, not required. A **gated** contract that loses its job — absorbed, superseded, or no longer worth its slot — retires under discipline: a rule or instruction line with no archive home is deleted from its surface; an installed third-party contract is removed under Extraction's terms. For these gated retirements, "no longer worth its slot" takes the same evidence discipline as admitting one: name the observed-work evidence, never route-absence alone. Update or remove every contract that routes to a removed surface, whichever class it was.
+A skill or command is build-and-prune: trash it the moment it stops earning its place — no evidence ceremony, and archiving to `skills-archive/` is optional, not required. A **gated** contract that loses its job — absorbed, superseded, or no longer worth its slot — retires under discipline: a rule or instruction line with no archive home is deleted from its surface; an installed third-party contract is removed under Extraction's terms. For these gated retirements, "no longer worth its slot" takes the same evidence discipline as admitting one: name the observed-work evidence, never route-absence alone. "Superseded" is decided in Admission's Supersession path: the replacement decision authorizes the retirement, and that decision's ledger entry carries the evidence — no separate retirement case is owed. Update or remove every contract that routes to a removed surface, whichever class it was.
 
 ## Decision Record
 
