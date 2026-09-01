@@ -1,23 +1,23 @@
 ---
 name: injection-safe-inputs
-description: "Use when designing or vetting how one trust boundary handles untrusted input — a request body, upload, webhook, query param, or file path: identify every sink the input reaches (SQL, shell, path, HTML/JS, template, LDAP), apply the sink-correct defense, cover mass assignment, deserialization, and size/type limits, and prove it with a must-block/must-pass payload table. Not for hardening one regex (regex-craft), LLM prompt injection, or a repo-wide vulnerability sweep."
+description: "Use when designing or vetting how one trust boundary handles untrusted input — a request body, upload, webhook, query param, or file path: identify every sink the input reaches (SQL, shell, path, HTML/JS, template, LDAP, outbound URL fetch/SSRF), apply the sink-correct defense, cover mass assignment, deserialization, and size/type limits, and prove it with a must-block/must-pass payload table. Not for hardening one regex (regex-craft), LLM prompt injection, or a repo-wide vulnerability sweep."
 ---
 
 # Injection-Safe Inputs
 
 Design how one trust boundary handles untrusted input — sink-first, one named defense per sink — and prove it with a must-block/must-pass payload table, never with reassurance. Invocation: `/injection-safe-inputs` or `$injection-safe-inputs`.
 
-A forcing pass over one trust boundary — a request body, an upload, a webhook, a query parameter, a file path — that traces the input to every sink it reaches, applies the sink-correct defense at each, dispositions mass assignment, unsafe deserialization, and size/type limits, and proves the result with a concrete payload table in two halves: executed where a running surface exists, honestly labeled authored-not-executed where none does. It edits on a working branch when applied; it never pushes, opens a PR, or publishes unless asked.
+A forcing pass over one trust boundary — a request body, an upload, a webhook, a query parameter, a file path, a third-party API response, a model's output — that traces the input to every sink it reaches, applies the sink-correct defense at each, dispositions mass assignment, unsafe deserialization, and size/type limits, and proves the result with a concrete payload table in two halves: executed where a running surface exists, honestly labeled authored-not-executed where none does. It edits on a working branch when applied; it never pushes, opens a PR, or publishes unless asked.
 
 ## Shape — a forcing pass over one boundary
 
-**Pin the boundary and follow the data first.** The one entry point under design — request body, upload, webhook, query parameter, file path — and each field's full downstream path: where it is stored, logged, rendered, executed, or passed on to another service. Second-order injection is found here, not at the entry: input stored quietly today still reaches the sink when it is rendered or queried tomorrow. Trace the data, not the request handler.
+**Pin the boundary and follow the data first.** The one entry point under design — request body, upload, webhook, query parameter, file path, third-party API response, model output (untrusted like any other source: never passed raw into eval, SQL, a shell, markup, or a path) — and each field's full downstream path: where it is stored, logged, rendered, executed, or passed on to another service. Second-order injection is found here, not at the entry: input stored quietly today still reaches the sink when it is rendered or queried tomorrow. Trace the data, not the request handler.
 
 Then work the boundary in order, each step a forcing question about this boundary, not a fill-in:
 
-- **Census the sinks.** For each downstream use, name the sink class: SQL/NoSQL query, shell or process invocation, filesystem path, HTML/JS render context, template engine, LDAP/directory query. The census is the gate the rest hangs on — each defense is chosen per sink, so an unidentified sink is an unguarded one. An input that reaches no sink needs limits only.
+- **Census the sinks.** For each downstream use, name the sink class: SQL/NoSQL query, shell or process invocation, filesystem path, HTML/JS render context, template engine, LDAP/directory query, outbound URL fetch (a user-influenced URL the server fetches — SSRF). The census is the gate the rest hangs on — each defense is chosen per sink, so an unidentified sink is an unguarded one. An input that reaches no sink needs limits only.
 - **Name the sink-correct defense, per sink — never generic "sanitization".** Read [references/sink-defenses.md](references/sink-defenses.md) as soon as the census names the sink classes present, and apply its entry for each censused sink. The rule to state plainly: **validation supplements, defenses replace** — an allowlist check is a good filter, but parameterization is what removes the vulnerability class.
-- **Disposition the boundary trio.** Mass assignment: bind allowlisted fields only, never object-splat a request body into a model — a smuggled `role=admin` field rides the splat in. Unsafe deserialization: never `pickle`, `ObjectInputStream`, or `yaml.load` on untrusted bytes — safe loaders or plain data formats. Size/type/encoding limits, declared at the boundary: length caps, content-type checks, reject-don't-truncate.
+- **Disposition the boundary trio.** Mass assignment: bind allowlisted fields only, never object-splat a request body into a model — a smuggled `role=admin` field rides the splat in. Unsafe deserialization: never `pickle`, `ObjectInputStream`, or `yaml.load` on untrusted bytes — safe loaders or plain data formats. Size/type/encoding limits, declared at the boundary: length caps, content-type checks — a declared content-type is attacker-declared, so verify it against the content's leading bytes and reject on mismatch — reject-don't-truncate.
 
 ## Prove it — the payload table
 
@@ -56,7 +56,7 @@ Never assert a block or pass outcome you did not observe; report only what the e
 - Whole-system attacker modeling → `red-team`; its attack paths make good must-block rows here.
 - Reviewing a completed change against a spec plus a diff → `implementation-review` where available.
 - A repo-wide vulnerability sweep → the parked security-audit or a bundled `security-review`; a scored debt backlog → `tech-debt-scan`.
-- LLM prompt injection is deliberately unowned: untrusted text reaching a model's context is a real boundary neither this skill nor any named neighbor covers — say so and stop; do not stretch the sink table over it.
+- LLM prompt injection — untrusted text reaching a model's *context* — is not censused here as a sink, and adversary modeling for it is `red-team`'s; a model's *output* reaching a sink is censused here like any untrusted source.
 
 ## Done when
 
