@@ -14,15 +14,15 @@ CANON='Treat repo-defined protected branches first; if the repo defines none, tr
 
 # Every always-loaded surface that must carry the sentence verbatim.
 # WS3 repoints the three SKILL.md that move under plugins/git-cycle/skills/ (git-hygiene,
-# merge-branch, closeout-check); acceptance-map and AGENTS.md stay put — update this list
-# in that migration step (Task 3.5).
+# merge-branch, closeout-check); the 2026-09-02 plan-cycle packaging moved acceptance-map
+# under plugins/plan-cycle/skills/; AGENTS.md stays put. Update this list in each such move.
 TARGETS=(
   "AGENTS.md"
   "plugins/git-cycle/skills/git-hygiene/SKILL.md"
   "plugins/git-cycle/skills/merge-branch/SKILL.md"
   "plugins/git-cycle/skills/resolve-conflicts/SKILL.md"
   "plugins/git-cycle/skills/closeout-check/SKILL.md"
-  "skills/acceptance-map/SKILL.md"
+  "plugins/plan-cycle/skills/acceptance-map/SKILL.md"
   "plugins/git-cycle/skills/land/SKILL.md"
 )
 

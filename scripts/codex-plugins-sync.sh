@@ -38,6 +38,7 @@
 #      codex plugin add review-family@turbo-mode
 #      codex plugin add git-cycle@turbo-mode
 #      codex plugin add relay@turbo-mode
+#      codex plugin add plan-cycle@turbo-mode
 #   3. Enable state lives in ~/.codex/config.toml under
 #      [plugins."<name>@turbo-mode"]; it survives republishing.
 #   4. Claude Code delivery of the same sources is separate: see
