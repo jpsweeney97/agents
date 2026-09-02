@@ -159,3 +159,4 @@ A cross-model deliberation with Codex (run `~/.synapsis/runs/2026-09-02-plugin-b
 1. Go or no-go on building `relay` first.
 2. Placement of `next-steps` and `to-questionnaire`: standalone (recommended for now), `decide`/`plan-cycle`, or `relay`.
 3. Only if `decide` is built: whether to redesign the home of `ADR-FORMAT.md` so `decision-record` can join it.
+   Resolved 2026-09-02: `decide` 1.1.0 takes `decision-record`; the format file moved to `plugins/decide/references/ADR-FORMAT.md` with a git-tracked symlink at the old `skills/grill-with-docs/` path. Design and certificate: `docs/plans/2026-09-02-adr-format-home.md`, `~/.synapsis/runs/2026-09-02-adr-format-home/`. The statements above that `decision-record` cannot leave `grill-with-docs` describe the tree at the time and are left as written.

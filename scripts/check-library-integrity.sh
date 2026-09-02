@@ -12,9 +12,12 @@
 #                              (plugin-shared references/ live two levels up),
 #                              falling back to the repo root so a cited root
 #                              path (e.g. scripts/check-library-integrity.sh)
-#                              is not a false dangle; glob patterns cited as
-#                              prose (e.g. scripts/check-*.sh) are not path
-#                              citations and are skipped
+#                              is not a false dangle; a plugin-qualified path
+#                              (plugins/<name>/references/...) is captured whole
+#                              and resolved at the repo root, so a standalone
+#                              skill may name a plugin's shared reference; glob
+#                              patterns cited as prose (e.g. scripts/check-*.sh)
+#                              are not path citations and are skipped
 #   3. orphan support files  — every git-tracked file under a skill's
 #                              references/ scripts/ examples/ is mentioned
 #                              somewhere else in that skill's bundle
@@ -26,6 +29,14 @@
 #                              landed bump is the publish signal on both runtimes,
 #                              so a disagreeing pair publishes a release whose own
 #                              record contradicts it
+#   6. ADR-FORMAT.md alias   — skills/grill-with-docs/ADR-FORMAT.md is the repo's
+#                              one tracked symlink (index mode 120000, exact target
+#                              ../../plugins/decide/references/ADR-FORMAT.md,
+#                              resolving to that regular file); check 2 never sees a
+#                              root-level file, so a deleted, retargeted, or
+#                              de-symlinked alias would otherwise pass every sweep
+#                              while three skills silently lose their one format
+#                              source (docs/plans/2026-09-02-adr-format-home.md)
 #
 # DELEGATED (covered elsewhere — invoked, never duplicated):
 #   check-protected-set.sh, check-handoff-paths.sh, check-review-family.sh
@@ -143,7 +154,7 @@ while IFS= read -r d; do
   # instead of truncating to scripts/check-; after stripping a trailing bold
   # marker (**), any token still holding a `*` is a glob cited as prose, not a
   # path citation — skip it.
-  done < <(grep -ohE '(\.\./)*(references|scripts|examples)/[A-Za-z0-9][A-Za-z0-9._/*-]*' "$d/SKILL.md" 2>/dev/null \
+  done < <(grep -ohE '((\.\./)*|plugins/[A-Za-z0-9._-]+/)(references|scripts|examples)/[A-Za-z0-9][A-Za-z0-9._/*-]*' "$d/SKILL.md" 2>/dev/null \
              | sed -E 's/[.,:;]+$//; s/\*\*+$//' | grep -v '\*' | sort -u)
 done < <(skill_dirs)
 [ "$dangling" -eq 0 ] && pass "self-referenced paths resolve ($tokens tokens)"
@@ -221,9 +232,41 @@ for pj in "$REPO"/plugins/*/.claude-plugin/plugin.json; do
 done
 [ "$lockbad" -eq 0 ] && pass "plugin manifest/CHANGELOG version lockstep ($plugincount plugins)"
 
+# --- 6: ADR-FORMAT.md alias (tracked symlink: mode, target, resolution) ---
+ALIAS="skills/grill-with-docs/ADR-FORMAT.md"
+ALIAS_TARGET="../../plugins/decide/references/ADR-FORMAT.md"
+aliasbad=0
+mode="$(git -C "$REPO" ls-files -s -- "$ALIAS" | awk '{print $1}')"
+if [ "$mode" != "120000" ]; then
+  bad "alias: $ALIAS index mode '${mode:-absent}' != 120000 (not a tracked symlink)"
+  aliasbad=1
+fi
+if [ ! -L "$REPO/$ALIAS" ]; then
+  bad "alias: $ALIAS is not a working-tree symlink"
+  aliasbad=1
+else
+  actual="$(readlink "$REPO/$ALIAS")"
+  if [ "$actual" != "$ALIAS_TARGET" ]; then
+    bad "alias: $ALIAS -> '$actual' (expected '$ALIAS_TARGET')"
+    aliasbad=1
+  fi
+  if [ ! -f "$REPO/$ALIAS" ]; then
+    bad "alias: $ALIAS does not resolve to a regular file"
+    aliasbad=1
+  else
+    resolved="$(cd "$(dirname "$REPO/$ALIAS")" && cd "$(dirname "$actual")" && pwd -P)/$(basename "$actual")"
+    canonical="$(cd "$REPO/plugins/decide/references" && pwd -P)/ADR-FORMAT.md"
+    if [ "$resolved" != "$canonical" ]; then
+      bad "alias: $ALIAS resolves to '$resolved', not the canonical '$canonical'"
+      aliasbad=1
+    fi
+  fi
+fi
+[ "$aliasbad" -eq 0 ] && pass "ADR-FORMAT.md alias is a tracked symlink to $ALIAS_TARGET and resolves to the canonical file"
+
 echo
 if [ "$fail" -ne 0 ]; then
   echo "FAIL: library integrity found defects (see [FAIL] lines above)" >&2
   exit 1
 fi
-echo "OK: library integrity clean (5 structural checks + 5 delegated canaries)"
+echo "OK: library integrity clean (6 structural checks + 5 delegated canaries)"
