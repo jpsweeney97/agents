@@ -1,10 +1,10 @@
 # Plugin bundle candidates — 2026-09-02
 
-Read-only assessment of which skills in `skills/` and `skills-claude/` form natural plugin bundles, what each bundle would cost, and what edits packaging needs. Nothing here has been built. Evidence: every SKILL.md description, the cross-reference graph between skill bodies, the skill-usage ledger (`~/.claude/logs/skill-usage-ledger.jsonl`, 6,854 records across both runtimes), git churn since 2026-06-01, the three existing plugins, and the prior extraction plan (`docs/plans/2026-06-17-git-cycle-plugin.md`).
+Read-only assessment of which skills in `skills/` and `skills-claude/` form natural plugin bundles, what each bundle would cost, and what edits packaging needs. Nothing here has been built. Evidence: every SKILL.md description, the cross-reference graph between skill bodies, the skill-usage ledger (`~/.claude/logs/skill-usage-ledger.jsonl`, 6,854 records across both runtimes), git churn since 2026-06-01, the three existing plugins, and the prior extraction plan (`docs/plans/2026-06-17-git-cycle-plugin.md`). Revised 2026-09-02 to the cross-model deliberation certificate; see Settled by deliberation at the end.
 
 ## Summary
 
-Three bundles are ready now: **decide** (shape and choose), **plan-cycle** (spec to execution), and **relay** (hand-carry between sessions). Four more are coherent but built from skills that have barely fired yet: **pressure-test**, **ops-cycle**, **test-cycle**, **threat-model**. One fold into an existing plugin is clear: `land` belongs in `git-cycle`. The skill-authoring family should stay unpackaged.
+Three bundles are ready now, to be built in this order: **relay** (hand-carry between sessions), then **plan-cycle** (spec to execution), then **decide** (shape and choose, seven skills). Four more are coherent but built from skills that have barely fired yet: **pressure-test**, **ops-cycle**, **test-cycle**, **threat-model**. One fold into an existing plugin is clear: `land` belongs in `git-cycle`. The skill-authoring family should stay unpackaged.
 
 ## How candidates were judged
 
@@ -20,30 +20,30 @@ Ledger caveat: records without a `runtime` field are Claude fires (3,666); `code
 
 ## Tier 1 — bundle now
 
-### 1. `decide` — shape a want, widen the field, choose, record
+### 1. `decide` — shape a want, widen the field, choose
 
 | Skill | Fires | Repos | Commits since June | First commit |
 |---|---|---|---|---|
 | making-recommendations | 299 | 17 | 18 | pre-June |
 | outcome-shaping | 137 | 9 | 2 | pre-June |
 | design-exploration | 36 | 8 | 8 | pre-June |
-| decision-record | 19 | 3 | 4 | pre-June |
 | deliberate | 14 | 3 | 29 | pre-June |
 | ideate | 9 | 4 | 6 | pre-June |
 | option-shaping | 5 | 4 | 2 | pre-June |
 | scope-cut | 0 | 0 | 4 | 2026-06-30 |
-| decision-owner-map | 0 | 0 | 3 | 2026-08-06 |
 
-Why it is a family: the five core skills (outcome-shaping, ideate, option-shaping, making-recommendations, design-exploration) reference each other almost pairwise, and their descriptions already form one routing chain ("once the want is clear: shaping a design is design-exploration, choosing among named options is making-recommendations"). `deliberate` runs that chain autonomously. `scope-cut` cuts a shaped scope. `decision-record` and `decision-owner-map` capture and route the result. Total fires: 519, the highest of any unpackaged family.
+Why it is a family: the five core skills (outcome-shaping, ideate, option-shaping, making-recommendations, design-exploration) reference each other almost pairwise, and their descriptions already form one routing chain ("once the want is clear: shaping a design is design-exploration, choosing among named options is making-recommendations"). `deliberate` runs that chain autonomously. `scope-cut` cuts a shaped scope. Total fires: 500, the highest of any unpackaged family.
+
+Left standalone, per the deliberation (both were in the original nine): `decision-record` binds `../grill-with-docs/ADR-FORMAT.md` as its single format source and forbids forking it, so it cannot sit in a plugin apart from `grill-with-docs`; `decision-owner-map` routes a decision to an owner rather than making one, and no core decide skill routes to it.
 
 Borderline: `next-steps` (27 fires, explicit-invoke only) turns findings into a sequenced action plan; it fits here or in plan-cycle. Default: leave it standalone until one bundle clearly owns it.
 
-Cost to know: `deliberate` and `making-recommendations` are among the most-edited skills in the library (29 and 18 commits since June). Each future edit becomes a release. Mitigation is batching edits into releases, which `review-family` already does (0.17.0 in twelve weeks).
+Cost to know: `deliberate` and `making-recommendations` are among the most-edited skills in the library (29 and 18 commits since June). Unique commits since 2026-06-01 across the seven: 57 (49 files). Each future edit becomes a release. Mitigation is batching edits into releases, which `review-family` already does (0.17.0 in twelve weeks).
 
 Bundle-specific edits:
 
-- `deliberate` ships `scripts/` and `tests/`; both move with it. Its validator's embedded tests use `skills/<name>/SKILL.md` fixture paths (lines 5989 to 6869 of `deliberate-validate.py`); run `uv run pytest skills/deliberate/tests` after the move and update the fixtures if they are asserted against the tree.
-- New re-run capsules will record source paths under `plugins/decide/skills/`; old capsules stay valid because they pin content ids.
+- `deliberate` ships `scripts/` and `tests/`; both move with it.
+- deliberate re-run capsules: a re-run re-resolves constituent and method pins as whole path-plus-id entries (`_pin_change_frontiers` in `skills/deliberate/scripts/deliberate-validate.py`), so moving the decide skills changes the recorded locators and invalidates existing capsules from the affected stage, Generate once ideate or deliberate's own method paths move. The migration must run the full deliberate suite and a focused old-capsule/new-pins re-run test proving that invalidation. The embedded `skills/...` paths and `skills/deliberate/tests/fixtures/valid-capsule.yaml` are synthetic validation fixtures; update them only if the tests are intentionally changed to model the post-move layout, not as a prerequisite of the move. Do not claim old capsules continue unchanged.
 
 ### 2. `plan-cycle` — from settled spec to executed work
 
@@ -59,7 +59,7 @@ Bundle-specific edits:
 | plan-queue | 0 | 0 | 1 | 2026-07-26 |
 | implement-issue | 0 | 0 | 1 | 2026-09-01 |
 
-Why it is a family: PRD to issues to plan to execution is one arc, and every member routes to its neighbors by name. `triage` and `implement-issue` are the tracker side of the same arc. `acceptance-map` sits between spec and implementation. `spec-drift-reconcile` is what runs when intent changes mid-arc. Total fires: 180. Churn is lower than `decide`, so this is the cheaper first bundle to build.
+Why it is a family: PRD to issues to plan to execution is one arc, and every member routes to its neighbors by name. `triage` and `implement-issue` are the tracker side of the same arc. `acceptance-map` sits between spec and implementation. `spec-drift-reconcile` is what runs when intent changes mid-arc. Total fires: 180. Unique commits since 2026-06-01 across the nine: 25 (12 files). Build it second, after `relay`.
 
 Bundle-specific edits:
 
@@ -76,6 +76,8 @@ Bundle-specific edits:
 | stage-prompt | 28 | 7 | pre-June |
 | courier | 3 | 1 | 2026-07-26 |
 
+Unique commits since 2026-06-01 across the three: 5 (3 files). Build it first: it is the smallest, lowest-churn migration on which to prove the packaging and dual-runtime load procedure.
+
 Why it is a family: all three exist to move a packet between a session here and a session elsewhere, and each names the other two as its neighbor. `context-checkpoint` belongs to the same job but is Claude-only and stays in `skills-claude/`.
 
 Alternative: fold these into `handoff` as 4.0.0. Against that: `handoff` is defined by one storage contract (`<project_root>/.agents/handoffs/`, guarded by `scripts/check-handoff-paths.sh`), and these three write elsewhere (`~/scratch-workspace/relay/`, `~/prompts`). A separate plugin keeps the handoff contract clean. Recommendation: separate plugin.
@@ -90,9 +92,9 @@ These families are real by cross-reference, but most members were admitted betwe
 
 Members: grill-me (57 fires, none since 2026-06-09), grill-with-docs (30), assumption-check (0), premortem (1), steelman (0), decision-flip (0), outside-view (0), incentive-map (0). Total 88.
 
-Why separate from `decide`: six of eight are zero-or-one-fire. Mixing them into the highest-use release unit means their edits tax `decide`'s releases. Merge the two later if one arc is preferred.
+Why separate from `decide`: its skills challenge a settled or proposed position rather than forming or choosing one. The fire counts above (six of eight at zero or one) were not re-derived in the deliberation and do not determine this; keeping the two release units apart also stops their edits taxing `decide`'s releases. Merge the two later if one arc is preferred.
 
-Edits: `grill-with-docs` ships `ADR-FORMAT.md` and `CONTEXT-FORMAT.md`. `steelman` is exported to claude.ai (`exports/steelman`); its export header records `skills/steelman/ @ <sha>`, so `scripts/exports-drift.sh` needs the new path.
+Edits: `grill-with-docs` ships `ADR-FORMAT.md` and `CONTEXT-FORMAT.md`; `decision-record` (standalone) and `improve-codebase-architecture` link those files by relative path, so moving `grill-with-docs` means updating their references per the maintenance note in `grill-with-docs/SKILL.md`. `steelman` is exported to claude.ai (`exports/steelman`); its export header records `skills/steelman/ @ <sha>`, so `scripts/exports-drift.sh` needs the new path.
 
 ### 5. `ops-cycle` — ship, watch, respond, learn
 
@@ -120,6 +122,7 @@ Members: red-team (1 fire), authorization-design (0), injection-safe-inputs (0),
 - **Codebase-map cluster** (explain-codebase, zoom-out, orient-status, add-an-x-by-example, co-change-radar, contract-change-propagation, fence-archaeology, doc-drift-audit, shelf-life, baseline). Two loose sub-clusters, 25 fires total, no shared contract.
 - **Code-quality toolbox** (simplify-code, improve-codebase-architecture, tech-debt-scan, perf-optimize, migration-campaign, dependency-upgrade). Standalone invocations with high churn (19 and 15 commits for tech-debt-scan and simplify-code).
 - **Standalone disciplines and personal skills** (hold-or-fold, recheck-investment, substitution-ledger, working-slice-review, soundcheck, reflect, reality-check, email-writing, caveman, the-gang-explains, teach, athenahealth-brand-system, claude-code-docs). No arc to join.
+- **decision-record and decision-owner-map** (removed from `decide` by the deliberation). decision-record cannot leave `grill-with-docs`'s format file under its current text; decision-owner-map is a routing packet, not a decision, with no reciprocal reference from the core.
 - **apply-findings** must not go into `review-family`: that plugin's contract is review-only, guarded by the read-only core in `check-review-family.sh`, and `apply-findings` edits files.
 
 ## What packaging costs
@@ -135,7 +138,7 @@ Generalized from the git-cycle plan, Workstream 3.
 3. Copy each skill directory with its companions (`agents/openai.yaml`, `references/`, `examples/`, `scripts/`, `tests/`, loose reference files). Delete the originals only after a live-load test in both runtimes.
 4. Add the `plugins/marketplace.json` entry with a relative path (`./.agents/plugins/<name>`); verify with `codex plugin list`.
 5. Run `scripts/claude-skills-sync.sh --link <name>`, trash each moved skill's stale symlink in `~/.claude/skills`, then `--check`.
-6. Run `codex plugin add <name>@turbo-mode`, enable it in `~/.codex/config.toml`, and add the plugin to the bootstrap lists in both sync-script headers.
+6. Run `codex plugin add <name>@turbo-mode`, enable it in `~/.codex/config.toml`, and add the plugin to the enumerated bootstrap list in the header of `scripts/codex-plugins-sync.sh` (`scripts/claude-skills-sync.sh` discovers every `plugins/` directory generically and needs no edit).
 7. Repoint path-bound surfaces: `check-protected-set.sh` (acceptance-map, land), `exports-drift.sh` headers for any exported skill, `AGENTS.md` path references.
 8. Invocation tokens change on Claude to `/<plugin>:<skill>`; on Codex `$<skill>` keeps working. Cross-references from other skills use bare tokens today and model routing keeps working (git-cycle precedent); prefixing them is optional.
 9. Validate: `quick_validate.py` per moved skill, YAML parse of each `agents/openai.yaml`, `git diff --check`, `scripts/check-library-integrity.sh`, and one live invocation per runtime.
@@ -147,10 +150,12 @@ Packaging is not a charter event: skills are build-and-prune, and the ledger's 2
 
 The plugin name is the Claude namespace. Avoid installed plugin names (codex, github, impeccable, obsidian, pyright-lsp, swift-lsp, typescript-lsp), Claude bundled skill names (code-review, debug, loop, run, verify, security-review, simplify), and Codex bundled names. Proposed names: `decide`, `plan-cycle`, `relay`, `pressure-test`, `ops-cycle`, `test-cycle`, `threat-model`.
 
+## Settled by deliberation (2026-09-02)
+
+A cross-model deliberation with Codex (run `~/.synapsis/runs/2026-09-02-plugin-bundle-candidates/`, readable `answer.md` beside the authoritative `run.json`) ended in a CONCESSION certificate: the host retired its pre-committed stance on two of the six decisions after verifying Codex's evidence at 5ee3a53. Settled: (1) `decide` at seven skills with `pressure-test` separate; (2) `plan-cycle` at nine; (3) `relay` as its own plugin, not a `handoff` fold; (4) `land` into `git-cycle` 1.7.0; (5) the skill-authoring family unpackaged; (6) build order `relay`, then `plan-cycle`, then `decide`. The certificate also corrected two packaging claims in the original text (deliberate capsule invalidation; the sync-script bootstrap list), both applied above. It does not assert that anything is built or published, that the tier-2 bundles were re-verified, that the usage counts are correct, or where `ADR-FORMAT.md` should live long-term.
+
 ## Open decisions
 
-1. Build order. Recommended: `plan-cycle` first (lowest churn, cheapest proof of the process), then `decide`, then `relay`.
-2. `pressure-test`: separate plugin (recommended) or folded into `decide`.
-3. `relay`: separate plugin (recommended) or `handoff` 4.0.0.
-4. `land` into `git-cycle` 1.7.0: yes or no.
-5. Placement of `next-steps` and `to-questionnaire`: standalone (recommended for now), `decide`/`plan-cycle`, or `relay`.
+1. Go or no-go on building `relay` first.
+2. Placement of `next-steps` and `to-questionnaire`: standalone (recommended for now), `decide`/`plan-cycle`, or `relay`.
+3. Only if `decide` is built: whether to redesign the home of `ADR-FORMAT.md` so `decision-record` can join it.
