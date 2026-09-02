@@ -1,11 +1,11 @@
 ---
 name: document-to-markdown
-description: "Use when a task needs the text of a Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV, or text-based PDF file you cannot read directly, converted locally to Markdown with a pinned anydoc CLI and never uploaded. Do not use for HTML or MHTML, email (.eml, .msg), images, scanned PDFs, or creating or editing documents."
+description: "Use when a task needs the text, the embedded images, or the structured content of a Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV, or text-based PDF file you cannot read directly, converted locally with a pinned anydoc build and never uploaded. Do not use for HTML or MHTML, email (.eml, .msg), image files, scanned PDFs, or creating or editing documents."
 ---
 
 # Document To Markdown
 
-Convert one office document, spreadsheet, presentation, ebook, or text-based PDF to GitHub-Flavored Markdown on this machine, using the anydoc command-line tool at a pinned version, so you can read its contents. Nothing leaves the machine. Invoke as `/document-to-markdown <file>` or `$document-to-markdown <file>`.
+Convert one office document, spreadsheet, presentation, ebook, or text-based PDF to GitHub-Flavored Markdown on this machine, using the anydoc command-line tool at a pinned version, so you can read its contents. When the task needs the pictures inside the file or structure the Markdown flattened, a second path runs the anydoc Python library at the same pinned version to write the embedded assets and the document model. Nothing leaves the machine on either path. Invoke as `/document-to-markdown <file>` or `$document-to-markdown <file>`.
 
 ## Use When
 
@@ -21,7 +21,7 @@ Convert one office document, spreadsheet, presentation, ebook, or text-based PDF
 
 ## Pinned Tool
 
-Version `0.2.4` of the npm package `@firecrawl/anydoc`. This line is the only place the version is written; bump it here after re-vetting the release.
+Version `0.2.4` of anydoc, as the npm package `@firecrawl/anydoc` for the Markdown path and the PyPI package `firecrawl-anydoc` for the library path. The version is written in exactly two places, this line and the `dependencies` line at the top of `scripts/anydoc_extract.py`; bump both together after re-vetting the release.
 
 Resolve the command in this order:
 
@@ -44,6 +44,20 @@ Announce one setup line before converting: `Converting <file> locally with anydo
 - Pass `--format <name>` only when detection cannot work: CSV read from stdin (`<anydoc> - --format csv < file`), or a file whose extension is missing or wrong. Names: `doc`, `docx`, `odt`, `pdf`, `ppt`, `pptx`, `rtf`, `epub`, `xlsx`, `ods`, `odp`, `csv`.
 - Then read the parts of the Markdown the task needs, using offsets for a large file, instead of loading the whole file into context.
 
+## Images And The Document Model
+
+Use this second path when the task needs the pictures embedded in the file, or when the Markdown flattened something the task depends on (a merged-cell table, footnotes, list numbering, which paragraph is a heading). It is not a substitute for the Markdown path, and it does not work for PDF, which has no document model.
+
+```bash
+uv run <skill dir>/scripts/anydoc_extract.py <file> <scratch>/<basename>-model [--format <name>]
+```
+
+- The script runs the pinned `firecrawl-anydoc==0.2.4` library through `uv`. The first run downloads a wheel of about 3 MB from PyPI into uv's cache; offline, that fails with a nonzero exit, which you report.
+- It writes `assets/<basename>-<id>.<ext>` for every embedded image or object, and `document.json`: the whole model as nested objects, each showing only the fields its `kind` uses, with image inlines pointing at assets by `asset_id`.
+- It prints a summary: top-level block counts, note and asset counts, and one line per asset with its media type, size, and path. Read `document.json` selectively; it is larger than the Markdown.
+- Same setup line, scratch rule, timeout, and one-file-per-call rule as the Markdown path. Exit codes are the same table below, printed as `anydoc-extract: <message>`; a PDF exits 1 with a message saying so.
+- The library call this path uses has no OCR option and no network path at all, so no upload is possible here even by mistake.
+
 ## Exit Codes And Stops
 
 The CLI never prompts. On failure it prints one `anydoc: <message>` line to stderr.
@@ -63,7 +77,7 @@ Never upload. `--ocr hosted` sends the entire document and its filename to Firec
 Tell the user when one of these applies to the file at hand:
 
 - Word: headers and footers are not extracted, so letterheads, running titles, and footer references are absent.
-- All formats: embedded images appear only as their alt text; no image files are produced.
+- All formats: in the Markdown, embedded images appear only as their alt text. The library path above writes the image files; for PDF there is no way to get them.
 - PDF: text only, with no page numbers or page boundaries; tables and list markers may flatten; a PDF with a broken font encoding can be reported as needing OCR.
 - Legacy `.ppt`: tables flatten into paragraphs. `.odp`: nested list items carry a stray leading dash.
 - Spreadsheets: a sheet with one cell far from the others, or padded with blank cells to the last row, can hit a fixed resource limit and fail with exit 1 even though it opens in Excel.
@@ -75,4 +89,4 @@ When the task is code rather than a one-off read, prefer the library over the CL
 
 ## Report
 
-Close with the output path and size for each file, the exit outcome, and the known gaps that apply. Do not paste the whole Markdown into the reply.
+Close with the output path and size for each file, the exit outcome, and the known gaps that apply. When the library path ran, add the assets directory with its file count and the `document.json` path. Do not paste the whole Markdown or the JSON into the reply.
