@@ -23,7 +23,7 @@ TARGETS=(
   "plugins/git-cycle/skills/resolve-conflicts/SKILL.md"
   "plugins/git-cycle/skills/closeout-check/SKILL.md"
   "skills/acceptance-map/SKILL.md"
-  "skills/land/SKILL.md"
+  "plugins/git-cycle/skills/land/SKILL.md"
 )
 
 fail=0

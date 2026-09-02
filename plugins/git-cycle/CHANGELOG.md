@@ -4,6 +4,12 @@ All notable changes to the Git Cycle plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.7.0 - 2026-09-02
+
+### Added
+
+- `land`: the one-authorization post-endorsement ritual (commit what is in scope, merge or push, save a handoff, refresh the throughline; any constituent's hard stop is surfaced as that skill stated it) joins the plugin from its standalone home at `skills/land/`, where it was admitted on 2026-07-26 as an irreversible-effect skill. Skill body byte-unchanged in the move; on Claude its token becomes `/git-cycle:land`, on Codex `$land` keeps working. The protected-set drift check (`scripts/check-protected-set.sh` in the source repo) is repointed to the new path. Packaged per `docs/plans/2026-09-02-plugin-bundle-candidates.md`: `land` references seven of the ten existing skills and completes the arc the plugin describes ("to merged-and-shared"). Minor, not patch: the plugin delivers a skill it did not deliver before; no existing plugin skill changed, so nothing breaks.
+
 ## 1.6.0 - 2026-07-17
 
 ### Added
