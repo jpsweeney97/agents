@@ -1,0 +1,13 @@
+The skill under test is the file /Users/jp/.agents-worktrees/deliberate/plugins/decide/skills/deliberate/SKILL.md. Read it and follow it as the skill for the request below. Its base directory is /Users/jp/.agents-worktrees/deliberate/plugins/decide/skills/deliberate, so the sibling skill paths it names resolve from there. Do not invoke /decide:deliberate or any installed skill in its place; the file is the skill.
+
+Deliberate this decision end to end.
+
+The decision: what to do with the shallow-prune safety experiment, called T2, now that the deliberate skill has been rebuilt light. T2 asked whether deliberate's Prune stage, which cuts options at sketch depth before any option is developed, systematically excludes options that full development would have shown to be winners. It was pre-registered and sealed on 2026-07-22, run to 322 of 400 planned agent dispatches, stopped at its 15-operator-hour ceiling on 2026-07-25, and closed INCONCLUSIVE: positive control undetermined, adjudication unrun. The rebuilt skill (version 2.0) keeps a shallow Prune stage, so the question T2 asked is still live.
+
+Files you may read for context: /Users/jp/.agents-worktrees/deliberate/docs/plans/2026-07-19-deliberate-shallow-prune-control-preregistration.md (read the frontmatter and the Question section; the rest is protocol detail), /Users/jp/.agents-worktrees/deliberate/docs/plans/2026-07-21-deliberate-t2-design-panel-report.md, /Users/jp/.agents-worktrees/deliberate/docs/reviews/2026-09-03-deliberate-shape-assessment.md, and the skill under test itself. No web research.
+
+Hard constraints: whatever replaces or continues T2 must cost well under T2's 15 operator hours, and any new blind evaluation must follow the blind-evaluation rule in /Users/jp/.agents-worktrees/deliberate/AGENTS.md (never reveal apparatus state to a potential judge before their judgment is recorded).
+
+What I value: knowing whether Prune is safe matters more to me than closing the question tidily, but I will not spend another week of operator time on it.
+
+My lean: close T2 as unanswerable at acceptable cost and rely on watching real runs of the rebuilt skill instead.

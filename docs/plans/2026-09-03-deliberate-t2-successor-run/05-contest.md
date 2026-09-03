@@ -1,0 +1,1 @@
+Exclusion check: live recorded challenges — "Test Contest, not Prune", "Make Prune cut less", "Price the question first", "Paired real runs", "JP reads S2 un-blinded", "Publish what T2 measured, with its limits"; most worth contesting: Test Contest, not Prune
