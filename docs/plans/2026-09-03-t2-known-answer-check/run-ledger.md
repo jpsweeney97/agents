@@ -30,3 +30,12 @@
 | Cut winner's `Revive if` names the fixing fact | 3 of 3 | 01, 04, 06 |
 | Survivors carried against "about four" | 4 in six cases; 5 in four cases (01, 04, 08, 09) | |
 | Cases valid on attempt 1 / 2 / 3 | 6 / 3 / 1 | 03, 04, 05 needed two; 10 needed three |
+
+## Contest test on case-06 (Shape, Recommend, Contest; one dispatch each; `model: opus`)
+
+| Stage | Output | Result |
+| --- | --- | --- |
+| Shape | `03-shaped.md` | surface completed; single cause established from E1/E2/E6; field-level note that no survivor acts on the cause and adding a candidate is outside Shape's authority |
+| Recommend | `04-close.md` | `clear call` for an added option, "correct the export date format (bug tracker issue #2291)", cleared on E3; chatbot cut (constraint, judgment call), banner cut (dominated, fact-established); told Contest to check whether an earlier stage rejected the fix |
+| Contest | `05-contest.md` | live challenge named: "Require a documentation search before a ticket can be submitted"; the cut winner "Restore the previous export date format" not named, although its `Revive if` (1) is satisfied by the close's reasoning |
+| Net | | final recommendation equals the sealed winner; reached by Recommend's add-an-alternative rule, not by revival of Prune's cut; Contest did not flag the cut |
