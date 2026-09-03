@@ -130,6 +130,10 @@ The July methodology critique held deliberate and wrote: "Nothing in the evidenc
 
 Two cheaper alternatives, and why I rank them lower. Fixing only the human-facing surfaces (description, argument hint, README) leaves the one-to-two-hour runtime, the never-run native dispatch shape, and eleven thousand lines of validator to maintain. Building a second, light skill beside the current one gives one job two skills and leaves the intimidating one in the plugin JP opens.
 
+## Correction, 2026-09-03, after the first run of the rebuilt skill
+
+The estimate above, "likely ten to twenty minutes," was wrong. The first end-to-end run of the rebuilt skill took 44 minutes 34 seconds and cost $20.57 at list price (`docs/smoke-tests/2026-09-03_deliberate-2.0-first-smoke.md`). The time is stage thinking on a 20-option field, not choreography: the run made one shell call where a v1 run made 866. The comparison to v1's 42 minutes and 1 hour 43 minutes stands; the claim that the rebuild is much faster does not, and the question of whether a 45-minute run is one JP will invoke is now a prune-watch item in the lifecycle note.
+
 ## Evidence boundary
 
 Read whole: SKILL.md, agents/openai.yaml, the plugin manifest and README, the spec's settled-want and lineage sections, the full July methodology critique, ADR 0001, the T2 pre-registration's status and question, the lifecycle note, and the transcript of the 2026-08-14 invocation. Read at heading and structure grain: the five references, the validator's subcommand list, contract-data.yaml's head, the T2 pilot and panel reports. Not read: the validator's body, the test suites, the smoke-test records beyond what the critique and lifecycle note quote. Fire counts come from the skill-usage ledger, which the critique showed undercounts Claude-side `/deliberate` fires (the hook only sees Skill-tool calls); I therefore also grepped the athena-kb-local transcript directly, which is how the one 2026-08-14 attempt was found. Run-time figures and the build's token cost are the critique's numbers, not re-measured here.
