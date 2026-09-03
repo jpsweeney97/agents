@@ -19,4 +19,4 @@ The complete output of the first end-to-end run of the rebuilt `deliberate` skil
 | `06-orchestrator-close.md` | close | the final message as delivered, with the cut ledger table and the re-run offer |
 | `invocation-prompt.txt` | invocation | the exact prompt the headless run received |
 
-**To act on it in a new session.** Read `06-orchestrator-close.md` first; it is the whole result in one place. The run's own re-run offer applies: name a cut to revive, a constraint to change, or a survivor to develop further, and `deliberate` restarts from that stage using these files as the earlier stages' output. The decision is still open; nothing here has been acted on.
+**To act on it in a new session.** Read `06-orchestrator-close.md` first; it is the whole result in one place. The run's own re-run offer applies: name a cut to revive, a constraint to change, or a survivor to develop further, and `deliberate` restarts from that stage using these files as the earlier stages' output. The decision was still open when this was written. Acted on 2026-09-03: the `check first` step ran and the ten-case run followed; see `docs/plans/2026-09-03-t2-known-answer-check/`.
