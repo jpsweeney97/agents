@@ -19,7 +19,7 @@ Workflow run `wf_b7da3b59-c99`, all agents on Opus per instruction: 4 dimension 
 
 Ten findings were refuted, most by running the reachable input and watching the text behave correctly. The refutations are listed below so the kills are auditable.
 
-Three items need a decision from JP. The rest is a mechanical fix batch of seven items. Any SKILL.md or notice edit is a plugin behavior change, so it goes out through a release cut and the plugin publish path.
+Three items needed a decision from JP; all three were decided the same day, each on its first option (see Decisions from JP). The rest is a mechanical fix batch of seven items, now ten with the decided ones. Any SKILL.md or notice edit is a plugin behavior change, so it goes out through a release cut and the plugin publish path.
 
 ## Evidence levels used in this record
 
@@ -128,9 +128,13 @@ Verifier corrections: this is under-disclosure, not contradiction. PRIVACY close
 
 Fix: needs Decision 2 below. The cheapest side conditions the calendar witness on user-pointing in SKILL.md, leaving the repo and last-three-decisions witnesses unconditional, which brings it inside PRIVACY's existing "evidence the user names."
 
-## Decisions needed from JP
+## Decisions from JP
+
+JP walked through the three decisions one at a time on 2026-09-03, after this record was first saved, and chose option 1 on each. The options are kept as written so the alternatives stay auditable.
 
 ### Decision 1 (F4): what does "comply" mean when the user flees a hard trade and asks for a recommendation?
+
+Decided: option 1.
 
 1. **In-lane, guarded (lean).** The lane may answer, but as the priced values question with a labeled lean, never a pick, and it names the unpriced trade in the same turn. Restraints and the Flight example get reworded to say that. Keeps the deliberate deference, keeps the guards, and never promises a switch a receiving lane may refuse.
 2. **Always hand off by name.** Restraints and the example both route to `making-recommendations`. Cleanest match to Core Behavior and the README, but the receiving lane's field-readiness hard stop and its "options not comparable" exit can bounce a craft-versus-deadline collision straight back, so the wording must say what happens then.
@@ -138,10 +142,14 @@ Fix: needs Decision 2 below. The cheapest side conditions the calendar witness o
 
 ### Decision 2 (F15): which side moves, the skill or the notice?
 
+Decided: option 1.
+
 1. **Condition the calendar witness in SKILL.md (lean).** "the repo, the last three decisions, and any calendar or record the user points you at." One clause; PRIVACY then already covers it under "evidence the user names."
 2. **Widen PRIVACY's read list.** Name calendar and connector-served personal records as sources the skill may read on its own initiative, and say whether such a read can leave the machine. Keeps the unconditional grant; costs a notice edit and a standing disclosure about personal data.
 
 ### Decision 3 (F2, SKILL.md half): should the skill say how a user-requested brief is written?
+
+Decided: option 1.
 
 1. **One clause mirroring `design-exploration` (lean, weakly).** Place it per repo convention, ask one path question if none is clear, leave it uncommitted for the user. Brings the two write-capable judgment lanes in this plugin into agreement.
 2. **Say nothing.** The global Markdown auto-commit default then applies, and the verifier judged that defensible: a user-requested capsule being committed is the default working as intended. Costs nothing and keeps machinery out of a judgment lane.
@@ -158,11 +166,11 @@ Apply after approval through `apply-findings`, in a `worktree-task-cycle` satell
 6. `PRIVACY.md` off-machine sentence: replace the "Three paths" count with count-free phrasing so it stops needing maintenance on every change. (F2)
 7. `PRIVACY.md` and `TERMS.md`: add `decision-record`'s dated amendment-section write on an older record, the 1.2.0 change both notices missed. Out of target but on an in-scope surface. (F2)
 
-Pending the decisions:
+Settled by the decisions (all option 1):
 
-8. `SKILL.md` Restraints and `examples/interaction-examples.md` Flight Named Once: reword per Decision 1. (F4)
-9. `SKILL.md` Load-Testing the Want, or `PRIVACY.md` read list: per Decision 2. (F15)
-10. `SKILL.md` The Capsule: one clause per Decision 3, or nothing. (F2)
+8. `SKILL.md` Restraints and `examples/interaction-examples.md` Flight Named Once: the lane may answer in place, but only as the priced values question with a lean labeled as a lean, never a pick, naming the unpriced trade in the same turn; reword both surfaces so they and Core Behavior agree. (F4, Decision 1)
+9. `SKILL.md` Load-Testing the Want: condition the calendar witness on the user pointing at it, leaving the repo and last-three-decisions witnesses unconditional. No PRIVACY read-list change. (F15, Decision 2)
+10. `SKILL.md` The Capsule: one clause mirroring `design-exploration`: when asked for a durable brief, the capsule is the brief, placed per repo convention with one path question if none is clear, left uncommitted for the user. (F2, Decision 3)
 
 ## Refuted findings
 
