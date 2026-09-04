@@ -1,4 +1,4 @@
 interface:
   display_name: "Reality Check"
-  short_description: "Ground hot moments in reality"
+  short_description: "Sort feeling from evidence while JP is still upset"
   default_prompt: "Use $reality-check to help me separate my emotional interpretation from what the evidence actually supports."
