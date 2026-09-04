@@ -2,7 +2,7 @@
 
 The approved design and executable plan are recorded in [the implementation plan](/Users/jp/.agents/docs/plans/2026-09-04-gap-review-dual-runtime.md), committed as 357addb. Implementation was performed inline in /Users/jp/.agents-worktrees/gap-review on feature/gap-review-dual-runtime. The skill under test was read explicitly from that worktree, so the still-installed Claude-only version could not supply the behavior.
 
-**Current result:** the twelve planned behavior cases passed against the final source bytes below. One additional focused verifier test and one direct check of a preserved malformed result passed. Two earlier runs failed and remain recorded below. Local delivery and token discovery have not yet been checked at this point in the record.
+**Current result:** the twelve planned behavior cases passed against the final source bytes below. One additional focused verifier test and one direct check of a preserved malformed result passed. Two earlier runs failed and remain recorded below. The source was merged locally as 105dc3a, the Claude symlink was updated, and fresh token-discovery and target-resolution checks passed in both runtimes.
 
 ## Method and permissions
 
@@ -112,4 +112,15 @@ Frontmatter and agents/openai.yaml parse. The local validator reports only the d
 
 ## Local delivery
 
-Not yet performed in this version of the record. The source is still isolated in the implementation worktree. The plan requires a validated local merge, replacement of the existing Claude symlink through the repository's sync script, fresh token/load-and-resolution probes in both runtimes, and a final worktree/fleet check.
+The worktree helper bound validation to 105dc3aeed0eaf416824dbad56a7d968c4e3fe9d and fast-forwarded the primary main branch to that exact commit. The source files at /Users/jp/.agents/skills/gap-review and in the implementation worktree still match the final tested hashes above.
+
+The old /Users/jp/.claude/skills/gap-review entry was inspected as a symlink to /Users/jp/.agents/skills-claude/gap-review. Only that stale link was trashed. The repository's claude-skills-sync.sh --link gap-review recreated it pointing to /Users/jp/.agents/skills/gap-review; readlink confirmed that target, and claude-skills-sync.sh --check exited 0 with no violations. The old source directory is absent. No second runtime copy, plugin release, mirror update, or push was made.
+
+Fresh CLI sessions started from /private/tmp/gap-review-dual-runtime-20260904, outside the repository. Both commands were the plan's load-and-resolution probes, with agent creation and source mutation disabled.
+
+| Runtime | Observed load and resolution | Result |
+| --- | --- | --- |
+| Claude Code | The /gap-review invocation identified its base as /Users/jp/.claude/skills/gap-review, read SKILL.md through that path, quoted the native-agent requirement, and found the relative reference with Glob. It resolved handoff to /Users/jp/.agents/plugins/handoff and identified the plugin and its four skills. The parent's separate readlink check established the source connection, since the probe's own Bash access was denied. | Exit 0; no review, agent dispatch, or report creation. [Transcript](/private/tmp/gap-review-dual-runtime-20260904/claude-load.jsonl) |
+| Codex | The $gap-review invocation read /Users/jp/.agents/skills/gap-review/SKILL.md, checked that references/review-prompts.md exists, quoted the native-agent requirement, and resolved handoff to /Users/jp/.agents/plugins/handoff as a plugin. | Exit 0; no review, agent dispatch, or source change. [Transcript](/private/tmp/gap-review-dual-runtime-20260904/codex-load.jsonl), [response](/private/tmp/gap-review-dual-runtime-20260904/codex-load.md) |
+
+These checks establish current token discovery, source/reference resolution, and the normal library root on the installed clients. They are separate from the controlled behavior cases above and do not count as additional full reviews.
