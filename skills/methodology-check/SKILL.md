@@ -1,6 +1,6 @@
 ---
 name: methodology-check
-description: "Use when you want a cheap, single-pass read on whether a skill's method is sound — its premise, epistemology, implicit theory — from the skill's text plus a fire census (does it run; which declared instruments are dead). Dual-runtime, single-agent; the default methodology pass — heavier than scrutinize-skill's contract-altitude detection, lighter than methodology-critique's fire-tested treatment, which it escalates to when how the target fires in real transcripts is the crux. Not for contract/execution review (scrutinize-skill), benchmarking (skill-benchmark), or routine editing."
+description: "Use when you want a cheap, single-pass read on whether a skill's method is sound — its premise, epistemology, implicit theory — from the skill's text plus a fire census (does it run; which declared instruments are dead). Dual-runtime, single-agent; the default methodology pass — heavier than scrutinize-skill's contract-altitude detection, lighter than methodology-critique's fire-tested treatment, which it escalates to when the question the decision turns on is how the target fires in real transcripts. Not for contract/execution review (scrutinize-skill), benchmarking (skill-benchmark), or routine editing."
 ---
 
 # Methodology Check
@@ -65,21 +65,21 @@ You cannot observe behavioral direction. When a finding's warrant needs *how* a 
 
 Deliver in chat, read-only:
 
-- the anchor, and where the evidence corrected it;
+- the anchor — your sealed guess, written before you looked at the evidence — and where the evidence corrected it;
 - the admissible findings with their tags;
-- the graded census;
-- a **verdict bounded to the decided-here set** — say plainly "on text + census," and name what you did not inspect;
-- for every escalate-rider, one scoped recommendation: "to settle whether it fires the right way, commission `methodology-critique` on this axis." **Never invoke `methodology-critique` yourself** — it is JP-commissioned, Claude-only, and expensive by design; you recommend, JP decides. The recommendation stands even from a runtime where `methodology-critique` is unavailable — JP commissions it from a Claude session.
+- the graded census of how often the target actually ran;
+- a **verdict limited to what you settled here** — say plainly "on text + census," and name what you did not inspect;
+- for every escalate-rider (a finding whose structure you settled but whose real-world effect you could not), one specific recommendation: "to settle whether it fires the right way, commission `methodology-critique` on this axis." **Never invoke `methodology-critique` yourself** — it is JP-commissioned, Claude-only, and expensive by design; you recommend, JP decides. The recommendation stands even from a runtime where `methodology-critique` is unavailable — JP commissions it from a Claude session.
 
 ## Aftermath
 
-Chat-first. Persist nothing by default — this pass is cheap to re-run, so a quick read stays in chat.
+Chat-first. Persist nothing by default — this pass is cheap to re-run, so a quick pass stays in chat.
 
-Persist only when the verdict is decision-shaping, and then as its own genre: `docs/reviews/<date>-<target>-methodology-check.md`, **never** `*-methodology-critique.md` (that namespace is the fire-tested treatment's tallied arc, and a text+census verdict dropped there pollutes it). A persisted brief carries a mandatory **Evidence Boundary**: text + census only, behavioral direction not inspected, a single-judge cheap pass whose verification layer is JP's reading — not a fire-tested adjudication.
+Persist only when the verdict is decision-shaping, and then as its own genre: `docs/reviews/<date>-<target>-methodology-check.md`, **never** `*-methodology-critique.md` (that namespace is the running record of the fire-tested treatment, and a text+census verdict filed there would corrupt it). A persisted brief carries a mandatory **Evidence Boundary**: text + census only, behavioral direction not inspected, a single-judge cheap pass whose only check is JP's reading — not a fire-tested adjudication.
 
 Repairs, the full treatment, and any edit are separate, user-initiated follow-ons. This lane stops at the verdict.
 
 ## Routing
 
 - Contract and execution altitude — "will the skill behave well once it triggers" — is `scrutinize-skill`'s.
-- When the crux is how the skill fires in its real transcripts, the lane is `methodology-critique` where available (Claude-only): escalate by recommendation, and on runtimes without it the recommendation is still the deliverable.
+- When the question the decision turns on is how the skill fires in its real transcripts, the lane is `methodology-critique` where available (Claude-only): escalate by recommendation, and on runtimes without it the recommendation is still the deliverable.
