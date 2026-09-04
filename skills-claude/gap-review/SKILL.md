@@ -62,26 +62,26 @@ Merge findings that share one root cause, even when different dimensions found t
 
 The report's claims match its evidence, at three levels, named as such:
 
-- Clean: only Phase 0's mechanical checks, plus surfaces at least one dimension read without findings (from the reviewers' recorded file lists). Claim nothing beyond those two.
+- Checked with nothing found: only Phase 0's mechanical checks, plus surfaces at least one dimension read without findings (from the reviewers' recorded file lists). Claim nothing beyond those two.
 - Confirmed findings: each labeled by its strongest evidence — reproduced (the verifier's `reproduced` field), or verifier-confirmed by argument.
-- Refuted findings: a section listing each killed finding's title and the verifier's refutation reason, one line each, so the kills are auditable.
+- Refuted findings: a section listing each refuted finding's title and the verifier's reason, one line each, so the refusals can be checked.
 
-Separate two kinds of item: decisions only JP can make (design or boundary choices — numbered options, with your lean) and the mechanical fix batch. The fix batch lives in the report; the close packet carries its count. Then stop. The run is complete at the report; apply nothing, even when a fix looks obvious.
+Separate two kinds of item: decisions only JP can make (design or boundary choices — numbered options, with the one you would choose) and the mechanical fix batch. The fix batch is in the report; the close packet gives its count. Then stop. The run is complete at the report; apply nothing, even when a fix looks obvious.
 
 ## Close Packet
 
 ```text
 Target: <resolved unit and kind>
-Clean: <Phase 0 checks; surfaces read without findings>
+Checked, nothing found: <Phase 0 checks; surfaces read without findings>
 Findings: <n confirmed (high/medium/low), m refuted — refutations listed in the report>
 Fix batch: <n items, in the report>
 Decisions needed: <numbered, or none>
-Apply route (on approval): apply-findings, through worktree-task-cycle; release-cut + CHANGELOG for plugin behavior changes; publish per AGENTS.md Plugin Layout And Delivery
+How to apply (on approval): apply-findings, through worktree-task-cycle; release-cut + CHANGELOG for plugin behavior changes; publish per AGENTS.md Plugin Layout And Delivery
 Report: <absolute path> (session-temporary; tell me to save it durably and I will)
 ```
 
 ## Boundaries
 
 - Evaluation only. No target edits, no commits, no landing, no publishing, no mirror or push. The close packet names the owners.
-- Keep/prune merit judgment is out of scope — that is charter and usage-ledger territory, not a gap question.
-- The established-facts discipline cuts both ways: reviewers must not re-litigate what Phase 0 verified, and the report must not claim anything Phase 0, a reviewer's recorded reading, or a verifier did not actually check.
+- Keep/prune merit judgment is out of scope — that is a charter and usage-ledger question, not a gap question.
+- The established-facts discipline applies in both directions: reviewers must not re-litigate what Phase 0 verified, and the report must not claim anything Phase 0, a reviewer's recorded reading, or a verifier did not actually check.

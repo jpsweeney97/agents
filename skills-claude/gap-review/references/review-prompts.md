@@ -30,7 +30,7 @@ JUDGING FRAME (from the repo's AGENTS.md — apply it):
 - Report only findings you would defend under adversarial scrutiny. No filler; an empty
   list is an acceptable answer.
 - In files_read, list every file you actually read in full — it is the coverage record
-  the final report's "clean" claims rest on; never list a file you only skimmed.
+  the final report's "checked with nothing found" claims rest on; never list a file you only skimmed.
 ```
 
 ## Verifier prompt
@@ -59,7 +59,7 @@ Context facts you may rely on without re-checking: <established facts>.
 
 ## Schemas
 
-Findings (per reviewer, via the Workflow `schema` option). `files_read` is the coverage record behind the report's "clean" claims:
+Findings (per reviewer, via the Workflow `schema` option). `files_read` is the coverage record behind the report's "checked with nothing found" claims:
 
 ```json
 {"files_read": ["..."],
