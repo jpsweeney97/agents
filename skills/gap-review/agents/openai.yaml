@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gap Review"
+  short_description: "Audit one library skill or plugin with independent verification"
+  default_prompt: "Use $gap-review to audit the skill or plugin I name for gaps and defects, verify findings with separate subagents, and stop at the report."
