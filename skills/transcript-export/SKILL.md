@@ -1,19 +1,19 @@
 ---
 name: transcript-export
-description: "Use when JP wants to export, save, reconstruct, or share a Codex or Claude session transcript as Markdown, including full-session exports, subsection exports bounded by messages or line numbers, conversation-only transcripts, hybrid transcripts, or technical transcripts with tool calls and outputs. Do not use for ordinary summarization unless JP asks for a transcript artifact."
+description: "Use when JP wants to export, save, reconstruct, or share a Codex or Claude session transcript as Markdown, including full-session exports, subsection exports bounded by messages or line numbers, conversation-only transcripts, hybrid transcripts, or technical transcripts with tool calls and outputs. Do not use for ordinary summarization unless JP asks for a saved transcript file."
 ---
 
 # Transcript Export
 
-Export a Codex or Claude session transcript into a Markdown artifact with the provider, range, and detail level JP actually wants.
+Export a Codex or Claude session transcript into a Markdown file with the provider, range, and detail level JP actually wants.
 
-Use `scripts/export_transcript.py` for the fragile work: resolving the JSONL session, detecting the provider, slicing the range, filtering duplicate/runtime-only records, and formatting the transcript.
+Use `scripts/export_transcript.py` for these steps, which are easy to get wrong by hand: resolving the JSONL session, detecting the provider, selecting the requested range, filtering duplicate/runtime-only records, and formatting the transcript.
 
-## First Move
+## Before You Start
 
 If JP already specifies the provider, range, detail level, and output path, proceed without another question.
 
-If any of those choices are missing, ask only for the missing decision in a compact way:
+If any of those choices are missing, ask only for the missing decision, briefly:
 
 - Provider: `auto`, `codex`, or `claude`. Default to `auto` unless the source is ambiguous.
 - Range: full session; subsection from message/phrase/line A to message/phrase/line B; from message/phrase/line A through the current end.
@@ -25,14 +25,14 @@ Do not make JP reconstruct implementation details. If he says "from the Haley te
 ## Detail Levels
 
 - Conversation-only: visible user messages and visible assistant messages. Omit tool calls, tool outputs, injected skill bodies, AGENTS/environment payloads, duplicate event mirrors, session metadata, hook/status records, and hidden reasoning/thinking blocks.
-- Hybrid: conversation-only transcript plus compact tool-call and tool-output summaries so JP can see what work happened without carrying every byte of command output.
+- Hybrid: conversation-only transcript plus brief tool-call and tool-output summaries so JP can see what work happened without including every byte of command output.
 - Full technical: visible conversation plus provider tool calls, tool arguments, and full tool outputs. For Codex, include supported function/custom/tool-search call records and outputs. For Claude, include assistant `tool_use` blocks and user `tool_result` blocks. Still omit hidden reasoning/thinking records, encrypted reasoning content, duplicate event mirrors, repeated session metadata, hook/status records, turn-context instruction blobs, and injected skill/AGENTS/environment payloads unless JP explicitly asks for raw JSONL and the applicable policy permits it.
 
 ## Session And Range Discovery
 
 Prefer exact source discovery over guessing.
 
-Use one of these routes:
+Use one of these ways:
 
 - If the thread id or JSONL path is known, pass `--thread-id <id>` or `--session-file <path>`.
 - If JP names boundary text, search `~/.codex/sessions` and `~/.claude/projects` with `rg` to find the JSONL file, then pass `--contains`, `--provider`, and marker arguments to the script.
