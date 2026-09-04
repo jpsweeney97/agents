@@ -50,6 +50,10 @@ If — and only if — the user picked **GitHub** or **GitLab**, ask one follow-
 
 - **PRs as a request surface** — yes / no (default: no). Record the answer in `docs/agents/issue-tracker.md`. For local-markdown and other trackers, skip this question — there are no PRs.
 
+If — and only if — the user picked **Local markdown**, ask one follow-up instead:
+
+- **Commit `.scratch/`** — yes / no (default: yes, so issues and their triage history survive the session and can be reviewed; an ignored `.scratch/` keeps no history). Record the answer in the layout line of `docs/agents/issue-tracker.md`.
+
 **Section B — Triage label vocabulary.**
 
 > Explainer: When the `triage` skill processes an incoming issue, it moves it through a state machine — needs evaluation, waiting on reporter, ready for an AFK agent to pick up, ready for a human, or won't fix. To do that, it needs to apply labels (or the equivalent in your issue tracker) that match strings *you've actually configured*. If your repo already uses different label names (e.g. `bug:triage` instead of `needs-triage`), map them here so the skill applies the right ones instead of creating duplicates.
@@ -61,6 +65,8 @@ The five canonical roles:
 - `ready-for-agent` — fully specified, AFK-ready (an agent can pick it up with no human context)
 - `ready-for-human` — needs human implementation
 - `wontfix` — will not be actioned
+
+The two category roles, `bug` and `enhancement`, follow the same rule; every triaged issue carries exactly one category role and one state role.
 
 Default: each role's string equals its name. Ask the user if they want to override any. If their issue tracker has no existing labels, the defaults are fine.
 
