@@ -1,0 +1,1 @@
+Exclusion check: live recorded challenges — **Add the case the rule does not cover.**, **Write the precedence into the charter.**, **Specific instruction beats general default (seed, from the record).**; most worth contesting: **Add the case the rule does not cover.**
