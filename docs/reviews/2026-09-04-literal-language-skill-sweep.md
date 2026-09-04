@@ -56,15 +56,29 @@ Rewording these inside the skills would make each skill disagree with the 35-bri
 
 `## First Move` is a smaller instance of the same class: `transcript-export` and `plan-panel-loop` share the heading, and only the former was changed, so the two now differ.
 
-## Open decision
+## The held three: JP chose option 3, and it was applied
 
-Whether to restate the three machinery skills is a live question, not a closed one. Three ways it could go:
+JP chose to restate only the sections describing what he receives and decides, leaving the run machinery in its own terms.
 
-1. **Leave them.** Their readers are agents; JP reads them only when commissioning, and the committed record stays consistent.
-2. **Restate the skills and accept the drift** from the briefs and the ledger entry, which describe past runs and were never going to be revised anyway.
-3. **Restate only the parts JP reads** — the sections describing what he receives and decides — and leave the run machinery in its own terminology.
+| Skill | Commit | Sections restated | Sections left alone |
+|---|---|---|---|
+| `gap-review` | `5407ff2` | Phase 3 (Report and Stop), Close Packet, Boundaries, plus the two report-label mentions in `references/review-prompts.md` | Phase 0, Phase 1, Phase 2, the rest of `review-prompts.md` |
+| `methodology-check` | `f38bdd4` | frontmatter routing, Verdict and escalation, Aftermath, Routing | the altitude test, First move, Evidence, Findings |
+| `methodology-critique` | `6971e12` | frontmatter routing, the opening framing, the Phase 0 dossier shown in chat, the Phase 2 brief floors, Phase 3 adjudication | Session Spanning, Phases 1 and 4–6, all of `references/evidence-recipe.md` |
 
-Option 3 is the narrowest and matches the line this sweep already drew. None has been chosen.
+### The rule that made option 3 work
+
+A JP-facing section often uses a term the machinery defines. Renaming it in one place and not the other would split the file's vocabulary — the same defect this sweep exists to remove.
+
+The resolution came from the contract's own fourth bullet: **names of real things stay as names, and get their plain meaning stated at first use.** So `the anchor`, `escalate-rider`, `the graded census`, `the treatment`, `a hold`, `an inversion`, and `the stop is a seam` all survive as names, each now followed by a short plain gloss where JP meets it. Nothing was renamed across a section boundary.
+
+This also protected the committed record: `seam`, `landing train`, `hold`, `inversion`, `the rig`, and the house TLDR signature all still stand in `methodology-critique`, so the skill continues to agree with the 35 briefs under `docs/reviews/` and with the append-only ledger entry.
+
+### Left unfixed on purpose
+
+`methodology-critique`'s description is 115 words, over the ~90 ceiling in AGENTS.md. It was 111 before this sweep. That is a routing-precision problem, not a wording one, and fixing it is a separate task.
+
+`## First Move` still differs between `transcript-export` (changed) and `plan-panel-loop` (not swept).
 
 ## Bounds
 
