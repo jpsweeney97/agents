@@ -1,4 +1,4 @@
 interface:
   display_name: "Braindump"
-  short_description: "Hold the room while JP empties his head, then play it back"
-  default_prompt: "Use $braindump: hold the room while I empty my head, then play it back in my own words when I say I'm done."
+  short_description: "Listen while JP empties his head, then play it back"
+  default_prompt: "Use $braindump: listen while I empty my head, then play it back in my own words when I say I'm done."
