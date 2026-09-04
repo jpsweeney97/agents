@@ -13,6 +13,10 @@ Issues and PRDs for this repo live in GitHub Issues for `jpsweeney97/agents`. Us
 
 Infer the repo from `git remote -v`. The `gh` CLI does this automatically when run inside this clone.
 
+## Pull requests as a triage surface
+
+**PRs as a request surface: no.**
+
 ## When a skill says "publish to the issue tracker"
 
 Create a GitHub issue.
