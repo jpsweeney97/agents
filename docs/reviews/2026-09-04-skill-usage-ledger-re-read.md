@@ -113,3 +113,32 @@ Inspected: the ledger after today's refresh (7,150 rows); `scripts/skill-usage-m
 2. If the prune branch is taken, a separate step proposes the first tranche over the 21 (or 24), oldest and least-storied first, by `git mv` into `skills-archive/`, never deletion, for approval before anything moves.
 3. Whether to run the sealed value test, which was meant to pair with this read, is a separate JP decision.
 4. If a further read is wanted, name its date; the 23 skills born after 2026-07-02 with no fires would be that read's population, and this record is the baseline for it.
+
+## Erratum (2026-09-05): the instrument was blind to most Codex use
+
+The day after this record landed, JP said he had used `regex-craft` in Codex. He had: four Codex sessions (`~/scratch-workspace` twice on 2026-08-04, `~/athena-kb-local` on 2026-08-27 and 2026-09-01) loaded it. The ledger had zero rows for it, and this record called it never fired. Two defects in `scripts/skill-usage-miner.py` caused that, both repaired on 2026-09-05 (commit `5bcec49`):
+
+- **A model-invoked Codex skill left no row.** The miner counted a Codex fire only from the `<skill><name>` block that a typed `$skill` token expands to. When Codex chooses a skill itself it reads the skill's `SKILL.md` through a shell call and writes no block. The footnote above named this class ("untagged self-invoked cycles") without sizing it. For every skill in this record's "still zero" list, typed tokens were zero and file reads were the only Codex form that existed. The miner now records one `kind: "read"` row per session and skill, with `read_burst` (distinct skills first read within 180 seconds of it) so a roster scan can be told from a chosen skill.
+- **`~/.codex/archived_sessions` was never scanned.** Archiving a thread in Codex moves its rollout there. The store held 772 rollouts (2026-02-06 to 2026-09-02) with 706 typed fires, none in the ledger. It is now a second scan root.
+
+The refresh under the repaired miner added 10,013 rows: 9,308 read rows (1,759 from the archive) and 701 archived typed fires. Post-T0 fires rose from the 3,972 tags this record counted to 4,096 tags plus 3,920 reads. The sibling `2026-09-05-skill-usage-ledger-re-read-erratum.py` reproduces every number below from the refreshed ledger; its raw output is the `.txt` beside it.
+
+**What still holds.** The pre-registered set reconstructs exactly as before: Claude rows before T0 give 36 fired and 40 never. The archive added no post-T0 typed fires to any of the 40. The 16 skills this record listed as fired by tag are unchanged.
+
+**What was wrong.** "24 of the 40 have still never fired on either runtime since 2026-07-02" was true of the ledger and false of Codex. Read against the same branches with reads in view, classing a read as *chosen* when it happened outside this repository and its review copies with `read_burst` below 4, and as a *scan* otherwise:
+
+| status since T0 | count | skills |
+|---|---|---|
+| fired by tag outside this repo | 15 | unchanged from the table above |
+| chosen by read outside this repo | 10 | `baseline`, `contract-change-propagation`, `keep-green`, `markdown-synthesis`, `prototype`, `reflect`, `regex-craft`, `runbook-authoring`, `search-handoffs`, `working-slice-review` |
+| read outside only inside roster scans | 6 | `grill-me`, `outcome-check`, `postmortem`, `research-capture`, `scope-cut`, `steelman` |
+| read only inside this repo (edits, reviews, censuses) | 8 | `acceptance-map`, `dependency-upgrade`, `deploy-plan`, `incident-response`, `migration-safety`, `observability-instrumentation`, `to-prd`, `zoom-out` |
+| no row of any kind | 1 | `friction-to-guards` (Claude-only, so Codex cannot load it) |
+
+So Branch B, "firing has spread", now covers 25 of the 40 rather than 16, and Branch A's "still broadly zero" set is 15 rather than 24, of which only one is zero in the plain sense.
+
+**The corrected prune population.** This record's "never fired anywhere, ever (21)" becomes: never *chosen* outside this repository, ever, counting reads before T0 as well. That is 11 of the 40, and 10 once `outcome-check` is set aside for its one in-repo tag: `dependency-upgrade`, `deploy-plan`, `friction-to-guards`, `incident-response`, `migration-safety`, `observability-instrumentation`, `postmortem`, `research-capture`, `scope-cut`, `steelman`. Three of the 21 left the population on the strength of chosen reads: `regex-craft` (four sessions), `runbook-authoring` (three markdown-reader sessions, 2026-07-06 to 07-12), and `zoom-out` (one cross-model session, 2026-06-07). Across today's 124-skill roster, 30 skills have never been chosen outside this repository and 3 have no row of any kind (`claude-home-audit`, `decision-flip`, `incentive-map`); the erratum output lists both sets.
+
+**What the repaired instrument still cannot see.** A read is a load, not proven execution, exactly as the footnote says of a typed row. The scan cut at four reads in 180 seconds is a judgment: a real-work session that consulted three skills in two minutes is classed as chosen, a scan that read three is too. Reads inside this repository are counted as edits and reviews, which undercounts any real use of a skill on this repository's own work (release cuts are the known case). Claude-side reads of a `SKILL.md` without a Skill call are still not mined. Codex reads of a skill's `references/` without its `SKILL.md` are not mined.
+
+**What this changes upstream.** The tranche proposal that rested on this record (`docs/plans/2026-09-04-skill-prune-tranche-1.md`, `0c7ab2d`) was revised the same day from the corrected population. The parked Skill Use contract's reopen trigger and the sealed value test are unaffected: neither depended on these counts. The miner's footnote now names both defects so the next read carries them.

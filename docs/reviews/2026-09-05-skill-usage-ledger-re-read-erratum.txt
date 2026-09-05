@@ -1,0 +1,103 @@
+== instrument delta (raw rows) ==
+ledger: 17166 raw rows -> 16923 fires after collapse {'fork': 8, 'burst': 235}
+codex read rows (kind=read): 9308
+rows mined from ~/.codex/archived_sessions: 2460 (701 typed tags, 1759 reads)
+
+== pre-registered set reconstruction: 36 fired / 40 never (recorded 36 / 40) ==
+
+== T0 zero-fire set (40): fires since T0, tags and reads apart ==
+skill                             tag tag>=08 read rd>=08 rd-choice rd-scan rd-agents tag-other arch  last        status
+acceptance-map                      0       0   13     11         0       0        13         0    5  2026-09-04  agents-only pre-T0: tag=1 read=12
+baseline                            0       0   25      8         9       2        14         0   20  2026-09-04  read-choice-outside pre-T0: tag=0 read=33
+contract-change-propagation         0       0   36     18        20       6        10         0    1  2026-09-04  read-choice-outside pre-T0: tag=0 read=4
+decision-record                    26      15   34     20         7       2        25        20    0  2026-09-04  fired-tag-outside
+dependency-upgrade                  0       0    4      0         0       0         4         0    0  2026-07-17  agents-only
+deploy-plan                         0       0    6      1         0       0         6         0    1  2026-09-04  agents-only
+diagnose                            8       2   29      1        18       3         8         6    2  2026-08-27  fired-tag-outside pre-T0: tag=0 read=6
+doc-drift-audit                     1       0    1      0         0       0         1         1    0  2026-07-07  fired-tag-outside
+email-writing                       2       1   17      2         6       1        10         2    1  2026-08-10  fired-tag-outside pre-T0: tag=2 read=4
+friction-to-guards                  0       0    0      0         0       0         0         0    1  2026-06-14  STILL-ZERO pre-T0: tag=0 read=1
+gh-address-comments                 2       0   35      3        28       5         2         2    6  2026-09-04  fired-tag-outside pre-T0: tag=7 read=44
+gh-pr-review-loop                  93       1    3      3         0       0         3        93    9  2026-09-04  fired-tag-outside pre-T0: tag=92 read=12
+grill-me                            0       0   15      5         0       2        13         0   33  2026-09-04  read-scan-only pre-T0: tag=65 read=34
+ideate                              9       1   84     19         5       3        74         8   17  2026-09-04  fired-tag-outside
+implementation-review              40      26  391    160       368       7        16        35   68  2026-09-05  fired-tag-outside pre-T0: tag=5 read=68
+improve-codebase-architecture      36       1   12      2         9       0         3        35    7  2026-09-02  fired-tag-outside pre-T0: tag=0 read=7
+incident-response                   0       0    2      0         0       0         2         0    0  2026-07-17  agents-only
+keep-green                          0       0   20     12        13       0         7         0    0  2026-09-04  read-choice-outside pre-T0: tag=0 read=1
+markdown-synthesis                  0       0   17      3         5       2        10         0   16  2026-09-01  read-choice-outside pre-T0: tag=2 read=22
+migration-campaign                  2       0    5      4         2       0         3         1    0  2026-09-04  fired-tag-outside
+migration-safety                    0       0    6      2         0       0         6         0    0  2026-09-04  agents-only
+observability-instrumentation       0       0    7      0         0       0         7         0    1  2026-07-17  agents-only
+outcome-check                       1       0   11      1         0       3         8         0    0  2026-09-04  read-scan-only
+postmortem                          0       0    7      1         0       1         6         0    1  2026-09-04  read-scan-only
+prototype                           0       0   13      8         6       1         6         0    3  2026-09-05  read-choice-outside pre-T0: tag=0 read=7
+reflect                             0       0    2      0         1       0         1         0    0  2026-07-28  read-choice-outside
+regex-craft                         0       0    6      4         4       0         2         0    0  2026-09-01  read-choice-outside
+release-cut                        13      11    9      4         0       0         9         2    0  2026-09-04  fired-tag-outside pre-T0: tag=0 read=1
+research-capture                    0       0    9      1         0       1         8         0    0  2026-09-04  read-scan-only
+runbook-authoring                   0       0   16      0         3       1        12         0    0  2026-07-28  read-choice-outside
+scope-cut                           0       0   21      8         0       3        18         0    1  2026-09-04  read-scan-only
+search-handoffs                     0       0    3      0         1       0         2         0   17  2026-07-28  read-choice-outside pre-T0: tag=0 read=61
+setup-matt-pocock-skills            1       1    4      4         0       0         4         1    4  2026-09-04  fired-tag-outside pre-T0: tag=3 read=6
+simplify-code                      37       0    4      0         0       1         3        35    9  2026-07-15  fired-tag-outside pre-T0: tag=0 read=16
+steelman                            0       0   15      1         0       1        14         0    3  2026-09-04  read-scan-only pre-T0: tag=0 read=1
+system-design-review                5       2   56     31        48       3         5         3   83  2026-09-03  fired-tag-outside pre-T0: tag=82 read=69
+tech-debt-scan                      4       1    3      0         0       0         3         3   16  2026-09-01  fired-tag-outside pre-T0: tag=0 read=33
+to-prd                              0       0   17     16         0       0        17         0    2  2026-09-04  agents-only pre-T0: tag=0 read=7
+working-slice-review                0       0   15      6         6       2         7         0   30  2026-09-04  read-choice-outside pre-T0: tag=5 read=27
+zoom-out                            0       0    1      0         0       0         1         0    1  2026-07-17  agents-only pre-T0: tag=0 read=4
+
+status counts: {'agents-only': 8, 'read-choice-outside': 10, 'fired-tag-outside': 15, 'STILL-ZERO': 1, 'read-scan-only': 6}
+no row of any kind since T0, under the repaired instrument: 0 -> (none)
+
+== corrected prune population: of the 40, never chosen outside this repo, ever: 11 ==
+  dependency-upgrade               tags-ever=0 reads-in-repo=4 scan-reads-outside=0 last=2026-07-17
+  deploy-plan                      tags-ever=0 reads-in-repo=6 scan-reads-outside=0 last=2026-09-04
+  friction-to-guards               tags-ever=0 reads-in-repo=0 scan-reads-outside=0 last=2026-06-14
+  incident-response                tags-ever=0 reads-in-repo=2 scan-reads-outside=0 last=2026-07-17
+  migration-safety                 tags-ever=0 reads-in-repo=6 scan-reads-outside=0 last=2026-09-04
+  observability-instrumentation    tags-ever=0 reads-in-repo=7 scan-reads-outside=0 last=2026-07-17
+  outcome-check                    tags-ever=1 reads-in-repo=8 scan-reads-outside=3 last=2026-09-04  (has a tag inside this repo)
+  postmortem                       tags-ever=0 reads-in-repo=6 scan-reads-outside=1 last=2026-09-04
+  research-capture                 tags-ever=0 reads-in-repo=8 scan-reads-outside=1 last=2026-09-04
+  scope-cut                        tags-ever=0 reads-in-repo=18 scan-reads-outside=3 last=2026-09-04
+  steelman                         tags-ever=0 reads-in-repo=14 scan-reads-outside=1 last=2026-09-04
+
+== cwds outside this repo where T0-zero skills were chosen (tag or non-scan read) ==
+  acceptance-map: ['/Users/jp/Projects/active/codex-tool-dev']
+  baseline: ['/Users/jp/Projects/active/cross-model', '/Users/jp/Projects/active/markdown-reader', '/Users/jp/athena-kb-local']
+  contract-change-propagation: ['/Users/jp/.codex/worktrees/41b7/career', '/Users/jp/Projects/active/cross-model', '/Users/jp/Projects/active/markdown-reader', '/Users/jp/athena-kb-local', '/Users/jp/career']
+  decision-record: ['/Users/jp/Projects/active/cross-model', '/Users/jp/Projects/active/markdown-reader', '/Users/jp/athena-kb-local']
+  diagnose: ['/Users/jp', '/Users/jp/.claude', '/Users/jp/.codex', '/Users/jp/Projects/active/markdown-reader', '/Users/jp/athena-kb-local']
+  doc-drift-audit: ['/Users/jp/Projects/active/cross-model']
+  email-writing: ['/Users/jp/athena-kb-local', '/Users/jp/career']
+  gh-address-comments: ['/Users/jp/Projects/active/claude-code-tool-dev', '/Users/jp/Projects/active/codex-collaboration', '/Users/jp/Projects/active/codex-tool-dev', '/Users/jp/Projects/active/codex-tool-dev/.worktrees/fix-ticket-runtime-readiness-activation-v1', '/Users/jp/Projects/active/cross-model', '/Users/jp/Projects/active/markdown-reader', '/Users/jp/Projects/active/video-editing-software', '/Users/jp/career']
+  gh-pr-review-loop: ['/Users/jp/Projects/active/codex-tool-dev', '/Users/jp/Projects/active/cross-model', '/Users/jp/Projects/active/markdown-reader', '/Users/jp/Projects/active/video-editing-software', '/Users/jp/career']
+  grill-me: ['/Users/jp/.codex', '/Users/jp/Projects/active/codex-tool-dev']
+  ideate: ['/Users/jp/Projects/active/cross-model', '/Users/jp/Projects/active/markdown-reader', '/Users/jp/agent-os', '/Users/jp/career', '/Users/jp/playpen']
+  implementation-review: ['/Users/jp/.codex', '/Users/jp/Projects/active/claude-code-tool-dev', '/Users/jp/Projects/active/claude-code-tool-dev/.claude/worktrees/feature+claude-code-docs-b-prime-recovery', '/Users/jp/Projects/active/claude-code-tool-dev/packages/mcp-servers/claude-code-docs', '/Users/jp/Projects/active/codex-collaboration', '/Users/jp/Projects/active/codex-tool-dev', '/Users/jp/Projects/active/codex-tool-dev/.worktrees/fix-ticket-runtime-readiness-activation-v1', '/Users/jp/Projects/active/cross-model', '/Users/jp/Projects/active/markdown-reader', '/Users/jp/agent-os', '/Users/jp/athena-kb-local', '/Users/jp/career', '/Users/jp/playpen']
+  improve-codebase-architecture: ['/Users/jp/Projects/active/markdown-reader', '/Users/jp/athena-kb-local']
+  keep-green: ['/Users/jp/Projects/active/markdown-reader', '/Users/jp/Projects/active/video-editing-software', '/Users/jp/athena-kb-local']
+  markdown-synthesis: ['/Users/jp/Documents/Career', '/Users/jp/Documents/Codex/2026-08-31/don', '/Users/jp/athena-kb-local', '/Users/jp/career', '/Users/jp/scratch-workspace/tenets']
+  migration-campaign: ['/Users/jp/Projects/active/markdown-reader', '/Users/jp/athena-kb-local']
+  prototype: ['/Users/jp/Projects/active/markdown-reader', '/Users/jp/Projects/active/video-editing-software', '/Users/jp/agent-os', '/Users/jp/athena-kb-local']
+  reflect: ['/Users/jp/career']
+  regex-craft: ['/Users/jp/athena-kb-local', '/Users/jp/scratch-workspace']
+  release-cut: ['/Users/jp/Projects/active/claude-code-tool-dev/packages/mcp-servers/claude-code-docs', '/Users/jp/Projects/active/cross-model']
+  runbook-authoring: ['/Users/jp/Projects/active/markdown-reader']
+  search-handoffs: ['/Users/jp/Projects/active/claude-code-tool-dev', '/Users/jp/Projects/active/codex-tool-dev', '/Users/jp/Projects/active/markdown-reader']
+  setup-matt-pocock-skills: ['/Users/jp/Projects/active/cross-model', '/Users/jp/athena-kb-local']
+  simplify-code: ['/Users/jp/Projects/active/cross-model', '/Users/jp/Projects/active/markdown-reader']
+  system-design-review: ['/Users/jp/.claude/plugins/cache/turbo-mode/cross-model/3.1.2', '/Users/jp/.claude/plugins/cache/turbo-mode/cross-model/3.1.3', '/Users/jp/.codex', '/Users/jp/Projects/active/claude-code-tool-dev', '/Users/jp/Projects/active/claude-code-tool-dev/.claude/worktrees/engram-review', '/Users/jp/Projects/active/claude-code-tool-dev/.claude/worktrees/skill-composition-review', '/Users/jp/Projects/active/claude-code-tool-dev/packages/plugins/cross-model', '/Users/jp/Projects/active/codex-collaboration', '/Users/jp/Projects/active/codex-tool-dev', '/Users/jp/Projects/active/cross-model', '/Users/jp/Projects/active/markdown-reader', '/Users/jp/athena-kb-local', '/Users/jp/career', '/Users/jp/playpen', '/Users/jp/scratch-workspace/cloned-git-repositories/CLI-Anything', '/Users/jp/scratch-workspace/cloned-git-repositories/codex-plugin-cc', '/Users/jp/scratch-workspace/cloned-git-repositories/graphify']
+  tech-debt-scan: ['/Users/jp/.codex', '/Users/jp/Projects/active/codex-collaboration', '/Users/jp/Projects/active/codex-tool-dev', '/Users/jp/Projects/active/cross-model', '/Users/jp/Projects/active/markdown-reader', '/Users/jp/athena-kb-local']
+  to-prd: ['/Users/jp/Projects/active/cross-model']
+  working-slice-review: ['/Users/jp/Projects/active/markdown-reader', '/Users/jp/Projects/active/video-editing-software', '/Users/jp/athena-kb-local']
+  zoom-out: ['/Users/jp/Projects/active/cross-model']
+
+== current roster (124): no row of any kind, ever, under the repaired instrument: 3 ==
+  claude-home-audit decision-flip incentive-map
+== current roster (124): never chosen outside this repo, ever: 30 ==
+  assumption-check authorization-design claude-home-audit decision-flip decision-owner-map dependency-upgrade deploy-plan document-to-markdown friction-to-guards gap-review incentive-map incident-response injection-safe-inputs methodology-check migration-safety observability-instrumentation outcome-check perf-optimize plan-queue postmortem premortem reality-check red-team research-capture resolve-conflicts scope-cut skill-benchmark skill-squad steelman to-questionnaire
+
+post-T0 fires: 4096 tags + 3920 reads = 8016 (the 2026-09-04 record counted 3,972 tags)

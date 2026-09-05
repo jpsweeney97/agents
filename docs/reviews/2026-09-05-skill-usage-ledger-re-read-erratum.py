@@ -108,6 +108,18 @@ class Acc:
         self.arch = 0
         self.last = ""
         self.cwds_other = set()
+        # before T0, by the same classes, so "ever" questions can be answered
+        self.pre_tag_other = 0
+        self.pre_choice_other = 0
+        self.pre_scan_other = 0
+
+    def chosen_outside_ever(self) -> int:
+        return (
+            self.tag_other
+            + self.read_choice_other
+            + self.pre_tag_other
+            + self.pre_choice_other
+        )
 
 
 acc: dict[str, Acc] = defaultdict(Acc)
@@ -123,8 +135,17 @@ for r in fires:
     if t is None or t < T0:
         if is_read:
             a.read_pre += 1
+            if cc == "other":
+                if int(r.get("read_burst") or 1) >= SCAN:
+                    a.pre_scan_other += 1
+                else:
+                    a.pre_choice_other += 1
+                    a.cwds_other.add(r.get("cwd"))
         else:
             a.tag_pre += 1
+            if cc == "other":
+                a.pre_tag_other += 1
+                a.cwds_other.add(r.get("cwd"))
         continue
     if is_read:
         a.read_post += 1
@@ -193,8 +214,24 @@ for n in zero_t0:
 print()
 print("status counts:", dict(counts))
 print(
-    f"never loaded anywhere, ever, under the repaired instrument: {len(still_zero_ever)} -> {' '.join(still_zero_ever)}"
+    f"no row of any kind since T0, under the repaired instrument: {len(still_zero_ever)} -> {' '.join(still_zero_ever) or '(none)'}"
 )
+print()
+# The corrected prune population: never CHOSEN outside this repo, ever. A tag anywhere
+# outside, or a read outside that was not part of a roster scan, counts as chosen;
+# reads inside this repo (edits, reviews, censuses) and scan reads do not.
+never_chosen_40 = [n for n in zero_t0 if acc[n].chosen_outside_ever() == 0]
+no_tag_ever_40 = [n for n in never_chosen_40 if acc[n].tag_pre + acc[n].tag_post == 0]
+print(
+    f"== corrected prune population: of the 40, never chosen outside this repo, ever: {len(never_chosen_40)} =="
+)
+for n in never_chosen_40:
+    a = acc[n]
+    print(
+        f"  {n:<32} tags-ever={a.tag_pre + a.tag_post} reads-in-repo={a.read_agents} "
+        f"scan-reads-outside={a.pre_scan_other + a.read_scan_other} last={a.last[:10]}"
+        + ("" if n in no_tag_ever_40 else "  (has a tag inside this repo)")
+    )
 print()
 print(
     "== cwds outside this repo where T0-zero skills were chosen (tag or non-scan read) =="
@@ -211,9 +248,14 @@ never_now = sorted(
     if acc[n].tag_pre + acc[n].tag_post + acc[n].read_pre + acc[n].read_post == 0
 )
 print(
-    f"== current roster ({len(roster_now)}): never loaded anywhere, ever, under the repaired instrument: {len(never_now)} =="
+    f"== current roster ({len(roster_now)}): no row of any kind, ever, under the repaired instrument: {len(never_now)} =="
 )
 print("  " + " ".join(never_now))
+never_chosen_now = sorted(n for n in roster_now if acc[n].chosen_outside_ever() == 0)
+print(
+    f"== current roster ({len(roster_now)}): never chosen outside this repo, ever: {len(never_chosen_now)} =="
+)
+print("  " + " ".join(never_chosen_now))
 print()
 
 # ---- how much the 2026-09-04 record under-counted, by row kind ----
