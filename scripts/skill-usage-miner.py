@@ -5,12 +5,28 @@ Scans ~/.claude/projects/*/*.jsonl (Claude Code) for skill fires:
 - model-invoked: assistant tool_use blocks calling the Skill (or legacy SlashCommand) tool
 - user-typed: <command-name> tags in user records (slash-command invocations)
 
-Scans ~/.codex/sessions/**/*.jsonl (Codex rollouts) for skill fires:
+Scans ~/.codex/sessions/**/*.jsonl and ~/.codex/archived_sessions/**/*.jsonl (Codex
+rollouts; archiving a thread in Codex moves its rollout to the second store, and until
+2026-09-05 the miner never looked there, so every fire in an archived thread was missing)
+for skill fires:
 - user-typed: <skill><name>...</name> injection blocks in user-role response_item messages
-  (how Codex expands a typed `$skill` token). Codex records carry `runtime: "codex"`;
-  records without a runtime field are Claude's. Codex has no live-hook equivalent, so
-  Codex fires land only via re-running this miner; a launchd job (com.jp.skill-usage-miner,
-  source: scripts/com.jp.skill-usage-miner.plist) runs it every ~5 days.
+  (how Codex expands a typed `$skill` token).
+- model-invoked: a shell tool call that reads a skill's SKILL.md (`cat`, `sed -n`, ...).
+  When Codex chooses a skill itself it loads it by reading the file; no <skill> block is
+  written, so until 2026-09-05 these fires were invisible (the regex-craft case that
+  exposed it: four Codex sessions, zero ledger rows). One row per (session, skill),
+  keyed `codex:{session}:read:{skill}`, with `kind: "read"`, `source: "model"`, and
+  `read_burst` = how many distinct skills that session first read within
+  READ_BURST_WINDOW_S of this one (`session_reads` = the session's total), so a
+  consumer can discount a roster scan that read a dozen SKILL.md files in two minutes
+  while choosing a route. A read of a skill the same session also loaded by tag is not
+  recorded twice.
+  Rows mined from the archive carry `archived: true` (informational; the key is the
+  same in either store, so a thread archived after mining never double-counts).
+Codex records carry `runtime: "codex"`; records without a runtime field are Claude's.
+Codex has no live-hook equivalent, so Codex fires land only via re-running this miner;
+a launchd job (com.jp.skill-usage-miner, source: scripts/com.jp.skill-usage-miner.plist)
+runs it every ~5 days.
 
 Appends new fire records to the cumulative ledger (JSONL), deduped by a stable key,
 so transcripts pruned by retention stay in the ledger once mined. Re-runnable anytime;
@@ -51,7 +67,31 @@ from pathlib import Path
 LEDGER_DEFAULT = Path.home() / ".claude" / "logs" / "skill-usage-ledger.jsonl"
 PROJECTS_DIR = Path.home() / ".claude" / "projects"
 CODEX_SESSIONS_DIR = Path.home() / ".codex" / "sessions"
+CODEX_ARCHIVED_DIR = Path.home() / ".codex" / "archived_sessions"
+CODEX_ROOTS = (CODEX_SESSIONS_DIR, CODEX_ARCHIVED_DIR)
 REPO = Path(__file__).resolve().parent.parent
+
+# A shell tool call reading a skill file. The captured group is the skill directory;
+# its basename is the skill, qualified `<plugin>:<name>` when the directory sits under
+# a plugin tree (repo source `plugins/<p>/skills/<name>` or the Codex plugin cache
+# `.../turbo-mode/<p>/<version>/skills/<name>`), matching the typed-token form.
+SKILL_READ_RE = re.compile(r"([\w.~+@-]*(?:/[\w.~+@-]+)*)/SKILL\.md\b")
+PLUGIN_SKILL_DIR_RE = re.compile(
+    r"(?:/plugins/(?P<p1>[\w.~+@-]+)/skills|/turbo-mode/(?P<p2>[\w.~+@-]+)/[\w.~+@-]+/skills)"
+    r"/(?P<name>[\w.~+@-]+)$"
+)
+CODEX_TOOL_CALL_TYPES = ("custom_tool_call", "function_call")
+# Tool calls that write a SKILL.md are edits, not loads.
+CODEX_EDIT_TOOL_NAMES = ("apply_patch",)
+# A roster scan reads many SKILL.md files in quick succession; a chosen skill is read
+# on its own when the task needs it. Each read row carries `read_burst`: how many
+# distinct skills the session first read within READ_BURST_WINDOW_S of this one
+# (itself included). At or above SCAN_READ_BURST the read is a scan, not a choice.
+# Consumers may pick their own cut; the row carries the count so they can. A
+# per-session total (`session_reads`) is also carried, but long real-work sessions
+# read a dozen skills over hours, so the burst is the discriminating signal.
+READ_BURST_WINDOW_S = 180.0
+SCAN_READ_BURST = 4
 
 # Typed command token -> canonical skill name, exact-token matches only (verified:
 # each token is documented in the target SKILL.md description; no roster dir of the
@@ -80,10 +120,18 @@ The ledger is blind in both directions; rows are invocation/load markers, never 
   where the agent declined the skill (routing questions) or the card was re-injected by a
   prose echo (simplify-code census, 2026-07-18). The summary collapses fork replays and
   <=60s re-invokes; semantic echo rows beyond that remain counted.
+- Codex read rows (`kind: "read"`, the `reads` column): a model-invoked Codex skill is a
+  shell read of its SKILL.md, recorded once per session and skill. A read is a LOAD
+  with weaker intent than a tag: a session that read many skills while choosing a route
+  (`read_burst` >= SCAN_READ_BURST) was scanning, not firing them all. Before
+  2026-09-05 no read was recorded and ~/.codex/archived_sessions was never scanned, so
+  every ledger read made before that date under-counted Codex (regex-craft: four
+  sessions, zero rows).
 - under-count (no row can exist): Claude-side skills exercised with no Skill call and no
   typed command (handoff-resumed arcs — e.g. the 07-18/19 methodology-critique treatment
-  sessions before mining); Codex-side untagged self-invoked cycles, multi-cycle chains
-  (one tag -> many cycles), and harness-driven runs (simplify-code census); skills whose
+  sessions before mining; a Read of a SKILL.md without a Skill call is not mined);
+  Codex-side loads that read only a skill's references/, multi-cycle chains (one tag or
+  read -> many cycles), and harness-driven runs (simplify-code census); skills whose
   realistic configurations bypass both instruments (e.g. deliberate's pipeline).
 - lag: the live hook records Skill-tool calls only; typed commands and everything else
   land only when this miner runs (launchd ~5 days).
@@ -97,6 +145,29 @@ docs/reviews/2026-07-19-methodology-critique-methodology-critique.md (unledgered
 
 def norm_skill(name: str) -> str:
     return name.strip().lstrip("/$").strip()
+
+
+def skill_from_read_path(skill_dir: str) -> str:
+    """Skill token for a SKILL.md read: bare dir name, plugin-qualified under a plugin tree."""
+    m = PLUGIN_SKILL_DIR_RE.search(skill_dir)
+    if m:
+        return f"{m.group('p1') or m.group('p2')}:{m.group('name')}"
+    return skill_dir.rsplit("/", 1)[-1]
+
+
+def codex_tool_call_text(payload: dict) -> str:
+    """The command text of a Codex shell call, whichever field the rollout format used.
+
+    Older rollouts: `function_call` with a JSON string in `arguments`; newer ones:
+    `custom_tool_call` (name `exec`) with a JS snippet string in `input`.
+    """
+    for field in ("input", "arguments"):
+        val = payload.get(field)
+        if isinstance(val, str):
+            return val
+        if val is not None:
+            return json.dumps(val)
+    return ""
 
 
 def iter_fires(path: Path):
@@ -165,13 +236,20 @@ def iter_fires(path: Path):
                         }
 
 
-def iter_codex_fires(path: Path):
+def iter_codex_fires(path: Path, archived: bool = False):
     """Yield fire dicts from one Codex rollout file. Never raises on malformed lines.
 
     A typed `$skill` reaches the transcript as a user-role response_item whose input_text
     carries a `<skill><name>...</name>` injection block. Verified against the full session
     corpus: (timestamp, skill) pairs are unique across files (resumes do not replay fires),
     so `codex:{session}:{ts}:{skill}` is a stable dedupe key.
+
+    A model-invoked skill reaches the transcript as a shell tool call whose command reads
+    the skill's SKILL.md. Those are buffered per file and yielded at the end as one
+    `kind: "read"` row per skill, keyed `codex:{session}:read:{skill}`, annotated with
+    `read_burst` (distinct skills first read within READ_BURST_WINDOW_S of it) and
+    `session_reads` (distinct skills the session read); a skill the same session also
+    loaded by tag is not yielded as a read.
     """
     try:
         fh = path.open(encoding="utf-8", errors="replace")
@@ -179,6 +257,8 @@ def iter_codex_fires(path: Path):
         print(f"skip {path.name}: {e}", file=sys.stderr)
         return
     session = cwd = None
+    tagged: set[str] = set()
+    reads: dict[str, dict] = {}
     with fh:
         for line in fh:
             if session is None and '"session_meta"' in line:
@@ -187,13 +267,43 @@ def iter_codex_fires(path: Path):
                     session, cwd = meta.get("id"), meta.get("cwd")
                 except json.JSONDecodeError:
                     pass
-            if "<skill>" not in line:
+            is_tag = "<skill>" in line
+            is_read = "SKILL.md" in line
+            if not (is_tag or is_read):
                 continue
             try:
                 rec = json.loads(line)
             except json.JSONDecodeError:
                 continue
             payload = rec.get("payload") or {}
+            base = {
+                "ts": rec.get("timestamp"),
+                "cwd": cwd,
+                "session": session,
+                "sidechain": False,
+                "runtime": "codex",
+            }
+            if archived:
+                base["archived"] = True
+            if is_read and payload.get("type") in CODEX_TOOL_CALL_TYPES:
+                if payload.get("name") in CODEX_EDIT_TOOL_NAMES:
+                    continue
+                for m in SKILL_READ_RE.finditer(codex_tool_call_text(payload)):
+                    skill = skill_from_read_path(m.group(1))
+                    # A glob or a bare `SKILL.md` leaves no directory: not a load.
+                    if not skill or skill.endswith(":"):
+                        continue
+                    if skill not in reads:
+                        reads[skill] = {
+                            "key": f"codex:{session}:read:{skill}",
+                            "skill": skill,
+                            "source": "model",
+                            "kind": "read",
+                            **base,
+                        }
+                continue
+            if not is_tag:
+                continue
             if payload.get("type") != "message" or payload.get("role") != "user":
                 continue
             content = payload.get("content") or []
@@ -204,16 +314,30 @@ def iter_codex_fires(path: Path):
                     continue
                 for m in CODEX_SKILL_RE.finditer(block.get("text", "")):
                     skill = norm_skill(m.group(1))
+                    tagged.add(skill.rsplit(":", 1)[-1])
                     yield {
                         "key": f"codex:{session}:{rec.get('timestamp')}:{skill}",
                         "skill": skill,
                         "source": "user",
-                        "ts": rec.get("timestamp"),
-                        "cwd": cwd,
-                        "session": session,
-                        "sidechain": False,
-                        "runtime": "codex",
+                        **base,
                     }
+    first_read = {s: parse_ts(r.get("ts")) for s, r in reads.items()}
+    for skill, row in reads.items():
+        if skill.rsplit(":", 1)[-1] in tagged:
+            continue
+        mine = first_read[skill]
+        row["read_burst"] = (
+            sum(
+                1
+                for other in first_read.values()
+                if mine is not None
+                and other is not None
+                and abs((other - mine).total_seconds()) <= READ_BURST_WINDOW_S
+            )
+            or 1
+        )
+        row["session_reads"] = len(reads)
+        yield row
 
 
 def load_ledger(ledger: Path):
@@ -298,6 +422,7 @@ class SkillStats:
         self.model = 0
         self.user = 0
         self.codex = 0
+        self.reads = 0
         self.subagent = 0
         self.cwds: set[str] = set()
         self.last = ""
@@ -353,13 +478,14 @@ def summarize(records: list[dict]) -> None:
             s.model += 1
         if r.get("runtime") == "codex":
             s.codex += 1
+        if r.get("kind") == "read":
+            s.reads += 1
         if r.get("sidechain"):
             s.subagent += 1
         if r.get("cwd"):
             s.cwds.add(r["cwd"])
         ts = r.get("ts") or ""
-        if ts > s.last:
-            s.last = ts
+        s.last = max(s.last, ts)
 
     def section(token: str) -> str:
         # Full-token roster match first; bare-name fallback covers plugin-qualified
@@ -372,7 +498,7 @@ def summarize(records: list[dict]) -> None:
         return "other"
 
     rows = sorted(by_skill.items(), key=lambda kv: -kv[1].total)
-    header = f"{'skill':<42} {'total':>5} {'model':>5} {'user':>5} {'codex':>5} {'subag':>5} {'cwds':>4}  last-fired"
+    header = f"{'skill':<42} {'total':>5} {'model':>5} {'user':>5} {'codex':>5} {'reads':>5} {'subag':>5} {'cwds':>4}  last-fired"
     counts: dict[str, int] = {}
     for title, key in (
         ("current-roster skills", "roster"),
@@ -390,7 +516,7 @@ def summarize(records: list[dict]) -> None:
         print(header)
         for skill, s in sec:
             print(
-                f"{skill:<42} {s.total:>5} {s.model:>5} {s.user:>5} {s.codex:>5} {s.subagent:>5} {len(s.cwds):>4}  {s.last[:10]}"
+                f"{skill:<42} {s.total:>5} {s.model:>5} {s.user:>5} {s.codex:>5} {s.reads:>5} {s.subagent:>5} {len(s.cwds):>4}  {s.last[:10]}"
             )
         print()
     print(
@@ -418,19 +544,20 @@ def main() -> int:
 
     seen = {r["key"] for r in existing if "key" in r}
     new = []
-    sources = [
-        (PROJECTS_DIR, iter_fires),
-        (CODEX_SESSIONS_DIR, iter_codex_fires),
-    ]
+    sources = [(PROJECTS_DIR, "claude"), *((root, "codex") for root in CODEX_ROOTS)]
     n_files = 0
-    for root, iter_fn in sources:
+    for root, runtime in sources:
         if not root.is_dir():
             print(f"skip {root}: not a directory", file=sys.stderr)
             continue
         files = sorted(root.rglob("*.jsonl"))
         n_files += len(files)
         for path in files:
-            for fire in iter_fn(path):
+            if runtime == "claude":
+                fires = iter_fires(path)
+            else:
+                fires = iter_codex_fires(path, archived=root == CODEX_ARCHIVED_DIR)
+            for fire in fires:
                 if fire["key"] in seen:
                     continue
                 seen.add(fire["key"])
