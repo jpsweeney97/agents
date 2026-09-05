@@ -87,6 +87,28 @@ if [ "$heading_count" -eq 0 ]; then
   fail=1
 fi
 
+# Index/reference lens parity — every lens `references/review-lenses.md`
+# defines must appear in implementation-review SKILL.md's step-3 index, and
+# vice versa. This is the drift class 0.17.0 produced (two lenses added to the
+# reference, index untouched) and 0.18.0 repaired by hand.
+IR_SKILL_MD="$ROOT/$SKILLS_DIR/implementation-review/SKILL.md"
+IR_LENSES="$ROOT/$SKILLS_DIR/implementation-review/references/review-lenses.md"
+index_lenses="$(awk '/^### 3\. Attack Changed Areas/{f=1;next} /^### 4\./{f=0} f' "$IR_SKILL_MD" | sed -n 's/^- `\([^`]*\)`: .*/\1/p' | sort)"
+ref_lenses="$(sed -n 's/^- \([A-Za-z][^,:]*\)[,:].*/\1/p' "$IR_LENSES" | sort)"
+index_count=$(printf '%s\n' "$index_lenses" | grep -c . || true)
+ref_count=$(printf '%s\n' "$ref_lenses" | grep -c . || true)
+if [ "$index_count" -eq 0 ] || [ "$ref_count" -eq 0 ]; then
+  echo "LENS CHECK BROKEN: extracted $index_count index lenses and $ref_count reference lenses" >&2
+  fail=1
+else
+  while IFS= read -r l; do
+    echo "LENS DRIFT: review-lenses.md defines '$l' but implementation-review SKILL.md's step-3 index lacks it" >&2; fail=1
+  done < <(comm -13 <(printf '%s\n' "$index_lenses") <(printf '%s\n' "$ref_lenses"))
+  while IFS= read -r l; do
+    echo "LENS DRIFT: implementation-review SKILL.md indexes '$l' but review-lenses.md defines no such lens" >&2; fail=1
+  done < <(comm -23 <(printf '%s\n' "$index_lenses") <(printf '%s\n' "$ref_lenses"))
+fi
+
 if [ "$fail" -ne 0 ]; then
   {
     echo ""
@@ -98,4 +120,4 @@ if [ "$fail" -ne 0 ]; then
   } >&2
   exit 1
 fi
-echo "OK: read-only core consistent across ${#READONLY_TARGETS[@]} review skills; bounded-review core across ${#BOUNDED_TARGETS[@]}; expiry core across ${#EXPIRY_TARGETS[@]}; $heading_count template headings declared"
+echo "OK: read-only core consistent across ${#READONLY_TARGETS[@]} review skills; bounded-review core across ${#BOUNDED_TARGETS[@]}; expiry core across ${#EXPIRY_TARGETS[@]}; $heading_count template headings declared; $ref_count lenses in index/reference parity"
