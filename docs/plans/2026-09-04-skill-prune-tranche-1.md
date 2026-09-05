@@ -3,7 +3,7 @@ type: plan
 date: 2026-09-04
 revised: 2026-09-05
 scope: first prune tranche over the never-fired skills named in docs/reviews/2026-09-04-skill-usage-ledger-re-read.md, re-proposed from that record's 2026-09-05 erratum
-status: PROPOSED — nothing moves until JP approves the list
+status: EXECUTED 2026-09-05 — four of the six archived at 1c84ea3 on JP's approval; deploy-plan and observability-instrumentation held for tranche 2
 reviewed_commit: 5bcec49
 ---
 
@@ -115,3 +115,14 @@ Non-skill surfaces:
 - In-repo reads were classed as edits and reviews. If one of the six was used for real work on this repository by Codex, that use is invisible here; release cuts are the known case of real in-repo work, and none of the six is a release skill.
 - No skill body was read for quality in this pass. The ordering is age and story, as the commitment specified.
 - Archiving is reversible by `git mv` back plus `--link`; the satellite comes back through `create-missing`.
+
+## Execution record (2026-09-05)
+
+JP approved four of the six, pulling `deploy-plan` and `observability-instrumentation` to tranche 2 because fold clauses landed in them four days earlier; held the `decide` lines for the plugin's next natural bump; and asked for `main` to be pushed.
+
+- **Moved:** `postmortem`, `incident-response`, `migration-safety`, `dependency-upgrade`, by `git mv` from `skills/` to `skills-archive/`, unchanged, through the `work-router` satellite's task branch; landed fast-forward as `1c84ea3`. `skills-archive/README.md` carries the tranche section.
+- **Route hygiene:** 17 lines across 10 live skills edited or dropped in the same commit (`premortem` 3, `reflect` 2, `diagnose` 1, `deploy-plan` 3, `observability-instrumentation` 1, `runbook-authoring` 3, `contract-change-propagation` 1, `characterization-tests` 1, `document-to-markdown` 1, `work-router` 1 example group). Every edited skill passes `quick_validate.py`. The two `decide` lines (`decision-record` description and line 68) are held, recorded under `decision-record` in `docs/agents/skill-lifecycle-notes.md`; `to-issues:43` is already availability-conditional. A whole-word grep of the four names across `skills/`, `skills-claude/`, `plugins/`, `exports/`, `scripts/`, and `AGENTS.md` returns exactly those three lines.
+- **Notes:** the `dependency-upgrade`, `incident-response`, and `migration-safety` sections of `skill-lifecycle-notes.md` each gained an archive line.
+- **Delivery cleanup:** the four `~/.claude/skills` symlinks were trashed; `scripts/claude-skills-sync.sh --check` exits 0. `scripts/check-library-integrity.sh --check` on the landed tip passes every check (120 skills). The four satellites were retired with `scripts/satellite-fleet.py retire`; the fleet check exits 0 with 120 findings.
+- **Proof of removal:** a fresh headless session on each runtime, asked to name any of the four skills available to it, answered `NONE` and then named three live skills (Claude: `diagnose, tdd, migration-campaign`; Codex: `diagnose, markdown-reformat, tech-debt-scan`).
+- **Tranche 2 population, in order:** `deploy-plan`, `observability-instrumentation` (pulled from this tranche), then the four held above: `friction-to-guards`, `research-capture`, `steelman`, `scope-cut`. The `ops-cycle` bundle option now needs `postmortem`, `incident-response`, and `migration-safety` restored first.
