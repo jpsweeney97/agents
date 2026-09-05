@@ -76,10 +76,6 @@ This is a scoped behavior-preserving cleanup of a concrete target. Do not use `i
 For multiple items, group by owner instead of defaulting to a dense table:
 
 ```markdown
-## Route These To `dependency-upgrade`
-
-- **React major bump**: chosen upstream dependency bump; confirm target version before pulling.
-
 ## Route These To `simplify-code`
 
 - **Large parser function**: scoped behavior-preserving cleanup; exact file target is known.

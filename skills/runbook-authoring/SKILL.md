@@ -1,6 +1,6 @@
 ---
 name: runbook-authoring
-description: "Use when turning a known operational procedure into a durable, repeatable runbook — deploy, rollback, restart, credential rotation, failover, alert response — that a non-author operator re-runs, sometimes under incident pressure; it finds the irreversible steps first and guards them proportionally. Not for a one-time build plan for new code (implementation-planning), a retrospective on an incident that already happened (postmortem), or hunting an unknown cause (diagnose)."
+description: "Use when turning a known operational procedure into a durable, repeatable runbook — deploy, rollback, restart, credential rotation, failover, alert response — that a non-author operator re-runs, sometimes under incident pressure; it finds the irreversible steps first and guards them proportionally. Not for a one-time build plan for new code (implementation-planning) or hunting an unknown cause (diagnose)."
 ---
 
 # Runbook Authoring
@@ -51,13 +51,12 @@ Labeled phases (preflight / execute / verify / rollback as sections) appear only
 
 - Build a thing once, for a context-free executor → `implementation-planning`; operate a thing that already exists, repeatedly, on live state → this skill. The runbook markers — trigger, points of no return, rollback, freshness stamp — are exactly what a build plan lacks.
 - Running a plan or operation → `execute-plan`; this authors and never executes.
-- The retrospective on an incident that happened → `postmortem`; its action items feed here.
 - Hunting an unknown cause → `diagnose` first; the stabilized known response may then be authored here.
 - Findings, not a procedure → `research-capture`. A tracked one-off change across many sites → `migration-campaign`; a runbook is the standing procedure.
 
 ## Artifact and lifecycle
 
-- Write to `docs/runbooks/<operation-slug>.md` — keyed by operation, **not** dated in the filename: a runbook is a living document revised in place, and freshness lives in the `Last validated` header (the deliberate divergence from `postmortem`'s dated snapshot, because a stale runbook for a consequential operation is actively dangerous). Create `docs/runbooks/` if absent; defer to a runbook home set in the project's `AGENTS.md or CLAUDE.md` if one exists.
+- Write to `docs/runbooks/<operation-slug>.md` — keyed by operation, **not** dated in the filename: a runbook is a living document revised in place, and freshness lives in the `Last validated` header (a deliberate choice, because a stale runbook for a consequential operation is actively dangerous). Create `docs/runbooks/` if absent; defer to a runbook home set in the project's `AGENTS.md or CLAUDE.md` if one exists.
 - Before writing, if the project is a git repo, run `git status`; if the path or its parent carries unrelated dirty state, surface that rather than write over it. Leave the artifact **uncommitted** for the user. Never commit on a protected or default branch; landing is deferred to `git-cycle`, done-ness to `closeout-check` — do not re-inline that apparatus.
 - Re-run is the maintenance path and is non-destructive: same operation, file clean → revise in place, re-exercise where possible, refresh `Last validated` and the per-step tags. New operation → create. File dirty, hand-edited, or a slug collision with a *different* operation → ask one path question; do not ask on a clean re-validate.
 - Report the artifact path, the irreversible steps guarded, the verification status, and the proof boundary: **authoring proves the procedure is written and honestly tagged — not that it has been run against production or that its commands work.** Validating that a runbook actually runs is a separate operational act this skill does not perform and must not claim.

@@ -38,7 +38,6 @@ This skill authors the signals; it cannot confirm they actually emit, scrape, or
 
 - Reactively hunting an unknown failure → `diagnose`; a "no signal here" gap surfaced mid-diagnosis routes back here afterward.
 - Reading signals that already exist → `deploy-plan` (one ship's gauge) or `outcome-check` (whether the goal moved); this creates the signals, sets no go/no-go, and reads no live metric.
-- Fighting the live fire → `incident-response`.
 - Authoring the human response to an alert → `runbook-authoring`; this authors the alert and the signal beneath it.
 - Flagging that instrumentation is missing → `system-design-review` / `tech-debt-scan`; their "no observability here" finding is a valid trigger for this skill.
 

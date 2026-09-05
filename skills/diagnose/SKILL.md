@@ -158,4 +158,4 @@ Required before declaring done:
 
 **Then ask: what would have prevented this bug?** If the answer involves architectural change (no good test seam, tangled callers, hidden coupling) hand off to the `improve-codebase-architecture` skill with the specifics. Make the recommendation **after** the fix is in, not before — you have more information now than when you started.
 
-For a durable, dated, blameless retrospective that outlives this commit-line — an incident with real impact, a timeline worth recording, or non-code aspects — hand off to `/postmortem` (`$postmortem`). This Phase 6 note is the one-line version, not that.
+This Phase 6 note is the one-line version of a retrospective, not a durable, dated, blameless one that outlives this commit-line; an incident with real impact, a timeline worth recording, or non-code aspects deserves that separate document.

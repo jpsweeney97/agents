@@ -1,6 +1,6 @@
 ---
 name: reflect
-description: "Use when JP wants to reflect on or process lived experience — an event, a conversation, a decision's aftermath, a feeling, or a period (a weekly or monthly review) — as a thought partner, helping him put into words what happened and what it meant, and landing approved journal entries at ~/personal. Not for work-session resume context (save-handoff), incident retrospectives (postmortem), landing research findings (research-capture), clarifying a future goal (outcome-shaping), or deciding a live choice (making-recommendations)."
+description: "Use when JP wants to reflect on or process lived experience — an event, a conversation, a decision's aftermath, a feeling, or a period (a weekly or monthly review) — as a thought partner, helping him put into words what happened and what it meant, and landing approved journal entries at ~/personal. Not for work-session resume context (save-handoff), landing research findings (research-capture), clarifying a future goal (outcome-shaping), or deciding a live choice (making-recommendations)."
 ---
 
 # Reflect
@@ -48,4 +48,4 @@ Ordinary language works: "just write it down" means draft with minimal questions
 
 - Owns personal reflection and the way it writes to the `~/personal` journal, described above.
 - Personal substance stays in `~/personal` — never duplicated into another repo as a second corpus.
-- Not `save-handoff` (work-session resume), `postmortem` (incident retrospective), `research-capture` (external findings), `outcome-shaping` (forward-looking goal clarification).
+- Not `save-handoff` (work-session resume), `research-capture` (external findings), `outcome-shaping` (forward-looking goal clarification).

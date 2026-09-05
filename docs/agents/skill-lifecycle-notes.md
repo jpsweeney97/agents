@@ -64,6 +64,8 @@ Watch three failure shapes. **Packet rot** — the far side coming back with cla
 
 Build-and-prune class (attended; writes and commits only ADR files, never pushes), no ledger entry owed. Joined the `decide` plugin as 1.1.0 on 2026-09-02, so behavior edits are plugin releases. First real captures: `docs/smoke-tests/2026-09-02_decision-record-first-real-fire.md` (stage 1 in cross-model; stage 2 on real supersessions in two repos).
 
+Held for the next natural `decide` bump (JP, 2026-09-05): the boundary line `An incident retrospective with dated action items -> postmortem` (`SKILL.md:68`) and the description's `an incident retrospective (postmortem)` clause (`SKILL.md:3`) route to `postmortem`, archived 2026-09-05 in prune tranche 1; drop both when the plugin next releases.
+
 **Parked 2026-09-02, JP's call: the replace-versus-narrow judgment.** Stage 2b showed the skill's unprompted call can differ from the maintainer's. A ruling that restated an older record with one changed bound had been recorded by the maintainer as a supersession (status flipped); the fresh agent recorded the same ruling as a narrowing (status kept, cross-reference added). The contract's detection sentence lists "replaces" while its decision rule reads as no-flip whenever most of the old record survives, and nothing says which wins when the new record restates the old. Not folded, because the confirm-before-change step already puts that call to the user in every attended session; the divergence bit only headless. Reopen trigger: one attended fire in which the agent's replace-versus-narrow call is wrong and the user has to correct it, or a corpus found mixing the two readings so that `accepted` no longer says whether a record is the one to read. Fix shape if reopened: one sentence — a record that restates the old one and changes a bound replaces it (supersede); one that leaves the old record governing and narrows a bound is a cross-reference. The companion observation (appended dated amendment sections versus the body-never-touched boundary) was folded in decide 1.2.0 the same day.
 
 ## deliberate
@@ -77,6 +79,8 @@ Methodology-treatment facts (seventeenth treatment, endorsed 2026-07-18; brief: 
 ## dependency-upgrade
 
 Thin in this authoring repo — nothing to upgrade here regularly — and that silence is not evidence against it. The value is **portable** to every package-managed repo, judged by that leverage and its cognitive-offload: the careful upgrade run summoned with one token. First-to-prune on observed mis-fire. Watch two failure shapes: the **fold signal** — if the cross-range read and the supply-chain gate almost never fire and the work collapses to "campaign-or-execute-plan, then `keep-green`," it has thinned into a routing note and should fold; and the **encyclopedia drift** — the moment it stops being a tight ordered pass and accretes per-manager solver recipes, it has become the multi-manager command reference it was built not to be. Either is prune evidence to collect, not a reason to withhold the build now.
+
+Archived 2026-09-05 in prune tranche 1 (`docs/plans/2026-09-04-skill-prune-tranche-1.md`): no typed fire on either runtime and never chosen by Codex outside this repository, ever, under the miner repaired that day. Now at `skills-archive/dependency-upgrade/`.
 
 ## deploy-plan
 
@@ -98,6 +102,8 @@ Divergent generation fires often and locally, so this is not first-to-prune — 
 
 Live burning-prod moments are rare in this authoring repo, so this is **first-to-prune**; the value is **portable** to ops/product repos. Watch the redirect-and-record fire on a real incident; prune without ceremony if it does not earn its keep — and never let it accrete a generic incident-management framework (ICS, role charts) to justify itself.
 
+Archived 2026-09-05 in prune tranche 1 (`docs/plans/2026-09-04-skill-prune-tranche-1.md`): no typed fire on either runtime and never chosen by Codex outside this repository, ever, under the miner repaired that day. Now at `skills-archive/incident-response/`.
+
 ## injection-safe-inputs
 
 Thin in this authoring repo — little untrusted input crosses trust lines here — and that silence is not evidence against it. The value is portable to every repo where input crosses a trust line (injection has sat near the top of the OWASP list for two decades), judged by that leverage and its cognitive-offload: the careful, sink-censused design pass summoned with one token. First-to-prune on observed mis-fire. Watch two failure shapes: the **fold signal** — if the sink census stops changing outcomes and the pass collapses into a generic "escape your inputs" lens, it has thinned into a review lens that belongs in `implementation-review` (when available); and the **encyclopedia drift** — the moment it accretes a per-framework payload encyclopedia (every ORM's placeholder syntax, every template engine's escape rules), it has stopped being a forcing pass. Either is prune evidence to collect, not a reason to withhold the build.
@@ -111,6 +117,8 @@ Watch three failure shapes. **Toll-booth relapse** — runs that pause between s
 ## migration-safety
 
 Thin in this authoring repo — there is no production database here; the value is **portable** to backend, service, and data-platform repos with a relational DB and a migrations directory, where these footguns recur and land their cost at run time. First-to-prune locally. Watch it fire on real migration work; prune without ceremony if it never earns more than "looks fine." Never let it accrete into a multi-engine DDL encyclopedia — the moment it stops being a tight, engine-confirmed forcing pass over one migration and becomes a reference of every lock rule for every database, it has become the thing it was built not to be.
+
+Archived 2026-09-05 in prune tranche 1 (`docs/plans/2026-09-04-skill-prune-tranche-1.md`): no typed fire on either runtime and never chosen by Codex outside this repository, ever, under the miner repaired that day. Now at `skills-archive/migration-safety/`.
 
 ## observability-instrumentation
 

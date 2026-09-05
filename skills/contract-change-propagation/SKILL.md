@@ -51,7 +51,6 @@ Out of scope — route instead:
 - reviewing an **already-completed** change against a plan → `implementation-review`.
 - architecture or design quality, boundaries, tradeoffs → `system-design-review`.
 - **applying** the change across shards with burndown tracking → `migration-campaign`; this skill stops at the plan and never applies the change.
-- the lock, online-index, backfill, and drop-ordering safety of a schema/DDL change against a *live* database → `migration-safety`: do the consumer/compat mapping here and hand the live-execution-safety plan to it.
 - slicing the plan into grabbable issues → `to-issues`.
 
 Read-only and judgment-only. Read code and the supplied change freely; do **not** edit files, apply the migration, stage, commit, or publish unless the user explicitly asks for that as a separate step. The `rg` sweep is evidence for your judgment, not an authority — never present it as an exhaustive consumer list.

@@ -1,6 +1,6 @@
 ---
 name: premortem
-description: "Use when a plan, design, or decision is settled-or-nearly-settled and committed, and you want prospective failure-imagination before execution — 'premortem this', 'imagine it's six months later and it flopped, why', 'what could make this fail'. Generates a wide field of past-tense accidental failure-causes with pre-mitigations and dated tripwires, and renders no verdict. Not for re-deciding go/no-go or readiness (`scrutinize`), an adversary's intentional attack (`red-team`), an incident already over (`postmortem`), or widening the solution space (`ideate`)."
+description: "Use when a plan, design, or decision is settled-or-nearly-settled and committed, and you want prospective failure-imagination before execution — 'premortem this', 'imagine it's six months later and it flopped, why', 'what could make this fail'. Generates a wide field of past-tense accidental failure-causes with pre-mitigations and dated tripwires, and renders no verdict. Not for re-deciding go/no-go or readiness (`scrutinize`), an adversary's intentional attack (`red-team`), or widening the solution space (`ideate`)."
 ---
 
 # Premortem
@@ -22,7 +22,7 @@ premortem does not re-decide the plan — the plan is already chosen — and it 
 Stop the instant another pass yields nothing mechanism-distinct (the stable-field halt, not a count). Then:
 
 - **Render no verdict.** premortem does not conclude "go," "no-go," "ready," or "not ready" — the plan stays chosen; the deliverable is mitigated failure modes, not a re-decision. A go/no-go or readiness call is `scrutinize`'s execution-readiness review; if you catch yourself concluding "so this isn't ready," you have left premortem for `scrutinize`.
-- **Route the durable items.** Owned, dated mitigations and tripwires file to `/triage` (or `$triage`), one issue per finding, exactly as `postmortem` routes its action items — by reference, never re-minting tracker machinery. Keep owner and date inline as the explicitly weaker fallback if no tracker is reachable. Chat-first: no artifact beyond these routed items by default.
+- **Route the durable items.** Owned, dated mitigations and tripwires file to `/triage` (or `$triage`), one issue per finding — by reference, never re-minting tracker machinery. Keep owner and date inline as the explicitly weaker fallback if no tracker is reachable. Chat-first: no artifact beyond these routed items by default.
 - **Close with one honest residual line, externally anchored.** Name which of the *plan's own stated assumptions or fixed points* the field still leaves untouched — never a self-drawn coverage map. **Never certify coverage:** no "all failure modes captured," no likelihood×impact matrix presented as complete or precise. A field that looks exhaustive relative to a map you drew is most blind exactly where that map is. The honest signal is the plan-anchored residual, not a box-count.
 
 ## When not to premortem
@@ -30,5 +30,5 @@ Stop the instant another pass yields nothing mechanism-distinct (the stable-fiel
 - The plan is not chosen yet → `ideate` (widen), `making-recommendations` (pick), or `design-exploration` (shape).
 - The user wants a go/no-go or readiness verdict, or a formal adversarial stress test → `scrutinize`.
 - The threat is a motivated adversary, not accident → `red-team`.
-- A real incident already happened → `postmortem` (after, with facts), not premortem (before, imagined).
+- A real incident already happened → not premortem (before, imagined); the retrospective after the fact is a different job.
 - The goal is too muddy to say what "failed" means → `outcome-shaping`.

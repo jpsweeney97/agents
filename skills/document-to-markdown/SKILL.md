@@ -26,7 +26,7 @@ Convert one office document, spreadsheet, presentation, ebook, or text-based PDF
 
 Version `0.2.4` of anydoc, as the npm package `@firecrawl/anydoc` for the Markdown path and the PyPI package `firecrawl-anydoc` for the library path. The version appears in every command and pin in this file (this line, both resolution steps, the setup line, the library sentence, and In A Codebase) and in the `dependencies` line at the top of `scripts/anydoc_extract.py`; a bump changes all of them, so grep for the old version after editing.
 
-The baseline for this pin is the vet report `docs/reviews/2026-09-01-anydoc-vet.md` in the `~/.agents` repo. Before bumping, re-vet the release against it: read the release notes for breaking changes (they have shipped in patch releases), confirm the two known crash cases (a crafted `.ppt` with deeply nested records; a crafted PDF with one highly compressible stream) are no worse, and confirm the OCR default is still `reject`. The mechanics of the bump belong to `dependency-upgrade` where available, plus the repo's validation ladder.
+The baseline for this pin is the vet report `docs/reviews/2026-09-01-anydoc-vet.md` in the `~/.agents` repo. Before bumping, re-vet the release against it: read the release notes for breaking changes (they have shipped in patch releases), confirm the two known crash cases (a crafted `.ppt` with deeply nested records; a crafted PDF with one highly compressible stream) are no worse, and confirm the OCR default is still `reject`. The mechanics of the bump follow the repo's validation ladder.
 
 Resolve the command in this order:
 

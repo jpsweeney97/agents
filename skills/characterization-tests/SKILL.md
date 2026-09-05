@@ -25,7 +25,7 @@ The committed net — tests, any golden files, the capture harness — plus a sh
 ## Modes and scope
 
 - One seam per run. Pointed at a whole legacy module, pin the seam the imminent change will cross and say what was left unpinned.
-- Tests only. This skill never performs the refactor, upgrade, or migration it enables — hand that to `simplify-code`, `dependency-upgrade`, or the change's own lane, with the net standing as its tripwire.
+- Tests only. This skill never performs the refactor, upgrade, or migration it enables — hand that to `simplify-code` or the change's own lane, with the net standing as its tripwire.
 
 ## Fences
 
