@@ -609,3 +609,58 @@ def test_finish_refuses_when_reviewer_record_disagrees_with_response(
     raw.write_text("not json")
     with pytest.raises(ReviewError, match="read record failed"):
         engine.finish(archive, "complete", note)
+
+
+@pytest.mark.parametrize(
+    ("original", "candidate", "expected_hunk"),
+    (
+        (
+            "old sentence",
+            "new sentence",
+            (
+                "@@ -1 +1 @@\n-old sentence\n\\ No newline at end of file\n"
+                "+new sentence\n\\ No newline at end of file\n"
+            ),
+        ),
+        (
+            "old sentence\n",
+            "new sentence",
+            "@@ -1 +1 @@\n-old sentence\n+new sentence\n\\ No newline at end of file\n",
+        ),
+        (
+            "old sentence",
+            "new sentence\n",
+            "@@ -1 +1 @@\n-old sentence\n\\ No newline at end of file\n+new sentence\n",
+        ),
+        (
+            "old\nsame",
+            "new\nsame",
+            "@@ -1,2 +1,2 @@\n-old\n+new\n same\n\\ No newline at end of file\n",
+        ),
+        (
+            "old sentence\n",
+            "new sentence\n",
+            "@@ -1 +1 @@\n-old sentence\n+new sentence\n",
+        ),
+    ),
+)
+def test_diff_marks_missing_final_newlines(
+    tmp_path: Path, original: str, candidate: str, expected_hunk: str
+) -> None:
+    repo = tmp_path / "target"
+    repo.mkdir()
+    source = repo / "draft.md"
+    source.write_bytes(original.encode())
+    revised = tmp_path / "candidate.md"
+    revised.write_bytes(candidate.encode())
+    host = tmp_path / "host.md"
+    host.write_text("Goal: say the new sentence.\n")
+    archive = Archive.create(tmp_path / "review", repo, source, 3)
+    replies = Replies([[], []])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.query(archive, revised, host, replies)
+    engine.finish(archive, "complete", host)
+    header = "--- submitted\n+++ checked-candidate\n"
+    assert archive.text("changes.diff") == header + expected_hunk
+    assert archive.path(archive.load()["checked"]).read_bytes() == candidate.encode()

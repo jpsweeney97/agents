@@ -232,6 +232,30 @@ def resume(archive: Archive) -> dict[str, Any]:
         return _record(archive, state, response, session)
 
 
+def _lines(text: str) -> list[str]:
+    """Split on newline only, so only the final line can lack its terminator."""
+    parts = text.split("\n")
+    lines = [part + "\n" for part in parts[:-1]]
+    if parts[-1]:
+        lines.append(parts[-1])
+    return lines
+
+
+def _unified_diff(original: str, candidate: str) -> str:
+    """Render a unified diff that stays valid when a final newline is absent."""
+    rendered: list[str] = []
+    for line in difflib.unified_diff(
+        _lines(original),
+        _lines(candidate),
+        fromfile="submitted",
+        tofile="checked-candidate",
+    ):
+        rendered.append(line)
+        if not line.endswith("\n"):
+            rendered.append("\n\\ No newline at end of file\n")
+    return "".join(rendered)
+
+
 def _verify_checked_record(
     archive: Archive, state: dict[str, Any], raw_name: str
 ) -> None:
@@ -331,14 +355,7 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
             "pending_or_failed_call": state["call"],
             "continuations": state["continuations"],
         }
-        diff = "".join(
-            difflib.unified_diff(
-                archive.text(state["original"]).splitlines(keepends=True),
-                archive.text(candidate).splitlines(keepends=True),
-                fromfile="submitted",
-                tofile="checked-candidate",
-            )
-        )
+        diff = _unified_diff(archive.text(state["original"]), archive.text(candidate))
         try:
             archive.path("changes.diff").write_text(diff, encoding="utf-8")
             archive.path("result.json").write_text(
