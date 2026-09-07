@@ -290,6 +290,29 @@ def _verify_checked_record(
         )
 
 
+def _failure_before_call(archive: Archive, state: dict[str, Any]) -> str | None:
+    """Name a local record failure that left a saved request with no call.
+
+    The detectable state is the current round's request record on disk with
+    no raw reviewer record and no call identity, at phase ``opening`` or
+    ``working``. Only file existence is tested, so a partially written
+    request record still gets an ending.
+    """
+    if state["phase"] not in {"opening", "working"} or state["call"] is not None:
+        return None
+    kind = "opening" if state["phase"] == "opening" else "closing"
+    prefix = f"{state['used']:02d}-{kind}"
+    request = f"{prefix}.request.json"
+    if not archive.path(request).is_file():
+        return None
+    if archive.path(f"{prefix}.raw.json").exists():
+        return None
+    return (
+        "local record failure before the reviewer call: "
+        f"{request} saved, no call recorded"
+    )
+
+
 def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
     """Render the host's declared ending; do not adjudicate its reasoning."""
     note = read_text(host_note)
@@ -333,12 +356,15 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
                 "allowance ending requires no remaining rounds at a between-round boundary",
                 state,
             )
+        failure = state["error"]
         if outcome == "failed" and state["phase"] not in {"failed", "pending"}:
-            fail(
-                "finish review",
-                "no failed or incomplete call is recorded",
-                state["phase"],
-            )
+            failure = _failure_before_call(archive, state)
+            if failure is None:
+                fail(
+                    "finish review",
+                    "no failed or incomplete call is recorded",
+                    state["phase"],
+                )
         candidate = state["checked"] or state["original"]
         original_reviewer_record = None
         if state["checked_response"] is not None:
@@ -354,7 +380,7 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
             "round_limit": state["limit"],
             "reviewer_record": original_reviewer_record,
             "latest_response": state["last_response"],
-            "failure": state["error"],
+            "failure": failure,
             "host_note": note,
             "pending_or_failed_call": state["call"],
             "continuations": state["continuations"],
@@ -382,7 +408,7 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
                 f"Failed rounds followed by authorized continuation: {continued}. These rounds were not refunded.\n\n"
                 f"Original reviewer record for this candidate: {original_reviewer_record}\n\n"
                 f"Latest valid reviewer response: {state['last_response']}\n\n"
-                f"Recorded failure: {state['error']}\n\n"
+                f"Recorded failure: {failure}\n\n"
                 f"[Changes from submitted version]({archive.path('changes.diff')})\n\n"
                 "## Host account: changes, evidence, disagreements, and limitations\n\n"
                 + note

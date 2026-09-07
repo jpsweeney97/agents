@@ -706,3 +706,175 @@ def test_finish_refuses_when_reviewer_record_fails_replay(tmp_path: Path) -> Non
     with pytest.raises(ReviewError, match="failed replay validation"):
         engine.finish(archive, "complete", note)
     assert not archive.path("result.json").exists()
+
+
+def _fail_request_record_sync(
+    archive: Archive, prefix: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Make the next request-record write leave its file on disk and raise."""
+    import os
+
+    original_fsync = os.fsync
+
+    def fail_request_sync(descriptor: int) -> None:
+        if archive.path(f"{prefix}.request.json").exists():
+            raise OSError("simulated failure syncing the request record")
+        original_fsync(descriptor)
+
+    monkeypatch.setattr(os, "fsync", fail_request_sync)
+
+
+def test_request_record_failure_before_call_renders_failed_ending(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING]])
+    engine.begin(archive)
+    with monkeypatch.context() as context:
+        _fail_request_record_sync(archive, "01-opening", context)
+        with pytest.raises(ReviewError, match="write record failed"):
+            engine.query(archive, source, host, replies)
+    state = archive.load()
+    assert (state["phase"], state["call"], state["used"]) == ("opening", None, 1)
+    assert archive.path("01-opening.request.json").is_file()
+    assert not archive.path("01-opening.raw.json").exists()
+    assert replies.sessions == []
+    note = tmp_path / "failed.md"
+    note.write_text("The request record failed to save before any reviewer call.")
+    result = engine.finish(archive, "failed", note)
+    assert result["outcome"] == "failed"
+    assert result["candidate_checked"] is False
+    assert result["candidate"] == str(archive.path(state["original"]))
+    assert result["rounds_used"] == 1
+    assert "01-opening.request.json" in result["failure"]
+    assert "no call recorded" in result["failure"]
+    assert archive.path("changes.diff").is_file()
+    assert f"Recorded failure: {result['failure']}" in archive.text("result.md")
+
+
+def _fail_pending_save_in_round_two(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[Archive, Path, Path, Replies, str]:
+    """Check round one, then lose the pending save before round two's call."""
+    import os
+
+    archive, source, host = setup_review(tmp_path)
+    resolved = dict(FINDING, disposition="resolved", explanation="Upload removed.")
+    replies = Replies([[FINDING], [resolved]])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.query(archive, source, host, replies)
+    checked = archive.load()["checked"]
+    engine.begin(archive)
+    candidate = tmp_path / "candidate.md"
+    candidate.write_text("Keep data local. Search local files.\n")
+    original_replace = os.replace
+
+    def fail_pending_save(src: str, dst: Path) -> None:
+        if archive.path("02-closing.request.json").exists():
+            raise OSError("simulated failure saving the pending state")
+        original_replace(src, dst)
+
+    with monkeypatch.context() as context:
+        context.setattr(os, "replace", fail_pending_save)
+        with pytest.raises(ReviewError, match="save progress failed"):
+            engine.query(archive, candidate, host, replies)
+    state = archive.load()
+    assert (state["phase"], state["call"], state["used"]) == ("working", None, 2)
+    assert archive.path("02-closing.request.json").is_file()
+    assert not archive.path("02-closing.raw.json").exists()
+    return archive, candidate, host, replies, checked
+
+
+def test_pending_save_failure_after_checked_round_renders_failed_ending(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive, _candidate, _host, replies, checked = _fail_pending_save_in_round_two(
+        tmp_path, monkeypatch
+    )
+    assert replies.sessions == [None, "review-session"]
+    note = tmp_path / "failed.md"
+    note.write_text("Progress failed to save before the round-two closing call.")
+    result = engine.finish(archive, "failed", note)
+    assert result["outcome"] == "failed"
+    assert result["candidate_checked"] is True
+    assert result["candidate"] == str(archive.path(checked))
+    assert result["rounds_used"] == 2
+    assert result["reviewer_record"] == "01-closing.raw.json"
+    assert "02-closing.request.json" in result["failure"]
+    assert "no call recorded" in result["failure"]
+
+
+def test_failed_ending_before_call_leaves_other_operations_unchanged(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive, candidate, host, replies, _checked = _fail_pending_save_in_round_two(
+        tmp_path, monkeypatch
+    )
+    progress = archive.path("state.json").read_bytes()
+    assert engine.resume(archive)["phase"] == "working"
+    with pytest.raises(ReviewError, match="request already saved"):
+        engine.query(archive, candidate, host, replies)
+    with pytest.raises(ReviewError, match="finish or resume the started round"):
+        engine.begin(archive)
+    note = tmp_path / "note.md"
+    note.write_text("No closing check happened in round two.")
+    with pytest.raises(ReviewError, match="no successful closing check"):
+        engine.finish(archive, "complete", note)
+    with pytest.raises(ReviewError, match="between-round boundary"):
+        engine.finish(archive, "exhausted", note)
+    engine.finish(archive, "failed", note)
+    assert archive.path("state.json").read_bytes() == progress
+    assert replies.sessions == [None, "review-session"]
+
+
+def test_unreadable_request_record_before_call_still_renders_failed_ending(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING]])
+    engine.begin(archive)
+    with monkeypatch.context() as context:
+        _fail_request_record_sync(archive, "01-opening", context)
+        with pytest.raises(ReviewError, match="write record failed"):
+            engine.query(archive, source, host, replies)
+    archive.path("01-opening.request.json").write_text("{")
+    with pytest.raises(ReviewError, match="read record failed"):
+        archive.read("01-opening.request.json")
+    note = tmp_path / "failed.md"
+    note.write_text("The request record is truncated; no reviewer call was made.")
+    result = engine.finish(archive, "failed", note)
+    assert result["outcome"] == "failed"
+    assert "01-opening.request.json" in result["failure"]
+    assert replies.sessions == []
+
+
+@pytest.mark.parametrize(
+    ("case", "phase"),
+    (
+        ("fresh", "between"),
+        ("checked", "between"),
+        ("opening", "opening"),
+        ("working", "working"),
+        ("working_round_two", "working"),
+    ),
+)
+def test_failed_ending_refused_without_a_recorded_failure(
+    tmp_path: Path, case: str, phase: str
+) -> None:
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING], [FINDING]])
+    if case != "fresh":
+        engine.begin(archive)
+    if case in {"checked", "working", "working_round_two"}:
+        engine.query(archive, source, host, replies)
+    if case in {"checked", "working_round_two"}:
+        engine.query(archive, source, host, replies)
+    if case == "working_round_two":
+        engine.begin(archive)
+    assert archive.load()["phase"] == phase
+    note = tmp_path / "note.md"
+    note.write_text("Nothing failed; a started round is not a failure.")
+    with pytest.raises(ReviewError, match="no failed or incomplete call is recorded"):
+        engine.finish(archive, "failed", note)
+    assert not archive.path("result.json").exists()
