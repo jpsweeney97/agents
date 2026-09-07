@@ -313,3 +313,32 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
         except OSError as exc:
             fail("write result", str(exc), archive.root)
         return result
+
+
+def extend(archive: Archive, extra: int, authorization: Path) -> dict[str, Any]:
+    """Record user-authorized extra rounds; never reset usage or repair a failure."""
+    permission = read_text(authorization)
+    if type(extra) is not int or extra < 1 or not permission.strip():
+        fail(
+            "extend review",
+            "positive extra rounds and authorization text required",
+            extra,
+        )
+    with archive.locked():
+        state = archive.load()
+        if state["phase"] != "between":
+            fail(
+                "extend review",
+                "extension requires a between-round boundary",
+                state["phase"],
+            )
+        state["limit"] += extra
+        state["extensions"].append(
+            {
+                "after_round": state["used"],
+                "extra": extra,
+                "authorization": permission,
+            }
+        )
+        archive.save(state)
+        return state

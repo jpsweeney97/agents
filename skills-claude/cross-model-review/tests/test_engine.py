@@ -209,3 +209,27 @@ def test_failure_does_not_return_unchecked_revision_as_checked(tmp_path: Path) -
     assert result["candidate"] == str(archive.path(checked))
     assert result["rounds_used"] == 2
     assert result["reviewer_record"] == "01-closing.raw.json"
+
+
+def test_extension_preserves_round_usage_and_review_session(tmp_path: Path) -> None:
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING]] * 4)
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    for number in (1, 2, 3):
+        if number > 1:
+            engine.begin(archive)
+        engine.query(archive, source, host, replies)
+    authorization = tmp_path / "authorization.md"
+    authorization.write_text("JP: authorize one additional round for F1.")
+    state = engine.extend(archive, 1, authorization)
+    assert (state["used"], state["limit"]) == (3, 4)
+    assert state["session"] == "review-session"
+    assert state["extensions"][0]["authorization"] == authorization.read_text()
+    assert engine.begin(archive)["used"] == 4
+    assert replies.sessions == [
+        None,
+        "review-session",
+        "review-session",
+        "review-session",
+    ]
