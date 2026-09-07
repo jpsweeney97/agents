@@ -878,3 +878,311 @@ def test_failed_ending_refused_without_a_recorded_failure(
     with pytest.raises(ReviewError, match="no failed or incomplete call is recorded"):
         engine.finish(archive, "failed", note)
     assert not archive.path("result.json").exists()
+
+
+def _decision_note(tmp_path: Path) -> Path:
+    note = tmp_path / "decision.md"
+    note.write_text(
+        "JP must choose whether the local-only constraint may change; the models cannot settle that. The saved round state is disclosed below."
+    )
+    return note
+
+
+@pytest.mark.parametrize(
+    "case",
+    ("opening_request_failure", "round_two_pending_save_failure", "unreadable_request"),
+)
+def test_decision_discloses_pre_call_failure_like_failed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, case: str
+) -> None:
+    if case == "round_two_pending_save_failure":
+        archive, _candidate, _host, replies, checked = _fail_pending_save_in_round_two(
+            tmp_path, monkeypatch
+        )
+        expected = (checked, "working", 2, "02-closing.request.json")
+    else:
+        archive, source, host = setup_review(tmp_path)
+        replies = Replies([[FINDING]])
+        engine.begin(archive)
+        with monkeypatch.context() as context:
+            _fail_request_record_sync(archive, "01-opening", context)
+            with pytest.raises(ReviewError, match="write record failed"):
+                engine.query(archive, source, host, replies)
+        if case == "unreadable_request":
+            archive.path("01-opening.request.json").write_text("{")
+        expected = (archive.load()["original"], "opening", 1, "01-opening.request.json")
+    candidate, phase, used, request = expected
+    calls = list(replies.sessions)
+    progress = archive.path("state.json").read_bytes()
+    note = _decision_note(tmp_path)
+    failed = engine.finish(archive, "failed", note)
+    result = engine.finish(archive, "decision", note)
+    assert result["outcome"] == "decision"
+    assert result["phase"] == phase
+    assert result["failure"] == failed["failure"]
+    assert request in result["failure"]
+    assert "no call recorded" in result["failure"]
+    assert result["pending_or_failed_call"] is None
+    assert result["rounds_used"] == used
+    assert result["candidate"] == str(archive.path(candidate))
+    assert result["candidate_checked"] is (case == "round_two_pending_save_failure")
+    saved = json.loads(archive.text("result.json"))
+    assert (saved["outcome"], saved["phase"], saved["failure"]) == (
+        "decision",
+        phase,
+        result["failure"],
+    )
+    rendered = archive.text("result.md")
+    assert "# Review result: decision" in rendered
+    assert f"Recorded failure: {result['failure']}" in rendered
+    assert archive.path("state.json").read_bytes() == progress
+    assert replies.sessions == calls
+
+
+@pytest.mark.parametrize(
+    ("case", "used", "phase"),
+    (
+        ("before_first_call", 1, "opening"),
+        ("after_opening_reply", 1, "working"),
+        ("follow_up_after_check", 2, "working"),
+        ("final_allowed_round", 3, "working"),
+    ),
+)
+def test_decision_renders_while_a_round_is_open_and_discloses_it(
+    tmp_path: Path, case: str, used: int, phase: str
+) -> None:
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING]] * 4)
+    engine.begin(archive)
+    if case != "before_first_call":
+        engine.query(archive, source, host, replies)
+    for _round in range(2, used + 1):
+        engine.query(archive, source, host, replies)
+        engine.begin(archive)
+    state = archive.load()
+    assert (state["phase"], state["used"]) == (phase, used)
+    checked = state["checked"]
+    calls = list(replies.sessions)
+    progress = archive.path("state.json").read_bytes()
+    result = engine.finish(archive, "decision", _decision_note(tmp_path))
+    assert (result["outcome"], result["phase"], result["rounds_used"]) == (
+        "decision",
+        phase,
+        used,
+    )
+    assert result["failure"] is None
+    assert result["pending_or_failed_call"] is None
+    assert result["candidate_checked"] is (checked is not None)
+    assert result["candidate"] == str(archive.path(checked or state["original"]))
+    assert json.loads(archive.text("result.json"))["phase"] == phase
+    rendered = archive.text("result.md")
+    assert f"Saved phase: {phase}." in rendered
+    assert (
+        f"Round {used} remains open; its closing check is not recorded in progress."
+        in rendered
+    )
+    assert archive.path("state.json").read_bytes() == progress
+    assert replies.sessions == calls
+
+
+def _leave_call_pending(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str, raw_present: bool
+) -> tuple[Archive, Replies, str, str | None]:
+    """Leave a call pending: a one-time progress-save failure after capture, or an interruption before capture."""
+    import os
+
+    archive, source, host = setup_review(tmp_path)
+    interruption = RuntimeError("simulated interruption during the reviewer call")
+    if kind == "opening":
+        replies = Replies([[FINDING] if raw_present else interruption])
+        prefix = "01-opening"
+    else:
+        resolved = dict(FINDING, disposition="resolved", explanation="Upload removed.")
+        replies = Replies(
+            [[FINDING], [resolved], [resolved] if raw_present else interruption]
+        )
+        prefix = "02-closing"
+    engine.begin(archive)
+    if kind == "closing":
+        engine.query(archive, source, host, replies)
+        engine.query(archive, source, host, replies)
+        engine.begin(archive)
+    checked = archive.load()["checked"]
+    if raw_present:
+        original_replace = os.replace
+        failures: list[str] = []
+
+        def fail_once(src: str, dst: Path) -> None:
+            if archive.path(f"{prefix}.raw.json").exists() and not failures:
+                failures.append("one transient failure writing progress")
+                raise OSError(failures[0])
+            original_replace(src, dst)
+
+        with monkeypatch.context() as context:
+            context.setattr(os, "replace", fail_once)
+            with pytest.raises(ReviewError, match="save progress failed"):
+                engine.query(archive, source, host, replies)
+    else:
+        with pytest.raises(RuntimeError, match="simulated interruption"):
+            engine.query(archive, source, host, replies)
+    state = archive.load()
+    assert (state["phase"], state["call"]["prefix"]) == ("pending", prefix)
+    assert archive.path(f"{prefix}.raw.json").exists() is raw_present
+    return archive, replies, prefix, checked
+
+
+@pytest.mark.parametrize("raw_present", (True, False))
+@pytest.mark.parametrize("kind", ("opening", "closing"))
+def test_decision_at_pending_discloses_the_call_and_leaves_resume_intact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str, raw_present: bool
+) -> None:
+    archive, replies, prefix, checked = _leave_call_pending(
+        tmp_path, monkeypatch, kind, raw_present
+    )
+    used = 1 if kind == "opening" else 2
+    calls = list(replies.sessions)
+    progress = archive.path("state.json").read_bytes()
+    result = engine.finish(archive, "decision", _decision_note(tmp_path))
+    assert (result["outcome"], result["phase"], result["rounds_used"]) == (
+        "decision",
+        "pending",
+        used,
+    )
+    assert result["pending_or_failed_call"]["prefix"] == prefix
+    assert result["failure"] is None
+    assert result["candidate_checked"] is (kind == "closing")
+    assert result["candidate"] == str(
+        archive.path(checked if kind == "closing" else archive.load()["original"])
+    )
+    rendered = archive.text("result.md")
+    assert "Saved phase: pending." in rendered
+    assert f"Pending or failed call: {prefix}." in rendered
+    assert f"Round {used} remains open" in rendered
+    assert archive.path("state.json").read_bytes() == progress
+    assert replies.sessions == calls
+    if raw_present:
+        resumed = engine.resume(archive)
+        assert resumed["phase"] == ("working" if kind == "opening" else "between")
+        if kind == "closing":
+            assert resumed["checked_response"] == "02-closing.response.json"
+    else:
+        with pytest.raises(
+            ReviewError, match="reviewer response is missing; no automatic retry"
+        ):
+            engine.resume(archive)
+        assert archive.path("state.json").read_bytes() == progress
+    assert replies.sessions == calls
+
+
+@pytest.mark.parametrize(
+    "case", ("malformed_opening", "closing_timeout_no_raw", "malformed_closing")
+)
+def test_decision_at_failed_discloses_the_failure_and_leaves_recovery_intact(
+    tmp_path: Path, case: str
+) -> None:
+    from cross_model_runtime.codex_transport import CodexTransportError
+
+    archive, source, host = setup_review(tmp_path)
+    if case == "malformed_opening":
+        replies = Replies(["not JSON"])
+        prefix, used = "01-opening", 1
+    else:
+        failure: Any = "not JSON"
+        if case == "closing_timeout_no_raw":
+            failure = CodexTransportError(
+                "review failed: simulated timeout. Got: 'closing'"
+            )
+        replies = Replies([[FINDING], [FINDING], failure])
+        prefix, used = "02-closing", 2
+    engine.begin(archive)
+    if case != "malformed_opening":
+        engine.query(archive, source, host, replies)
+        engine.query(archive, source, host, replies)
+        engine.begin(archive)
+    with pytest.raises(CodexTransportError):
+        engine.query(archive, source, host, replies)
+    state = archive.load()
+    assert (state["phase"], state["call"]["prefix"]) == ("failed", prefix)
+    assert archive.path(f"{prefix}.raw.json").exists() is (
+        case != "closing_timeout_no_raw"
+    )
+    calls = list(replies.sessions)
+    progress = archive.path("state.json").read_bytes()
+    result = engine.finish(archive, "decision", _decision_note(tmp_path))
+    assert (result["outcome"], result["phase"], result["rounds_used"]) == (
+        "decision",
+        "failed",
+        used,
+    )
+    assert result["pending_or_failed_call"]["prefix"] == prefix
+    assert result["failure"] == state["error"]
+    assert result["candidate_checked"] is (case != "malformed_opening")
+    assert result["candidate"] == str(
+        archive.path(state["checked"] or state["original"])
+    )
+    rendered = archive.text("result.md")
+    assert "Saved phase: failed." in rendered
+    assert f"Pending or failed call: {prefix}." in rendered
+    assert f"Recorded failure: {state['error']}" in rendered
+    label = (
+        "Last checked candidate"
+        if result["candidate_checked"]
+        else "Submitted version; no successful closing check recorded in progress"
+    )
+    assert f"{label}: [" in rendered
+    assert archive.path("state.json").read_bytes() == progress
+    with pytest.raises(ReviewError, match="recorded failure needs a user decision"):
+        engine.resume(archive)
+    empty = tmp_path / "empty.md"
+    empty.write_text(" \n")
+    with pytest.raises(ReviewError, match="authorization text is required"):
+        engine.continue_after_failure(archive, empty)
+    authorization = tmp_path / "authorization.md"
+    authorization.write_text("JP: authorize continuation after this failed call.")
+    if case == "malformed_closing":
+        assert (
+            engine.continue_after_failure(archive, authorization)["phase"] == "between"
+        )
+    else:
+        with pytest.raises(ReviewError):
+            engine.continue_after_failure(archive, authorization)
+        assert archive.path("state.json").read_bytes() == progress
+    assert replies.sessions == calls
+
+
+def test_between_round_endings_carry_phase_and_unchanged_failure(
+    tmp_path: Path,
+) -> None:
+    from cross_model_runtime.codex_transport import CodexTransportError
+
+    archive, note = _complete_one_round(tmp_path)
+    result = engine.finish(archive, "complete", note)
+    assert (result["phase"], result["failure"], result["continuations"]) == (
+        "between",
+        None,
+        [],
+    )
+    rendered = archive.text("result.md")
+    assert "Saved phase: between." in rendered
+    assert "remains open" not in rendered
+    assert "Pending or failed call: none." in rendered
+
+    (tmp_path / "second").mkdir()
+    archive, source, host = setup_review(tmp_path / "second", limit=2)
+    replies = Replies([[FINDING], [FINDING], "not JSON"])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.query(archive, source, host, replies)
+    engine.begin(archive)
+    with pytest.raises(CodexTransportError):
+        engine.query(archive, source, host, replies)
+    authorization = tmp_path / "continue.md"
+    authorization.write_text("JP: authorize continuation; no extra rounds granted.")
+    engine.continue_after_failure(archive, authorization)
+    result = engine.finish(archive, "exhausted", note)
+    assert (result["phase"], result["failure"]) == ("between", None)
+    assert result["continuations"][0]["failed_call"] == "02-closing"
+    rendered = archive.text("result.md")
+    assert "Saved phase: between." in rendered
+    assert "remains open" not in rendered
+    assert "Failed rounds followed by authorized continuation: 2." in rendered

@@ -356,15 +356,18 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
                 "allowance ending requires no remaining rounds at a between-round boundary",
                 state,
             )
-        failure = state["error"]
-        if outcome == "failed" and state["phase"] not in {"failed", "pending"}:
-            failure = _failure_before_call(archive, state)
-            if failure is None:
-                fail(
-                    "finish review",
-                    "no failed or incomplete call is recorded",
-                    state["phase"],
-                )
+        before_call = _failure_before_call(archive, state)
+        failure = state["error"] if state["error"] is not None else before_call
+        if (
+            outcome == "failed"
+            and state["phase"] not in {"failed", "pending"}
+            and before_call is None
+        ):
+            fail(
+                "finish review",
+                "no failed or incomplete call is recorded",
+                state["phase"],
+            )
         candidate = state["checked"] or state["original"]
         original_reviewer_record = None
         if state["checked_response"] is not None:
@@ -374,6 +377,7 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
             _verify_checked_record(archive, state, original_reviewer_record)
         result = {
             "outcome": outcome,
+            "phase": state["phase"],
             "candidate": str(archive.path(candidate)),
             "candidate_checked": state["checked"] is not None,
             "rounds_used": state["used"],
@@ -395,16 +399,25 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
             label = (
                 "Last checked candidate"
                 if result["candidate_checked"]
-                else "Submitted version; no successful closing check"
+                else "Submitted version; no successful closing check recorded in progress"
             )
             continued = (
                 ", ".join(str(item["after_round"]) for item in state["continuations"])
                 or "none"
             )
+            open_round = (
+                ""
+                if state["phase"] == "between"
+                else f"Round {state['used']} remains open; its closing check is not recorded in progress.\n\n"
+            )
+            call = state["call"]["prefix"] if state["call"] is not None else "none"
             archive.path("result.md").write_text(
                 f"# Review result: {outcome}\n\n"
                 f"{label}: [{candidate}]({archive.path(candidate)})\n\n"
                 f"Rounds started: {state['used']} of {state['limit']}.\n\n"
+                f"Saved phase: {state['phase']}.\n\n"
+                + open_round
+                + f"Pending or failed call: {call}.\n\n"
                 f"Failed rounds followed by authorized continuation: {continued}. These rounds were not refunded.\n\n"
                 f"Original reviewer record for this candidate: {original_reviewer_record}\n\n"
                 f"Latest valid reviewer response: {state['last_response']}\n\n"
