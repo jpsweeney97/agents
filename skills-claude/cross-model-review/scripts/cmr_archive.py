@@ -17,9 +17,18 @@ class ReviewError(Exception):
     """A review operation could not be completed faithfully."""
 
 
-def fail(operation: str, reason: str, got: object) -> NoReturn:
+class RecordError(ReviewError):
+    """A local record could not be written; saved work stays resumable."""
+
+
+def fail(
+    operation: str,
+    reason: str,
+    got: object,
+    error: type[ReviewError] = ReviewError,
+) -> NoReturn:
     """Raise the repository's explicit operation diagnostic."""
-    raise ReviewError(f"{operation} failed: {reason}. Got: {got!r:.100}")
+    raise error(f"{operation} failed: {reason}. Got: {got!r:.100}")
 
 
 def read_text(path: Path) -> str:
@@ -112,7 +121,7 @@ class Archive:
                 stream.flush()
                 os.fsync(stream.fileno())
         except OSError as exc:
-            fail("write record", str(exc), name)
+            fail("write record", str(exc), name, RecordError)
 
     def snapshot_text(self, text: str) -> str:
         """Save exact candidate bytes under their content digest."""
@@ -129,7 +138,7 @@ class Archive:
                     stream.flush()
                     os.fsync(stream.fileno())
         except OSError as exc:
-            fail("save candidate", str(exc), name)
+            fail("save candidate", str(exc), name, RecordError)
         return name
 
     def load(self) -> dict[str, Any]:
@@ -185,7 +194,7 @@ class Archive:
                 temporary = stream.name
             os.replace(temporary, self.root / "state.json")
         except OSError as exc:
-            fail("save progress", str(exc), self.root)
+            fail("save progress", str(exc), self.root, RecordError)
 
     @contextmanager
     def locked(self) -> Iterator[None]:

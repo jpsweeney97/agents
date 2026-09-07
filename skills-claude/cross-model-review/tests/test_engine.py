@@ -664,3 +664,34 @@ def test_diff_marks_missing_final_newlines(
     header = "--- submitted\n+++ checked-candidate\n"
     assert archive.text("changes.diff") == header + expected_hunk
     assert archive.path(archive.load()["checked"]).read_bytes() == candidate.encode()
+
+
+def test_one_time_raw_capture_failure_keeps_call_resumable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import os
+
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING]])
+    engine.begin(archive)
+    original_fsync = os.fsync
+    failures: list[str] = []
+
+    def fail_once(descriptor: int) -> None:
+        if archive.path("01-opening.raw.json").exists() and not failures:
+            failures.append("one transient failure syncing the raw record")
+            raise OSError(failures[0])
+        original_fsync(descriptor)
+
+    with monkeypatch.context() as context:
+        context.setattr(os, "fsync", fail_once)
+        with pytest.raises(ReviewError, match="write record failed"):
+            engine.query(archive, source, host, replies)
+    state = archive.load()
+    assert state["phase"] == "pending"
+    assert state["call"]["prefix"] == "01-opening"
+    assert archive.read("01-opening.raw.json")["exit_code"] == 0
+    resumed = engine.resume(archive)
+    assert (resumed["used"], resumed["phase"]) == (1, "working")
+    assert replies.sessions == [None]

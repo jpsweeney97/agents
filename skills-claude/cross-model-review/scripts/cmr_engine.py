@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from cmr_archive import Archive, ReviewError, fail, read_text
+from cmr_archive import Archive, RecordError, ReviewError, fail, read_text
 from cmr_protocol import invoke, response_schema
 from cross_model_runtime.codex_transport import (
     DEFAULT_TIMEOUT_SECONDS,
@@ -106,7 +106,7 @@ def _record(
 
 
 def _failed(archive: Archive, state: dict[str, Any], error: Exception) -> None:
-    """Record a failed reviewer call; local record failures never reach here."""
+    """Record a failed reviewer call; a RecordError never reaches here."""
     state["phase"] = "failed"
     state["error"] = str(error)
     archive.save(state)
@@ -193,6 +193,8 @@ def query(
         try:
             response, session = invoke(archive, prefix, request, runner)
             _validate(state["call"], response, previous_refs)
+        except RecordError:
+            raise
         except (CodexTransportError, ReviewError) as exc:
             _failed(archive, state, exc)
             raise
@@ -226,6 +228,8 @@ def resume(archive: Archive) -> dict[str, Any]:
         try:
             response, session = invoke(archive, prefix, request, replay=True)
             _validate(call, response, previous_refs)
+        except RecordError:
+            raise
         except (CodexTransportError, ReviewError) as exc:
             _failed(archive, state, exc)
             raise
