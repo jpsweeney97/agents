@@ -4,6 +4,8 @@ Source: [JP-approved design](/Users/jp/Projects/active/cross-model/docs/plans/20
 
 Planning baseline: `/Users/jp/.agents` at `06fd467`, on `chore/cross-model-review-implementation-plan`; cross-model transport inspected at `59e4100`. Only the design approval record and this plan are changed during planning. The file contents below are proposed implementation payloads, not installed or executed code. No separate acceptance map exists for this design.
 
+Execution hold after the [September 7 review](/Users/jp/Projects/active/cross-model/docs/session-reports/2026-09-07-cross-model-review-implementation-plan-review.md): the file-URL dependency must be replaced with the selected freshness fix before execution, and JP must settle the terminal-failure versus authorized-continuation choice. The payloads below have not yet been changed for P1 or P2. The P3-P5 setup and wording fixes are applied.
+
 ## Execution boundaries
 
 The owning repository is `/Users/jp/.agents`. Work on a non-main branch. Preserve unrelated changes; do not pull, merge, push, publish issues, alter global instructions, or install the skill as a side effect of implementation. A later issue request belongs to the library's configured tracker, `jpsweeney97/agents`, after confirming the destination. Cross-model supplies an imported package; none of its Python source or certificate rules is changed by this plan.
@@ -48,11 +50,11 @@ Run the following only after JP authorizes execution. These are inspection and s
 ```bash
 git -C /Users/jp/.agents status --short --branch --untracked-files=all
 git -C /Users/jp/.agents log -1 --oneline
-git -C /Users/jp/.agents switch -c feature/cross-model-review
+git -C /Users/jp/.agents switch -c feature/cross-model-review chore/cross-model-review-implementation-plan
 test ! -e /Users/jp/.agents/skills-claude/cross-model-review
 ```
 
-Expected: the intended planning/design commits are available, the tree is suitable for isolated work, a new working branch is selected, and the proposed skill path does not exist. If the feature branch already exists, inspect it and use its verified state rather than overwriting or deleting it. The paths in this plan name the primary library checkout. If an unrelated working branch is active, establish the correct execution checkout before applying these absolute-path payloads; do not switch its contents underneath another session.
+Expected: the intended planning/design commits are available, the tree is suitable for isolated work, a new working branch is selected, and the proposed skill path does not exist. The feature branch deliberately starts from the named plan branch so the executor retains this unmerged plan. At this repair, that branch differs from main only by this plan document. Verify that remains true before branching; do not implicitly stack unrelated work. If the plan branch has already been merged and retired, verify the plan is present on main and use main as the explicit base instead. No merge is performed by these commands. If the feature branch already exists, inspect it and use its verified state rather than overwriting or deleting it. The paths in this plan name the primary library checkout. If an unrelated working branch is active, establish the correct execution checkout before applying these absolute-path payloads; do not switch its contents underneath another session.
 
 Use `--no-project` for these isolated dependency and test commands so they do not discover or synchronize an unrelated parent project. The exact dependency source is `cross-model-contracts @ file:///Users/jp/Projects/active/cross-model`. Verify import resolution from the library before building on it:
 
@@ -1414,7 +1416,7 @@ Create `/Users/jp/.agents/skills-claude/cross-model-review/SKILL.md` with this c
 ````markdown
 ---
 name: cross-model-review
-description: "Use when the user wants Claude and Codex to review and revise a plan, design, or agent-facing instruction draft. Return a separate candidate with evidence and unresolved disagreements. Do not use for a read-only review, production implementation, or Synapsis answer certification."
+description: "Use when the user wants Claude and Codex to review and revise a plan, design, or agent-facing instruction draft. Return a separate candidate with evidence and unresolved disagreements. Do not use for a critique without revision, production implementation, or Synapsis answer certification."
 ---
 
 # Cross-Model Review
@@ -1425,7 +1427,7 @@ Only operate in a user-visible Claude Code session. Do not launch this workflow 
 
 ## Start
 
-Read the draft, its stated goals and constraints, and relevant repository instructions and decisions. Infer what is available and ask only for material missing information. For pasted text, save a UTF-8 input file in a temporary directory first; do not replace a repository file.
+Read the draft, its stated goals and constraints, and relevant repository instructions and decisions. Infer what is available and ask only for material missing information. For pasted text associated with an existing project, save a UTF-8 input file outside that repository and use the project's actual Git root for `--repo`. If the draft has no associated repository, create a temporary directory containing the pasted file, initialize it with `git init`, and use that directory as `--repo`; keep the saved review outside it. State that the review is grounded in the draft and supplied references rather than an existing project codebase.
 
 Show the submitted file, target repository, maximum rounds, and where the separate candidate and results will be saved. Explain that rounds do not bound total time or spending. Let the user correct inferred choices. Large candidate changes are permitted when grounded in evidence and consistent with the user's goals and explicit constraints; competing user priorities require the user's choice.
 
