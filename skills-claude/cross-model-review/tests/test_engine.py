@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -412,3 +413,43 @@ def test_continuation_does_not_create_more_allowance(tmp_path: Path) -> None:
     assert engine.extend(archive, 1, extra)["limit"] == 3
     assert engine.begin(archive)["used"] == 3
     assert replies.sessions == [None, "review-session", "review-session"]
+
+
+def test_cli_initializes_from_foreign_cwd_without_model_calls(tmp_path: Path) -> None:
+    import subprocess
+
+    repo = tmp_path / "target"
+    repo.mkdir()
+    source = repo / "plan.md"
+    source.write_text("# Plan\n")
+    review_root = tmp_path / "review"
+    script = Path(__file__).resolve().parents[1] / "scripts" / "review.py"
+    initialized = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            "--review",
+            str(review_root),
+            "init",
+            "--repo",
+            str(repo),
+            "--source",
+            str(source),
+        ],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert initialized.returncode == 0, initialized.stderr
+    assert json.loads(initialized.stdout)["used"] == 0
+    begun = subprocess.run(
+        [sys.executable, str(script), "--review", str(review_root), "begin"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert begun.returncode == 0, begun.stderr
+    assert json.loads(begun.stdout)["used"] == 1
+    assert source.read_text() == "# Plan\n"
