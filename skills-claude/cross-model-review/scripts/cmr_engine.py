@@ -200,3 +200,116 @@ def resume(archive: Archive) -> dict[str, Any]:
         except (CodexTransportError, ReviewError) as exc:
             _failed(archive, state, exc)
             raise
+
+
+def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
+    """Render the host's declared ending; do not adjudicate its reasoning."""
+    import difflib
+    import json
+
+    note = read_text(host_note)
+    if outcome not in {"complete", "decision", "exhausted", "failed"}:
+        fail("finish review", "unknown ending", outcome)
+    if not note.strip():
+        fail("finish review", "an evidence and limitations note is required", host_note)
+    with archive.locked():
+        state = archive.load()
+        response = (
+            archive.read(state["last_response"])
+            if state["last_response"] is not None
+            else None
+        )
+        if outcome == "complete":
+            if (
+                state["phase"] != "between"
+                or state["checked"] is None
+                or state["checked_response"]
+                != f"{state['used']:02d}-closing.response.json"
+            ):
+                fail(
+                    "finish review",
+                    "latest round has no successful closing check",
+                    state["phase"],
+                )
+            if any(
+                finding["material"] and finding["disposition"] == "standing"
+                for finding in response["findings"]
+            ):
+                fail(
+                    "finish review",
+                    "reviewer has standing material findings",
+                    state["last_response"],
+                )
+        if outcome == "exhausted" and (
+            state["used"] != state["limit"] or state["phase"] != "between"
+        ):
+            fail(
+                "finish review",
+                "allowance ending requires no remaining rounds at a between-round boundary",
+                state,
+            )
+        if outcome == "failed" and state["phase"] not in {"failed", "pending"}:
+            fail(
+                "finish review",
+                "no failed or incomplete call is recorded",
+                state["phase"],
+            )
+        candidate = state["checked"] or state["original"]
+        original_reviewer_record = (
+            state["checked_response"].removesuffix(".response.json") + ".raw.json"
+            if state["checked_response"] is not None
+            else None
+        )
+        result = {
+            "outcome": outcome,
+            "candidate": str(archive.path(candidate)),
+            "candidate_checked": state["checked"] is not None,
+            "rounds_used": state["used"],
+            "round_limit": state["limit"],
+            "reviewer_record": original_reviewer_record,
+            "latest_response": state["last_response"],
+            "failure": state["error"],
+            "host_note": note,
+            "pending_or_failed_call": state["call"],
+            "continuations": state["continuations"],
+        }
+        diff = "".join(
+            difflib.unified_diff(
+                archive.text(state["original"]).splitlines(keepends=True),
+                archive.text(candidate).splitlines(keepends=True),
+                fromfile="submitted",
+                tofile="checked-candidate",
+            )
+        )
+        try:
+            archive.path("changes.diff").write_text(diff, encoding="utf-8")
+            archive.path("result.json").write_text(
+                json.dumps(result, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            label = (
+                "Last checked candidate"
+                if result["candidate_checked"]
+                else "Submitted version; no successful closing check"
+            )
+            continued = (
+                ", ".join(str(item["after_round"]) for item in state["continuations"])
+                or "none"
+            )
+            archive.path("result.md").write_text(
+                f"# Review result: {outcome}\n\n"
+                f"{label}: [{candidate}]({archive.path(candidate)})\n\n"
+                f"Rounds started: {state['used']} of {state['limit']}.\n\n"
+                f"Failed rounds followed by authorized continuation: {continued}. These rounds were not refunded.\n\n"
+                f"Original reviewer record for this candidate: {original_reviewer_record}\n\n"
+                f"Latest valid reviewer response: {state['last_response']}\n\n"
+                f"Recorded failure: {state['error']}\n\n"
+                f"[Changes from submitted version]({archive.path('changes.diff')})\n\n"
+                "## Host account: changes, evidence, disagreements, and limitations\n\n"
+                + note
+                + "\n\nThis is a review record, not a certificate or adoption.\n",
+                encoding="utf-8",
+            )
+        except OSError as exc:
+            fail("write result", str(exc), archive.root)
+        return result

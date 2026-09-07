@@ -143,3 +143,69 @@ def test_omitted_finding_is_not_withdrawal(tmp_path: Path) -> None:
     assert archive.load()["checked"] is None
     assert archive.load()["used"] == 1
     assert archive.read("01-closing.raw.json")["final_message"]
+
+
+def test_result_preserves_disagreement_and_does_not_invent_completion(
+    tmp_path: Path,
+) -> None:
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING], [FINDING]])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.query(archive, source, host, replies)
+    note = tmp_path / "ending.md"
+    note.write_text(
+        "Claude still holds the local-only concern. Codex requests a constraint change that only JP can authorize; both positions remain open."
+    )
+    with pytest.raises(ReviewError, match="standing material findings"):
+        engine.finish(archive, "complete", note)
+    result = engine.finish(archive, "decision", note)
+    assert result["candidate_checked"] is True
+    assert result["rounds_used"] == 1
+    assert "still holds" in archive.text("result.md")
+    assert "01-closing.raw.json" in archive.text("result.md")
+
+
+def test_resolved_candidate_returns_diff_without_adopting_it(tmp_path: Path) -> None:
+    archive, source, host = setup_review(tmp_path)
+    resolved = dict(
+        FINDING, disposition="resolved", explanation="Remote upload removed."
+    )
+    replies = Replies([[FINDING], [resolved]])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    candidate = tmp_path / "candidate.md"
+    candidate.write_text("Keep data local. Search local files.\n")
+    engine.query(archive, candidate, host, replies)
+    note = tmp_path / "complete.md"
+    note.write_text(
+        "Remote upload removed; local-only goal preserved. No held material concerns or user decisions remain."
+    )
+    result = engine.finish(archive, "complete", note)
+    assert result["candidate_checked"] is True
+    assert "Search local files" in archive.text("changes.diff")
+    assert "Upload all data remotely" in source.read_text()
+    raw = archive.read(result["reviewer_record"])
+    assert json.loads(raw["final_message"])["findings"][0]["disposition"] == "resolved"
+
+
+def test_failure_does_not_return_unchecked_revision_as_checked(tmp_path: Path) -> None:
+    from cross_model_runtime.codex_transport import CodexTransportError
+
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING], [FINDING], "not JSON"])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.query(archive, source, host, replies)
+    checked = archive.load()["checked"]
+    engine.begin(archive)
+    pending = tmp_path / "pending.md"
+    pending.write_text("An unverified replacement.\n")
+    with pytest.raises(CodexTransportError):
+        engine.query(archive, pending, host, replies)
+    note = tmp_path / "failure.md"
+    note.write_text("Round two closing validation failed. Its candidate is unverified.")
+    result = engine.finish(archive, "failed", note)
+    assert result["candidate"] == str(archive.path(checked))
+    assert result["rounds_used"] == 2
+    assert result["reviewer_record"] == "01-closing.raw.json"
