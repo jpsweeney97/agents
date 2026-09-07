@@ -233,3 +233,182 @@ def test_extension_preserves_round_usage_and_review_session(tmp_path: Path) -> N
         "review-session",
         "review-session",
     ]
+
+
+@pytest.mark.parametrize("failure_kind", ("malformed", "omitted", "nonzero"))
+def test_authorized_continuation_preserves_records_and_charges_next_round(
+    tmp_path: Path,
+    failure_kind: str,
+) -> None:
+    from cross_model_runtime.codex_transport import CodexTransportError
+
+    archive, source, host = setup_review(tmp_path)
+    resolved = dict(FINDING, disposition="resolved", explanation="Correction checked.")
+    failure: Any = "not JSON"
+    if failure_kind == "omitted":
+        failure = []
+    elif failure_kind == "nonzero":
+        failure = CodexResult(
+            None, 23, "captured stdout", "process failed", ("controlled",)
+        )
+    replies = Replies([[FINDING], [resolved], failure, [resolved]])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.query(archive, source, host, replies)
+    engine.begin(archive)
+    with pytest.raises((ReviewError, CodexTransportError)):
+        engine.query(archive, source, host, replies)
+    before = archive.load()
+    prefix = before["call"]["prefix"]
+    raw_before = archive.path(f"{prefix}.raw.json").read_bytes()
+    request_before = archive.path(f"{prefix}.request.json").read_bytes()
+    authorization = tmp_path / "continue.md"
+    authorization.write_text(
+        "JP: authorize continuation after the second closing call."
+    )
+
+    after = engine.continue_after_failure(archive, authorization)
+    assert after["phase"] == "between"
+    for key in (
+        "used",
+        "limit",
+        "session",
+        "last_response",
+        "checked",
+        "checked_response",
+    ):
+        assert after[key] == before[key]
+    assert after["continuations"] == [
+        {
+            "after_round": 2,
+            "failed_call": "02-closing",
+            "authorization": authorization.read_text(),
+            "failure": before["error"],
+        }
+    ]
+    assert archive.path(f"{prefix}.raw.json").read_bytes() == raw_before
+    assert archive.path(f"{prefix}.request.json").read_bytes() == request_before
+    assert replies.sessions == [None, "review-session", "review-session"]
+    note = tmp_path / "result-note.md"
+    note.write_text(
+        "The second closing call failed; no new successful check exists yet."
+    )
+    with pytest.raises(
+        ReviewError, match="latest round has no successful closing check"
+    ):
+        engine.finish(archive, "complete", note)
+
+    assert engine.begin(archive)["used"] == 3
+    engine.query(archive, source, host, replies)
+    assert replies.sessions == [
+        None,
+        "review-session",
+        "review-session",
+        "review-session",
+    ]
+    assert archive.read(archive.load()["last_response"])["findings"] == [resolved]
+    note.write_text("The third closing check passed; no held material concerns remain.")
+    result = engine.finish(archive, "complete", note)
+    assert result["rounds_used"] == 3
+    assert result["continuations"] == after["continuations"]
+
+
+@pytest.mark.parametrize(
+    "case",
+    (
+        "opening",
+        "timeout",
+        "missing_raw",
+        "corrupt_raw",
+        "corrupt_request",
+        "missing_candidate",
+        "missing_session",
+        "corrupt_previous",
+        "missing_authorization",
+        "empty_authorization",
+    ),
+)
+def test_continuation_refuses_terminal_or_corrupt_records(
+    tmp_path: Path, case: str
+) -> None:
+    from cross_model_runtime.codex_transport import CodexTransportError
+
+    archive, source, host = setup_review(tmp_path)
+    if case == "opening":
+        replies = Replies(["not JSON"])
+        engine.begin(archive)
+    else:
+        failure: Any = "not JSON"
+        if case == "timeout":
+            failure = CodexTransportError(
+                "review failed: simulated timeout. Got: 'closing'"
+            )
+        replies = Replies([[FINDING], failure])
+        engine.begin(archive)
+        engine.query(archive, source, host, replies)
+    with pytest.raises((ReviewError, CodexTransportError)):
+        engine.query(archive, source, host, replies)
+    state = archive.load()
+    prefix = state["call"]["prefix"]
+    if case == "missing_raw":
+        raw = archive.path(f"{prefix}.raw.json")
+        raw.rename(raw.with_suffix(".retained"))
+    elif case == "corrupt_raw":
+        archive.path(f"{prefix}.raw.json").write_text("{}")
+    elif case == "corrupt_request":
+        archive.path(f"{prefix}.request.json").write_text("{")
+    elif case == "missing_candidate":
+        candidate = archive.path(state["call"]["revision"])
+        candidate.rename(candidate.with_suffix(".retained"))
+    elif case == "missing_session":
+        state["session"] = None
+        archive.save(state)
+    elif case == "corrupt_previous":
+        archive.path(state["last_response"]).write_text("{}")
+    authorization = tmp_path / "authorization.md"
+    authorization.write_text(
+        "JP: authorize continuation if the saved records permit it."
+    )
+    if case == "missing_authorization":
+        authorization.rename(authorization.with_suffix(".retained"))
+    elif case == "empty_authorization":
+        authorization.write_text(" \n")
+    before = archive.path("state.json").read_bytes()
+    attempts = list(replies.sessions)
+    with pytest.raises(ReviewError):
+        engine.continue_after_failure(archive, authorization)
+    assert archive.path("state.json").read_bytes() == before
+    assert archive.load()["phase"] == "failed"
+    assert archive.load()["continuations"] == []
+    assert replies.sessions == attempts
+
+
+def test_continuation_does_not_create_more_allowance(tmp_path: Path) -> None:
+    from cross_model_runtime.codex_transport import CodexTransportError
+
+    archive, source, host = setup_review(tmp_path, limit=2)
+    replies = Replies([[FINDING], [FINDING], "not JSON"])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.query(archive, source, host, replies)
+    engine.begin(archive)
+    with pytest.raises(CodexTransportError):
+        engine.query(archive, source, host, replies)
+    authorization = tmp_path / "continue.md"
+    authorization.write_text("JP: authorize continuation; no extra rounds granted yet.")
+    state = engine.continue_after_failure(archive, authorization)
+    assert (state["used"], state["limit"]) == (2, 2)
+    with pytest.raises(ReviewError, match="no rounds remain"):
+        engine.begin(archive)
+    note = tmp_path / "ending.md"
+    note.write_text(
+        "Round two failed. Round one's checked candidate still has F1; no allowance remains."
+    )
+    result = engine.finish(archive, "exhausted", note)
+    assert result["reviewer_record"] == "01-closing.raw.json"
+    assert result["continuations"][0]["failed_call"] == "02-closing"
+    extra = tmp_path / "extra.md"
+    extra.write_text("JP: authorize one additional round.")
+    assert engine.extend(archive, 1, extra)["limit"] == 3
+    assert engine.begin(archive)["used"] == 3
+    assert replies.sessions == [None, "review-session", "review-session"]

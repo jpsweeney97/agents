@@ -342,3 +342,109 @@ def extend(archive: Archive, extra: int, authorization: Path) -> dict[str, Any]:
         )
         archive.save(state)
         return state
+
+
+def continue_after_failure(archive: Archive, authorization: Path) -> dict[str, Any]:
+    """Record authorized continuation; never call a model or refund a round.
+
+    Args:
+        archive: Existing records for the review that failed.
+        authorization: JP's explicit authorization for this failed call.
+
+    Returns:
+        A between-round boundary with unchanged allowance, usage, and session.
+    """
+    from cross_model_contracts.schema_validation import schema_violations
+
+    permission = read_text(authorization)
+    if not permission.strip():
+        fail(
+            "continue review", "explicit authorization text is required", authorization
+        )
+    with archive.locked():
+        state = archive.load()
+        call = state["call"]
+        if (
+            state["phase"] != "failed"
+            or not isinstance(call, dict)
+            or call.get("kind") != "closing"
+        ):
+            fail("continue review", "requires a failed closing call", state["phase"])
+        prefix = call.get("prefix")
+        revision = call.get("revision")
+        if prefix != f"{state['used']:02d}-closing" or not isinstance(revision, str):
+            fail("continue review", "failed call record is inconsistent", call)
+        session = state["session"]
+        if not isinstance(session, str) or not session.strip():
+            fail("continue review", "no session id is recorded", session)
+
+        # Read the outer captured result, not the rejected message's JSON or reason.
+        raw = archive.read(f"{prefix}.raw.json")
+        required = {"final_message", "exit_code", "stdout", "stderr", "argv"}
+        if (
+            not required <= raw.keys()
+            or type(raw["exit_code"]) is not int
+            or not isinstance(raw["stdout"], str)
+            or not isinstance(raw["stderr"], str)
+            or not isinstance(raw["argv"], list)
+            or not all(isinstance(arg, str) for arg in raw["argv"])
+            or (
+                raw["final_message"] is not None
+                and not isinstance(raw["final_message"], str)
+            )
+        ):
+            fail("continue review", "captured raw record is corrupt", prefix)
+        request = archive.read(f"{prefix}.request.json")
+        if (
+            request.get("session") != session
+            or request.get("revision") != revision
+            or request.get("repo") != state["repo"]
+            or not isinstance(request.get("prompt"), str)
+            or not isinstance(request.get("host_text"), str)
+            or request.get("schema") != response_schema(revision)
+        ):
+            fail("continue review", "saved request is inconsistent", prefix)
+        archive.text(revision)
+        previous_name = state["last_response"]
+        if not isinstance(previous_name, str):
+            fail("continue review", "last valid response is missing", previous_name)
+        previous = archive.read(previous_name)
+        previous_revision = previous.get("revision")
+        if not isinstance(previous_revision, str) or schema_violations(
+            response_schema(previous_revision), previous
+        ):
+            fail(
+                "continue review",
+                "last valid response record is corrupt",
+                previous_name,
+            )
+        archive.text(previous_revision)
+        if state["checked"] is not None and (
+            state["checked_response"] != previous_name
+            or state["checked"] != previous_revision
+        ):
+            fail(
+                "continue review",
+                "checked candidate record is inconsistent",
+                state["checked"],
+            )
+        if state["checked"] is None and state["checked_response"] is not None:
+            fail(
+                "continue review",
+                "checked candidate identity is missing",
+                state["checked_response"],
+            )
+
+        state["continuations"].append(
+            {
+                "after_round": state["used"],
+                "failed_call": prefix,
+                "authorization": permission,
+                "failure": state["error"],
+            }
+        )
+        state["phase"] = "between"
+        state["call"] = None
+        state["error"] = None
+        archive.save(state)
+        return state
