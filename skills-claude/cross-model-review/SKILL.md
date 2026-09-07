@@ -19,7 +19,7 @@ The helper is `/Users/jp/.agents/skills-claude/cross-model-review/scripts/review
 
 Create each review under `~/.cross-model-review/reviews/` in a new timestamped directory. Supply the actual Git repository root as `init --repo`, obtained by `git rev-parse --show-toplevel` in the target. The helper does not write the submitted file or run the implementation described by it.
 
-Before the first `review` command, read `/Users/jp/Projects/active/cross-model/docs/choreography/run-lifecycle.md` for the transport compatibility requirement and verify that the installed Codex CLI version has the required physical compatibility evidence. Complete the existing compatibility procedure before transport if it is owed. Do not import Synapsis's certificate choreography or move accounting. The latest known planning-time gap was 0.153.2 installed versus 0.153.0 recorded; inspect current state rather than reusing those versions as current truth.
+Before the first `review` command, read `/Users/jp/Projects/active/cross-model/docs/choreography/run-lifecycle.md` for the transport compatibility requirement and verify that the installed Codex CLI version has the required physical compatibility evidence. Complete the existing compatibility procedure before transport if it is owed. Do not import Synapsis's certificate choreography or move accounting.
 
 Read [reviewer instructions](references/reviewer.md) before composing the first host request. The helper includes those instructions in each Codex request. Host requests must state goals, explicit constraints, evidence, changes, challenges, and any material concern you still hold, including one Codex declined to raise. Save the actual request text; do not impersonate Codex or rewrite its recorded words.
 
