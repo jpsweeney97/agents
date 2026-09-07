@@ -564,3 +564,48 @@ def test_resume_survives_its_own_one_time_save_failure(
     assert state["call"]["prefix"] == "01-opening"
     assert engine.resume(archive)["phase"] == "working"
     assert replies.sessions == [None]
+
+
+def _complete_one_round(tmp_path: Path) -> tuple[Archive, Path]:
+    archive, source, host = setup_review(tmp_path)
+    resolved = dict(FINDING, disposition="resolved", explanation="Upload removed.")
+    replies = Replies([[FINDING], [resolved]])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.query(archive, source, host, replies)
+    note = tmp_path / "note.md"
+    note.write_text("Upload removed; no held concerns or user decisions remain.")
+    return archive, note
+
+
+def test_finish_refuses_when_checked_reviewer_record_is_missing(
+    tmp_path: Path,
+) -> None:
+    archive, note = _complete_one_round(tmp_path)
+    raw = archive.path("01-closing.raw.json")
+    raw.rename(raw.with_suffix(".aside"))
+    for outcome in ("complete", "decision"):
+        with pytest.raises(ReviewError, match="reviewer record .* is missing"):
+            engine.finish(archive, outcome, note)
+    assert not archive.path("result.json").exists()
+    raw.with_suffix(".aside").rename(raw)
+    result = engine.finish(archive, "complete", note)
+    assert result["reviewer_record"] == "01-closing.raw.json"
+    assert archive.path(result["reviewer_record"]).is_file()
+
+
+def test_finish_refuses_when_reviewer_record_disagrees_with_response(
+    tmp_path: Path,
+) -> None:
+    archive, note = _complete_one_round(tmp_path)
+    raw = archive.path("01-closing.raw.json")
+    record = json.loads(raw.read_text())
+    reply = json.loads(record["final_message"])
+    reply["review_notes"] = "Edited after the fact."
+    record["final_message"] = json.dumps(reply)
+    raw.write_text(json.dumps(record))
+    with pytest.raises(ReviewError, match="reviewer record disagrees"):
+        engine.finish(archive, "complete", note)
+    raw.write_text("not json")
+    with pytest.raises(ReviewError, match="read record failed"):
+        engine.finish(archive, "complete", note)

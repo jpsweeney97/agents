@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import difflib
+import json
 from pathlib import Path
 from typing import Any
 
@@ -230,11 +232,38 @@ def resume(archive: Archive) -> dict[str, Any]:
         return _record(archive, state, response, session)
 
 
+def _verify_checked_record(
+    archive: Archive, state: dict[str, Any], raw_name: str
+) -> None:
+    """Require the checked candidate's raw reviewer reply to exist and match.
+
+    The reply is compared the way the transport derived it: the captured
+    final message parsed as JSON must equal the accepted response, and that
+    response must name the checked candidate. Nothing is reconstructed.
+    """
+    if not archive.path(raw_name).is_file():
+        fail(
+            "finish review",
+            "reviewer record for the checked candidate is missing",
+            raw_name,
+        )
+    raw = archive.read(raw_name)
+    accepted = archive.read(state["checked_response"])
+    final_message = raw.get("final_message")
+    try:
+        replied = json.loads(final_message) if isinstance(final_message, str) else None
+    except json.JSONDecodeError:
+        replied = None
+    if replied != accepted or accepted.get("revision") != state["checked"]:
+        fail(
+            "finish review",
+            "reviewer record disagrees with the accepted response",
+            raw_name,
+        )
+
+
 def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
     """Render the host's declared ending; do not adjudicate its reasoning."""
-    import difflib
-    import json
-
     note = read_text(host_note)
     if outcome not in {"complete", "decision", "exhausted", "failed"}:
         fail("finish review", "unknown ending", outcome)
@@ -283,11 +312,12 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
                 state["phase"],
             )
         candidate = state["checked"] or state["original"]
-        original_reviewer_record = (
-            state["checked_response"].removesuffix(".response.json") + ".raw.json"
-            if state["checked_response"] is not None
-            else None
-        )
+        original_reviewer_record = None
+        if state["checked_response"] is not None:
+            original_reviewer_record = (
+                state["checked_response"].removesuffix(".response.json") + ".raw.json"
+            )
+            _verify_checked_record(archive, state, original_reviewer_record)
         result = {
             "outcome": outcome,
             "candidate": str(archive.path(candidate)),
