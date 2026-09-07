@@ -169,3 +169,34 @@ def query(
         except (CodexTransportError, ReviewError) as exc:
             _failed(archive, state, exc)
             raise
+
+
+def resume(archive: Archive) -> dict[str, Any]:
+    """Continue only from saved records; this operation never calls a model."""
+    with archive.locked():
+        state = archive.load()
+        if state["phase"] == "failed":
+            fail(
+                "resume review",
+                "recorded failure needs a user decision",
+                state["error"],
+            )
+        if state["phase"] != "pending":
+            return state
+        call = state["call"]
+        if not isinstance(call, dict):
+            fail("resume review", "pending call identity is missing", call)
+        prefix = call["prefix"]
+        if not archive.path(f"{prefix}.raw.json").is_file():
+            fail(
+                "resume review",
+                "reviewer response is missing; no automatic retry",
+                prefix,
+            )
+        try:
+            request = archive.read(f"{prefix}.request.json")
+            response, session = invoke(archive, prefix, request, replay=True)
+            return _accept(archive, state, response, session)
+        except (CodexTransportError, ReviewError) as exc:
+            _failed(archive, state, exc)
+            raise
