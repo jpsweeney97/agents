@@ -695,3 +695,14 @@ def test_one_time_raw_capture_failure_keeps_call_resumable(
     resumed = engine.resume(archive)
     assert (resumed["used"], resumed["phase"]) == (1, "working")
     assert replies.sessions == [None]
+
+
+def test_finish_refuses_when_reviewer_record_fails_replay(tmp_path: Path) -> None:
+    archive, note = _complete_one_round(tmp_path)
+    raw = archive.path("01-closing.raw.json")
+    record = json.loads(raw.read_text())
+    record["exit_code"] = 23
+    raw.write_text(json.dumps(record))
+    with pytest.raises(ReviewError, match="failed replay validation"):
+        engine.finish(archive, "complete", note)
+    assert not archive.path("result.json").exists()

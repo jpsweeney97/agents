@@ -263,11 +263,11 @@ def _unified_diff(original: str, candidate: str) -> str:
 def _verify_checked_record(
     archive: Archive, state: dict[str, Any], raw_name: str
 ) -> None:
-    """Require the checked candidate's raw reviewer reply to exist and match.
+    """Require the checked candidate's raw reviewer reply to replay and match.
 
-    The reply is compared the way the transport derived it: the captured
-    final message parsed as JSON must equal the accepted response, and that
-    response must name the checked candidate. Nothing is reconstructed.
+    The captured reply is re-validated through the transport's own replay
+    path (exit status, JSON, schema) and must equal the accepted response
+    naming the checked candidate. Nothing is reconstructed.
     """
     if not archive.path(raw_name).is_file():
         fail(
@@ -275,13 +275,13 @@ def _verify_checked_record(
             "reviewer record for the checked candidate is missing",
             raw_name,
         )
-    raw = archive.read(raw_name)
+    prefix = raw_name.removesuffix(".raw.json")
     accepted = archive.read(state["checked_response"])
-    final_message = raw.get("final_message")
     try:
-        replied = json.loads(final_message) if isinstance(final_message, str) else None
-    except json.JSONDecodeError:
-        replied = None
+        request = archive.read(f"{prefix}.request.json")
+        replied, _session = invoke(archive, prefix, request, replay=True)
+    except (CodexTransportError, ReviewError) as exc:
+        fail("finish review", "reviewer record failed replay validation", str(exc))
     if replied != accepted or accepted.get("revision") != state["checked"]:
         fail(
             "finish review",
