@@ -453,3 +453,114 @@ def test_cli_initializes_from_foreign_cwd_without_model_calls(tmp_path: Path) ->
     assert begun.returncode == 0, begun.stderr
     assert json.loads(begun.stdout)["used"] == 1
     assert source.read_text() == "# Plan\n"
+
+
+def test_one_time_progress_save_failure_keeps_call_resumable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import os
+
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING]])
+    engine.begin(archive)
+    original_replace = os.replace
+    failures: list[str] = []
+
+    def fail_once(src: str, dst: Path) -> None:
+        if archive.path("01-opening.raw.json").exists() and not failures:
+            failures.append("one transient failure writing progress")
+            raise OSError(failures[0])
+        original_replace(src, dst)
+
+    with monkeypatch.context() as context:
+        context.setattr(os, "replace", fail_once)
+        with pytest.raises(ReviewError, match="save progress failed"):
+            engine.query(archive, source, host, replies)
+    state = archive.load()
+    assert state["phase"] == "pending"
+    assert state["call"]["prefix"] == "01-opening"
+    assert archive.read("01-opening.response.json")["revision"] == state["original"]
+    resumed = engine.resume(archive)
+    assert (resumed["used"], resumed["phase"]) == (1, "working")
+    assert resumed["session"] == "review-session"
+    assert replies.sessions == [None]
+
+
+def test_one_time_response_write_failure_keeps_call_resumable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive, source, host = setup_review(tmp_path)
+    resolved = dict(FINDING, disposition="resolved", explanation="Upload removed.")
+    replies = Replies([[FINDING], [resolved]])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    original_write = Archive.write
+    failures: list[str] = []
+
+    def fail_once(self: Archive, name: str, value: dict[str, Any]) -> None:
+        if name.endswith(".response.json") and not failures:
+            failures.append(name)
+            raise ReviewError(
+                f"write record failed: one transient failure. Got: {name!r}"
+            )
+        original_write(self, name, value)
+
+    with monkeypatch.context() as context:
+        context.setattr(Archive, "write", fail_once)
+        with pytest.raises(ReviewError, match="write record failed"):
+            engine.query(archive, source, host, replies)
+    state = archive.load()
+    assert state["phase"] == "pending"
+    assert state["call"]["prefix"] == "01-closing"
+    assert state["checked"] is None
+    assert not archive.path("01-closing.response.json").exists()
+    assert archive.read("01-closing.raw.json")["final_message"]
+    resumed = engine.resume(archive)
+    assert resumed["phase"] == "between"
+    assert resumed["checked_response"] == "01-closing.response.json"
+    note = tmp_path / "complete.md"
+    note.write_text("Upload removed; no held concerns or user decisions remain.")
+    assert engine.finish(archive, "complete", note)["candidate_checked"] is True
+    assert replies.sessions == [None, "review-session"]
+
+
+def test_resume_survives_its_own_one_time_save_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import os
+
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING]])
+    engine.begin(archive)
+    original_replace = os.replace
+
+    def fail_after_capture(src: str, dst: Path) -> None:
+        if archive.path("01-opening.raw.json").exists():
+            raise OSError("persistent failure writing progress")
+        original_replace(src, dst)
+
+    with monkeypatch.context() as context:
+        context.setattr(os, "replace", fail_after_capture)
+        with pytest.raises(ReviewError, match="save progress failed"):
+            engine.query(archive, source, host, replies)
+    assert archive.load()["phase"] == "pending"
+    failures: list[str] = []
+
+    def fail_once(src: str, dst: Path) -> None:
+        if not failures:
+            failures.append("one transient failure during resume")
+            raise OSError(failures[0])
+        original_replace(src, dst)
+
+    with monkeypatch.context() as context:
+        context.setattr(os, "replace", fail_once)
+        with pytest.raises(ReviewError, match="save progress failed"):
+            engine.resume(archive)
+    state = archive.load()
+    assert state["phase"] == "pending"
+    assert state["call"]["prefix"] == "01-opening"
+    assert engine.resume(archive)["phase"] == "working"
+    assert replies.sessions == [None]

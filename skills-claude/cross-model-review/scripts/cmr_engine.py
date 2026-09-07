@@ -34,14 +34,23 @@ def begin(archive: Archive) -> dict[str, Any]:
         return state
 
 
-def _accept(
-    archive: Archive,
-    state: dict[str, Any],
+def _previous_refs(archive: Archive, state: dict[str, Any]) -> set[str]:
+    """Collect finding references from the last valid reviewer response."""
+    if state["last_response"] is None:
+        return set()
+    return {item["ref"] for item in archive.read(state["last_response"])["findings"]}
+
+
+def _validate(
+    call: dict[str, Any],
     response: dict[str, Any],
-    session: str,
-) -> dict[str, Any]:
-    call = state["call"]
-    archive.text(call["revision"])
+    previous_refs: set[str],
+) -> None:
+    """Reject a reviewer reply that misnames the candidate or drops findings.
+
+    Every failure here originates in the reviewer's reply, so callers record
+    it as a failed call. Local record problems belong to ``_record``.
+    """
     if response["revision"] != call["revision"]:
         fail(
             "record response",
@@ -51,15 +60,29 @@ def _accept(
     refs = [finding["ref"] for finding in response["findings"]]
     if len(refs) != len(set(refs)):
         fail("record response", "duplicate finding references", refs)
-    if state["last_response"] is not None:
-        previous = archive.read(state["last_response"])
-        missing = {item["ref"] for item in previous["findings"]} - set(refs)
-        if missing:
-            fail(
-                "record response",
-                "cumulative response omitted findings",
-                sorted(missing),
-            )
+    missing = previous_refs - set(refs)
+    if missing:
+        fail(
+            "record response",
+            "cumulative response omitted findings",
+            sorted(missing),
+        )
+
+
+def _record(
+    archive: Archive,
+    state: dict[str, Any],
+    response: dict[str, Any],
+    session: str,
+) -> dict[str, Any]:
+    """Persist a validated reply; a local failure here leaves the call pending.
+
+    The response record is written before progress, so a failed write or a
+    failed progress save leaves the raw reply and the pending call in place
+    for ``resume`` to replay without another model call.
+    """
+    call = state["call"]
+    archive.text(call["revision"])
     name = f"{call['prefix']}.response.json"
     if archive.path(name).exists():
         if archive.read(name) != response:
@@ -81,6 +104,7 @@ def _accept(
 
 
 def _failed(archive: Archive, state: dict[str, Any], error: Exception) -> None:
+    """Record a failed reviewer call; local record failures never reach here."""
     state["phase"] = "failed"
     state["error"] = str(error)
     archive.save(state)
@@ -139,6 +163,7 @@ def query(
             if state["last_response"] is not None
             else "No prior formal findings."
         )
+        previous_refs = _previous_refs(archive, state)
         prompt = (
             reviewer_text
             + f"\n\nCall: {kind}. Round: {state['used']} of {state['limit']}."
@@ -165,10 +190,11 @@ def query(
         archive.save(state)
         try:
             response, session = invoke(archive, prefix, request, runner)
-            return _accept(archive, state, response, session)
+            _validate(state["call"], response, previous_refs)
         except (CodexTransportError, ReviewError) as exc:
             _failed(archive, state, exc)
             raise
+        return _record(archive, state, response, session)
 
 
 def resume(archive: Archive) -> dict[str, Any]:
@@ -193,13 +219,15 @@ def resume(archive: Archive) -> dict[str, Any]:
                 "reviewer response is missing; no automatic retry",
                 prefix,
             )
+        request = archive.read(f"{prefix}.request.json")
+        previous_refs = _previous_refs(archive, state)
         try:
-            request = archive.read(f"{prefix}.request.json")
             response, session = invoke(archive, prefix, request, replay=True)
-            return _accept(archive, state, response, session)
+            _validate(call, response, previous_refs)
         except (CodexTransportError, ReviewError) as exc:
             _failed(archive, state, exc)
             raise
+        return _record(archive, state, response, session)
 
 
 def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
