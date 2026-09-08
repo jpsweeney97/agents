@@ -1,0 +1,7 @@
+interface:
+  display_name: "Plain Language"
+  short_description: "Rewrite the last answer and keep later replies plain"
+  default_prompt: "Use $plain-language to rewrite your previous answer in full and in brief, then keep subsequent replies in plain language."
+
+policy:
+  allow_implicit_invocation: false
