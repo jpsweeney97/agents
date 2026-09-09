@@ -122,7 +122,8 @@ Proof boundaries:
 
 ## Git And Cleanup
 
-- Do file-changing work on a working branch (`chore/`, `fix/`, `feature/`) and land it on `main` with a fast-forward merge; a Claude Code user-level hook enforces this by blocking edits on `main`.
+- Before creating a branch or editing files under `skills/<skill>/`, `skills-claude/<skill>/`, or `plugins/<plugin>/`, follow [worktree-task-cycle](plugins/git-cycle/skills/worktree-task-cycle/SKILL.md). Use an existing permanent worktree under `../.agents-worktrees/`, with `main` as the base, and keep the primary checkout on `main`. Follow the skill through completion and cleanup.
+- Do file-changing work on a working branch (`chore/`, `fix/`, `feature/`) and land it on `main` with a fast-forward merge.
 - Protected-branch floor (this repo): never commit on the default branch or a protected branch. Treat repo-defined protected branches first; if the repo defines none, treat `main`, `master`, `develop`, and `release/*` as protected. This always-loaded floor governs work in this repo only; it does not travel to other repositories, where the `git-cycle` skills carry their own inline copy.
 - Review `git diff --stat` and the relevant diff before staging or committing.
 - For completed, focused, file-changing work, create a local commit by default after focused verification — unless the user asked not to commit, the turn was review-only or exploratory, validation is failing or blocked, the work is incomplete, or unrelated dirty files make safe staging ambiguous.
