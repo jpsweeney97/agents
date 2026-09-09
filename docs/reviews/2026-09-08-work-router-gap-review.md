@@ -102,7 +102,7 @@ All in `skills/work-router/SKILL.md`; one-line edits unless noted. Apply through
 4. Line 28: "If the item is missing or under-named, ask one narrow question. Route to `outcome-shaping` only when the vagueness is a still-muddy want, not a missing target." (C4)
 5. Line 86: "…decide whether the change is already pinned to specific interface elements (`contract-change-propagation` maps its blast radius) or is still an opportunity to survey (`improve-codebase-architecture`)." (C4)
 6. Line 100 (after decision 3): "Adversarial review of one skill's contract is `scrutinize-skill`; a library-wide inventory audit has no owning lane — say so and name the closest per-skill route; this skill does not audit the library." (C4)
-7. Step 2 sentence per decisions 1–2 (C1). 
+7. Step 2 sentence per decisions 1–2 (C1).
 8. Line 24 rewrite plus step 6 re-scope per decision 4 (C5). Under (b): "When the user pairs an explicit invocation with a routing check, render the route note; if it confirms the invoked skill, say so and let the invocation proceed; if it names a different lane or a risk, stop and ask." and, at line 33, "Do not run the downstream skill on the strength of the note."
 
 Total: 8 items.
