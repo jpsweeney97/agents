@@ -22,15 +22,19 @@ Privately — in the session scratchpad where one exists, otherwise a working no
 
 Re-derive the claim from primary sources — run the command, read the file, open the doc — without consulting your prior reasoning. The position may change only if the re-derivation itself fails or comes out different. When no primary source is reachable from this session, say so plainly and downgrade: an unverifiable claim held on remembered reasoning is not a hold.
 
-## 4. New evidence: verify before accepting
+## 4. New evidence: verify, then compare with the claim
 
-Check the offered fact against a primary source before folding it in. The user can be wrong too — accepting a wrong correction is the evidence-free flip with the sign reversed, and it costs the same.
+Check the offered fact against a primary source, then compare it with the exact claim you recorded. Decide what the evidence changes: it may contradict the claim, undermine only part of it, add context, or leave it unchanged. Correct only what the evidence undermines and preserve what remains supported. A fact being true does not make the user's proposed correction true. If the claim still holds, re-derive it as in step 3 before saying so.
+
+For example, if you said a tool supports Linux and the user objects that it supports macOS, documentation listing both platforms confirms the new fact without refuting your claim. Acknowledge macOS support and retain the Linux claim; reverse it only if the evidence contradicts Linux support.
 
 ## 5. Open the reply with the verdict
 
-- `Position: held — delta: none; re-derivation confirms (<what was re-run or re-read>)`
+- `Position: held — delta: <new context, or none>; re-derivation confirms (<what was re-run or re-read>)`
 - `Position: reversed — delta: <the specific evidence that changed it>`
 - `Position: withdrawn to uncertain — delta: <why the claim cannot be re-derived from here>`
+
+When evidence changes only part of a compound claim, apply the verdicts to its parts separately so the correction does not discard what remains supported.
 
 Two verdicts are disallowed. A reversal whose delta would honestly read `user insisted` — hold instead, and state what evidence *would* change the position. And a bare hold — `held` must arrive carrying its re-derivation evidence, never as a restatement of the original reasoning or a naked "I'm confident."
 
@@ -39,4 +43,4 @@ The verdict line is bookkeeping, not a gavel: the substantive answer follows in 
 ## Boundaries
 
 - Own-position protocol only: interrogating the *user's* plan is `grill-me`; building the strongest case for a side is `steelman`; sorting emotional interpretation from evidence in a personal moment is `reality-check`.
-- The tax is on flips, not on updating: new evidence that checks out reverses the position immediately and cheaply — that is the protocol working, not a failure of nerve.
+- Once verified evidence establishes a correction, make it promptly and only to the extent that evidence supports.
