@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hold or Fold"
+  short_description: "Recheck your challenged claims against evidence"
+  default_prompt: "Use $hold-or-fold to recheck the factual claim I challenged against primary evidence and correct only what that evidence undermines."
