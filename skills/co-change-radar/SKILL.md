@@ -11,18 +11,18 @@ Invocation: `/co-change-radar` or `$co-change-radar`; also fires unprompted befo
 
 ## 1. Mine the partners
 
-1. Take the file's recent history: `git log -n 30 --format='%H' --name-only -- <file>`.
+1. Take the file's recent commits and their complete file lists: `git log -n 30 --format='%H' --name-only --full-diff -- <file>`. The path selects commits; `--full-diff` keeps the other changed paths visible for pruning and counting.
 2. Prune bulk commits before counting — a commit touching more than ~20 files is a refactor sweep, a format pass, or lockfile churn, and its co-occurrences are noise, not habit. Say how many were pruned.
 3. Count co-occurrences across the surviving commits. Flag a partner when it co-changed in **≥40% of those commits and at least 3 times**. Tune the gate when the repo's evidence warrants, but never remove it: an ungated partner list decays the radar into ceremony on every edit.
 4. When fewer than ~5 focused commits touch the file — young file, shallow clone, squash-heavy history — say so, fall back to naming likely partners from reading the tree, and mark the result as derived from that weaker basis. Never slide silently from "history is thin" to "no check".
 
 ## 2. Disposition every flagged partner — mandatory
 
-For each flagged partner absent from the current diff, either touch it or state in one line why this particular change genuinely does not need it:
+For each flagged partner absent from the current diff, either update it within the authorized scope, explain in one line why this particular change does not need it, or report it as needed but unresolved with the reason it remains open (for example, deferred, blocked, or outside scope). A check-only invocation reports needed changes without making them:
 
 ```text
 Co-change partners of src/routes.py (12 focused commits kept, 3 bulk pruned):
-  docs/api.md                 10/12  in diff? no  — GAP: every param change updated the table; updating now
+  docs/api.md                 10/12  in diff? no  — needed but unresolved: param table needs updating; user deferred docs changes
   tests/fixtures/routes.json   8/12  in diff? no  — not needed: internal rename, response shape unchanged
   src/schema.py                6/12  in diff? yes
 ```
@@ -33,4 +33,4 @@ Before declaring a multi-file change complete, re-run the check against the full
 
 - Edit-time, not add-time: adding another instance of a category the repo already has draws on the siblings' add-commits — that is `add-an-x-by-example`. Same evidence source, different question: it asks what adding an X requires; this asks what moves with a file you are changing.
 - No interface required: mapping the consumers of a declared interface change — API, function signature, schema, config key, event payload — is `contract-change-propagation`. This fires on ordinary edits and finds the coupling that has no interface at all.
-- A radar, not a verdict: the output is the partner table and its dispositions. It orders no work and blocks nothing; a partner honestly dispositioned as not-needed is a pass, not an override.
+- A radar, not a verdict: the output is the partner table and its dispositions. It neither authorizes additional edits nor decides whether the overall task is complete. Reporting a needed but unresolved partner satisfies this check's disclosure requirement without resolving that work.
