@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fence Archaeology"
+  short_description: "Find why a rule or safeguard exists before removal"
+  default_prompt: "Use $fence-archaeology to investigate why this code or rule exists and whether that reason still applies before removing it."

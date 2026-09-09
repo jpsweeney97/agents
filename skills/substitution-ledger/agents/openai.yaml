@@ -1,0 +1,4 @@
+interface:
+  display_name: "Substitution Ledger"
+  short_description: "Track differences between requested and delivered work"
+  default_prompt: "Use $substitution-ledger to record any reduction in the requested deliverable and resolve or disclose each one before finishing."

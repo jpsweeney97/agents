@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Capture"
+  short_description: "Save existing research with sources and open questions"
+  default_prompt: "Use $research-capture to save these research findings with source attribution, a freshness date, and open questions."

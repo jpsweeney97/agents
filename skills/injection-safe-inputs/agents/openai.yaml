@@ -1,0 +1,4 @@
+interface:
+  display_name: "Injection-Safe Inputs"
+  short_description: "Defend untrusted inputs at each operation they reach"
+  default_prompt: "Use $injection-safe-inputs to trace this untrusted input, choose defenses for each operation it reaches, and define allowed and blocked test cases."

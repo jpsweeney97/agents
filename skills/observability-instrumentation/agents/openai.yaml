@@ -1,0 +1,4 @@
+interface:
+  display_name: "Observability Instrumentation"
+  short_description: "Add useful logs, metrics, traces, and alerts"
+  default_prompt: "Use $observability-instrumentation to identify the operational questions this service needs to answer and add suitable logs, metrics, traces, and alerts."

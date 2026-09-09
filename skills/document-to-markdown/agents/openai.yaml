@@ -1,0 +1,4 @@
+interface:
+  display_name: "Document to Markdown"
+  short_description: "Convert document contents to Markdown locally"
+  default_prompt: "Use $document-to-markdown to convert this document to Markdown locally so I can read its contents."

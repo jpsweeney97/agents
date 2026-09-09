@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deploy Plan"
+  short_description: "Plan rollout checks and criteria for stopping"
+  default_prompt: "Use $deploy-plan to assess this rollout and define checks, observation time, and criteria for stopping without executing a deployment."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Decision Flip"
+  short_description: "Find which uncertain estimate changes the conclusion"
+  default_prompt: "Use $decision-flip to test whether changing one estimate within its justified range would reverse this conclusion."

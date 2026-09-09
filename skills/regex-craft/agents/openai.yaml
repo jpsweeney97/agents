@@ -1,0 +1,4 @@
+interface:
+  display_name: "Regex Craft"
+  short_description: "Check a regex for correctness and slow backtracking"
+  default_prompt: "Use $regex-craft to check this regex in its actual engine and verify correctness and backtracking behavior with executed cases."

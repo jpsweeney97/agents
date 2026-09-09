@@ -1,0 +1,4 @@
+interface:
+  display_name: "Outcome Check"
+  short_description: "Check whether a shipped change achieved its goal"
+  default_prompt: "Use $outcome-check to assess whether this shipped change achieved its original goal using available real-world evidence."

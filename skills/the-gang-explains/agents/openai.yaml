@@ -1,0 +1,4 @@
+interface:
+  display_name: "The Gang Explains"
+  short_description: "Explain a concept as an Always Sunny scene"
+  default_prompt: "Use $the-gang-explains to explain this concept through an It's Always Sunny in Philadelphia scene."

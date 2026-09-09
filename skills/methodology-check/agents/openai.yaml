@@ -1,0 +1,4 @@
+interface:
+  display_name: "Methodology Check"
+  short_description: "Assess a skill's method and evidence of real use"
+  default_prompt: "Use $methodology-check to assess this skill's method from its text and available usage records in one read-only pass."

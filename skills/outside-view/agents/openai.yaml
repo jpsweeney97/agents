@@ -1,0 +1,4 @@
+interface:
+  display_name: "Outside View"
+  short_description: "Ground estimates in comparable past attempts"
+  default_prompt: "Use $outside-view to ground this estimate in comparable past attempts and explain the evidence for any adjustments."

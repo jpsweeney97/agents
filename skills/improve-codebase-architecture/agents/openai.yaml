@@ -1,0 +1,4 @@
+interface:
+  display_name: "Improve Codebase Architecture"
+  short_description: "Find refactors that simplify module interfaces"
+  default_prompt: "Use $improve-codebase-architecture to find opportunities for simpler module interfaces and produce an HTML report without implementing refactors."

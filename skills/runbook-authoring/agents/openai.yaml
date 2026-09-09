@@ -1,0 +1,4 @@
+interface:
+  display_name: "Runbook Authoring"
+  short_description: "Write a repeatable operational procedure"
+  default_prompt: "Use $runbook-authoring to turn this known procedure into a runbook another operator can follow and verify."

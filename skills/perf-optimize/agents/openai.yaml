@@ -1,0 +1,4 @@
+interface:
+  display_name: "Performance Optimization"
+  short_description: "Measure and improve a known slow operation"
+  default_prompt: "Use $perf-optimize to measure this slow operation, profile its cost, and verify whether a focused change improves performance."

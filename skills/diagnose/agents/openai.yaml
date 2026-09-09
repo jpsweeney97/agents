@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diagnose"
+  short_description: "Investigate unclear or difficult software bugs"
+  default_prompt: "Use $diagnose to investigate this bug, test competing explanations, and identify its cause from evidence."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Incentive Map"
+  short_description: "Predict how people respond to rules and rewards"
+  default_prompt: "Use $incentive-map to examine how participants would respond to this policy or metric and identify likely unintended behavior."

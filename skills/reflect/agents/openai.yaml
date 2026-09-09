@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reflect"
+  short_description: "Reflect on lived experience and what it means"
+  default_prompt: "Use $reflect to help me process this experience and decide what, if anything, I want to preserve as a journal entry."

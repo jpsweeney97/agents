@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grill with Docs"
+  short_description: "Question a design against project docs and code"
+  default_prompt: "Use $grill-with-docs to question this design one decision at a time against the project's code, terminology, and recorded decisions."

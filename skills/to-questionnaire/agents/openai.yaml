@@ -1,0 +1,4 @@
+interface:
+  display_name: "To Questionnaire"
+  short_description: "Draft questions for someone who holds missing knowledge"
+  default_prompt: "Use $to-questionnaire to turn this knowledge gap into a Markdown questionnaire for the person who can answer it."

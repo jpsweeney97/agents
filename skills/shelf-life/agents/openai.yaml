@@ -1,0 +1,4 @@
+interface:
+  display_name: "Shelf Life"
+  short_description: "Tie conclusions to code and check for later changes"
+  default_prompt: "Use $shelf-life to tie this conclusion to the commit and files it depends on, or check whether its recorded dependencies have changed."

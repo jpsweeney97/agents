@@ -1,0 +1,4 @@
+interface:
+  display_name: "Soundcheck"
+  short_description: "Reread instructions and check recent compliance"
+  default_prompt: "Use $soundcheck to reread the always-loaded instructions and check recent replies against them with specific evidence."

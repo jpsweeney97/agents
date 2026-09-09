@@ -1,0 +1,4 @@
+interface:
+  display_name: "Documentation Drift Audit"
+  short_description: "Check documentation references against current code"
+  default_prompt: "Use $doc-drift-audit to check this documentation against the current code and report confirmed stale references without editing files."

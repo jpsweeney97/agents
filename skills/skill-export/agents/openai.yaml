@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill Export"
+  short_description: "Prepare skills for manual upload to claude.ai"
+  default_prompt: "Use $skill-export to prepare this skill for manual upload to claude.ai and record the source version used."

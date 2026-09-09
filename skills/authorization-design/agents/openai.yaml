@@ -1,0 +1,4 @@
+interface:
+  display_name: "Authorization Design"
+  short_description: "Design and verify who can access each resource"
+  default_prompt: "Use $authorization-design to define who may do what to this resource and produce concrete allowed and denied access cases."

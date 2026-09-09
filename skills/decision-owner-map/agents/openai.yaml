@@ -1,0 +1,4 @@
+interface:
+  display_name: "Decision Owner Map"
+  short_description: "Identify who decides and what they need"
+  default_prompt: "Use $decision-owner-map to clarify this decision, identify its owner from evidence, and prepare what they need to decide."
