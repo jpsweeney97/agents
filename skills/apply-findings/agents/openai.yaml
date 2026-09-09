@@ -1,0 +1,4 @@
+interface:
+  display_name: "Apply Findings"
+  short_description: "Apply review fixes and report each outcome"
+  default_prompt: "Use $apply-findings to apply the selected fixes, preserve the review decisions, verify the changes, and report the outcome of every finding and the next step."
