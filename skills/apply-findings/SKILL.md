@@ -14,10 +14,11 @@ Invocation: `/apply-findings` or `$apply-findings`, or a plain instruction to ap
 
 Before touching a file, enumerate **every** finding in the source review into a ledger — including the ones the user did not name. "Apply 1–4" over a six-item review produces six rows: four in scope, two marked out of scope. Named and declined beats vanished.
 
-Read the scope, state your reading, and proceed — do not stop to ask. "Apply the fixes" over an adjudicated review means every finding the adjudication upheld; over a raw review it means every finding. Put the reading in the ledger header so the user can correct one line instead of re-deriving your scope.
+Read the user's scope, state your reading, and proceed — do not stop to ask. "Apply the fixes" over a raw review means every finding. Over an adjudicated review, it means the changes recommended for action now, using any revised or narrowed remedy. A finding being true or confirmed is not enough: preserve instructions to defer it, reject the proposed change, or verify something first unless the user explicitly changes that decision. Put the reading in the ledger header so the user can correct one line instead of re-deriving your scope.
 
 ## Apply
 
+- Perform any check required by the adjudication before applying that finding. If the check cannot run or cannot settle whether a change is warranted, mark the finding `blocked`, name the missing evidence, and continue with independent findings.
 - Work in dependency order, not list order, when fixes touch the same code.
 - A finding that does not survive contact with the code is not force-applied. Record what the code actually showed and keep going: disagreement with the review is a ledger outcome, never a reason to stop the run or to ask permission to continue.
 - Stay inside the findings. The adjacent cleanup you can see from here goes in a note under the ledger, not in the diff — a review-application turn that quietly becomes a refactor is unreviewable.
@@ -43,11 +44,11 @@ Every row filled; no finding omitted for being uninteresting. When the host's ow
 Under the table, a tally line and anything the applying surfaced that the review missed:
 
 ```text
-6 findings: 4 applied · 1 no-change-needed · 1 skipped · 0 blocked → next: /land
+6 findings: 4 applied · 1 no-change-needed · 0 skipped · 1 blocked → next: obtain test access for #6
 ```
 
-## Stop at the gate
+## Stop and name the next step
 
-Publication is not this skill's to perform: no merge, no push, no PR, no release, no landing ritual. Report the ledger and name `/land` (where available) as the next move.
+Publication is not this skill's to perform: no merge, no push, no PR, no release, no landing ritual. Choose the next step from the ledger: resolve the remaining blocker, obtain the missing decision or evidence, or finish verification. Recommend `/land` or `$land` (where available) only when all in-scope work is complete, its required checks passed, and there are changes to land. If nothing needs landing, say so.
 
 The local commit is the one step this skill does not decide. Where the repo's own instructions make a local commit the default after verified work, that contract governs and this skill does not override it; where they do not, leave the tree so the user can read the ledger against it.
