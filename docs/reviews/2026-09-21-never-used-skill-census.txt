@@ -1,0 +1,195 @@
+roster: 122 live skills (skills 73, skills-claude 9, plugins 40)
+ledger view: 316 rows collapsed (8 fork replays, 308 rapid re-invokes)
+tiers: {'t0': 1, 't1': 2, 't2': 12, 't3': 9, 'cold': 15, 'live': 83}
+
+== TIER 0 - no row of any kind (1) ==
+skill                             source                born         real synth scan routes cwds  last real fire
+decision-flip                     skills                2026-08-06      0     0    0      0    0  -
+
+== TIER 1 - only synthetic probe rows (2) ==
+skill                             source                born         real synth scan routes cwds  last real fire
+incentive-map                     skills                2026-08-06      0     1    0      0    0  -
+perf-optimize                     skills                2026-09-01      0     2    0      0    0  -
+
+== TIER 2 - only roster-scan reads (seen, never chosen) (12) ==
+skill                             source                born         real synth scan routes cwds  last real fire
+claude-home-audit                 skills-claude         2026-07-16      0     0    1      1    0  -
+document-to-markdown              skills                2026-09-01      0     0    1      0    0  -
+friction-to-guards                skills-claude         2026-06-12      0     0    2      1    0  -
+resolve-conflicts                 plugins/git-cycle     2026-07-09      0     2    2      4    0  -
+authorization-design              skills                2026-07-10      0     0    3      1    0  -
+decision-owner-map                skills                2026-08-06      0     0    3      1    0  -
+reality-check                     skills                2026-07-02      0     0    3      2    0  -
+deploy-plan                       skills                2026-06-27      0     2    6      6    0  -
+injection-safe-inputs             skills                2026-07-10      0     0    7      1    0  -
+observability-instrumentation     skills                2026-06-27      0     0    7      1    0  -
+research-capture                  skills                2026-06-25      0     0    9      5    0  -
+plan-queue                        plugins/plan-cycle    2026-07-26      0     0   19      0    0  -
+
+== TIER 3 - real fires, but only inside /Users/jp/.agents (9) ==
+skill                             source                born         real synth scan routes cwds  last real fire
+red-team                          skills                2026-06-27      1     0    6      8    1  2026-06-27 (85d)
+to-questionnaire                  skills                2026-09-01      1     3    6      2    1  2026-09-03 (17d)
+steelman                          skills                2026-06-27      1     1   16      4    1  2026-06-27 (85d)
+scope-cut                         plugins/decide        2026-06-30      1     0   20      3    1  2026-07-28 (54d)
+outcome-check                     skills                2026-06-27      2     1   10      5    1  2026-07-28 (54d)
+assumption-check                  skills                2026-07-09      2     0   12      3    1  2026-07-28 (54d)
+premortem                         skills                2026-06-27      2     2   13      6    1  2026-07-28 (54d)
+methodology-check                 skills                2026-07-07      2     1   16      3    1  2026-07-07 (75d)
+skill-squad                       skills-claude         2026-06-24     13     0    7      0    1  2026-07-01 (81d)
+
+== TIER 4 - used in real work, silent >= 56 days (15) ==
+skill                             source                born         real synth scan routes cwds  last real fire
+doc-drift-audit                   skills                2026-06-26      1     3    1      2    1  2026-07-06 (76d)
+reflect                           skills                2026-07-01      1     0    1      1    1  2026-07-02 (80d)
+transcript-export                 skills                2026-07-02      1     0    3      0    1  2026-07-03 (79d)
+zoom-out                          skills                2026-06-05      1     2    5      2    1  2026-06-07 (105d)
+teach                             skills                2026-07-05      1     1    7      2    1  2026-07-24 (58d)
+skill-benchmark                   skills-claude         2026-06-12      2     0    5      8    2  2026-06-15 (97d)
+plan-panel-loop                   skills                2026-07-08      2     1   21      0    2  2026-07-08 (74d)
+acceptance-map                    plugins/plan-cycle    2026-06-08      3     1   24      6    2  2026-06-11 (101d)
+caveman                           skills                2026-06-05      8     1    5      0    2  2026-07-04 (78d)
+the-gang-explains                 skills                2026-07-25     12     0    2      0    6  2026-07-26 (56d)
+methodology-critique              skills-claude         2026-07-03     15     1    6      3    3  2026-07-19 (63d)
+search-handoffs                   plugins/handoff       2026-06-09     16     0   48      1    3  2026-07-10 (72d)
+simplify-code                     skills                2026-05-28     40     0   17      4    3  2026-07-15 (67d)
+git-hygiene                       plugins/git-cycle     2026-05-28     54     0   35      6    9  2026-07-15 (67d)
+grill-me                          skills                2026-05-28     66     0   49      9    3  2026-06-09 (103d)
+
+== LIVE - real fires outside this repo within the window (83) ==
+skill                             source                born         real synth scan routes cwds  last real fire
+skill-export                      skills                2026-07-26      1     0    1      0    1  2026-08-03 (48d)
+context-checkpoint                skills-claude         2026-07-26      2     1    1      0    2  2026-09-07 (13d)
+fence-archaeology                 skills                2026-08-06      2     2    1      0    2  2026-09-09 (11d)
+add-an-x-by-example               skills                2026-07-26      2     0    4      1    2  2026-08-13 (38d)
+to-prd                            plugins/plan-cycle    2026-06-05      2     0   22      7    2  2026-09-04 (16d)
+athenahealth-brand-system         skills                2026-09-01      3     0    0      0    3  2026-08-25 (26d)
+outside-view                      skills                2026-08-06      3     1    1      1    1  2026-09-01 (19d)
+substitution-ledger               skills                2026-07-26      3     0    2      0    3  2026-09-21 (-1d)
+migration-campaign                skills                2026-06-20      3     2    4      7    2  2026-09-03 (17d)
+regex-craft                       skills                2026-06-28      4     0    2      1    2  2026-09-01 (19d)
+runbook-authoring                 skills                2026-06-26      4     1   12      2    2  2026-07-28 (54d)
+braindump                         skills                2026-09-03      5     3    0      0    3  2026-09-04 (16d)
+setup-matt-pocock-skills          skills-claude         2026-06-05      5     0    9      4    3  2026-09-04 (16d)
+explain-codebase                  skills                2026-06-24      7     1    1      1    3  2026-09-11 (9d)
+soundcheck                        skills                2026-08-06      7     2    1      0    4  2026-09-07 (13d)
+characterization-tests            skills                2026-07-10      7     0    4      2    3  2026-08-20 (31d)
+implement-issue                   plugins/plan-cycle    2026-09-01      8     0   23      4    2  2026-09-07 (13d)
+test-trust-audit                  skills                2026-07-10      9     1    6      1    2  2026-08-14 (37d)
+prototype                         skills                2026-06-05      9     0   13      7    4  2026-09-21 (-1d)
+work-router                       skills                2026-07-06      9    50   13      0    3  2026-09-02 (18d)
+tech-debt-scan                    skills                2026-05-28      9     0   31     14    7  2026-09-01 (19d)
+to-issues                         plugins/plan-cycle    2026-06-05      9     1   31     16    3  2026-09-04 (16d)
+bug-epidemiology                  skills                2026-07-26     10     0    3      1    3  2026-09-17 (3d)
+markdown-synthesis                skills                2026-06-05     11     0   30      5    6  2026-09-01 (19d)
+plain-language                    skills                2026-09-08     12     0    3      4    5  2026-09-18 (2d)
+courier                           plugins/relay         2026-07-26     12     1    4      4    3  2026-09-07 (13d)
+exiting-worktrees                 plugins/git-cycle     2026-06-09     12     0   13      2    6  2026-09-01 (19d)
+spec-drift-reconcile              plugins/plan-cycle    2026-06-26     13     0   15      2    5  2026-09-04 (16d)
+cross-model-review                skills-claude         2026-09-07     14     1    2      0    3  2026-09-22 (-2d)
+email-writing                     skills                2026-06-30     15     0   10      2    3  2026-08-10 (41d)
+baseline                          skills                2026-06-04     15     2   44     19    4  2026-08-31 (20d)
+keep-green                        skills                2026-06-25     16     2    7      6    5  2026-09-05 (15d)
+release-cut                       plugins/git-cycle     2026-06-23     16     0    9      2    3  2026-09-04 (16d)
+shelf-life                        skills                2026-07-26     17     1    4      0    3  2026-09-21 (-1d)
+gap-review                        skills                2026-09-04     17     1    6      0    8  2026-09-09 (11d)
+skill-ux-design                   skills                2026-06-07     20     0   61      4    6  2026-09-03 (17d)
+scrutinize-image-prompt           skills                2026-08-07     22     0    8      1    7  2026-08-09 (42d)
+contract-change-propagation       skills                2026-06-19     25     4   18      8    8  2026-09-15 (5d)
+option-shaping                    plugins/decide        2026-07-13     32     2   63      5    7  2026-09-21 (-1d)
+stage-prompt                      plugins/relay         2026-07-26     33     0    3      3    9  2026-09-11 (9d)
+ideate                            plugins/decide        2026-06-26     33     2   59     11    6  2026-09-07 (13d)
+diagnose                          skills                2026-06-05     34     5   16     12    9  2026-09-17 (3d)
+decision-record                   plugins/decide        2026-06-27     34     4   22      2    4  2026-09-04 (16d)
+collaborative-image-prompt-architectskills                2026-08-02     36     0   10      1   11  2026-09-10 (10d)
+land                              plugins/git-cycle     2026-07-26     37     0   15     22   10  2026-09-07 (13d)
+working-slice-review              skills                2026-06-27     40     0    9      2    5  2026-09-18 (2d)
+behavior-smoke-test               skills                2026-06-09     40     0   28      6    7  2026-09-04 (16d)
+next-steps                        skills                2026-05-28     45     3   46      6   10  2026-08-06 (45d)
+improve-codebase-architecture     skills                2026-06-05     47     0   10      9    4  2026-09-08 (12d)
+deliberate                        plugins/decide        2026-07-14     48     2   38     11    4  2026-09-04 (16d)
+pr-description                    plugins/git-cycle     2026-06-20     49     1    9      2    5  2026-08-11 (40d)
+openai-docs                       skills-claude         2026-06-09     49     2   22      0   11  2026-09-17 (3d)
+worktree-task-cycle               plugins/git-cycle     2026-07-17     53     0   20      3    5  2026-09-09 (11d)
+markdown-reformat                 skills                2026-05-28     55     0   30      3   13  2026-09-22 (-2d)
+grill-with-docs                   skills                2026-06-05     56     0   16      4    5  2026-09-08 (12d)
+hold-or-fold                      skills                2026-07-26     57     0    6      1    6  2026-09-21 (-1d)
+recheck-investment                skills                2026-07-16     60     0    7      3    7  2026-09-21 (-1d)
+apply-findings                    skills                2026-07-26     60     1   11      4   10  2026-09-21 (-1d)
+gh-address-comments               plugins/git-cycle     2026-06-13     64     1   18      4    8  2026-08-06 (45d)
+co-change-radar                   skills                2026-07-26     64     1   30      1    6  2026-09-21 (-1d)
+orient-status                     skills                2026-05-28     66     1   39      5    9  2026-08-22 (29d)
+claude-code-docs                  skills                2026-05-28     73     1   28      2   13  2026-09-11 (9d)
+design-exploration                plugins/decide        2026-06-12     74     0   42     16   10  2026-09-21 (-1d)
+closeout-check                    plugins/git-cycle     2026-06-08     86     0   43     14    8  2026-09-09 (11d)
+triage                            plugins/plan-cycle    2026-06-05     92     0   39     26    8  2026-09-09 (11d)
+tdd                               skills                2026-06-05     96     1   30     11    7  2026-09-17 (3d)
+scrutinize-skill                  plugins/review-family 2026-06-09    109     1   83     14    8  2026-09-09 (11d)
+relay-by-reference                plugins/relay         2026-07-26    121     1    4      1    7  2026-09-21 (-1d)
+implementation-planning           plugins/plan-cycle    2026-06-12    132     3   34     12   11  2026-09-22 (-2d)
+execute-plan                      plugins/plan-cycle    2026-06-12    135     1   57      7   12  2026-09-22 (-2d)
+outcome-shaping                   plugins/decide        2026-07-02    159     2   43     16    9  2026-09-13 (7d)
+merge-branch                      plugins/git-cycle     2026-06-01    160     4   36     10   17  2026-09-21 (-1d)
+system-design-review              plugins/review-family 2026-06-09    160     2   58      9   19  2026-09-21 (-1d)
+gh-pr-review-loop                 plugins/git-cycle     2026-05-29    186     1   14      6    6  2026-08-06 (45d)
+writing-principles                skills                2026-05-28    188     0  127      3   14  2026-09-09 (11d)
+agent-facing-design               skills                2026-06-07    297     1  168      8   22  2026-09-21 (-1d)
+review-reviewer                   plugins/review-family 2026-06-09    308     1   28      5   11  2026-09-11 (9d)
+throughline                       plugins/handoff       2026-06-10    463     3   16      6   19  2026-09-21 (-1d)
+implementation-review             plugins/review-family 2026-06-09    509     4   56     16   14  2026-09-21 (-1d)
+making-recommendations            plugins/decide        2026-05-28    589     3  125     19   36  2026-09-22 (-2d)
+scrutinize                        plugins/review-family 2026-06-09    849    10  100     23   25  2026-09-22 (-2d)
+save-handoff                      plugins/handoff       2026-06-09   1179     5   94      6   34  2026-09-22 (-2d)
+load-handoff                      plugins/handoff       2026-06-09   1795     1   71      3   19  2026-09-22 (-2d)
+
+== external plugin tokens sharing a local bare name (NOT credited) ==
+  handoff:triage                                26
+  github:gh-address-comments                    7
+  sbonly:skill-benchmark                        1
+
+== Claude-side blind spot: transcripts naming skills/<name>/SKILL.md ==
+scanned 2126 Claude transcripts
+skill                              sessions  outside .agents  cwds outside .agents
+decision-flip                            27                3  /Users/jp/playpen(2), <no-cwd-field>(1)
+incentive-map                            33                2  <no-cwd-field>(1), /Users/jp/playpen(1)
+perf-optimize                            19                0  
+authorization-design                     37                2  <no-cwd-field>(1), /Users/jp/Projects/active/cross-model(1)
+claude-home-audit                         3                0  
+decision-owner-map                       63                6  <no-cwd-field>(4), /Users/jp/playpen(2)
+deploy-plan                              52                3  <no-cwd-field>(2), /Users/jp/Projects/active/cross-model(1)
+document-to-markdown                     28                4  /Users/jp/athena-os(3), <no-cwd-field>(1)
+friction-to-guards                        7                0  
+injection-safe-inputs                    38                3  <no-cwd-field>(2), /Users/jp/Projects/active/cross-model(1)
+observability-instrumentation            48                4  <no-cwd-field>(3), /Users/jp/Projects/active/cross-model(1)
+plan-queue                               40                2  <no-cwd-field>(1), /Users/jp/playpen(1)
+reality-check                            54                5  <no-cwd-field>(3), /Users/jp/Projects/active/cross-model(2)
+research-capture                         40                5  <no-cwd-field>(4), /Users/jp/Projects/active/cross-model(1)
+resolve-conflicts                        51                3  <no-cwd-field>(2), /Users/jp/Projects/active/cross-model(1)
+
+== T1 blindness footnote — read before treating rows as fires ==
+The ledger is blind in both directions; rows are invocation/load markers, never proven fires.
+- over-count: a Codex <skill> row records the capsule LOAD, not execution — known specimens
+  where the agent declined the skill (routing questions) or the card was re-injected by a
+  prose echo (simplify-code census, 2026-07-18). The summary collapses fork replays and
+  <=60s re-invokes; semantic echo rows beyond that remain counted.
+- Codex read rows (`kind: "read"`, the `reads` column): a model-invoked Codex skill is a
+  shell read of its SKILL.md, recorded once per session and skill. A read is a LOAD
+  with weaker intent than a tag: a session that read many skills while choosing a route
+  (`read_burst` >= SCAN_READ_BURST) was scanning, not firing them all. Before
+  2026-09-05 no read was recorded and ~/.codex/archived_sessions was never scanned, so
+  every ledger read made before that date under-counted Codex (regex-craft: four
+  sessions, zero rows).
+- under-count (no row can exist): Claude-side skills exercised with no Skill call and no
+  typed command (handoff-resumed arcs — e.g. the 07-18/19 methodology-critique treatment
+  sessions before mining; a Read of a SKILL.md without a Skill call is not mined);
+  Codex-side loads that read only a skill's references/, multi-cycle chains (one tag or
+  read -> many cycles), and harness-driven runs (simplify-code census); skills whose
+  realistic configurations bypass both instruments (e.g. deliberate's pipeline).
+- lag: the live hook records Skill-tool calls only; typed commands and everything else
+  land only when this miner runs (launchd ~5 days).
+- endogeneity: a fire census is an intervention — treatments can summon the fires they
+  count (Era 109/113); treat post-treatment fire surges as partially endogenous before
+  crediting or debiting any skill for them.
+Sources: docs/reviews/2026-07-18-deliberate-methodology-critique.md (T1),
+docs/reviews/2026-07-18-simplify-code-methodology-critique.md (census, observer effect),
+docs/reviews/2026-07-19-methodology-critique-methodology-critique.md (unledgered fires).
