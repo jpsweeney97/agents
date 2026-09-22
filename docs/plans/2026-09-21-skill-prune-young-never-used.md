@@ -2,7 +2,7 @@
 type: plan
 date: 2026-09-21
 scope: prune deliberation over the five never-used skills that carry no inbound SKILL.md route, drawn from docs/reviews/2026-09-21-never-used-skill-census.md
-status: PROPOSED — awaiting JP's decision; no file has moved
+status: EXECUTED 2026-09-21 — JP approved archiving `skill-squad`, and overrode the proposal to archive `decision-flip` and `incentive-map` as well; `plan-queue` and `perf-optimize` kept
 reviewed_commit: 4fc80ed
 ---
 
@@ -90,15 +90,17 @@ The cost of holding them is two files totalling 44 lines and a slightly longer r
 
 ## Proposed disposition
 
-| skill | proposal | reversibility |
-|---|---|---|
-| `skill-squad` | archive to `skills-archive/` | restore from archive; no ledger entry |
-| `plan-queue` | keep; reopen 2026-11-01 on the trigger above | — |
-| `perf-optimize` | keep; revisit with tranche 2, no earlier than 2026-11-01 | — |
-| `decision-flip` | JP decides: hold or archive | restore from archive |
-| `incentive-map` | JP decides: hold or archive | restore from archive |
+| skill | proposal | JP's decision, 2026-09-21 | reversibility |
+|---|---|---|---|
+| `skill-squad` | archive to `skills-archive/` | **archived** | restore from archive; no ledger entry |
+| `plan-queue` | keep; reopen 2026-11-01 on the trigger above | kept | — |
+| `perf-optimize` | keep; revisit with tranche 2, no earlier than 2026-11-01 | kept | — |
+| `decision-flip` | JP decides: hold or archive | **archived** | restore from archive |
+| `incentive-map` | JP decides: hold or archive | **archived** | restore from archive |
 
-No file has moved. Archiving `skill-squad` needs no route hygiene: nothing on any live surface names it.
+JP archived all three archivable candidates, which on `decision-flip` and `incentive-map` answers the open question this document could not: the estimate-heavy and structure-design work those two serve is not coming. None of the three needed route hygiene — no live surface named any of them, which is why they were the unrouted set in the first place.
+
+**Executed 2026-09-21.** The three moved unchanged to `skills-archive/` through the satellite lifecycle. The landing sequence also removes their now-dangling `~/.claude/skills` symlinks with `trash`, and leaves their three satellites standing for a separate retirement pass through `scripts/satellite-fleet.py`, which is the owning repo's decision rather than this plan's. No ledger entry is owed: all three are build-and-prune class.
 
 ## Evidence boundary
 
