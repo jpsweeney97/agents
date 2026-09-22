@@ -1,0 +1,4 @@
+interface:
+  display_name: "Source Fidelity"
+  short_description: "Check a derivative against its source"
+  default_prompt: "Use $source-fidelity to check whether this derived document faithfully carries its source under the requested changes."

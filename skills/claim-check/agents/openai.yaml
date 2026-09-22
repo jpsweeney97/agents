@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claim Check"
+  short_description: "Verify one project claim with fresh evidence"
+  default_prompt: "Use $claim-check to verify this specific project claim against fresh evidence."

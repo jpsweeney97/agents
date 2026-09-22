@@ -1,0 +1,4 @@
+interface:
+  display_name: "Decision Walkthrough"
+  short_description: "Answer an existing sheet one question at a time"
+  default_prompt: "Use $decision-walkthrough to walk through this answer sheet with me one question at a time and record my answers."
