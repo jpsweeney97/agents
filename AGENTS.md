@@ -23,10 +23,11 @@ Whether to build or keep a skill turns on that merit, never on local observabili
 - `skills/` is dual-runtime: Codex (>=0.137) scans `$HOME/.agents/skills` in place; Claude Code serves each skill through a symlink in `~/.claude/skills`.
 - `skills-claude/` holds Claude-only or Codex-excluded skills. Codex must never scan it; it reaches Claude through the same symlinks.
 - `skills-archive/` holds retired skills. It is outside both delivery paths (not scanned by Codex, never linked into `~/.claude/skills`); treat it as history, not live skill source.
-- `exports/` holds skills re-targeted for claude.ai and uploaded by hand — a third delivery path with no delivery mechanism, since custom Skills do not sync across surfaces. It sits outside the other two (not scanned by Codex, never linked into `~/.claude/skills`), and the `SKILL.md` files there are build artifacts of the skills they name: edit the source in `skills/<name>/` and export again through `skill-export`, never the copy.
-- After adding or renaming a skill, run `scripts/claude-skills-sync.sh --link <name>`; verify delivery with `--check` (it never deletes). Remove stale `~/.claude/skills` entries with `trash`. Bootstrap and recovery live in the script header; `--link-all` rebuilds the symlink farm.
+- `exports/` holds skills re-targeted for claude.ai and uploaded by hand — a third delivery path with no delivery mechanism: nothing delivers repo changes to claude.ai. The reverse direction exists — Claude Code downloads skills enabled on claude.ai into `~/.claude/skills/synced/` as `anthropic-skills:<name>` — and this machine turns it off with `syncClaudeAiSkills: false` in `~/.claude/settings.json`. It sits outside the other two (not scanned by Codex, never linked into `~/.claude/skills`), and the `SKILL.md` files there are build artifacts of the skills they name: edit the source in `skills/<name>/` and export again through `skill-export`, never the copy.
+- `work-skills/` holds public-safe variants of selected skills for manual transfer into another approved workspace (`work-skills/README.md`). It is not a delivery path: no runtime reads it, and nothing tracks drift from the sources, so compare a variant with its source before transferring it.
+- After adding or renaming a skill, run `scripts/claude-skills-sync.sh --link <name>`; verify delivery with `--check` (it never deletes). Remove stale `~/.claude/skills` entries with `trash`. Bootstrap and recovery live in the script header; `--link-all` rebuilds the symlink farm. A new skill also gets its permanent satellite worktree after landing: run `uv run --script scripts/satellite-fleet.py create-missing` (attended); `satellite-fleet.py check` is the read-only fleet reconciliation.
 - Claude-side symlink discovery and live reload are undocumented behavior, canary-guarded at session start.
-- A `skills/` skill is dual-runtime, so name it to avoid both Codex-bundled names (`~/.codex/skills/`, including `.system/`: `openai-docs`, `skill-creator`, `skill-installer`, `plugin-creator`, `imagegen`, `pdf`, `doc`, `codex-primary-runtime`) and Claude Code bundled names (`code-review`, `debug`, `loop`, `claude-api`, `run`, `verify`, and similar). A `skills-claude/` skill is Claude-only: it must still avoid the Claude bundled names, but may intentionally reuse a Codex-bundled name (e.g. `openai-docs`) to re-author that capability for Claude, since Codex never scans `skills-claude/`.
+- A `skills/` skill is dual-runtime, so name it to avoid both Codex-bundled names (`~/.codex/skills/`, including `.system/`: `openai-docs`, `skill-creator`, `skill-installer`, `plugin-creator`, `imagegen`, `review-agent`, `pdf`, `codex-primary-runtime`; live list: `ls ~/.codex/skills ~/.codex/skills/.system`) and Claude Code bundled names (`code-review`, `debug`, `loop`, `claude-api`, `run`, `verify`, and similar). A `skills-claude/` skill is Claude-only: it must still avoid the Claude bundled names, but may intentionally reuse a Codex-bundled name (e.g. `openai-docs`) to re-author that capability for Claude, since Codex never scans `skills-claude/`.
 - In skill text, name invocation tokens for both runtimes (`/skill-name` or `$skill-name`), name instruction files jointly (`AGENTS.md` or `CLAUDE.md`), and phrase routing to single-runtime skills availability-conditionally.
 
 ## Plugin Layout And Delivery
@@ -48,10 +49,12 @@ Whether to build or keep a skill turns on that merit, never on local observabili
 ## Repo Docs
 
 - `docs/agents/charter.md` — contracts charter governing admission, extraction, and retirement of behavior contracts. Skills and commands are build-and-prune and are not charter events (build/prune freely); consult the charter only before the gated events it names: authoring or retiring an always-loaded contract (a rule, an AGENTS.md line, or a hook), authoring a skill that can fire unattended or wields irreversible-effect tools, installing contract-shipping material, or deciding the fate of third-party material.
-- `docs/agents/contract-decisions.md` — the append-only decision ledger the charter requires: one entry per gated charter decision (admission, fold, rejection, park, retirement of an ambient contract or third-party material; build-and-prune skill/command churn is not ledgered) with an evidence pointer. The durable, runtime-neutral record; append, never rewrite settled entries.
+- `docs/agents/contract-decisions.md` — the append-only decision ledger the charter requires: one entry per gated charter decision (admission, fold, rejection, park, retirement of an ambient contract, a gated skill, or third-party material; build-and-prune skill/command churn is not ledgered) with an evidence pointer. The durable, runtime-neutral record; append, never rewrite settled entries.
 - `docs/agents/issue-tracker.md` — issues are tracked in GitHub Issues for `jpsweeney97/agents`.
 - `docs/agents/triage-labels.md` — the default five-label triage vocabulary.
 - `docs/agents/domain.md` — the single-context domain-doc layout.
+- `docs/agents/skill-lifecycle-notes.md` — maintainer-facing prune-and-watch context for individual skills, kept out of their fire-time `SKILL.md` bodies.
+- `docs/agents/codex-plugin-list-cache-sync-2026-07-17.md` — the evidence record for how ChatGPT Desktop's Codex app-server syncs a drifted local-marketplace source into the Codex plugin cache (cited by `scripts/codex-plugins-sync.sh`).
 - `docs/agents/contract-evaluation-methodology.md` — playbook (not an obligation) for testing whether a behavior contract is load-bearing and beneficial while escaping circularity: pre-register/seal, single-variable differential, blind cross-model arms, human cold-judge anchor, pilot before seal. Distilled from the judgment-trust apparatus arc (tests 1–5). Reach for it when a contract's value is the open question; overkill for ordinary edits.
 
 ## Blind Evaluations
@@ -113,6 +116,8 @@ Useful checks:
 ruby -ryaml -e 'YAML.load_file(ARGV[0])' skills/<skill>/agents/openai.yaml
 python /Users/jp/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/<skill>
 git diff --check -- skills/<skill>
+# Repo test suite (no project file; keeps caches out of the tree):
+PYTHONDONTWRITEBYTECODE=1 uv run --no-project --with pytest python -m pytest -p no:cacheprovider -q tests
 ```
 
 Proof boundaries:
