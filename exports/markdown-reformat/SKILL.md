@@ -3,7 +3,7 @@ name: markdown-reformat
 description: "Use to format rough text, hard-wrapped prose, outlines, or messy Markdown as Markdown, keeping wording, order, and voice. Not for summaries, rewrites, proofreading, synthesis, or non-Markdown output."
 ---
 
-<!-- export: skills/markdown-reformat/ @ ca872740a59fdcaae5e762635e245d6698512e95 | 2026-09-23 | claude.ai -->
+<!-- export: skills/markdown-reformat/ @ 3402808def1cf84fbc932b69f2ecdce89b6841ce | 2026-09-23 | claude.ai -->
 
 # Markdown Reformat
 
