@@ -1,12 +1,20 @@
 # skills-archive
 
-Skills parked out of service, kept retrievable. Nothing here is live: Codex
-scans only `skills/`, and `scripts/claude-skills-sync.sh` links only `skills/`,
-`skills-claude/`, and `plugins/` into `~/.claude/skills`.
+Skills parked out of service, kept retrievable. Nothing here is live: Codex scans only `skills/`, and `scripts/claude-skills-sync.sh` links only `skills/`, `skills-claude/`, and `plugins/` into `~/.claude/skills`.
 
-To restore a skill: `git mv skills-archive/<name> skills-claude/<name>` (or
-`skills/<name>` for dual-runtime), then run
-`scripts/claude-skills-sync.sh --link <name>`.
+To restore a skill: `git mv skills-archive/<name> skills-claude/<name>` (or `skills/<name>` for dual-runtime), then run `scripts/claude-skills-sync.sh --link <name>`.
+
+## Agent-team skills (archived 2026-06-12)
+
+`design-review-team` and `tech-debt-audit` were moved here unchanged from `skills-claude/` in `9d2ef7a`, parking both Claude-only agent-team skills outside the Codex scan path and the sync link sources. Restore target: `skills-claude/`.
+
+## write-a-skill (archived 2026-06-12)
+
+`write-a-skill` was moved here unchanged from `skills/` in `a880b78`: its 100-line rule contradicted repo practice and official guidance, and its description doctrine duplicated `AGENTS.md` and `skill-creator`. Restore target: `skills/`.
+
+## deliberate v1 (archived 2026-09-03)
+
+`deliberate-v1` is the v1 bundle of `plugins/decide/skills/deliberate/` (validator, run-state store, capsules, and tests), archived in `cebf8e9` when decide 2.0.0 rebuilt `deliberate` as a light orchestrator; its `ARCHIVED.md` records the move. It is history, not a restore candidate: the live `deliberate` replaced it.
 
 ## Prune tranche 1 (archived 2026-09-05)
 

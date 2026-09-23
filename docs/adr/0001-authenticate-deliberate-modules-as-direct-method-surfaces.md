@@ -1,3 +1,7 @@
+---
+status: deprecated
+---
+
 # Authenticate deliberate modules as direct method surfaces
 
 When the `deliberate` validator is decomposed, every behavior-bearing imported production module will be listed directly in `validation.method-surfaces` alongside the stable `scripts/deliberate-validate.py` entrypoint, and every such file will be platform-hashed before any helper invocation. This extends the existing exact per-file pin, read-authorization, capsule-validation, and restart-frontier mechanism without adding an aggregate-identity layer; the evidence and compatibility boundary are recorded in the [validator debt scan](../audits/2026-07-15-deliberate-validator-debt-scan.md).

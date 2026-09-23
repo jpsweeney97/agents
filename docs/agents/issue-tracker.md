@@ -24,3 +24,7 @@ Create a GitHub issue.
 ## When a skill says "fetch the relevant ticket"
 
 Run `gh issue view <number> --comments`.
+
+## Rejected requests
+
+The `triage` skill records rejected feature requests in `.out-of-scope/` at the repo root, one Markdown file per concept, so a later matching request surfaces the earlier decision. The convention is `plugins/plan-cycle/skills/triage/OUT-OF-SCOPE.md`.
