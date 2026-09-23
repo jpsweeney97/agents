@@ -1,4 +1,4 @@
 interface:
   display_name: "Skill Export"
-  short_description: "Prepare skills for manual upload to claude.ai"
-  default_prompt: "Use $skill-export to prepare this skill for manual upload to claude.ai and record the source version used."
+  short_description: "Export skills to claude.ai or report stale exports"
+  default_prompt: "Use $skill-export to check existing exports without changing them, or prepare the named skill for manual upload to claude.ai. Record its actual clean source directory and commit; distinguish local checks from observed upload acceptance."

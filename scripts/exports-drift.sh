@@ -4,7 +4,7 @@
 # Each export under exports/<name>/SKILL.md carries a provenance comment as the
 # first line of its body:
 #
-#   <!-- export: skills/<name>/ @ <sha> | <YYYY-MM-DD> | claude.ai -->
+#   <!-- export: <repo-relative-source-directory>/ @ <sha> | <YYYY-MM-DD> | claude.ai -->
 #
 # Drift is `git log <sha>..HEAD -- <source>` being non-empty. This script only
 # reports; it never rewrites an export or advances a sha. Whether a stale export
@@ -12,7 +12,7 @@
 # exported text — that belongs to the `skill-export` skill, not here.
 #
 # Exit: 0 when every export parsed (whether current or stale), 2 when any export
-# is malformed or names a source or sha git cannot resolve. Staleness alone is
+# is malformed, has dirty source, or a git query fails. Staleness alone is
 # expected and is never an error.
 #
 # Usage: scripts/exports-drift.sh [name ...]     (default: every export)
@@ -35,7 +35,7 @@ fi
 
 [ "${#targets[@]}" -eq 0 ] && { echo "NONE: no exports built yet"; exit 0; }
 
-bad=0 stale=0 current=0
+bad=0 dirty=0 stale=0 current=0
 
 for dir in "${targets[@]}"; do
   name="$(basename "$dir")"
@@ -65,7 +65,25 @@ for dir in "${targets[@]}"; do
     echo "MALFORMED: $name (source path '$src' does not exist)"; bad=$((bad + 1)); continue
   fi
 
-  commits="$(git log --oneline "${sha}..HEAD" -- "$src" 2>/dev/null)"
+  if changes="$(git status --porcelain --untracked-files=all -- "$src")"; then
+    if [ -n "$changes" ]; then
+      echo "DIRTY: $name (source '$src' has uncommitted changes)"
+      printf '%s\n' "$changes"
+      dirty=$((dirty + 1)); continue
+    fi
+  else
+    query_status=$?
+    echo "ERROR: $name (git status failed for source '$src', exit $query_status; see stderr)"
+    bad=$((bad + 1)); continue
+  fi
+
+  if commits="$(git log --oneline "${sha}..HEAD" -- "$src")"; then
+    :
+  else
+    query_status=$?
+    echo "ERROR: $name (git log failed for source '$src', exit $query_status; see stderr)"
+    bad=$((bad + 1)); continue
+  fi
   if [ -z "$commits" ]; then
     echo "CURRENT: $name ($src @ $sha)"; current=$((current + 1))
   else
@@ -77,6 +95,6 @@ for dir in "${targets[@]}"; do
 done
 
 echo "---"
-echo "RESULT: $current current, $stale stale, $bad malformed"
-[ "$bad" -gt 0 ] && exit 2
+echo "RESULT: $current current, $stale stale, $dirty dirty, $bad malformed or failed"
+if [ "$bad" -gt 0 ] || [ "$dirty" -gt 0 ]; then exit 2; fi
 exit 0

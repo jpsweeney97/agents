@@ -1,6 +1,6 @@
 ---
 name: skill-export
-description: "Use when maintaining this library's skills as uploaded claude.ai Skills — building an upload-ready export from a source skill, or finding which exports went stale since their source moved. Owns capability re-targeting, cross-reference closure, and the drift-then-rebuild cycle. Do not use to commission work in a fresh tooled session (`stage-prompt`), to hand-carry a payload to another model (`courier`), or to author or review the source skill itself."
+description: "Use when maintaining this library's skills as uploaded claude.ai Skills — building an upload-ready export from a source skill, or reporting which exports went stale since their source moved. Checking is read-only; rebuilding requires an export/update request. Owns capability re-targeting and cross-reference closure. Do not use to commission work in a fresh tooled session (`stage-prompt`), to hand-carry a payload to another model (`courier`), or to author or review the source skill itself."
 argument-hint: "[skill name to export | check]"
 ---
 
@@ -20,6 +20,10 @@ What is genuinely absent is everything *local*: this repo and every path in it, 
 
 ## Export
 
+**Resolve the source.** Use the requested source path, or resolve the name among `skills/<name>/`, `skills-claude/<name>/`, and `plugins/<plugin>/skills/<name>/`. Confirm its `SKILL.md` exists; ask which source only if the request leaves multiple matches. Do not use an export, archive, or installed cache as source. Keep the actual repo-relative source directory separate from the export name, including when the name must change for upload.
+
+**Pin clean source.** Before building, run `git status --porcelain --untracked-files=all -- "$source_dir"` from the repo root. A query failure or any staged, unstaged, or untracked source change stops the export before writing provenance or packaging; report the paths and leave those changes alone. Do not auto-commit or discard source changes to make an export possible. Record `git log -1 --format=%H -- "$source_dir"`, require a successful nonempty result, and build from that clean committed source. Check the same status and commit again before packaging; if either changed, stop without claiming a completed export. Apply the same clean-source check to any external local reference files copied or inlined during the census.
+
 **Census.** Walk the source and name every capability it assumes — a path it reads, a command it runs, a fact it checks, a sibling skill it hands off to, a file it writes. Do this before editing anything; the census is what the rest of the pass disposes of, and a capability never named is one silently dropped.
 
 **Disposition.** Give every censused item exactly one of three, and be able to say which:
@@ -34,13 +38,14 @@ Sometimes the dispositions add up to *do not export*. When what lands in the dro
 
 **Closure.** Cross-references only resolve if the named skill is also in the exported set. For each one: in the set, keep it; not in the set, inline the substance it was borrowing or cut the pointer. A dangling `courier` or `apply-findings` reference is a dead end the far side cannot follow and cannot even discover is missing.
 
-**Constraints.** These are hard — a violation is a rejected upload, not a style note:
+**Upload evidence and local checks.** Consult the current [claude.ai creation guide](https://support.claude.com/en/articles/12512198-how-to-create-custom-skills) and [upload instructions](https://support.claude.com/en/articles/12512180-use-skills-in-claude) when exporting. As checked on 2026-09-23, the claude.ai guide documents a 64-character name limit, a 200-character description limit, optional `dependencies` metadata, and a zip containing a matching skill folder. The [API guide](https://platform.claude.com/docs/en/build-with-claude/skills-guide) separately permits 1,024 description characters; that is not evidence of claude.ai upload acceptance. If destination documentation is unavailable or conflicts with observed behavior, report the uncertainty rather than claiming the upload rules were verified.
 
-- `name` — 64 characters max, lowercase letters, digits, and hyphens only, and it **may not contain `claude` or `anthropic`**. In this library that blocks `claude-code-docs` and `claude-home-audit`; give each an export name and record it in the provenance line.
-- `description` — 1024 characters max. The library currently clears this (longest 835 characters), but re-check after editing.
-- Frontmatter — `name` and `description` only. Strip the Claude Code fields: `argument-hint`, `disable-model-invocation`, `allowed-tools`.
-- Body — target under 5k tokens, roughly 3,750 words.
-- Package — a zip containing the skill **folder** at its root, with the folder name equal to the frontmatter `name`. Both are named upload-failure causes.
+- Validate the exported `name` and `description` against the destination evidence. Use lowercase letters, digits, and hyphens and avoid `claude` or `anthropic` in the export name as a conservative compatibility convention borrowed from the API rules, not as a verified claude.ai rejection rule.
+- Retain `name`, `description`, and relevant documented metadata such as `dependencies`. Strip Claude Code-only fields such as `argument-hint`, `disable-model-invocation`, and `allowed-tools`; do not claim all other metadata causes rejection.
+- Keep the body under about 5k tokens when practical; this is a size recommendation, not a proven upload limit.
+- Inspect the actual zip: one skill folder at its root, folder name matching `name`, with `SKILL.md` and the referenced bundled files present. Parse frontmatter and measure character limits after editing.
+
+Local checks establish package structure and conformance to the cited documentation. Report upload acceptance as **not tested** unless an authorized upload of this exact package was observed to succeed; a local validator cannot supply that evidence. Exporting does not authorize uploading.
 
 Build the zip **outside the repo** — a temp or scratch directory — and report its absolute path. It is a rebuildable artifact of a tracked directory, so it has no business in the tree, and a stray one is not merely untidy: skill work in this repo runs through a satellite worktree whose lifecycle refuses to land while an unknown ignored path sits in the tree, so a zip built into `exports/` blocks the very commit that carries the export.
 
@@ -51,18 +56,18 @@ Build the zip **outside the repo** — a temp or scratch directory — and repor
 Write one HTML comment as the first line of the exported body, directly under the frontmatter:
 
 ```markdown
-<!-- export: skills/<name>/ @ <sha> | <YYYY-MM-DD> | claude.ai -->
+<!-- export: <repo-relative-source-directory>/ @ <sha> | <YYYY-MM-DD> | claude.ai -->
 ```
 
-`<sha>` is the last commit that touched the source directory at export time — `git log -1 --format=%h -- skills/<name>/` — not `HEAD`, which moves for unrelated reasons and would report drift that never happened. The comment uploads harmlessly and costs a few tokens; it is what makes staleness a question anyone can answer later.
+`<sha>` is the clean-source commit recorded during Export, for the actual directory, for example `plugins/review-family/skills/scrutinize/`. Do not substitute `HEAD` or invent `skills/<export-name>/`: unrelated commits and renamed exports do not identify the source. The comment tracks only the named directory; changes to shared references or inlined sibling instructions outside it need separate inspection and are not covered by a `CURRENT` result.
 
 ## Check
 
-`scripts/exports-drift.sh` reads each export's provenance line and reports whether its source has moved since. It only reports — it never rewrites an export or advances a sha.
+`scripts/exports-drift.sh` reads each export's provenance line and reports committed changes, dirty source directories, malformed provenance, and query failures. `check` and bare invocation are report-only for the entire skill: do not rewrite exports, advance provenance, build zips, stage, or commit. A dirty source or failed query is unresolved, never `CURRENT`.
 
-Staleness is not by itself a reason to rebuild: source edits that never reached the exported text leave the upload correct. Read what actually changed in the named commits, then say for each stale export whether the change reached the exported surface. Rebuild the ones where it did, and say plainly which ones you are leaving alone and why.
+Staleness is not by itself a reason to rebuild: source edits that never reached the exported text leave the upload correct. Read what actually changed in the named commits, then report which stale exports need rebuilding and which do not, with reasons. Stop after the report unless the user has also authorized an export/update request covering the named exports.
 
-A rebuild is a fresh export pass, not a patch: run the census again, because the source may have gained a capability assumption the last pass never saw. End by naming what the user must now re-upload — nothing changes on claude.ai until they do.
+An authorized rebuild is a fresh export pass, not a patch: run the census again, because the source may have gained a capability assumption the last pass never saw. End by naming what the user must now re-upload — nothing changes on claude.ai until they do.
 
 ## Boundaries
 
@@ -72,10 +77,13 @@ A rebuild is a fresh export pass, not a patch: run the census again, because the
 
 ## Output
 
+For a check, report each export's status, whether rebuilding is recommended and why, and any unresolved dirty source or query failure. Do not emit a build-success packet. For a completed export:
+
 ```markdown
-Exported: exports/<name>/ from skills/<name>/ @ <sha>
+Exported: exports/<name>/ from <actual-source-directory>/ @ <sha>
 Dispositions: <n> kept, <n> re-mechanized, <n> dropped — <what was dropped>
 Closure: <resolved within set | rewritten | cut>
-Constraints: <pass | what was changed to pass>
-Upload: <zip path> — re-upload at Settings > Capabilities > Skills
+Local validation: <checks and results; documentation URL and date checked; any uncertainty>
+Upload acceptance: <not tested | observed acceptance of this exact package>
+Upload: <absolute zip path> — manual upload at Customize > Skills
 ```
