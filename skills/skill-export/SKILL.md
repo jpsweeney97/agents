@@ -6,7 +6,7 @@ argument-hint: "[skill name to export | check]"
 
 # Skill Export
 
-This repo serves its skills to Codex by in-place scan and to Claude Code by symlink. claude.ai is a third target, and the only one with no delivery mechanism at all: Anthropic's documentation states that custom Skills **do not sync across surfaces**, so a skill uploaded there changes only when a human exports it again and re-uploads by hand. This skill owns that lane — the build, the provenance that makes staleness visible, and the rebuild.
+This repo serves its skills to Codex by in-place scan and to Claude Code by symlink. claude.ai is a third target, and the only one with no delivery mechanism from this repo: nothing pushes a repo change to claude.ai, so a skill uploaded there changes only when a human exports it again and re-uploads by hand. The reverse direction does exist: Claude Code downloads the skills enabled on claude.ai into `~/.claude/skills/synced/` and loads them as `anthropic-skills:<name>` unless `syncClaudeAiSkills` is `false`, so where sync is on, an upload left enabled appears beside the repo skill in Claude Code sessions. JP's machine sets it to `false`. This skill owns that lane — the build, the provenance that makes staleness visible, and the rebuild.
 
 Invocation: `/skill-export <name>` or `$skill-export <name>` to build one export; `/skill-export check` (or a bare invocation) to report which existing exports have gone stale.
 
