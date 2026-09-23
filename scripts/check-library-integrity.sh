@@ -20,7 +20,9 @@
 #                              are not path citations and are skipped
 #   3. orphan support files  — every git-tracked file under a skill's
 #                              references/ scripts/ examples/ is mentioned
-#                              somewhere else in that skill's bundle
+#                              somewhere else in that skill's bundle; a .py
+#                              module also counts as mentioned when another
+#                              .py file in the bundle imports it by name
 #   4. frontmatter sweep     — every delivered SKILL.md passes quick_validate.py,
 #                              filtering the AGENTS.md-accepted argument-hint /
 #                              disable-model-invocation "unexpected key" complaint
@@ -169,10 +171,22 @@ while IFS= read -r d; do
     [ -n "$f" ] || continue
     supportfiles=$((supportfiles + 1))
     b="$(basename "$f")"
+    # A Python module is cited by `import <stem>` / `from <stem> import`, never
+    # by its file name, so an import from another .py file in the bundle counts
+    # as a mention (the cross-model-review cmr_*.py false orphans, 2026-09-23).
+    stem=""
+    case "$b" in *.py) stem="${b%.py}" ;; esac
     referenced=0
     for g in "${bundle[@]+"${bundle[@]}"}"; do
       [ "$g" = "$f" ] && continue
       if grep -qF "$b" "$REPO/$g" 2>/dev/null; then referenced=1; break; fi
+      case "$g" in
+        *.py)
+          if [ -n "$stem" ] && grep -qE "^[[:space:]]*(import|from)[[:space:]]+${stem}([[:space:].,]|$)" "$REPO/$g" 2>/dev/null; then
+            referenced=1; break
+          fi
+          ;;
+      esac
     done
     if [ "$referenced" -eq 0 ]; then
       bad "orphan support file: $f (unmentioned in its skill bundle)"

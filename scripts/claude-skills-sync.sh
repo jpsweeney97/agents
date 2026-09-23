@@ -57,7 +57,11 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEST="$HOME/.claude/skills"
 SOURCES=("$REPO/skills" "$REPO/skills-claude" "$REPO/plugins")
-EXEMPT=(synapsis)  # managed by the concurrent cross-model project (~/Projects/active/cross-model), not this repo
+# synapsis: managed by the concurrent cross-model project (~/Projects/active/cross-model), not this repo.
+# synced: reserved by Claude Code for skills downloaded from claude.ai (docs: skills, "Skills synced
+#   from claude.ai"); trashing it is futile while sync is on. This machine turns sync off with
+#   "syncClaudeAiSkills": false in ~/.claude/settings.json (2026-09-23 hygiene audit, H1/M1).
+EXEMPT=(synapsis synced)
 
 is_exempt() {
   local name="$1" e
