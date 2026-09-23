@@ -5,6 +5,7 @@ Date: 2026-09-23
 Target: `/Users/jp/.agents` at `deefb04` (`main`, level with `origin/main`), plus the places this repo delivers into or reads from: `~/.claude/skills`, `~/.claude/settings.json`, `~/.codex`, and the satellite worktrees under `/Users/jp/.agents-worktrees`
 Mode: read-only. Nothing was changed. Every action below is a recommendation.
 Artifact path: `docs/audits/2026-09-23-repo-hygiene-audit.md`
+Follow-up: fixes were applied the same day, after the audit; see Follow-up at the end.
 
 ## Result
 
@@ -306,3 +307,36 @@ The verifier spot-checked six of the twelve. **Action:** optional. These are dat
 2. A four-agent workflow ran three finders in parallel: git and filesystem; skill library and delivery; and docs, scripts, tests, and instruction files. One verifier-and-completeness agent then re-ran the evidence for every finding, tried to refute each one, merged duplicates, and ran the checks nobody had covered. It added three findings: M3, L3, and L4.
 3. The main session re-checked the four high findings, the ledger structure (M6), the stranded branch (M4), the `openai.yaml` gap (M5), and issue #20. It also recounted the description characters for H3 and confirmed the H1 and H3 mechanisms in the Claude Code docs.
 4. Read-only proof: after the workflow, `git status` in the primary checkout was clean, and every satellite was unchanged except the known, parked `execute-plan` draft. The one side effect was the ruff-format hook's `.ruff_cache` entry described in L15. That folder is git-ignored and outside version control.
+
+## Follow-up
+
+Applied on 2026-09-23 after the audit, on JP's four answers: turn off claude.ai skill sync with `syncClaudeAiSkills: false`, raise the skill listing budget, land the stranded ledger entry, and start the fixes that needed no decision. A read-only review of the fixes then found three errors in the new text; the commit that adds this section corrects them.
+
+**Both automatic checks now pass, and every fix JP approved is on `main`; the findings still open are listed at the end of this section.**
+
+Fixed or decided:
+
+- **H1:** fixed in `0672d5a`. `scripts/claude-skills-sync.sh` exempts `synced`.
+- **H2:** fixed in `0672d5a`. The orphan check counts an `import` or `from` line in another `.py` file of the bundle as a mention. A planted orphan in a throwaway copy of the repo still fails the check.
+- **H3:** JP chose to raise the budget. `SLASH_COMMAND_TOOL_CHAR_BUDGET` in `~/.claude/settings.json` went from `50000` to `90000`. The file is outside the repo, and the change takes effect at the next Claude Code start. The review measured about 57,700 characters of listing text for next start, leaving roughly 24,000 characters of room after an estimated 7,000 to 8,000 for Claude Code's bundled skills.
+- **M1 and M3:** JP chose `"syncClaudeAiSkills": false` in `~/.claude/settings.json`. At the next start, Claude Code stops loading the 27 synced skills and moves them to `~/.claude/skills/.trash/`. They stay available on claude.ai. Because 14 of the 27 are Anthropic-authored, the decision is recorded in the ledger as a third-party removal, with a reopen trigger for the `docx`, `pdf`, `pptx`, and `xlsx` skills.
+- **M2:** fixed in `0ff9f9b` (`AGENTS.md`), `90e9d11` (`exports/README.md`), and `ad0a675` (`skills/skill-export/SKILL.md`).
+- **M4:** fixed in `9def9ea`, a cherry-pick of `9dc5b1b` onto `main`. The branch itself still exists; see L5.
+- **M5:** fixed in `ad0a675`.
+- **M6:** fixed in `0c67ddc`. 33 entries moved, text unchanged: the 32 the audit counted plus the 2026-09-06 entry from M4, which first landed in the same place.
+- **M7:** annotated in `9e40aa8`. Correction to this report: M7's statement that no Claude transcript older than 2026-08-01 remains is false. The audit judged transcript age by file modification time. The 2026-07-17 transcript survives, and a correction ledger entry quotes JP's grant and ruling from it.
+- **L1, L10:** fixed in `0ff9f9b`.
+- **L3:** fixed in `9e40aa8` (charter and ledger header) and `0ff9f9b` (`AGENTS.md` Repo Docs line).
+- **L8, L12:** fixed in `90e9d11`.
+- **L11:** line 15 fixed in `90e9d11`. Correction to this report: point (2) was not a defect, because the paragraph that follows it in `skill-lifecycle-notes.md` already marks the v1 `deliberate` text as history.
+- **L13:** fixed in `0ff9f9b` (two Repo Docs files and the test command) and `90e9d11` (`.out-of-scope/` in `docs/agents/issue-tracker.md`).
+- **L2, in part:** `0ff9f9b` added the satellite step to `AGENTS.md`, but it named `satellite-fleet.py create-missing`, which refuses while `check` reports drift in any satellite, as it does for the parked `execute-plan` draft. The commit that adds this section changes the step to `satellite-fleet.py create <name>`. The four satellites are not created yet.
+
+Not done, each needing JP's decision or go-ahead:
+
+- **H4:** the `athenahealth-brand-system` fonts and logo, plus the two template renames.
+- **L2:** creating the four missing satellites (`claim-check`, `decision-walkthrough`, `plain-language`, `source-fidelity`) with `satellite-fleet.py create <name>`.
+- **L4:** closing issue #20.
+- **L5:** branch cleanup. `chore/codex-handoff-auto-commit-exception` now needs `git branch -D`, because its commit reached `main` as a cherry-pick with a different id. Deleting the remote branch is a push.
+- **L6, L7, L9, L14, L15, L16, L17, L19, L20:** untouched. L18 waits for the next `decide` release.
+- Not covered by the audit: claude.ai plugin sync is a separate setting (`syncClaudeAiPlugins`, unset), and it still delivers `cowork-plugin-management` into `~/.claude/plugins/synced/`.
