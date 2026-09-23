@@ -86,6 +86,10 @@ Archived 2026-09-05 in prune tranche 1 (`docs/plans/2026-09-04-skill-prune-tranc
 
 Thin and **first-to-prune** — risky ships are rare in this authoring repo; the value is **portable** to ops/product repos. Watch it fire on a real risky ship; prune without ceremony if it never earns more than "read your own gauge."
 
+## diagnose
+
+Broadened on 2026-09-23 from software bugs to non-software targets — household, hardware, appliance, tool, workflow, AI behavior — with the user as hands and senses. Evidence for the demand: JP had hand-uploaded a `diagnose` copy to claude.ai whose description was re-targeted to exactly those domains, and the 2026-09-23 hygiene audit found that copy stale and unprovenanced; carrying both domains in the source lets the claude.ai export stay a re-targeting of the source rather than a fork. The software path is unchanged. The non-software mode adds a safety boundary (the one hard rule, justified by injury risk), a triage step that keeps a first-touch problem light and applies the hard gates once a fix has failed, and `references/hands-on-probes.md` for the probe ladder and physical intermittency cause-classes. Watch two things: whether the non-software branch fires anywhere the ledger can see (claude.ai fires are invisible to it, so a ledger zero is expected and not prune evidence), and whether the body's growth to about 3,000 words dulls the software path in live use. If the export lane is retired and no non-software fire is ever observed, the mode is the first thing to fold back into the reference.
+
 ## doc-drift-audit
 
 Locally **first-to-prune**: a skill-library's prose carries few hard code symbols, and the canaries plus `check-library-integrity.sh` already own the structural slice, so content-claim drift is thin here. The real value is **portable** — code-heavy repos with READMEs, API/reference docs, and CLI/config docs that rot against a moving codebase. Build it because it is cheap to try and clean to remove; judge it by whether it fires usefully when pointed at a code-heavy repo, and prune without ceremony if it does not.

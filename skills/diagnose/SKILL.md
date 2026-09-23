@@ -1,23 +1,39 @@
 ---
 name: diagnose
-description: "Use when the user asks to diagnose/debug a bug whose cause is unclear, hard to reproduce, intermittent, spans multiple components, or involves a performance regression. Do not use for straightforward implementation, known fixes, obvious single-test failures, code review, or post-fix architecture improvement; once the cause is known, locking the fix in test-first belongs to `tdd`."
+description: "Use when the user asks to diagnose or debug a problem whose cause is unclear, intermittent, hard to reproduce, resistant to a fix, or spread across components — a software bug, a performance regression, or a non-software target: a household, hardware, appliance, tool, workflow, or AI-behavior problem. Do not use for straightforward implementation, known fixes, quick lookups, obvious single-test failures, code review, post-fix architecture improvement, or medical symptoms; once a code cause is known, locking the fix in test-first belongs to `tdd`."
 ---
 
 # Diagnose
 
-A discipline for hard bugs. Skip phases only when explicitly justified.
+A discipline for hard problems whose cause is unclear. The target is usually a software bug; the same discipline diagnoses a non-software target — a household, hardware, appliance, tool, workflow, or AI-behavior problem — with the adjustments under Non-software targets. Skip phases only when explicitly justified.
 
-When exploring the codebase, use the project's domain glossary to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
+When the target is a codebase, use the project's domain glossary to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 
 ## Redact
 
 This skill has you show commands, outputs, and captured artifacts. Redact every secret first: write `<REDACTED>` in its place. Build loops against env vars, so the credential stays in the environment rather than in what you show. Captured artifacts carry auth headers — quote only the lines that carry the signal. If the redacted output is not enough to diagnose the bug, say so and ask the user rather than un-redacting.
+
+## Non-software targets
+
+When the target is not software you cannot run the probes yourself: you direct the diagnosis, and the user is the hands and senses. Every probe is something you write exactly — a question, an observation to make, a test to perform — and the user carries it out and reports back. Write probes for a person's hands, eyes, and ears, not for a machine. Never imply you observed something that was not reported, and say plainly what you have not seen. Evidence arrives however chat allows: descriptions, photos, screenshots, recordings, pasted text, links. Batch independent questions into one message and make each answerable cold.
+
+**Safety boundary.** Hazardous systems — mains electrical beyond plug-level swaps, gas, structural elements, work at height, vehicle safety systems, pressure vessels, suspected mold or asbestos — get diagnosed only to the point of observation, then referred to a professional. Never direct a probe that risks injury. Name the cost of any destructive, irreversible, or expensive probe before asking for it, and get explicit agreement. Medical symptoms in people or animals are out of scope: refer to a clinician or vet.
+
+**Triage — match depth to the problem.** Three calls before the phases:
+
+1. *Lookup or investigation?* If the symptom names a known failure mode with a canonical answer — a compatibility question, a documented limitation, a common fault with an established fix — search, answer, and stop; do not unfold the phases. If the user wants an artifact's quality reviewed rather than an observed failure explained, that is a review, not a diagnosis.
+2. *How repeatable?* Repeatable (fails on demand) affords iteration. Semi-repeatable (often, but not on command) affords iteration at a cost. One-shot or costly (every retry drills another hole) must lean on reconstruction and cheap probes. This sets which probes are affordable.
+3. *First attempt, or already resisted?* For a first-touch problem, run light: one batched diagnostic interview covering Phases 1–2, then ranked hypotheses with the cheapest probe attached. Once any fix has failed — before this conversation or during it — the hard gates apply in full: no hypothesising without an evidence channel, no fix without a discriminating probe implicating the cause, one change at a time, each change verified against the pinned symptom before the next.
+
+Read [references/hands-on-probes.md](references/hands-on-probes.md) for the cost-ranked probe ladder, the physical-world intermittency cause-classes, one-shot reconstruction, and the recurrence tell. The phases below name where a non-software target diverges; everything not marked applies to both.
 
 ## Phase 1 — Build a feedback loop
 
 **This is the skill.** Everything else is mechanical. If you have a fast, deterministic, agent-runnable pass/fail signal for the bug, you will find the cause — bisection, hypothesis-testing, and instrumentation all just consume that signal. If you don't have one, no amount of staring at code will save you.
 
 Spend disproportionate effort here. **Be aggressive. Be creative. Refuse to give up.**
+
+For a non-software target the loop is an evidence channel the user operates: a quick trigger plus a crisp, observable pass/fail they can repeat and report each iteration. Every iteration costs a human round trip — minimise both the effort and the size of the report you need back. The probe ladder in the reference replaces the list below.
 
 ### Ways to construct one — try them in roughly this order
 
@@ -61,11 +77,11 @@ The goal is not a clean repro but a **higher reproduction rate**. Loop the trigg
 | **External / network** | Tracks network conditions; intermittent timeouts | Replay a captured trace or mock the boundary; pin the dependency |
 | **Resource leak / exhaustion** | Fails *later* in a long run, not early; clears after a restart | Run the loop long and watch the resource curve → bisect to the leak site |
 
-Match the bug to a class, then point Phase 1's loop at that class's knob. When two classes are plausible, the next thing to build is the probe that separates them.
+Match the bug to a class, then point Phase 1's loop at that class's knob. When two classes are plausible, the next thing to build is the probe that separates them. Physical and workflow targets have their own cause-classes — load, environment, wear, leftover state, interaction, marginal component — in the reference.
 
 ### When you genuinely cannot build a loop
 
-Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. Do **not** proceed to hypothesise without a loop.
+Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. For a non-software target ask for hands-on time, a captured artifact, or agreement to a costlier probe. Do **not** proceed to hypothesise without a loop.
 
 Do not proceed to Phase 2 until you have a loop you believe in.
 
@@ -79,6 +95,8 @@ Confirm:
 - [ ] The failure is reproducible across multiple runs (or, for non-deterministic bugs, reproducible at a high enough rate to debug against).
 - [ ] You have captured the exact symptom (error message, wrong output, slow timing) so later phases can verify the fix actually addresses it.
 
+For a non-software target, pin the symptom precisely: a screw that pulls out, spins in place, or snaps is three different problems with three different causes. Capture the pinned symptom in the conversation so Phase 5 can verify against it — including whether the user's real complaint is the one being diagnosed.
+
 ### Minimise
 
 Once the loop is red, shrink the repro to the **smallest scenario that still goes red**. Cut inputs, callers, config, data, and steps **one at a time**, re-running the loop after each cut, and keep only what is load-bearing for the failure.
@@ -86,6 +104,8 @@ Once the loop is red, shrink the repro to the **smallest scenario that still goe
 Why bother: a minimal repro shrinks the hypothesis space in Phase 3 — fewer moving parts left to suspect — and becomes the clean regression test in Phase 5.
 
 Done when **every remaining element is load-bearing**: removing any one of them makes the loop go green.
+
+For a non-software target, isolate the same way with the user's hands: substitute known-good parts, remove a component, vary the environment, one element at a time, checking after each change whether the symptom persists. For one-shot problems, isolate on paper: which elements were present at the failure, and which does each hypothesis actually require.
 
 Do not proceed until you have **reproduced and minimised** the bug.
 
@@ -97,19 +117,21 @@ Each hypothesis must be **falsifiable**: state the prediction it makes.
 
 > Format: "If <X> is the cause, then <changing Y> will make the bug disappear / <changing Z> will make it worse."
 
-If you cannot state the prediction, the hypothesis is a vibe — discard or sharpen it.
+If you cannot state the prediction, the hypothesis is a vibe — discard or sharpen it. Searching how others describe the same symptom is fair fuel here; a search hit is still a hypothesis until a probe confirms it on this instance.
 
-**Show the ranked list to the user before testing.** They often have domain knowledge that re-ranks instantly ("we just deployed a change to #3"), or know hypotheses they've already ruled out. Cheap checkpoint, big time saver. Don't block on it — proceed with your ranking if the user is AFK.
+**Show the ranked list to the user before testing.** They often have domain knowledge that re-ranks instantly ("we just deployed a change to #3", "the landlord replaced that wall last year"), or know hypotheses they've already ruled out. Cheap checkpoint, big time saver. Don't block on it — proceed with your ranking if the user is AFK. For a non-software target, present the list together with the first probe, so a user with nothing to add just runs the probe and a user with knowledge re-ranks before a round trip is wasted.
 
 ## Phase 4 — Instrument
 
-Each probe must map to a specific prediction from Phase 3. **Change one variable at a time.**
+Each probe must map to a specific prediction from Phase 3. **Change one variable at a time.** Prefer probes that split the hypothesis space over probes that flatter the favourite.
 
 Tool preference:
 
 1. **Debugger / REPL inspection** if the env supports it. One breakpoint beats ten logs.
 2. **Targeted logs** at the boundaries that distinguish hypotheses.
 3. Never "log everything and grep".
+
+For a non-software target, the probe ladder in the reference replaces this list; the one-variable rule and the split-the-space rule stand.
 
 **Tag every debug log** with a unique prefix, e.g. `[DEBUG-a4f2]`. Cleanup at the end becomes a single grep. Untagged logs survive; tagged logs die.
 
@@ -142,7 +164,9 @@ If a correct seam exists:
 
 Fix where the bad value or wrong behavior originates, not the layer where the symptom surfaced.
 
-If the fix fails, return to Phase 3 with the new evidence instead of stacking another change on top. When roughly three fixes have failed — especially when each one reveals a new problem somewhere else — the architecture is the hypothesis now: stop and raise that with the user before attempting a fourth.
+For a non-software target there is no test seam: verify against the **original pinned symptom**, not the minimised setup — the user restores the full scenario, re-runs or re-creates it, and reports. For one-shot problems, define the **recurrence tell** — the earliest observable sign it is back — and, when worth the effort, a cheap periodic check.
+
+If the fix fails, return to Phase 3 with the new evidence instead of stacking another change on top. When roughly three fixes have failed — especially when each one reveals a new problem somewhere else — the frame is the hypothesis: for code, the architecture; for a non-software target, a different problem category, access or expertise the chat lacks, or a professional's job. Stop and raise that with the user before attempting a fourth.
 
 ## Phase 6 — Cleanup + post-mortem
 
@@ -154,8 +178,10 @@ Required before declaring done:
 - [ ] Throwaway prototypes removed with `trash` (never `rm`), or moved to a clearly-marked debug location
 - [ ] The hypothesis that turned out correct is stated in the commit / PR message — so the next debugger learns
 
+For a non-software target the same list reads: the user confirms the original symptom is gone in their own re-check; everything changed for diagnosis is restored (parts reassembled, settings reverted, workarounds removed); the confirmed cause and the probe that proved it are recorded in one line wherever the user keeps such notes.
+
 **The confirmed cause is also a search key.** Before declaring done, `bug-epidemiology` (where available) hunts the defect's twins — copy-paste clones, the same API misused elsewhere, the parallel implementation with the parallel flaw — because the fixed instance is a sample, not a unit.
 
-**Then ask: what would have prevented this bug?** If the answer involves architectural change (no good test seam, tangled callers, hidden coupling) hand off to the `improve-codebase-architecture` skill with the specifics. Make the recommendation **after** the fix is in, not before — you have more information now than when you started.
+**Then ask: what would have prevented this bug?** If the answer involves architectural change (no good test seam, tangled callers, hidden coupling) hand off to the `improve-codebase-architecture` skill with the specifics. For a non-software target the answer is usually a replacement schedule, better tooling, or a change to how the thing is used — recommend it now, with the evidence in hand. Make the recommendation **after** the fix is in, not before — you have more information now than when you started.
 
 This Phase 6 note is the one-line version of a retrospective, not a durable, dated, blameless one that outlives this commit-line; an incident with real impact, a timeline worth recording, or non-code aspects deserves that separate document.
