@@ -16,7 +16,7 @@ Apply the official athenahealth brand consistently while preserving the user's f
    - Read [references/voice-and-style.md](references/voice-and-style.md) for any written content, titles, labels, product messaging, or terminology review.
    - Read [references/assets-and-sources.md](references/assets-and-sources.md) before selecting a template, logo, font, photograph, or icon, or when refreshing this skill from the public brand site.
 3. Start from the appropriate official template in `assets/templates/` whenever one exists. Preserve its layouts, masters, theme, styles, logo treatments, margins, and reusable components.
-4. Use the bundled Source Sans 3 and PT Serif font files in `assets/fonts/` when the runtime supports font embedding. If embedding is unavailable, keep the named font family in the artifact and disclose any fallback.
+4. Set type in Source Sans 3 and PT Serif. This skill bundles no font files: embed the fonts only when the runtime already has them installed and supports embedding. Otherwise keep the named font family in the artifact and disclose any fallback.
 5. Use approved assets only. Never redraw, recolor, stretch, crop, rearrange, or synthesize an athenahealth logo. Never invent a brand icon or represent generated imagery as approved brand photography.
 6. Adapt the design to the content without forcing every brand element into every artifact. Prefer clarity, simplicity, hierarchy, and generous whitespace.
 7. Validate the result before delivery.
@@ -25,7 +25,7 @@ Apply the official athenahealth brand consistently while preserving the user's f
 
 ### Presentations
 
-- Use `assets/templates/powerpoint/athenahealth_2025_brand_template.pptx` as the starting point.
+- Use `assets/templates/powerpoint/pptx-template.pptx` as the starting point.
 - Preserve the 16:9 format, master layouts, theme fonts, grid, and logo placement.
 - Use concise, sentence-case headlines. Punctuate content-slide headlines that express a complete thought; omit terminal punctuation on title, divider, or section-label slides.
 - Use approved tints for charts and data visualization. Keep Hero Purple, cream, and white visually dominant.
@@ -40,7 +40,7 @@ Apply the official athenahealth brand consistently while preserving the user's f
 
 ### Spreadsheets and charts
 
-- Use `assets/templates/excel/athenahealth_excel_template.xlsx` as the starting point.
+- Use `assets/templates/excel/excel-template.xlsx` as the starting point.
 - Preserve formulas, workbook structure, number formats, theme, and accessibility.
 - Use Hero Purple and approved tints as the default chart series. Use secondary colors to distinguish series, never as dominant page backgrounds or body-copy colors.
 - Do not use red decoratively; reserve critical red for genuinely critical states.

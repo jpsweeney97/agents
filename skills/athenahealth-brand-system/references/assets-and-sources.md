@@ -6,7 +6,7 @@ Reviewed on 2026-08-03. The public brand site is the source of truth. If its cur
 
 ### PowerPoint
 
-- `assets/templates/powerpoint/athenahealth_2025_brand_template.pptx`
+- `assets/templates/powerpoint/pptx-template.pptx`
 - Official release shown on the brand resource page: 2025 Q2.
 
 ### Word
@@ -19,22 +19,16 @@ Reviewed on 2026-08-03. The public brand site is the source of truth. If its cur
 
 ### Excel
 
-- `assets/templates/excel/athenahealth_excel_template.xlsx`
+- `assets/templates/excel/excel-template.xlsx`
 - The public resource link currently points to the 2021 workbook; preserve its embedded styles unless a newer official template is supplied.
 
 ### Fonts
 
-- `assets/fonts/SourceSans3-VF.ttf`
-- `assets/fonts/SourceSans3-Italic-VF.ttf`
-- `assets/fonts/PTSerif-Regular.ttf`
-- `assets/fonts/PTSerif-Bold.ttf`
-- `assets/fonts/PTSerif-Italic.ttf`
-- `assets/fonts/PTSerif-BoldItalic.ttf`
-- Open Font License text is included for each family.
+- None bundled. The brand families are Source Sans 3 and PT Serif; `SKILL.md` step 4 says what to do when they are not installed, and the Typography page below says where each is used.
 
 ### Logo
 
-- `assets/logos/athenahealth-logo.png` is the transparent wordmark used in the public brand site's header. Prefer the logo treatments already embedded in official templates. For other production uses, obtain the approved variant from Assethub.
+- None bundled as a standalone file. Prefer the logo treatments already embedded in the official templates. For any other use, obtain the approved variant from Assethub.
 
 ## Official brand pages
 
