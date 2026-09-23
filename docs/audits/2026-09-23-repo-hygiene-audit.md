@@ -330,13 +330,18 @@ Fixed or decided:
 - **L8, L12:** fixed in `90e9d11`.
 - **L11:** line 15 fixed in `90e9d11`. Correction to this report: point (2) was not a defect, because the paragraph that follows it in `skill-lifecycle-notes.md` already marks the v1 `deliberate` text as history.
 - **L13:** fixed in `0ff9f9b` (two Repo Docs files and the test command) and `90e9d11` (`.out-of-scope/` in `docs/agents/issue-tracker.md`).
-- **L2, in part:** `0ff9f9b` added the satellite step to `AGENTS.md`, but it named `satellite-fleet.py create-missing`, which refuses while `check` reports drift in any satellite, as it does for the parked `execute-plan` draft. The commit that adds this section changes the step to `satellite-fleet.py create <name>`. The four satellites are not created yet.
+- **L2, in part:** `0ff9f9b` added the satellite step to `AGENTS.md`, but it named `satellite-fleet.py create-missing`, which refuses while `check` reports drift in any satellite, as it does for the parked `execute-plan` draft. The commit that adds this section changes the step to `satellite-fleet.py create <name>`. The four satellites were created in the second pass below.
 
-Not done, each needing JP's decision or go-ahead:
+Second pass, on JP's approval of the remaining asks, with H4 resolved by removing the references:
 
-- **H4:** the `athenahealth-brand-system` fonts and logo, plus the two template renames.
-- **L2:** creating the four missing satellites (`claim-check`, `decision-walkthrough`, `plain-language`, `source-fidelity`) with `satellite-fleet.py create <name>`.
-- **L4:** closing issue #20.
-- **L5:** branch cleanup. `chore/codex-handoff-auto-commit-exception` now needs `git branch -D`, because its commit reached `main` as a cherry-pick with a different id. Deleting the remote branch is a push.
-- **L6, L7, L9, L14, L15, L16, L17, L19, L20:** untouched. L18 waits for the next `decide` release.
-- Not covered by the audit: claude.ai plugin sync is a separate setting (`syncClaudeAiPlugins`, unset), and it still delivers `cowork-plugin-management` into `~/.claude/plugins/synced/`.
+- **H4:** fixed in `d79dbf4`. The skill no longer cites font files or a logo file. Step 4 says no font files are bundled and keeps the fallback rule, and the PowerPoint and Excel paths name the tracked files. Every `assets/` and `references/` path the skill cites now exists.
+- **L2:** the four satellites were created with `satellite-fleet.py create <name>`. `satellite-fleet.py check` now reports only the parked `execute-plan` draft.
+- **L4:** issue #20 was closed as completed, with a comment pointing to `~/.codex/AGENTS.md` line 19 and the two 2026-09-08 ledger entries that record the fold.
+- **L5:** 22 merged local branches were deleted with `git branch -d`, which also removed the leftover `.git/config` section. `chore/codex-handoff-auto-commit-exception` was force-deleted after a check that its one added ledger line is on `main`. `git worktree prune` removed the record of its deleted worktree. The merged remote branch `chore/simplify-code-methodology-critique` was deleted on GitHub. One merged branch stays: `chore/execute-plan-contained-review`, which the parked `execute-plan` satellite has checked out.
+- **L15:** the empty directories (root `references/`, `skills/tech-debt-scan/examples/`, `.agents/skills/`, and the empty `assets/fonts/` and `assets/logos/` in `athenahealth-brand-system`) and the ignored cache folders (three `__pycache__` folders, `skills/document-to-markdown/.ruff_cache`, and the root `.ruff_cache`) were moved to the trash. The `.DS_Store` files and the question of adding `--no-cache` to the ruff hook were left alone.
+- **L16:** 13 allow rules that name missing paths were removed from `.claude/settings.local.json`, leaving 40. The audit's count of 12 was one short. The SessionStart checks are unchanged.
+- **L17:** the three `.git/sg-*` files were moved to the trash.
+- **claude.ai plugin sync:** turned off with `"syncClaudeAiPlugins": false` in `~/.claude/settings.json`, and recorded in the ledger as the removal of `cowork-plugin-management` from Claude Code.
+- `main` was pushed to `origin`.
+
+Still open: L6, L7, L9, L14, L19, and L20 were not part of either approval. L18 waits for the next `decide` release.
