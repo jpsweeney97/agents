@@ -4,6 +4,14 @@ All notable changes to the Decide plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2.6.0 - 2026-09-24
+
+### Changed
+
+- `design-exploration` now reads the seam of an incoming shaping capsule or seam-marked handoff before designing: parts the previous lane marked as its compression, unpriced, or unconfirmed are open questions put to the user in the first clarification round, not settled premises, and they travel forward marked if they stay unconfirmed. A handoff that says only "settled" with no seam is read as a compression. Before, the skill had a rule for a still-muddy outcome and a capsule of its own to emit, but no rule for receiving one; on 2026-08-26 the receiving session treated a capsule's seam-marked compressions as inputs the user chose (methodology-critique brief, section 5). The sending half landed in 2.5.0; `implementation-planning` gets the same receipt rule in plan-cycle 1.4.0.
+
+Minor, not patch: receiving a seam-marked capsule was a situation with no defined behavior.
+
 ## 2.5.0 - 2026-09-24
 
 ### Changed
