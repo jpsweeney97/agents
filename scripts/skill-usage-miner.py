@@ -32,8 +32,9 @@ Appends new fire records to the cumulative ledger (JSONL), deduped by a stable k
 so transcripts pruned by retention stay in the ledger once mined. Re-runnable anytime;
 the live PostToolUse hook (scripts/skill-usage-hook.py) writes the same ledger between runs.
 
-Raw ledger records are never rewritten: the file is append-ordered (Claude projects, then
-Codex back-mining), NOT time-sorted — consumers must never assume chronology; compute date
+Raw ledger records are never rewritten (one exception: `--annotate-forks` adds fork
+provenance fields to existing Codex rows in place, never changing a key or a value; see
+below): the file is append-ordered (Claude projects, then Codex back-mining), NOT time-sorted — consumers must never assume chronology; compute date
 ranges from the `ts` field. All normalization happens at summary time only: typed command
 tokens that alias a canonical skill (e.g. `handoff:load` -> `handoff:load-handoff`) are
 merged via ALIASES, and rows are classified into current-roster / archived / non-roster
@@ -49,15 +50,31 @@ their key tails (`ts:skill`) are not globally unique across sessions, and Codex 
 are verified not to replay fires. Raw rows are untouched; the collapse is disclosed in
 the summary output.
 
+Codex fork collapse (2026-09-24): Codex `spawn_agent` with `fork_turns: "all"` and Codex
+Desktop thread forks copy the parent conversation into the new thread's rollout under
+fresh timestamps, so one shaping on 2026-08-13 became 106 ledger rows
+(docs/reviews/2026-09-24-outcome-shaping-methodology-critique.md). Codex later compacts
+the copied prefix out of the fork's file, so the copied records cannot be re-found by
+content, but the fork's `session_meta` keeps `forked_from_id`, `thread_source`, and its own
+timestamp. Every Codex row therefore carries `forked_from` (when the thread is a fork),
+`sidechain: true` when the thread is a subagent, and `copied: true` when the record was
+written within FORK_COPY_WINDOW_S of the fork's creation (the copied prefix lands in the
+first second). At summary time a copied row collapses into the parent thread's own row
+for that skill or, when the parent was never mined, into one kept copy per (parent,
+skill). Rows mined before these fields existed get them from `--annotate-forks`.
+Per-turn re-reads of a SKILL.md are not a second inflation: a read row is already one
+per (session, skill), and a read of a skill the session also tagged is suppressed.
+
 The summary also prints a standing T1 blindness footnote (see FOOTNOTE): the ledger is
 blind in both directions — rows are invocation/load markers, not proven fires — and any
 re-read (the 2026-08-01 read in particular) must carry those caveats.
 
-Usage: skill-usage-miner.py [--ledger PATH] [--summary-only]
+Usage: skill-usage-miner.py [--ledger PATH] [--summary-only | --annotate-forks]
 """
 
 import argparse
 import json
+import os
 import re
 import sys
 from collections import defaultdict
@@ -113,13 +130,21 @@ PREFILTER = ('"Skill"', '"SlashCommand"', "<command-name>")
 # 13s double-invoke pair in session 5c843a6a (2026-07-06).
 BURST_WINDOW_S = 60.0
 
+# A forked Codex thread's rollout opens with a copy of the parent's records, all stamped
+# within about a second of the fork's session_meta timestamp (0.2-0.6s on the
+# 2026-08-13 forks; 0.005-9.6s across the pre-July corpus, one 31s outlier left as a
+# fire). A record later than this was written by the fork itself.
+FORK_COPY_WINDOW_S = 10.0
+
 FOOTNOTE = """\
 == T1 blindness footnote — read before treating rows as fires ==
 The ledger is blind in both directions; rows are invocation/load markers, never proven fires.
 - over-count: a Codex <skill> row records the capsule LOAD, not execution — known specimens
   where the agent declined the skill (routing questions) or the card was re-injected by a
-  prose echo (simplify-code census, 2026-07-18). The summary collapses fork replays and
-  <=60s re-invokes; semantic echo rows beyond that remain counted.
+  prose echo (simplify-code census, 2026-07-18). The summary collapses fork replays
+  (Claude: a record uuid shared across session files; Codex: `copied` rows that a forked
+  thread re-stamped from its parent, see --annotate-forks) and <=60s re-invokes; semantic
+  echo rows beyond that remain counted.
 - Codex read rows (`kind: "read"`, the `reads` column): a model-invoked Codex skill is a
   shell read of its SKILL.md, recorded once per session and skill. A read is a LOAD
   with weaker intent than a tag: a session that read many skills while choosing a route
@@ -153,6 +178,37 @@ def skill_from_read_path(skill_dir: str) -> str:
     if m:
         return f"{m.group('p1') or m.group('p2')}:{m.group('name')}"
     return skill_dir.rsplit("/", 1)[-1]
+
+
+def fork_provenance(meta: dict) -> dict:
+    """What a Codex session_meta payload says about the thread's origin.
+
+    Survives Codex's later compaction of a fork's copied prefix, which is why the
+    collapse keys on this and not on the copied records themselves.
+    """
+    return {
+        "forked_from": meta.get("forked_from_id") or None,
+        "subagent": meta.get("thread_source") == "subagent",
+        "created": parse_ts(meta.get("timestamp")),
+    }
+
+
+def fork_fields(ts: object, fork: dict) -> dict:
+    """Row fields for one Codex record: `forked_from` when the thread is a fork, plus
+    `copied: True` when the record sits inside the fork's copied prefix (within
+    FORK_COPY_WINDOW_S of the fork's creation)."""
+    fields: dict = {}
+    if not fork.get("forked_from"):
+        return fields
+    fields["forked_from"] = fork["forked_from"]
+    t, created = parse_ts(ts), fork.get("created")
+    if (
+        t is not None
+        and created is not None
+        and abs((t - created).total_seconds()) <= FORK_COPY_WINDOW_S
+    ):
+        fields["copied"] = True
+    return fields
 
 
 def codex_tool_call_text(payload: dict) -> str:
@@ -250,6 +306,10 @@ def iter_codex_fires(path: Path, archived: bool = False):
     `read_burst` (distinct skills first read within READ_BURST_WINDOW_S of it) and
     `session_reads` (distinct skills the session read); a skill the same session also
     loaded by tag is not yielded as a read.
+
+    Every row carries the thread's fork provenance from its session_meta (see
+    fork_provenance / fork_fields): `sidechain` is true for a subagent thread, and a
+    forked thread's rows carry `forked_from` plus `copied` when re-stamped from the parent.
     """
     try:
         fh = path.open(encoding="utf-8", errors="replace")
@@ -257,6 +317,7 @@ def iter_codex_fires(path: Path, archived: bool = False):
         print(f"skip {path.name}: {e}", file=sys.stderr)
         return
     session = cwd = None
+    fork: dict = {}
     tagged: set[str] = set()
     reads: dict[str, dict] = {}
     with fh:
@@ -264,9 +325,10 @@ def iter_codex_fires(path: Path, archived: bool = False):
             if session is None and '"session_meta"' in line:
                 try:
                     meta = json.loads(line).get("payload") or {}
-                    session, cwd = meta.get("id"), meta.get("cwd")
                 except json.JSONDecodeError:
-                    pass
+                    meta = {}
+                session, cwd = meta.get("id"), meta.get("cwd")
+                fork = fork_provenance(meta)
             is_tag = "<skill>" in line
             is_read = "SKILL.md" in line
             if not (is_tag or is_read):
@@ -280,8 +342,9 @@ def iter_codex_fires(path: Path, archived: bool = False):
                 "ts": rec.get("timestamp"),
                 "cwd": cwd,
                 "session": session,
-                "sidechain": False,
+                "sidechain": fork.get("subagent", False),
                 "runtime": "codex",
+                **fork_fields(rec.get("timestamp"), fork),
             }
             if archived:
                 base["archived"] = True
@@ -372,13 +435,18 @@ def collapse(records: list[dict]) -> "tuple[list[dict], dict[str, int]]":
     fires. Hook fallback tails (`hook-{ts}`, written when tool_use_id was absent)
     are exempt for the same reason.
 
+    Codex fork-copy collapse: a row with `copied` is the parent thread's record
+    re-stamped into a forked thread (`forked_from`). It collapses into the parent's
+    own row for that skill when the parent was mined, else into the first copy seen
+    for (parent, skill). A forked thread's own later rows are not copies and stay.
+
     Burst collapse: within one (session, bare canonical skill name), rows within
     BURST_WINDOW_S of the last kept row collapse into it — retries, double
     invokes, and the typed-command + Skill-call double record of a single fire.
     Rows without a parseable ts never burst-collapse.
     """
     kept: list[dict] = []
-    stats = {"fork": 0, "burst": 0}
+    stats = {"fork": 0, "copy": 0, "burst": 0}
     seen_tails: set[str] = set()
     for r in records:
         key = str(r.get("key") or "")
@@ -391,9 +459,25 @@ def collapse(records: list[dict]) -> "tuple[list[dict], dict[str, int]]":
                 seen_tails.add(tail)
         kept.append(r)
 
-    def burst_group(r: dict) -> "tuple[object, str]":
+    def bare(r: dict) -> str:
         token = str(r.get("skill"))
-        return r.get("session"), ALIASES.get(token, token).rsplit(":", 1)[-1]
+        return ALIASES.get(token, token).rsplit(":", 1)[-1]
+
+    def burst_group(r: dict) -> "tuple[object, str]":
+        return r.get("session"), bare(r)
+
+    own = {(r.get("session"), bare(r)) for r in kept if not r.get("copied")}
+    seen_copies: set[tuple] = set()
+    uncopied: list[dict] = []
+    for r in kept:
+        if r.get("copied") and r.get("forked_from"):
+            group = (r["forked_from"], bare(r))
+            if group in own or group in seen_copies:
+                stats["copy"] += 1
+                continue
+            seen_copies.add(group)
+        uncopied.append(r)
+    kept = uncopied
 
     groups: defaultdict[tuple, list[tuple[datetime, int]]] = defaultdict(list)
     for i, r in enumerate(kept):
@@ -464,7 +548,7 @@ def summarize(records: list[dict]) -> None:
     records, cstats = collapse(records)
     print(
         f"view: {raw_n} raw rows -> {len(records)} fires "
-        f"(collapsed {cstats['fork']} fork replays, "
+        f"(collapsed {cstats['fork']} fork replays, {cstats['copy']} Codex fork copies, "
         f"{cstats['burst']} rapid re-invokes <={BURST_WINDOW_S:.0f}s)\n"
     )
     by_skill: defaultdict[str, SkillStats] = defaultdict(SkillStats)
@@ -527,6 +611,83 @@ def summarize(records: list[dict]) -> None:
     print(FOOTNOTE)
 
 
+def codex_session_meta(roots: "tuple[Path, ...] | None" = None) -> "dict[str, dict]":
+    """Session id -> fork provenance, from the first line of every Codex rollout."""
+    out: dict[str, dict] = {}
+    for root in CODEX_ROOTS if roots is None else roots:
+        if not root.is_dir():
+            continue
+        for path in root.rglob("*.jsonl"):
+            try:
+                with path.open(encoding="utf-8", errors="replace") as fh:
+                    meta = json.loads(fh.readline()).get("payload") or {}
+            except (OSError, json.JSONDecodeError):
+                continue
+            if meta.get("id"):
+                out[meta["id"]] = fork_provenance(meta)
+    return out
+
+
+def annotate_forks(
+    ledger: Path,
+    records: list[dict],
+    size_at_load: int,
+    metas: "dict[str, dict] | None" = None,
+) -> "dict[str, int]":
+    """Add fork provenance to existing Codex rows in place; keys and values untouched.
+
+    The one write that touches existing rows. Rewrites the ledger atomically (temp
+    file in the same directory, then rename) and refuses if the file changed size
+    between the read and the write, since the live hook appends concurrently. A row
+    the hook lands inside that window would otherwise be lost; the next mine run
+    would re-add it, but refusing is cheaper than relying on that.
+    """
+    if metas is None:
+        metas = codex_session_meta()
+    stats = {"annotated": 0, "unchanged": 0, "no_meta": 0}
+    for r in records:
+        if r.get("runtime") != "codex":
+            continue
+        fork = metas.get(str(r.get("session")))
+        if fork is None:
+            stats["no_meta"] += 1
+            continue
+        desired = {"sidechain": fork["subagent"], **fork_fields(r.get("ts"), fork)}
+        current = {"sidechain": bool(r.get("sidechain"))}
+        for k in ("forked_from", "copied"):
+            if r.get(k):
+                current[k] = r[k]
+        if desired == current:
+            stats["unchanged"] += 1
+            continue
+        for k in ("forked_from", "copied"):
+            r.pop(k, None)
+        r.update(desired)
+        stats["annotated"] += 1
+    if not stats["annotated"]:
+        return stats
+    size_now = ledger.stat().st_size
+    if size_now != size_at_load:
+        raise SystemExit(
+            f"annotate failed: ledger changed during rewrite, re-run. "
+            f"Got: {size_at_load} -> {size_now} bytes"
+        )
+    tmp = ledger.with_name(ledger.name + ".annotate-tmp")
+    with tmp.open("w", encoding="utf-8") as fh:
+        for r in records:
+            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+        fh.flush()
+        os.fsync(fh.fileno())
+    if ledger.stat().st_size != size_at_load:
+        tmp.unlink()
+        raise SystemExit(
+            f"annotate failed: ledger changed during rewrite, re-run. "
+            f"Got: {size_at_load} -> {ledger.stat().st_size} bytes"
+        )
+    os.replace(tmp, ledger)
+    return stats
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ledger", type=Path, default=LEDGER_DEFAULT)
@@ -535,10 +696,24 @@ def main() -> int:
         action="store_true",
         help="summarize existing ledger; no mining",
     )
+    ap.add_argument(
+        "--annotate-forks",
+        action="store_true",
+        help="add fork provenance to existing Codex rows in place, then summarize; no mining",
+    )
     args = ap.parse_args()
 
+    size_at_load = args.ledger.stat().st_size if args.ledger.exists() else 0
     existing = load_ledger(args.ledger)
     if args.summary_only:
+        summarize(existing)
+        return 0
+    if args.annotate_forks:
+        astats = annotate_forks(args.ledger, existing, size_at_load)
+        print(
+            f"annotated {astats['annotated']} Codex rows with fork provenance "
+            f"({astats['unchanged']} already current, {astats['no_meta']} with no rollout on disk)\n"
+        )
         summarize(existing)
         return 0
 

@@ -3,7 +3,10 @@
 Each collapse test pins a defect class proven in the 2026-07-18/19 treatment
 census work: the 8fa43ba8/359a3b70 session-fork replay, the 5c843a6a 13-second
 double-invoke, and the typed-command + Skill-call double record of one fire.
-Hermetic: pure-function tests on the imported module; no ledger or transcript IO.
+The Codex fork-copy tests pin the 2026-08-13 specimen from the outcome-shaping
+methodology critique: one shaping in thread 019ffb9d, re-stamped into 106
+subagent forks. Hermetic: pure-function tests on the imported module, or
+throwaway rollout and ledger files under tmp_path; no real ledger or transcript IO.
 """
 
 from __future__ import annotations
@@ -57,7 +60,7 @@ def test_fork_replay_collapses_to_one_fire() -> None:
     )
     kept, stats = miner.collapse([a, b])
     assert kept == [a]
-    assert stats == {"fork": 1, "burst": 0}
+    assert stats == {"fork": 1, "copy": 0, "burst": 0}
 
 
 def test_codex_rows_exempt_from_fork_collapse() -> None:
@@ -97,7 +100,7 @@ def test_burst_collapse_13s_double_invoke() -> None:
     )
     kept, stats = miner.collapse([a, b])
     assert kept == [a]
-    assert stats == {"fork": 0, "burst": 1}
+    assert stats == {"fork": 0, "copy": 0, "burst": 1}
 
 
 def test_burst_collapse_merges_typed_command_and_skill_call() -> None:
@@ -123,7 +126,7 @@ def test_no_burst_collapse_beyond_window_or_across_sessions() -> None:
     c = row("t:u3:tdd", "tdd", "2026-07-06T15:00:05Z", "t")  # other session
     kept, stats = miner.collapse([a, b, c])
     assert kept == [a, b, c]
-    assert stats == {"fork": 0, "burst": 0}
+    assert stats == {"fork": 0, "copy": 0, "burst": 0}
 
 
 def test_burst_anchor_is_last_kept_row_not_chained() -> None:
@@ -156,7 +159,7 @@ def test_summary_prints_collapse_view_and_t1_footnote(capsys) -> None:
     out = capsys.readouterr().out
     assert "T1 blindness footnote" in out
     assert "partially endogenous" in out
-    assert "collapsed 0 fork replays" in out
+    assert "collapsed 0 fork replays, 0 Codex fork copies" in out
     assert "Codex read rows" in out
 
 
@@ -435,7 +438,7 @@ def test_read_and_tag_rows_burst_collapse_together() -> None:
     )
     kept, stats = miner.collapse([tag, rd])
     assert kept == [tag]
-    assert stats == {"fork": 0, "burst": 1}
+    assert stats == {"fork": 0, "copy": 0, "burst": 1}
 
 
 def test_summary_counts_reads_in_their_own_column(capsys) -> None:
@@ -465,3 +468,276 @@ def test_summary_counts_reads_in_their_own_column(capsys) -> None:
     cols = tdd_line.split()
     # skill total model user codex reads subag cwds last
     assert cols[1:6] == ["2", "1", "1", "2", "1"]
+
+
+# ---- Codex fork copies (2026-09-24 repair) ----
+#
+# Specimen: athena-kb-local thread 019ffb9d-b3c3 (2026-08-13) tagged outcome-shaping
+# once at 14:54:11; 106 `spawn_agent` forks (session_meta `forked_from_id` =
+# 019ffb9d-b3c3, `thread_source` = subagent) each re-stamped that record 0.2-0.6s
+# after their own session_meta timestamp. Codex later compacted the copied prefix
+# out of the fork files, so only the session_meta provenance survives.
+
+PARENT = "019ffb9d-b3c3-7cc0-a017-db552bd8a8a6"
+
+
+def _write_forked_rollout(
+    tmp_path,
+    lines: list[str],
+    session: str = "fork-1",
+    created: str = "2026-08-13T14:54:57.238Z",
+    thread_source: str = "subagent",
+    parent: str = PARENT,
+) -> Path:
+    meta = json.dumps(
+        {
+            "timestamp": created,
+            "type": "session_meta",
+            "payload": {
+                "id": session,
+                "cwd": "/Users/jp/athena-kb-local",
+                "forked_from_id": parent,
+                "parent_thread_id": parent,
+                "thread_source": thread_source,
+                "timestamp": created,
+            },
+        }
+    )
+    p = tmp_path / f"rollout-2026-08-13T10-54-57-{session}.jsonl"
+    p.write_text("\n".join([meta, *lines]) + "\n", encoding="utf-8")
+    return p
+
+
+def test_codex_fork_rows_carry_provenance(tmp_path) -> None:
+    # The re-stamped tag lands 0.2s after the fork's session_meta: a copy. A read
+    # the fork makes itself, 30s later, is the fork's own row.
+    p = _write_forked_rollout(
+        tmp_path,
+        [
+            _typed_tag("2026-08-13T14:54:57.440Z", "outcome-shaping"),
+            _exec_js(
+                "2026-08-13T14:55:27.000Z",
+                "cat /Users/jp/.agents/skills/regex-craft/SKILL.md",
+            ),
+        ],
+    )
+    rows = list(miner.iter_codex_fires(p))
+    assert [r["skill"] for r in rows] == ["outcome-shaping", "regex-craft"]
+    tag, read = rows
+    assert tag["forked_from"] == PARENT
+    assert tag["copied"] is True
+    assert tag["sidechain"] is True
+    assert tag["key"] == "codex:fork-1:2026-08-13T14:54:57.440Z:outcome-shaping"
+    assert read["forked_from"] == PARENT
+    assert "copied" not in read
+    assert read["sidechain"] is True
+
+
+def test_codex_copied_read_row_is_marked(tmp_path) -> None:
+    # A read inside the copied prefix is a copy too (the row's ts is the first read's).
+    p = _write_forked_rollout(
+        tmp_path,
+        [_exec_js("2026-08-13T14:54:57.500Z", "cat /x/skills/tdd/SKILL.md")],
+    )
+    (row,) = miner.iter_codex_fires(p)
+    assert row["kind"] == "read"
+    assert row["copied"] is True
+
+
+def test_codex_user_thread_fork_is_copied_but_not_sidechain(tmp_path) -> None:
+    # A Codex Desktop thread fork by the user copies the parent the same way but is
+    # not a subagent.
+    p = _write_forked_rollout(
+        tmp_path,
+        [_typed_tag("2026-07-13T19:39:52.487Z", "outcome-shaping")],
+        created="2026-07-13T19:39:52.100Z",
+        thread_source="user",
+    )
+    (row,) = miner.iter_codex_fires(p)
+    assert row["copied"] is True
+    assert row["forked_from"] == PARENT
+    assert row["sidechain"] is False
+
+
+def test_codex_unforked_rows_carry_no_fork_fields(tmp_path) -> None:
+    p = _write_rollout(tmp_path, [_typed_tag("2026-08-27T19:57:09.519Z", "tdd")])
+    (row,) = miner.iter_codex_fires(p)
+    assert row["sidechain"] is False
+    assert "forked_from" not in row
+    assert "copied" not in row
+
+
+def _copy(session: str, ts: str, skill: str = "outcome-shaping", **extra) -> dict:
+    return row(
+        f"codex:{session}:{ts}:{skill}",
+        skill,
+        ts,
+        session,
+        runtime="codex",
+        forked_from=PARENT,
+        copied=True,
+        sidechain=True,
+        **extra,
+    )
+
+
+def test_codex_fork_copies_collapse_into_the_parent_row() -> None:
+    parent = row(
+        f"codex:{PARENT}:2026-08-13T14:54:11.285Z:outcome-shaping",
+        "outcome-shaping",
+        "2026-08-13T14:54:11.285Z",
+        PARENT,
+        runtime="codex",
+    )
+    copies = [
+        _copy("fork-1", "2026-08-13T14:54:57.440Z"),
+        _copy("fork-2", "2026-08-13T14:55:02.718Z"),
+        _copy("fork-3", "2026-08-13T23:57:50.465Z"),
+    ]
+    # Ledger order is mining order, not chronology: copies may precede the parent.
+    kept, stats = miner.collapse([copies[0], parent, *copies[1:]])
+    assert kept == [parent]
+    assert stats == {"fork": 0, "copy": 3, "burst": 0}
+
+
+def test_codex_fork_copies_without_a_mined_parent_keep_one() -> None:
+    copies = [
+        _copy("fork-1", "2026-08-13T14:54:57.440Z"),
+        _copy("fork-2", "2026-08-13T14:55:02.718Z"),
+    ]
+    kept, stats = miner.collapse(copies)
+    assert kept == [copies[0]]
+    assert stats["copy"] == 1
+
+
+def test_codex_fork_own_rows_and_other_skills_are_kept() -> None:
+    # A fork's own later fire (no `copied`) stays; a copy of a different skill is its
+    # own group; a copy of a plugin-qualified token collapses on the bare name.
+    parent = row(
+        f"codex:{PARENT}:2026-08-13T14:54:11.285Z:outcome-shaping",
+        "outcome-shaping",
+        "2026-08-13T14:54:11.285Z",
+        PARENT,
+        runtime="codex",
+    )
+    own = row(
+        "codex:fork-1:2026-08-13T16:00:00.000Z:tdd",
+        "tdd",
+        "2026-08-13T16:00:00.000Z",
+        "fork-1",
+        runtime="codex",
+        forked_from=PARENT,
+        sidechain=True,
+    )
+    other = _copy("fork-1", "2026-08-13T14:54:57.450Z", skill="grill-me")
+    qualified = _copy(
+        "fork-2", "2026-08-13T14:55:02.718Z", skill="decide:outcome-shaping"
+    )
+    kept, stats = miner.collapse([parent, own, other, qualified])
+    assert kept == [parent, own, other]
+    assert stats["copy"] == 1
+
+
+def test_annotate_forks_adds_provenance_and_keeps_keys(tmp_path, monkeypatch) -> None:
+    sessions = tmp_path / "sessions"
+    sessions.mkdir()
+    _write_rollout(sessions, [], session=PARENT)
+    _write_forked_rollout(sessions, [], session="fork-1")
+    _write_forked_rollout(
+        sessions,
+        [],
+        session="fork-2",
+        created="2026-08-13T15:07:58.734Z",
+        thread_source="user",
+    )
+    ledger = tmp_path / "ledger.jsonl"
+    rows = [
+        row(
+            f"codex:{PARENT}:2026-08-13T14:54:11.285Z:outcome-shaping",
+            "outcome-shaping",
+            "2026-08-13T14:54:11.285Z",
+            PARENT,
+            runtime="codex",
+        ),
+        # fork-1: copied prefix record (0.2s after creation), compacted out of the file
+        row(
+            "codex:fork-1:2026-08-13T14:54:57.440Z:outcome-shaping",
+            "outcome-shaping",
+            "2026-08-13T14:54:57.440Z",
+            "fork-1",
+            runtime="codex",
+        ),
+        # fork-2: the fork's own read, an hour later — provenance but not a copy
+        row(
+            "codex:fork-2:read:tdd",
+            "tdd",
+            "2026-08-13T16:07:58.000Z",
+            "fork-2",
+            source="model",
+            kind="read",
+            runtime="codex",
+        ),
+        # a Claude row and a Codex row with no rollout on disk are left alone
+        row("s-claude:uuid-1:tdd", "tdd", "2026-08-13T14:54:11.285Z", "s-claude"),
+        row(
+            "codex:gone:2026-08-13T14:54:11.285Z:tdd",
+            "tdd",
+            "2026-08-13T14:54:11.285Z",
+            "gone",
+            runtime="codex",
+        ),
+    ]
+    ledger.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    monkeypatch.setattr(miner, "CODEX_ROOTS", (sessions,))
+    records = miner.load_ledger(ledger)
+    stats = miner.annotate_forks(ledger, records, ledger.stat().st_size)
+    assert stats == {"annotated": 2, "unchanged": 1, "no_meta": 1}
+    after = miner.load_ledger(ledger)
+    assert [r["key"] for r in after] == [r["key"] for r in rows]
+    assert after[0]["sidechain"] is False and "forked_from" not in after[0]
+    assert after[1]["forked_from"] == PARENT and after[1]["copied"] is True
+    assert after[1]["sidechain"] is True
+    assert after[2]["forked_from"] == PARENT and "copied" not in after[2]
+    assert after[2]["sidechain"] is False
+    assert after[3] == rows[3]
+    assert after[4] == rows[4]
+    # Idempotent: a second pass changes nothing and does not rewrite.
+    mtime = ledger.stat().st_mtime_ns
+    stats2 = miner.annotate_forks(ledger, after, ledger.stat().st_size)
+    assert stats2 == {"annotated": 0, "unchanged": 3, "no_meta": 1}
+    assert ledger.stat().st_mtime_ns == mtime
+    # The annotated ledger now collapses the copy into the parent.
+    kept, cstats = miner.collapse(after)
+    assert [r["key"] for r in kept] == [
+        rows[0]["key"],
+        rows[2]["key"],
+        rows[3]["key"],
+        rows[4]["key"],
+    ]
+    assert cstats["copy"] == 1
+
+
+def test_annotate_forks_refuses_when_the_ledger_grew(tmp_path, monkeypatch) -> None:
+    import pytest
+
+    sessions = tmp_path / "sessions"
+    sessions.mkdir()
+    _write_forked_rollout(sessions, [], session="fork-1")
+    ledger = tmp_path / "ledger.jsonl"
+    r = row(
+        "codex:fork-1:2026-08-13T14:54:57.440Z:outcome-shaping",
+        "outcome-shaping",
+        "2026-08-13T14:54:57.440Z",
+        "fork-1",
+        runtime="codex",
+    )
+    ledger.write_text(json.dumps(r) + "\n", encoding="utf-8")
+    monkeypatch.setattr(miner, "CODEX_ROOTS", (sessions,))
+    size = ledger.stat().st_size
+    records = miner.load_ledger(ledger)
+    with ledger.open("a", encoding="utf-8") as fh:  # the live hook appends
+        fh.write(json.dumps(row("s:hook-x", "tdd", None, "s")) + "\n")
+    with pytest.raises(SystemExit, match="ledger changed during rewrite"):
+        miner.annotate_forks(ledger, records, size)
+    assert not list(tmp_path.glob("*.annotate-tmp"))
+    assert len(miner.load_ledger(ledger)) == 2  # untouched
