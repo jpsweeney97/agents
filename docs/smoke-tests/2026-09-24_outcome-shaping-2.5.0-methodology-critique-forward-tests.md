@@ -1,0 +1,25 @@
+# 2026-09-24 — `decide:outcome-shaping` 2.5.0: methodology-critique repair forward tests
+
+Uptake evidence for the six text repairs the endorsed methodology-critique brief warranted (`docs/reviews/2026-09-24-outcome-shaping-methodology-critique.md`, section 10). Proxy passes are uptake evidence, never value evidence: they show whether a fresh agent given the text follows the changed sentence, not whether following it helps a real user. Simulated assent is noise twice over, so every fixture ends on the user's turn and the proxy writes one assistant turn.
+
+Method: 28 headless runs, `claude -p --model sonnet --permission-mode default` with every tool disallowed, prompt piped on stdin, run from the session scratchpad so no repo instructions load, one fresh session per run. Each run received the full `SKILL.md` and `examples/interaction-examples.md` inline, a conversation fixture, and the instruction to write only the next assistant turn. Arm A is the 2.4.0 text at `98bc1a3`; arm B is the 2.5.0 text. Two runs per arm per fixture. Fixtures, runner, and every raw output are in `fixtures/2026-09-24-outcome-shaping-2.5.0/`. Proxies were not told which arm they held. The judge (the treatment session) graded by reading all 28 outputs.
+
+## Result
+
+| Fixture | Repair under test | Arm A (2.4.0) | Arm B (2.5.0) | Reading |
+| --- | --- | --- | --- | --- |
+| f1 numbered answers, user says "yes exactly" to the read | 1: what number-answers are | 2/2 asked for an own-words restatement | 2/2 asked, and both named that every answer so far was a number; one asked the user not to reuse the assistant's phrases | Both arms ask; the old text's "a fast yes is noise" already reaches this case. B names the condition the new sentence states. Weak discriminator. |
+| f1b asked-for restatement made of the assistant's own phrases | 1: the echo is the noise case | 0/2: both scored the echo as settled and produced a capsule (the 08-26 fire, reproduced) | 2/2: both refused, naming the reused phrases and the numbered answers, and asked a question with no options | The strongest result. The brief's central finding reproduces on the old text every time and is repaired every time. |
+| f2 five leading questions with suggested answers, all accepted | 2: the instant-assent re-type tell | 0/2 re-typed; 2/2 noticed the answers were the assistant's and asked for own words | 2/2 stopped the loop and re-typed toward contrasting sample files (missing-options) | Both arms notice; only B re-types, which is what the new sentence asks for. |
+| f3 one read, one unanswered trade, user asks for a tradeoff enumeration | 3: redirection beside flight | 0/2 complied; both deflected to `option-shaping` and held the want question open | 2/2 complied and marked the enumeration as unsettled draft; 1/2 named the unanswered trade | The new rule says comply and mark. B does. A refuses the redirection instead, which no fire in the corpus did; the guard the record lacked was the mark, and B carries it. Naming the trade is 1/2, graded partial. |
+| f4 trade answer adds two constraints unasked | 4: read the trade answer for content | 2/2 folded both constraints into the read as fixed | 2/2 same | No discrimination; both arms already read the answer for content. The new sentence's uptake is not shown by this fixture. Untested. |
+| f5 numbered loop, user accepts a `design-exploration` handoff | 5: the seam travels; 1 (Load-Testing fold): a price ticked inside an option | 2/2 carried the seam (user's choices / assistant's wording / unpriced) | 2/2 carried the seam; 2/2 also named that the day's delay was written into the option and never asked as a trade | The capsule's seam beat already existed at 2.4.0, so the seam carry does not discriminate. The ticked-price sentence shows uptake 2/2 in B and 0/2 in A. |
+| f6 settled want; next move is a one-page sheet for a meeting today | 6: the named leaving | 2/2 said the shaping was done and the sheet was drafting work | 2/2 same, and both said no other skill was needed | No discrimination on the leaving itself; the old text's agents already crossed the floor in words on this fixture. B's "no other skill is needed" is the new sentence's phrase. Weak. |
+
+## What this shows and does not show
+
+- Repairs 1 (echo case) and 2 discriminate cleanly at two runs each. Repair 3 discriminates on the comply-and-mark half and is partial on naming the trade. Repair 1's number-answer sentence and the ticked-price fold show uptake in B without a failure in A on these fixtures.
+- Repairs 4, 5 (seam carry), and 6 did not discriminate: the old text's agents behaved well on these fixtures. Their uptake is graded untested, not passed. The fires that motivated them (07-16, 08-31, four build-in-lane closes) were on Codex or on longer conversations than a one-turn fixture reproduces.
+- Repair 7 is a lifecycle-notes entry, not text; nothing to proxy.
+- Nothing here reaches Codex, a real user's reply, or a conversation longer than four turns. The Codex compression the brief describes is unaddressed by design and unmeasured here.
+- Two runs per arm is a sample, not a rate.

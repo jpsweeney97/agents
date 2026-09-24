@@ -4,6 +4,19 @@ All notable changes to the Decide plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2.5.0 - 2026-09-24
+
+### Changed
+
+- `outcome-shaping`'s settlement test now says what number, tick, and pasted-back answers are: assent to the assistant's prose, however many there were. After such a loop the restatement is asked for whatever the stakes, and a restatement assembled from the assistant's own phrases is named as the noise case rather than the pass. The examples file carries the echo-restatement anti-pattern.
+- The re-type rule gains the tell the record actually shows: a run of answers that all pass (bare yeses, verbatim echoes, pasted-back offered text) means the questions are supplying their own answers; before, the rule keyed only on answers dying under trades, a tell no fire has shown.
+- The trade paragraph now says what trades do on the record: narrow, bound, and force a choice between named shapes, with the trade answer read for content the user adds unasked. It offers a forced choice beside the cost hypothetical, and names a price ticked inside an option as not yet traded. The sentence "a negotiable want that dies under its first honest trade was not the want" is gone; no want has died under a trade in twenty-one conversations.
+- Redirection is handled beside flight: when the user asks for the next thing, switches lanes, or pauses before restating the shape, whatever travels is marked as the assistant's compression rather than as settled, naming any trade left unanswered. Before, the only mid-shaping departure the text handled was flight at discomfort.
+- A capsule carried into a handoff now carries its seam (the user's words, the compression, the unpriced parts); a handoff that says only "settled" claims authority the shaping never earned.
+- Exits name the leaving when the settled want's next move is a small artifact rather than a lane: say the shaping is over and the making is beginning, instead of inventing a destination or crossing the floor silently.
+
+Minor, not patch: redirection and the small-artifact leaving are situations whose behavior was previously undefined; the other four changes replace or extend sentences the fire record contradicted. Source: the endorsed methodology-critique brief, `docs/reviews/2026-09-24-outcome-shaping-methodology-critique.md` in the source repo. Not changed: the Codex-side compression to one trade and an assistant-declared settle is recorded as a watch item in the source repo's lifecycle notes, not repaired, because its mechanism is a hypothesis.
+
 ## 2.4.0 - 2026-09-04
 
 ### Changed
