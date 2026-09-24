@@ -102,3 +102,17 @@ One `methodology-critique` commission covers all three riders. Axis: in the 28 f
 ## Artifacts
 
 Scratchpad only, not persisted: marker file lists, `classified.json`, `classify.py`, `probe.py`, `probe2.py` under the session scratchpad. Re-run cost is a few minutes of grep.
+
+## Erratum (2026-09-24): the route-name probe counted mentions, not exits
+
+The same-day `methodology-critique` (`docs/reviews/2026-09-24-outcome-shaping-methodology-critique.md`, "Rider 2" and "The sealed commission, corrected") read the field fires end to end and found that the census row "Field fires naming a forward route in output" measured nothing about exits. Three defects in this brief's output probes:
+
+- **The probe matched the Exits table's route names in assistant output, and the loaded body carries those names.** The nine `making-recommendations` hits were the body's own text echoed plus one upstream use before shaping began; no reader found a single handoff to it. The 23 `design-exploration` hits are a mention count, not 23 exits.
+- **Field routes do not wear the table's names.** The mud re-typed toward evidence in four conversations ("behavior test", "search the docs", "fan out subagents", "experiment") and toward options in one (`ideate`), and the name probe saw none of it. Finding 2's rider offered two readings of the zero ("field mud is always missing-words, or re-typing does not happen outside test conditions"); both were wrong, because the zero was a probe artifact.
+- **The testimony row ("0 of 28") had the same defect from one phrasing.** Testimony fired in five or six conversations, once in the adversarial form.
+
+The "28 field fires, 17 in one repo" count was inflated a further way: Codex `spawn_agent` with `fork_turns: "all"` and Desktop thread forks copy a parent conversation into many rollout files, so one 2026-08-13 shaping existed as fourteen files. The corpus holds about twenty-one distinct conversations, sixteen outside this repository. The miner now collapses fork copies at summary time (`f6600fc`), so a re-run of this census would not repeat that inflation.
+
+What holds: the sealed anchor and its corrections, the marker-vintage and corpus-reach bounds, and the escalate-rider tags, which were the right call for exactly the reason the tags exist (two of the three riders came back partly refuted once the fires were read). What changes: the per-instrument output rows in the Census table are mention counts and should be read as such, and the "all other exits 0" cell is withdrawn.
+
+Method correction: an output probe for the target's own vocabulary counts echoes and mentions, not behavior, and real behavior often does not wear the body's names. `methodology-check` now names this as a census confound, so the next check reports such rows as mention counts and escalates the behavioral question instead of resting a rider on the zero.
