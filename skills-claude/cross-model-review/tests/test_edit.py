@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import errno
 import hashlib
 import json
 import os
@@ -1193,11 +1194,39 @@ def test_deeply_nested_edits_file_is_refused_through_fail(tmp_path: Path) -> Non
     assert_nothing_published(host)
 
 
-def test_symlink_loops_are_refused_through_fail(tmp_path: Path) -> None:
+def _emulate_python312_resolve(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make ``Path.resolve`` raise on a symlink loop, as Python 3.12 does.
+
+    The helper allows Python 3.12, whose non-strict ``Path.resolve`` raises
+    ``RuntimeError`` on a loop; 3.13 and later do not. Emulating 3.12 here lets
+    the loop tests catch a return to ``Path.resolve`` under any interpreter.
+    """
+    original = Path.resolve
+
+    def resolve(self: Path, strict: bool = False) -> Path:
+        resolved = original(self, strict=strict)
+        try:
+            resolved.stat()
+        except OSError as exc:
+            if exc.errno == errno.ELOOP:
+                raise RuntimeError(f"Symlink loop from {exc.filename!r}") from None
+        return resolved
+
+    monkeypatch.setattr(Path, "resolve", resolve)
+
+
+def test_symlink_loops_are_refused_through_fail(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     archive, host, candidate = make_review(tmp_path)
     loop = archive.root.parent / "loop"
     loop.symlink_to(loop)
+    (archive.root / "drafts" / "loop.md").symlink_to(
+        archive.root / "drafts" / "loop.md"
+    )
+    (archive.root / "rootloop").symlink_to(archive.root / "rootloop")
     edits_path = write_edits(archive.root.parent / "edits.json", ONE_EDIT)
+    _emulate_python312_resolve(monkeypatch)
     with pytest.raises(
         ReviewError,
         match="^edit candidate failed: output must be directly inside the review's host directory",
@@ -1218,6 +1247,22 @@ def test_symlink_loops_are_refused_through_fail(tmp_path: Path) -> None:
             archive,
             str(candidate),
             str(loop),
+            str(host / "candidate-2.md"),
+            digest(BASE),
+        )
+    for reference in ("drafts/loop.md", "drafts/../rootloop"):
+        with pytest.raises(ReviewError, match="^read input failed: "):
+            cmr_edit.apply_edits(
+                archive, reference, str(edits_path), str(host / "candidate-2.md"), None
+            )
+    with pytest.raises(
+        ReviewError,
+        match="^edit candidate failed: host directory must exist and not be a symlink",
+    ):
+        cmr_edit.apply_edits(
+            Archive(loop),
+            str(candidate),
+            str(edits_path),
             str(host / "candidate-2.md"),
             digest(BASE),
         )

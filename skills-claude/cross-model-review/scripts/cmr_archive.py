@@ -31,6 +31,17 @@ def fail(
     raise error(f"{operation} failed: {reason}. Got: {got!r:.100}")
 
 
+def resolve_path(path: Path) -> Path:
+    """Resolve ``path`` the same way on every supported Python.
+
+    ``Path.resolve`` raises ``RuntimeError`` on a symlink loop before Python
+    3.13; ``os.path.realpath``, which 3.13's ``Path.resolve`` uses, returns the
+    looping path instead, so the loop surfaces as the caller's own refusal or a
+    ``read input`` error.
+    """
+    return Path(os.path.realpath(path))
+
+
 def read_text(path: Path) -> str:
     """Read a UTF-8 input without changing it."""
     try:
@@ -43,15 +54,15 @@ class Archive:
     """Files for a review; mutable progress is separate from original records."""
 
     def __init__(self, root: Path) -> None:
-        self.root = root.expanduser().resolve()
+        self.root = resolve_path(root.expanduser())
 
     @classmethod
     def create(cls, root: Path, repo: Path, source: Path, limit: int) -> Archive:
         """Snapshot a source into a new external review directory."""
         root, repo, source = (
-            root.expanduser().resolve(),
-            repo.expanduser().resolve(),
-            source.expanduser().resolve(),
+            resolve_path(root.expanduser()),
+            resolve_path(repo.expanduser()),
+            resolve_path(source.expanduser()),
         )
         if not repo.is_dir() or root.is_relative_to(repo):
             fail("create review", "review must be outside the target directory", root)
@@ -88,7 +99,7 @@ class Archive:
 
     def path(self, name: str) -> Path:
         """Resolve an archive-local reference, refusing external paths."""
-        path = (self.root / name).resolve()
+        path = resolve_path(self.root / name)
         if not path.is_relative_to(self.root):
             fail("resolve record", "record is outside review directory", name)
         return path
