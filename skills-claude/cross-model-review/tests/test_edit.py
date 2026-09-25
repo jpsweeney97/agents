@@ -725,6 +725,26 @@ INJECTIONS = [
         1,
         "write receipt failed: candidate published at {out}; receipt not written by this invocation; receipt path now exists, created concurrently; boom; temporary left at {tmp}: boom",
     ),
+    (
+        "link",
+        1,
+        FileExistsError,
+        ("unlink", 1),
+        False,
+        False,
+        1,
+        "publish candidate failed: nothing published by this invocation; output now exists, created concurrently; boom; temporary left at {tmp}: boom",
+    ),
+    (
+        "link",
+        2,
+        OSError,
+        ("unlink", 2),
+        True,
+        False,
+        1,
+        "write receipt failed: candidate published at {out}; receipt not written; boom; temporary left at {tmp}: boom",
+    ),
 ]
 
 
