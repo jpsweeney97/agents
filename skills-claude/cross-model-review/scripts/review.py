@@ -14,6 +14,7 @@ import json
 import sys
 from pathlib import Path
 
+import cmr_edit
 import cmr_engine as engine
 from cmr_archive import Archive, ReviewError
 from cross_model_runtime.codex_transport import (
@@ -50,6 +51,11 @@ def main() -> int:
     extend = commands.add_parser("extend")
     extend.add_argument("--extra", required=True, type=int)
     extend.add_argument("--authorization", required=True, type=Path)
+    edit = commands.add_parser("edit")
+    edit.add_argument("--from", dest="from_", metavar="FROM", required=True, type=str)
+    edit.add_argument("--edits", required=True, type=str)
+    edit.add_argument("--out", required=True, type=str)
+    edit.add_argument("--expect-sha", type=str, default=None)
     args = parser.parse_args()
     archive = Archive(args.review)
     try:
@@ -71,6 +77,10 @@ def main() -> int:
             )
         elif args.command == "finish":
             result = engine.finish(archive, args.outcome, args.note)
+        elif args.command == "edit":
+            result = cmr_edit.apply_edits(
+                archive, args.from_, args.edits, args.out, args.expect_sha
+            )
         else:
             result = engine.extend(archive, args.extra, args.authorization)
     except (ReviewError, CodexTransportError) as exc:

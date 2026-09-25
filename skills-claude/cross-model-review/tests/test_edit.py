@@ -6,6 +6,8 @@ import hashlib
 import json
 import os
 import re
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -777,3 +779,152 @@ def test_injected_publication_failures(
     if left:
         payload = plan.candidate_bytes if nth == 1 else plan.receipt_bytes
         assert left[0].read_bytes() == payload
+
+
+# 11. CLI.
+
+
+def _run_cli(cwd: Path, review: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(SCRIPT), "--review", str(review), "edit", *args],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def test_cli_relative_paths_resolve_against_the_working_directory(
+    tmp_path: Path,
+) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    write_edits(host / "edits.json", ONE_EDIT)
+    done = _run_cli(
+        host,
+        archive.root,
+        "--from",
+        "./candidate-1.md",
+        "--edits",
+        "./edits.json",
+        "--out",
+        "./candidate-2.md",
+        "--expect-sha",
+        digest(BASE),
+    )
+    assert done.returncode == 0, done.stderr
+    result = json.loads(done.stdout)
+    assert done.stdout == json.dumps(result, indent=2, ensure_ascii=False) + "\n"
+    assert result == {
+        "out": str(host / "candidate-2.md"),
+        "receipt": str(host / "candidate-2.md.receipt.json"),
+        "base_sha256": digest(BASE),
+        "sha256": digest(b"# Title\n\nAlpha BETA gamma.\n\nDelta epsilon.\n"),
+        "edits_applied": 1,
+        "lines": 5,
+    }
+    receipt = json.loads(
+        (host / "candidate-2.md.receipt.json").read_text(encoding="utf-8")
+    )
+    assert receipt["base"] == {
+        "argument": "./candidate-1.md",
+        "path": str(candidate),
+        "sha256": digest(BASE),
+    }
+    assert receipt["edits_file"]["argument"] == "./edits.json"
+    assert receipt["edits_file"]["path"] == str(host / "edits.json")
+    assert receipt["edits"] == ONE_EDIT
+
+
+def test_cli_drafts_reference_resolves_against_the_review_root(tmp_path: Path) -> None:
+    archive, host, _candidate = make_review(tmp_path)
+    write_edits(host / "edits.json", ONE_EDIT)
+    foreign = tmp_path / "elsewhere"
+    foreign.mkdir()
+    ref = archive.load()["original"]
+    done = _run_cli(
+        foreign,
+        archive.root,
+        "--from",
+        ref,
+        "--edits",
+        str(host / "edits.json"),
+        "--out",
+        str(host / "candidate-2.md"),
+    )
+    assert done.returncode == 0, done.stderr
+    assert json.loads(done.stdout)["base_sha256"] == digest(BASE)
+    receipt = json.loads(
+        (host / "candidate-2.md.receipt.json").read_text(encoding="utf-8")
+    )
+    assert receipt["base"]["argument"] == ref
+    assert receipt["base"]["path"] == str(archive.path(ref))
+
+    refused = _run_cli(
+        foreign,
+        archive.root,
+        "--from",
+        ref,
+        "--edits",
+        str(host / "edits.json"),
+        "--out",
+        "candidate-3.md",
+    )
+    assert refused.returncode == 1
+    assert refused.stdout == ""
+    assert refused.stderr.startswith(
+        "edit candidate failed: output must be directly inside the review's host directory"
+    )
+    assert_nothing_published(host, "candidate-3.md")
+
+
+def test_cli_errors_go_to_stderr_with_exit_one(tmp_path: Path) -> None:
+    archive, host, _candidate = make_review(tmp_path)
+    write_edits(host / "edits.json", ONE_EDIT)
+    failed = _run_cli(
+        host,
+        archive.root,
+        "--from",
+        "./candidate-1.md",
+        "--edits",
+        "./edits.json",
+        "--out",
+        "./candidate-2.md",
+    )
+    assert failed.returncode == 1
+    assert failed.stdout == ""
+    assert failed.stderr.startswith(
+        "edit candidate failed: expected sha256 is required for a filesystem path base. "
+        "Got: './candidate-1.md'"
+    )
+    assert_nothing_published(host)
+
+
+@pytest.mark.parametrize("position", ["--from", "--edits", "--out"])
+def test_cli_refuses_a_non_utf8_path_argument(tmp_path: Path, position: str) -> None:
+    archive, host, _candidate = make_review(tmp_path)
+    write_edits(host / "edits.json", ONE_EDIT)
+    arguments = {
+        "--from": "./candidate-1.md",
+        "--edits": "./edits.json",
+        "--out": "./candidate-2.md",
+    }
+    arguments[position] = arguments[position].replace(".", "\udcff.", 1)
+    before = sorted(path.name for path in host.iterdir())
+    failed = _run_cli(
+        host,
+        archive.root,
+        "--from",
+        arguments["--from"],
+        "--edits",
+        arguments["--edits"],
+        "--out",
+        arguments["--out"],
+        "--expect-sha",
+        digest(BASE),
+    )
+    assert failed.returncode == 1
+    assert failed.stdout == ""
+    assert failed.stderr.startswith(
+        "edit candidate failed: argument is not encodable as UTF-8"
+    )
+    assert sorted(path.name for path in host.iterdir()) == before
