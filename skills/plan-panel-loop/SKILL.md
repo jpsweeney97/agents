@@ -24,7 +24,7 @@ Start by making the setup visible and cheap to correct:
 - Target: the exact plan file, pasted plan, issue, PR body, or other artifact being reviewed. For issues, PR bodies, and other remote artifacts, default to a patch-shaped replacement in chat unless the user explicitly authorizes editing that remote surface.
 - Authority: the plan's stated source of truth and any nearby context that controls whether a proposed patch is valid.
 - Mutation boundary: what may be edited, what must stay untouched, and whether the final output is a file patch or a proposed replacement in chat.
-- Loop cap: default to two review/patch/re-review cycles unless the user explicitly asks for more.
+- Loop cap: default to two review/patch/re-review cycles unless the user explicitly asks for more. A request for more still gets a number; "until the panel finds nothing" is not a cap, for the reason under Stop Conditions.
 - Proof boundary: whether panel feedback came from subagents, separate model/tool calls, or a single-agent simulation.
 - Reviewer containment: if subagents are used, state that they are read-only reviewers and may not edit files, launch nested panels, or change external state.
 
@@ -105,11 +105,13 @@ After any file edit, summarize the changed sections and run the smallest relevan
 
 Stop with `defensible for inspected scope` only when every accepted material finding has either been patched or deliberately rejected with evidence, the re-review found no new material blocker, and the proof boundary is stated honestly.
 
+`defensible for inspected scope` is a claim about the lenses that ran, not about the plan. A plan that carries complete code carries as many decisions as the code will, so a fresh panel with a fresh lens finds a fresh material finding in any such plan; the run this loop was built from went on that way for panel after panel, each clearing the last one's lanes and opening new ones. Cleanliness does not arrive by iteration: do not read a clean panel as a reason to run one more, and do not read a new lens's finding as proof the last verdict was wrong. A finding that execution's own gates catch as cheaply as a panel does — a path or line number `execute-plan` re-checks before each task, a symbol the compiler will reject, a step whose test will fail as written — is handed to execution: record it under the closeout's remaining findings as handed to the executor, and do not spend a cycle patching and re-reviewing it here.
+
 Stop with `needs user decision` when findings conflict, the correct patch depends on priorities the plan does not settle, the target or authority is ambiguous, the mutation boundary would need to expand, or patching would risk overwriting unrelated work.
 
 Stop with `iteration cap reached` when the default or user-specified cap is reached while material findings remain. Summarize the remaining findings and the smallest next decision rather than launching another panel.
 
-When the cap is reached with material findings remaining, a third cycle is proposed without a lower cap, or the smallest responsible patch would add a new subsystem, trust boundary, persistent proof surface, or maintenance obligation, route the continue-question to `recheck-investment` (where available) before running another cycle or applying that patch. The named plan stays unpatched while that check runs; finding validity stays with this loop's panel, and the check owns only whether continued investment needs renewed human authorization.
+When the cap is reached with material findings remaining, a third cycle is proposed without a lower cap, or the smallest responsible patch would add a new subsystem, trust boundary, persistent proof surface, or maintenance obligation, route the continue-question to `recheck-investment` (where available) before running another cycle or applying that patch. The named plan stays unpatched while that check runs; finding validity stays with this loop's panel, and the check owns only whether continued investment needs renewed human authorization. A request to continue until the panels find nothing is a request with no stop in it: say so, propose a cap, and route the question the same way.
 
 Stop with `not patchable as given` when the plan lacks enough concrete goal, scope, authority, or execution shape for panel feedback to produce a responsible patch. Name the workflow that should clarify it next.
 
