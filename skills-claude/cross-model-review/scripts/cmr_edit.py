@@ -127,7 +127,7 @@ def _parse_edits(text: str, raw: str) -> list[dict[str, str]]:
     """Parse the edits file; every string is checked for UTF-8 encodability."""
     try:
         value = json.loads(text)
-    except (json.JSONDecodeError, RecursionError) as exc:
+    except (ValueError, RecursionError) as exc:  # JSONDecodeError is a ValueError
         fail(OPERATION, f"invalid edits file: {exc}", raw)
     if not isinstance(value, list):
         fail(OPERATION, "invalid edits file: top level must be an array", raw)

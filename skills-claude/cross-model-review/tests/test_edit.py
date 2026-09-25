@@ -1181,9 +1181,8 @@ def test_deeply_nested_edits_file_is_refused_through_fail(tmp_path: Path) -> Non
     deep = archive.root.parent / "deep.json"
     deep.write_text("[" * 200_000 + "]" * 200_000, encoding="utf-8")
     with pytest.raises(
-        ReviewError,
-        match="^edit candidate failed: invalid edits file: maximum recursion depth",
-    ):
+        ReviewError, match="^edit candidate failed: invalid edits file: "
+    ) as caught:
         cmr_edit.apply_edits(
             archive,
             str(candidate),
@@ -1191,6 +1190,25 @@ def test_deeply_nested_edits_file_is_refused_through_fail(tmp_path: Path) -> Non
             str(host / "candidate-2.md"),
             digest(BASE),
         )
+    assert isinstance(caught.value.__context__, RecursionError)
+    assert_nothing_published(host)
+
+
+def test_integer_past_the_digit_limit_is_an_invalid_edits_file(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    huge = archive.root.parent / "huge.json"
+    huge.write_text("[" + "9" * 5000 + "]", encoding="utf-8")
+    with pytest.raises(
+        ReviewError, match="^edit candidate failed: invalid edits file: "
+    ) as caught:
+        cmr_edit.apply_edits(
+            archive,
+            str(candidate),
+            str(huge),
+            str(host / "candidate-2.md"),
+            digest(BASE),
+        )
+    assert isinstance(caught.value.__context__, ValueError)
     assert_nothing_published(host)
 
 
