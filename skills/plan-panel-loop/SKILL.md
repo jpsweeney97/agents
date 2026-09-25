@@ -46,7 +46,7 @@ Each panel member needs a compact brief:
 
 Ask reviewers for stable anchors from the current snapshot. Prefer heading or surrounding text plus current line numbers when available. Line numbers are useful evidence on the current snapshot, but the patching agent must re-read before editing because line numbers can drift.
 
-Do not claim an independent panel if you did not actually run one. If no subagent or separate-call mechanism is available, run the lenses yourself, label the result as single-agent simulated panel feedback, and lower the proof claim accordingly.
+Do not claim an independent panel if you did not actually run one. If no subagent or separate-call mechanism is available, run the lenses yourself, label the result as single-agent simulated panel feedback, and lower the proof claim accordingly. A mechanism the runtime exposes but whose tool policy allows dispatch only on the user's explicit request for delegation is unavailable until the user makes that request: name the policy and ask once before simulating.
 
 When using subagents, read [references/subagent-brief.md](references/subagent-brief.md) and include its containment language in every reviewer prompt.
 

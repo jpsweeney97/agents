@@ -29,7 +29,7 @@ Honor plain-language steering. "Just consistency and lifecycle" selects those di
 
 Require native subagents that can start a fresh context, read the target, and return results. Claude Code uses Agent; Codex uses its native collaboration tools. Use the tools actually exposed by the host. Workflow and command-line launches of another agent runtime are not required and are not substitutes for missing native subagents.
 
-Confirm that these capabilities are available before starting the review. If the host cannot start separate fresh agents, stop and explain what is unavailable. Do not perform review or verification in the main agent as a fallback.
+Confirm that these capabilities are available before starting the review. If the host cannot start separate fresh agents, stop and explain what is unavailable. A subagent tool the host exposes but whose policy allows dispatch only on the user's explicit request for delegation counts as unavailable until the user makes that request: name the policy and ask once before stopping. Do not perform review or verification in the main agent as a fallback.
 
 Use an explicitly requested supported model; otherwise use the host's configured subagent defaults. Disclose an unsupported model request rather than silently replacing it. For each task, start a fresh context without inherited conversation history. Pass the relevant source paths, checked facts, judging rules, and assigned task explicitly. A verifier receives its candidate finding, not the other verifiers' conclusions.
 
