@@ -14,9 +14,11 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import cmr_archive
 import cmr_edit
 import cmr_engine as engine
 import pytest
+import review as review_cli
 from cmr_archive import Archive, RecordError, ReviewError
 from cross_model_runtime.codex_transport import CodexResult, CodexTransportError
 
@@ -1305,6 +1307,75 @@ def test_symlink_loops_are_refused_through_fail(
             digest(BASE),
         )
     assert_nothing_published(host)
+
+
+def test_review_creation_refuses_symlink_loops_through_fail(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "target"
+    repo.mkdir()
+    source = repo / "plan.md"
+    source.write_bytes(BASE)
+    loop = tmp_path / "loop"
+    loop.symlink_to(loop)
+    _emulate_python312_resolve(monkeypatch)
+    with pytest.raises(ReviewError, match="^create review failed: "):
+        Archive.create(loop, repo, source, 3)
+    with pytest.raises(
+        ReviewError,
+        match="^create review failed: review must be outside the target directory",
+    ):
+        Archive.create(tmp_path / "review", loop, source, 3)
+    with pytest.raises(ReviewError, match="^read input failed: "):
+        Archive.create(tmp_path / "review", repo, loop, 3)
+    assert not (tmp_path / "review").exists()
+
+
+def test_a_symlink_after_a_loop_is_still_resolved(tmp_path: Path) -> None:
+    """Before 3.13, ``realpath`` stops at a loop and treats the rest as text.
+
+    Only Python 3.12 takes that path, so only the suite's 3.12 run can fail
+    here; the helper's validation runs the suite on 3.12, 3.13, and 3.14.
+    """
+    archive, host, candidate = make_review(tmp_path)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "secret.md").write_bytes(BASE)
+    drafts = archive.root / "drafts"
+    (drafts / "loop").symlink_to(drafts / "loop")
+    (drafts / "outdir").symlink_to(outside)
+    name = "drafts/loop/../outdir/secret.md"
+    with pytest.raises(
+        ReviewError,
+        match="^resolve record failed: record is outside review directory",
+    ):
+        archive.path(name)
+    with pytest.raises(
+        ReviewError,
+        match="^resolve record failed: record is outside review directory",
+    ):
+        edit(archive, host, candidate, base=name, expect_sha=None)
+    assert_nothing_published(host)
+
+
+def test_a_path_that_never_settles_is_refused(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    passes = iter(range(1000))
+
+    def realpath(path: object) -> str:
+        return f"/unsettled/{next(passes)}"
+
+    monkeypatch.setattr(cmr_archive.os.path, "realpath", realpath)
+    with pytest.raises(
+        ReviewError, match="^resolve path failed: symlinks did not settle"
+    ):
+        cmr_archive.resolve_path(Path("/start"))
+    monkeypatch.setattr(sys, "argv", ["review.py", "--review", "/start", "status"])
+    assert review_cli.main() == 1
+    assert capsys.readouterr().err.startswith(
+        "resolve path failed: symlinks did not settle"
+    )
 
 
 # 14. Published files take the mode any other new record gets.

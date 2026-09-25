@@ -31,15 +31,34 @@ def fail(
     raise error(f"{operation} failed: {reason}. Got: {got!r:.100}")
 
 
+_RESOLVE_PASSES = 40
+
+
 def resolve_path(path: Path) -> Path:
-    """Resolve ``path`` the same way on every supported Python.
+    """Resolve ``path`` so that a containment check on the result is sound.
 
     ``Path.resolve`` raises ``RuntimeError`` on a symlink loop before Python
     3.13; ``os.path.realpath``, which 3.13's ``Path.resolve`` uses, returns the
     looping path instead, so the loop surfaces as the caller's own refusal or a
-    ``read input`` error.
+    ``read input`` error. Before 3.13, ``realpath`` also stops at the first
+    loop and normalizes the rest of the path only as text, which can leave a
+    later symlink unresolved (``loop/../outdir``). Repeating it until the result
+    stops changing resolves what it left. The result then either contains no
+    symlink, so it names the file a read reaches, or still contains a loop, so a
+    read fails. For a path without a loop every supported Python gives the same
+    result; a ``..`` after a loop can still resolve differently between 3.12
+    and 3.13, within that guarantee.
+
+    Raises:
+        ReviewError: The result still changes after ``_RESOLVE_PASSES`` passes.
     """
-    return Path(os.path.realpath(path))
+    resolved = os.path.realpath(path)
+    for _ in range(_RESOLVE_PASSES):
+        again = os.path.realpath(resolved)
+        if again == resolved:
+            return Path(resolved)
+        resolved = again
+    fail("resolve path", "symlinks did not settle", str(path))
 
 
 def read_text(path: Path) -> str:

@@ -57,8 +57,8 @@ def main() -> int:
     edit.add_argument("--out", required=True, type=str)
     edit.add_argument("--expect-sha", type=str, default=None)
     args = parser.parse_args()
-    archive = Archive(args.review)
     try:
+        archive = Archive(args.review)
         if args.command == "init":
             result = Archive.create(
                 args.review, args.repo, args.source, args.rounds
