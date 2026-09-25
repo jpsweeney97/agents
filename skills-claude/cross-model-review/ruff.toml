@@ -1,0 +1,3 @@
+# The candidate-edit fixtures are recorded bytes that the equivalence test compares
+# exactly; keep ruff (which also formats Markdown) away from them.
+extend-exclude = ["tests/fixtures"]
