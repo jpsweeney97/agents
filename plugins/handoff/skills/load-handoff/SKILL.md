@@ -93,7 +93,7 @@ The short form is about five lines with no headings:
 ```markdown
 Loaded: <path>, saved <age> ago.
 Nothing has changed since then: `<branch>` at `<HEAD>`, <working-tree summary, such as "clean" or "1 untracked path">.
-Next: <the handoff's next action>
+Next: <the handoff's next action, in one sentence>
 Throughline: <one line saying it is stale and how far behind; omit this line unless stale>
 
 Need from you:
