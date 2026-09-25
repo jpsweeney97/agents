@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 import tempfile
@@ -1221,3 +1222,21 @@ def test_symlink_loops_are_refused_through_fail(tmp_path: Path) -> None:
             digest(BASE),
         )
     assert_nothing_published(host)
+
+
+# 14. Published files take the mode any other new record gets.
+
+
+def test_candidate_and_receipt_take_the_umask_default_mode(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    edit(archive, host, candidate)
+    snapshot = archive.path(archive.load()["original"])
+    mask = os.umask(0)
+    os.umask(mask)
+    expected = 0o666 & ~mask
+    for path in (
+        snapshot,
+        host / "candidate-2.md",
+        host / "candidate-2.md.receipt.json",
+    ):
+        assert stat.S_IMODE(os.stat(path).st_mode) == expected, path

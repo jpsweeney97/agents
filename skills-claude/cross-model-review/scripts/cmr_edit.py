@@ -264,6 +264,17 @@ def _remove(temporary: str | None) -> Leftover:
     return None
 
 
+def _creation_mode() -> int:
+    """Return the mode ``open`` gives a new file under the current umask.
+
+    ``NamedTemporaryFile`` creates its file ``0600``; the published candidate
+    and receipt take the mode every other new review record gets instead.
+    """
+    mask = os.umask(0)
+    os.umask(mask)
+    return 0o666 & ~mask
+
+
 def _link_once(
     host: Path, data: bytes, destination: Path
 ) -> tuple[str, OSError | None, Leftover]:
@@ -284,6 +295,7 @@ def _link_once(
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
+            os.fchmod(stream.fileno(), _creation_mode())
     except OSError as exc:
         return "failed", exc, _remove(temporary)
     try:
