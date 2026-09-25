@@ -1169,3 +1169,55 @@ def test_base_digest_is_checked_before_the_edits_are_parsed(tmp_path: Path) -> N
             archive, str(candidate), str(malformed), str(host / "candidate-2.md"), wrong
         )
     assert_nothing_published(host)
+
+
+# 13. Unusual inputs still end in the shared diagnostic format.
+
+
+def test_deeply_nested_edits_file_is_refused_through_fail(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    deep = archive.root.parent / "deep.json"
+    deep.write_text("[" * 200_000 + "]" * 200_000, encoding="utf-8")
+    with pytest.raises(
+        ReviewError,
+        match="^edit candidate failed: invalid edits file: maximum recursion depth",
+    ):
+        cmr_edit.apply_edits(
+            archive,
+            str(candidate),
+            str(deep),
+            str(host / "candidate-2.md"),
+            digest(BASE),
+        )
+    assert_nothing_published(host)
+
+
+def test_symlink_loops_are_refused_through_fail(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    loop = archive.root.parent / "loop"
+    loop.symlink_to(loop)
+    edits_path = write_edits(archive.root.parent / "edits.json", ONE_EDIT)
+    with pytest.raises(
+        ReviewError,
+        match="^edit candidate failed: output must be directly inside the review's host directory",
+    ):
+        cmr_edit.apply_edits(
+            archive, str(candidate), str(edits_path), str(loop / "new.md"), digest(BASE)
+        )
+    with pytest.raises(ReviewError, match="^read input failed: "):
+        cmr_edit.apply_edits(
+            archive,
+            str(loop),
+            str(edits_path),
+            str(host / "candidate-2.md"),
+            digest(BASE),
+        )
+    with pytest.raises(ReviewError, match="^read input failed: "):
+        cmr_edit.apply_edits(
+            archive,
+            str(candidate),
+            str(loop),
+            str(host / "candidate-2.md"),
+            digest(BASE),
+        )
+    assert_nothing_published(host)

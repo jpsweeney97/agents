@@ -60,6 +60,16 @@ def _digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _resolved(path: Path) -> Path:
+    """Resolve ``path`` the same way on every supported Python.
+
+    ``Path.resolve`` raises ``RuntimeError`` on a symlink loop before Python
+    3.13; ``os.path.realpath`` returns the looping path instead, so the loop
+    surfaces later as a containment refusal or a ``read input`` error.
+    """
+    return Path(os.path.realpath(path))
+
+
 def _encodable(value: str) -> bool:
     try:
         value.encode("utf-8")
@@ -87,7 +97,7 @@ def _output_paths(host: Path, raw: str) -> tuple[Path, Path]:
     if raw.endswith(os.sep) or name in ("", ".", ".."):
         fail(OPERATION, "output must name a file", raw)
     supplied = Path(raw)
-    parent = supplied.parent.resolve()
+    parent = _resolved(supplied.parent)
     if parent != host:
         fail(
             OPERATION,
@@ -127,7 +137,7 @@ def _parse_edits(text: str, raw: str) -> list[dict[str, str]]:
     """Parse the edits file; every string is checked for UTF-8 encodability."""
     try:
         value = json.loads(text)
-    except json.JSONDecodeError as exc:
+    except (json.JSONDecodeError, RecursionError) as exc:
         fail(OPERATION, f"invalid edits file: {exc}", raw)
     if not isinstance(value, list):
         fail(OPERATION, "invalid edits file: top level must be an array", raw)
@@ -205,14 +215,14 @@ def _prepare(
     host = _host_directory(archive)
     out_path, receipt_path = _output_paths(host, out)
     is_reference, expected = _expected_digest(base, expect_sha)
-    base_path = archive.path(base) if is_reference else Path(base).resolve()
+    base_path = archive.path(base) if is_reference else _resolved(Path(base))
     if out_path == base_path:
         fail(OPERATION, "output must differ from the base", str(out_path))
     base_text = archive.text(base) if is_reference else read_text(base_path)
     base_digest = _digest(base_text.encode("utf-8"))
     if base_digest != expected:
         fail(OPERATION, f"base sha256 is {base_digest}, expected {expected}", base)
-    edits_path = Path(edits).resolve()
+    edits_path = _resolved(Path(edits))
     edits_text = read_text(edits_path)
     edit_list = _parse_edits(edits_text, edits)
     text = _apply(base_text, edit_list)
