@@ -4,6 +4,13 @@ All notable changes to the Handoff plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This changelog begins at 3.2.1; earlier versions predate the file and are not reconstructed here.
 
+## 3.4.0 - 2026-09-25
+
+### Added
+
+- `load-handoff`: a short reply form of about five lines — the loaded path and its age, one line of live state, the handoff's next action, a stale-throughline line only when stale, and the handoff's open decisions numbered under `Need from you:`. It is used only when the live-reality check finds nothing that differs from the handoff: same branch; same `HEAD`, or only commits under `.agents/handoffs/` since the save; no newer handoff on another branch passed over; the working tree and the named files agree with the handoff. Any difference, or any condition that could not be checked, keeps the full response shape, which is unchanged, as it is whenever the user asks for the full report. The check itself still runs in full. Motivation: of 209 Claude-side load replies from 2026-09-01 to 2026-09-25 whose handoff recorded a commit, 173 (83%) found the handoff's branch and `HEAD` still live, at a median handoff age of 7 minutes, yet those replies ran a median of 383 words, most of which the previous session's closing message had just said. The handoffs-only allowance exists because the land ritual commits a throughline refresh after the save in repositories that track it: of the 25 same-branch loads whose `HEAD` had moved, 9 had moved only by that commit.
+- `load-handoff`: the check now runs `date -u` (for the handoff's age) and, when `HEAD` differs from the handoff's `commit`, `git diff --name-only <commit> HEAD` (to see what changed since the save).
+
 ## 3.3.0 - 2026-08-23
 
 ### Changed
