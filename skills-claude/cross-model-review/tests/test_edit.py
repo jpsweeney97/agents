@@ -13,8 +13,10 @@ from pathlib import Path
 from typing import Any
 
 import cmr_edit
+import cmr_engine as engine
 import pytest
 from cmr_archive import Archive, RecordError, ReviewError
+from cross_model_runtime.codex_transport import CodexResult, CodexTransportError
 
 TESTS = Path(__file__).resolve().parent
 SCRIPTS = TESTS.parent / "scripts"
@@ -928,3 +930,136 @@ def test_cli_refuses_a_non_utf8_path_argument(tmp_path: Path, position: str) -> 
         "edit candidate failed: argument is not encodable as UTF-8"
     )
     assert sorted(path.name for path in host.iterdir()) == before
+
+
+# 9. Isolation from round state.
+
+
+def test_edit_leaves_state_untouched_at_every_phase_and_under_lock(
+    tmp_path: Path,
+) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    state_path = archive.root / "state.json"
+    for index, phase in enumerate(
+        ("between", "opening", "working", "pending", "failed")
+    ):
+        state = archive.load()
+        state["phase"] = phase
+        state["used"] = 0 if phase == "between" else 1
+        state["call"] = (
+            {"prefix": "01-opening", "kind": "opening", "revision": state["original"]}
+            if phase == "pending"
+            else None
+        )
+        state["error"] = "simulated" if phase == "failed" else None
+        archive.save(state)
+        before = state_path.read_bytes()
+        edit(archive, host, candidate, out=str(host / f"phase-{index}.md"))
+        assert state_path.read_bytes() == before
+        assert (
+            host / f"phase-{index}.md"
+        ).read_bytes() == b"# Title\n\nAlpha BETA gamma.\n\nDelta epsilon.\n"
+    before = state_path.read_bytes()
+    with archive.locked():
+        edit(archive, host, candidate, out=str(host / "locked.md"))
+    assert state_path.read_bytes() == before
+    assert archive.load()["checked"] is None
+
+
+# 10. Review integration.
+
+
+def _controlled_runner(bodies: list[Any]) -> Any:
+    def run(
+        prompt: str,
+        *,
+        output_schema: dict[str, Any],
+        repo_root: str,
+        timeout_seconds: float,
+        resume_thread_id: str | None,
+    ) -> CodexResult:
+        body = bodies.pop(0)
+        if isinstance(body, Exception):
+            raise body
+        message = json.dumps(
+            {
+                "revision": output_schema["properties"]["revision"]["enum"][0],
+                "findings": body,
+                "review_notes": "Read the whole candidate.",
+            }
+        )
+        return CodexResult(
+            message,
+            0,
+            '{"type":"thread.started","thread_id":"review-session"}\n',
+            "",
+            ("codex", "controlled-test-runner"),
+        )
+
+    return run
+
+
+def test_query_snapshots_the_edited_candidate_and_edit_never_moves_checked(
+    tmp_path: Path,
+) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    source = tmp_path / "target" / "plan.md"
+    request = tmp_path / "request.md"
+    request.write_text(
+        "Goal: uppercase beta. Review the candidate.\n", encoding="utf-8"
+    )
+    finding = {
+        "ref": "F1",
+        "disposition": "standing",
+        "material": True,
+        "explanation": "beta should be uppercase.",
+    }
+    resolved = dict(finding, disposition="resolved", explanation="Now uppercase.")
+
+    engine.begin(archive)
+    engine.query(archive, source, request, _controlled_runner([[finding]]))
+    edit(
+        archive,
+        host,
+        candidate,
+        edits=[{"old": "beta", "new": "Beta"}],
+        out=str(host / "candidate-2.md"),
+    )
+    edit(
+        archive,
+        host,
+        host / "candidate-2.md",
+        edits=[{"old": "Beta", "new": "BETA"}],
+        out=str(host / "candidate-3.md"),
+    )
+    assert archive.load()["checked"] is None
+
+    state = engine.query(
+        archive, host / "candidate-3.md", request, _controlled_runner([[resolved]])
+    )
+    checked = state["checked"]
+    assert checked == f"drafts/{digest((host / 'candidate-3.md').read_bytes())}.md"
+    assert archive.path(checked).read_bytes() == (host / "candidate-3.md").read_bytes()
+    assert state["phase"] == "between"
+
+    edit(
+        archive,
+        host,
+        host / "candidate-3.md",
+        edits=[{"old": "gamma", "new": "GAMMA"}],
+        out=str(host / "candidate-4.md"),
+    )
+    assert archive.load()["checked"] == checked
+
+    engine.begin(archive)
+    with pytest.raises(CodexTransportError, match="transport down"):
+        engine.query(
+            archive,
+            host / "candidate-4.md",
+            request,
+            _controlled_runner([CodexTransportError("transport down")]),
+        )
+    state = archive.load()
+    assert state["phase"] == "failed"
+    assert state["checked"] == checked
+    assert state["used"] == 2
