@@ -6,12 +6,13 @@ import hashlib
 import json
 import os
 import re
+import tempfile
 from pathlib import Path
 from typing import Any
 
 import cmr_edit
 import pytest
-from cmr_archive import Archive, ReviewError
+from cmr_archive import Archive, RecordError, ReviewError
 
 TESTS = Path(__file__).resolve().parent
 SCRIPTS = TESTS.parent / "scripts"
@@ -525,3 +526,254 @@ def test_host_must_be_a_real_directory(tmp_path: Path) -> None:
         ReviewError, match="host directory must exist and not be a symlink"
     ):
         edit(archive, host, moved)
+
+
+# 7. Concurrent creation.
+
+
+def test_same_out_race_loser_publishes_nothing(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    edits_a = write_edits(host / "a.json", [{"old": "beta", "new": "A"}])
+    edits_b = write_edits(host / "b.json", [{"old": "beta", "new": "B"}])
+    out = str(host / "candidate-2.md")
+    plan_a = cmr_edit._prepare(archive, str(candidate), str(edits_a), out, digest(BASE))
+    plan_b = cmr_edit._prepare(archive, str(candidate), str(edits_b), out, digest(BASE))
+    cmr_edit._publish(plan_a)
+    winner = (
+        (host / "candidate-2.md").read_bytes(),
+        (host / "candidate-2.md.receipt.json").read_bytes(),
+    )
+    assert winner[0] == b"# Title\n\nAlpha A gamma.\n\nDelta epsilon.\n"
+    with pytest.raises(
+        RecordError,
+        match="^publish candidate failed: nothing published by this invocation; "
+        "output now exists, created concurrently; ",
+    ):
+        cmr_edit._publish(plan_b)
+    assert (
+        (host / "candidate-2.md").read_bytes(),
+        (host / "candidate-2.md.receipt.json").read_bytes(),
+    ) == winner
+    assert published(host) == (True, True, [])
+
+
+def test_receipt_destination_collision_keeps_candidate(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    edits_file = write_edits(host / "edits.json", ONE_EDIT)
+    out = host / "candidate-2.md"
+    receipt = host / "candidate-2.md.receipt.json"
+    plan = cmr_edit._prepare(
+        archive, str(candidate), str(edits_file), str(out), digest(BASE)
+    )
+    receipt.write_bytes(b"foreign\n")
+    with pytest.raises(RecordError) as caught:
+        cmr_edit._publish(plan)
+    message = str(caught.value)
+    assert message.startswith(
+        f"write receipt failed: candidate published at {out}; receipt not written "
+        "by this invocation; receipt path now exists, created concurrently; "
+    )
+    assert message.endswith(f". Got: {str(receipt)!r:.100}")
+    assert out.read_bytes() == plan.candidate_bytes
+    assert receipt.read_bytes() == b"foreign\n"
+    assert published(host) == (True, True, [])
+
+
+# 8. Injected publication failures, one at a time.
+
+
+def _inject(
+    monkeypatch: pytest.MonkeyPatch, name: str, nth: int, error: type[OSError]
+) -> None:
+    module: Any = tempfile if name == "NamedTemporaryFile" else os
+    original = getattr(module, name)
+    calls = 0
+
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        nonlocal calls
+        calls += 1
+        if calls == nth:
+            raise error("boom")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(module, name, wrapper)
+
+
+INJECTIONS = [
+    # (name, nth, error, second injection, out published, receipt published, temporaries left, expected reason)
+    (
+        "NamedTemporaryFile",
+        1,
+        OSError,
+        None,
+        False,
+        False,
+        0,
+        "publish candidate failed: nothing published; boom",
+    ),
+    (
+        "fsync",
+        1,
+        OSError,
+        None,
+        False,
+        False,
+        0,
+        "publish candidate failed: nothing published; boom",
+    ),
+    (
+        "link",
+        1,
+        OSError,
+        None,
+        False,
+        False,
+        0,
+        "publish candidate failed: nothing published; boom",
+    ),
+    (
+        "link",
+        1,
+        FileExistsError,
+        None,
+        False,
+        False,
+        0,
+        "publish candidate failed: nothing published by this invocation; output now exists, created concurrently; boom",
+    ),
+    (
+        "unlink",
+        1,
+        OSError,
+        None,
+        True,
+        False,
+        1,
+        "publish candidate failed: candidate published at {out}; receipt not attempted; temporary left at {tmp}: boom",
+    ),
+    (
+        "NamedTemporaryFile",
+        2,
+        OSError,
+        None,
+        True,
+        False,
+        0,
+        "write receipt failed: candidate published at {out}; receipt not written; boom",
+    ),
+    (
+        "fsync",
+        2,
+        OSError,
+        None,
+        True,
+        False,
+        0,
+        "write receipt failed: candidate published at {out}; receipt not written; boom",
+    ),
+    (
+        "link",
+        2,
+        OSError,
+        None,
+        True,
+        False,
+        0,
+        "write receipt failed: candidate published at {out}; receipt not written; boom",
+    ),
+    (
+        "link",
+        2,
+        FileExistsError,
+        None,
+        True,
+        False,
+        0,
+        "write receipt failed: candidate published at {out}; receipt not written by this invocation; receipt path now exists, created concurrently; boom",
+    ),
+    (
+        "unlink",
+        2,
+        OSError,
+        None,
+        True,
+        True,
+        1,
+        "write receipt failed: candidate and receipt published; temporary left at {tmp}: boom",
+    ),
+    (
+        "link",
+        1,
+        OSError,
+        ("unlink", 1),
+        False,
+        False,
+        1,
+        "publish candidate failed: nothing published; boom; temporary left at {tmp}: boom",
+    ),
+    (
+        "link",
+        2,
+        FileExistsError,
+        ("unlink", 2),
+        True,
+        False,
+        1,
+        "write receipt failed: candidate published at {out}; receipt not written by this invocation; receipt path now exists, created concurrently; boom; temporary left at {tmp}: boom",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    (
+        "name",
+        "nth",
+        "error",
+        "second",
+        "out_published",
+        "receipt_published",
+        "temporaries",
+        "reason",
+    ),
+    INJECTIONS,
+)
+def test_injected_publication_failures(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    name: str,
+    nth: int,
+    error: type[OSError],
+    second: tuple[str, int] | None,
+    out_published: bool,
+    receipt_published: bool,
+    temporaries: int,
+    reason: str,
+) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    edits_file = write_edits(host / "edits.json", ONE_EDIT)
+    out = host / "candidate-2.md"
+    receipt = host / "candidate-2.md.receipt.json"
+    plan = cmr_edit._prepare(
+        archive, str(candidate), str(edits_file), str(out), digest(BASE)
+    )
+    _inject(monkeypatch, name, nth, error)
+    if second is not None:
+        _inject(monkeypatch, second[0], second[1], OSError)
+    with pytest.raises(RecordError) as caught:
+        cmr_edit._publish(plan)
+    monkeypatch.undo()
+    left = sorted(host.glob("edit-*.tmp"))
+    assert len(left) == temporaries
+    tmp = str(left[0]) if left else ""
+    expected = reason.format(out=out, tmp=tmp)
+    got = str(out) if expected.startswith("publish candidate") else str(receipt)
+    assert str(caught.value) == f"{expected}. Got: {got!r:.100}"
+    assert out.exists() == out_published
+    assert receipt.exists() == receipt_published
+    if out_published:
+        assert out.read_bytes() == plan.candidate_bytes
+    if receipt_published:
+        assert receipt.read_bytes() == plan.receipt_bytes
+    if left:
+        payload = plan.candidate_bytes if nth == 1 else plan.receipt_bytes
+        assert left[0].read_bytes() == payload
