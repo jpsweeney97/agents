@@ -4,6 +4,12 @@ All notable changes to the Handoff plugin are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This changelog begins at 3.2.1; earlier versions predate the file and are not reconstructed here.
 
+## 3.4.1 - 2026-09-25
+
+### Fixed
+
+- `load-handoff`: a stale throughline no longer rules out the short form. Before this fix, Codex loaded a handoff whose branch and `HEAD` matched live state exactly while the throughline was one handoff behind, and gave the full form in 2 of 2 runs; one of those runs cited only the throughline's older description as the difference. The skill now says a stale throughline is not a difference from the handoff, and the short form's `Throughline:` line reports it. After the fix, Codex gave the short form with the stale line when it found nothing else different, and still gave the full form whenever it found a real difference, such as a named record file contradicting the handoff.
+
 ## 3.4.0 - 2026-09-25
 
 ### Added

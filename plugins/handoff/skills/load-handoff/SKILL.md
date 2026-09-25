@@ -86,7 +86,7 @@ Use the short form only when the check found nothing that differs from the hando
 - The working tree agrees with the handoff: no path the handoff names shows uncommitted changes in `git status` that the handoff does not mention, and when the handoff states the working-tree status, the live status matches it.
 - Every file the handoff names that the check read still says what the handoff says.
 
-Any difference, or any condition you could not check, means the full form in Response Shape below.
+Any difference, or any condition you could not check, means the full form in Response Shape below. A stale throughline is not a difference from the handoff: it describes older history by definition, so it does not rule out the short form, and the short form's `Throughline:` line reports it.
 
 The short form is about five lines with no headings:
 
