@@ -44,8 +44,10 @@ def resolve_path(path: Path) -> Path:
     loop and normalizes the rest of the path only as text, which can leave a
     later symlink unresolved (``loop/../outdir``). Repeating it until the result
     stops changing resolves what it left. The result then either contains no
-    symlink, so it names the file a read reaches, or still contains a loop, so a
-    read fails. For a path without a loop every supported Python gives the same
+    symlink, so it names the file a read reaches, or still contains a component
+    ``realpath`` could not follow (a loop, or an entry behind a directory
+    without search permission), so a read of it fails. For a path without a
+    loop every supported Python gives the same
     result; a ``..`` after a loop can still resolve differently between 3.12
     and 3.13, within that guarantee.
 

@@ -1331,12 +1331,37 @@ def test_review_creation_refuses_symlink_loops_through_fail(
     assert not (tmp_path / "review").exists()
 
 
-def test_a_symlink_after_a_loop_is_still_resolved(tmp_path: Path) -> None:
-    """Before 3.13, ``realpath`` stops at a loop and treats the rest as text.
+def _emulate_python312_realpath(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make ``os.path.realpath`` stop at a symlink loop, as Python 3.12's does.
 
-    Only Python 3.12 takes that path, so only the suite's 3.12 run can fail
-    here; the helper's validation runs the suite on 3.12, 3.13, and 3.14.
+    3.12's ``realpath`` resolves up to the first symlink that loops, keeps the
+    rest of the path as text, and normalizes it, so ``loop/../outdir`` comes
+    back with ``outdir`` unresolved; 3.13 and later keep resolving. This models
+    that much of 3.12, which is all the tests below use, so a return to a
+    single ``realpath`` fails them under any interpreter.
     """
+    original = os.path.realpath
+
+    def realpath(path: Any, *, strict: bool = False) -> str:
+        parts = Path(os.getcwd(), path).parts  # keeps ``..``, unlike abspath
+        for index in range(1, len(parts)):
+            prefix = Path(*parts[: index + 1])
+            if not prefix.is_symlink():
+                continue
+            try:
+                prefix.stat()
+            except OSError as exc:
+                if exc.errno == errno.ELOOP:
+                    head = original(Path(*parts[:index]), strict=strict)
+                    return os.path.normpath(os.path.join(head, *parts[index:]))
+        return original(path, strict=strict)
+
+    monkeypatch.setattr(os.path, "realpath", realpath)
+
+
+def test_a_symlink_after_a_loop_is_still_resolved(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     archive, host, candidate = make_review(tmp_path)
     outside = tmp_path / "outside"
     outside.mkdir()
@@ -1345,6 +1370,10 @@ def test_a_symlink_after_a_loop_is_still_resolved(tmp_path: Path) -> None:
     (drafts / "loop").symlink_to(drafts / "loop")
     (drafts / "outdir").symlink_to(outside)
     name = "drafts/loop/../outdir/secret.md"
+    real_outside = Path(os.path.realpath(outside))
+    _emulate_python312_realpath(monkeypatch)
+    assert os.path.realpath(archive.root / name) == str(drafts / "outdir/secret.md")
+    assert Archive(drafts / "loop/../outdir").root == real_outside
     with pytest.raises(
         ReviewError,
         match="^resolve record failed: record is outside review directory",
