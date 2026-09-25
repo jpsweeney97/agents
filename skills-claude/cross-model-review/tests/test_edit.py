@@ -751,6 +751,26 @@ INJECTIONS = [
         1,
         "write receipt failed: candidate published at {out}; receipt not written; boom; temporary left at {tmp}: cleanup boom",
     ),
+    (
+        "fchmod",
+        1,
+        OSError,
+        None,
+        False,
+        False,
+        0,
+        "publish candidate failed: nothing published; boom",
+    ),
+    (
+        "fchmod",
+        2,
+        OSError,
+        None,
+        True,
+        False,
+        0,
+        "write receipt failed: candidate published at {out}; receipt not written; boom",
+    ),
 ]
 
 
@@ -1291,12 +1311,16 @@ def test_symlink_loops_are_refused_through_fail(
 
 
 def test_candidate_and_receipt_take_the_umask_default_mode(tmp_path: Path) -> None:
-    archive, host, candidate = make_review(tmp_path)
-    edit(archive, host, candidate)
+    previous = os.umask(0o027)
+    try:
+        archive, host, candidate = make_review(tmp_path)
+        edit(archive, host, candidate)
+        after = os.umask(0o027)
+    finally:
+        os.umask(previous)
+    assert after == 0o027, "edit must leave the process umask as it found it"
     snapshot = archive.path(archive.load()["original"])
-    mask = os.umask(0)
-    os.umask(mask)
-    expected = 0o666 & ~mask
+    expected = 0o640
     for path in (
         snapshot,
         host / "candidate-2.md",
