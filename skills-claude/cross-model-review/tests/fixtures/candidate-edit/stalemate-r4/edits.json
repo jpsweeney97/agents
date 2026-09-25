@@ -1,0 +1,22 @@
+[
+  {
+    "label": "F7 where-it-stands: acceptance as the log holds it",
+    "old": "- **Where it stands** (in place of **Answer**): the last live proposal, or both positions when the models disagreed, in readable numbered structure, labelled as not accepted by both sides; when the run closed before any proposal or position was recorded, one line says so.",
+    "new": "- **Where it stands** (in place of **Answer**): the last live proposal, or both positions when the models disagreed, in readable numbered structure, with its standing stated as the log holds it: accepted by both sides but not certified (both `AcceptanceDeclaration`s recorded and no certificate emitted, as when the sealed probe refused the text), accepted by one side, or accepted by neither; when the run closed before any proposal or position was recorded, one line says so."
+  },
+  {
+    "label": "F7 closing sentence: certificate, not acceptance",
+    "old": "No section implies that an answer was accepted, and every section reports the run record as it is: none invents a proposal, a position, a probe verdict, or a decision the record does not hold.",
+    "new": "No section implies that a certificate was earned, and every section reports the run record as it is: none invents or erases a proposal, a position, an acceptance, a probe verdict, or a decision the record does not hold."
+  },
+  {
+    "label": "F7 CONTEXT.md Close entry: decision conditional",
+    "old": "The host closes the run with a close-out note that says why no certificate was earned and what the user must decide. Avoid: stalemate, failure, timeout, cap-exhausted, fallback.",
+    "new": "The host closes the run with a close-out note that says why no certificate was earned and what, if anything, the user must decide. Avoid: stalemate, failure, timeout, cap-exhausted, fallback."
+  },
+  {
+    "label": "F7 CONTEXT.md Close-out note entry: decision conditional",
+    "old": "the transport-failure history, and the decision owed. For a probe-refusal close it is ADR-0030's timestamped close-out record,",
+    "new": "the transport-failure history, and the decision owed (or that none is owed, as for an abandonment). For a probe-refusal close it is ADR-0030's timestamped close-out record,"
+  }
+]

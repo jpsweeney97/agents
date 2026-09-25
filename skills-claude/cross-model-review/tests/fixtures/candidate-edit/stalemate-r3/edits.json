@@ -1,0 +1,42 @@
+[
+  {
+    "label": "F7 outcome bullet",
+    "old": "- **Outcome**: the first sentence says that no certificate was earned, which of section 3's cases closed the run, and that no sealed probe accepted a final text; the second says what that means for the user.",
+    "new": "- **Outcome**: the first sentence says that no certificate was earned and why the run closed (one of section 3's three cases, or an abandonment), then states the sealed-probe history as the record holds it: no sealed probe ran, or the last probe's verdict and which text it judged; the second sentence says what that means for the user."
+  },
+  {
+    "label": "F7 where-it-stands bullet",
+    "old": "- **Where it stands** (in place of **Answer**): the last live proposal, or both positions when the models disagreed, in readable numbered structure, labelled as not accepted by both sides.",
+    "new": "- **Where it stands** (in place of **Answer**): the last live proposal, or both positions when the models disagreed, in readable numbered structure, labelled as not accepted by both sides; when the run closed before any proposal or position was recorded, one line says so."
+  },
+  {
+    "label": "F7 decision-needed bullet",
+    "old": "- **Decision needed** (in place of **Asserts / does not assert**): the decision the note hands to the user, in the user's terms.",
+    "new": "- **Decision needed** (in place of **Asserts / does not assert**): the decision the note hands to the user, in the user's terms, or \"none\" when the close records an abandonment with nothing left to decide."
+  },
+  {
+    "label": "F7 closing sentence",
+    "old": "The chat presentation follows the file: outcome first (\"no certificate; the run was closed because ...\"), the `answer.md` path, and the decision under a \"Need from you:\" line. No section implies that an answer was accepted.",
+    "new": "The chat presentation follows the file: outcome first (\"no certificate; the run was closed because ...\"), the `answer.md` path, and the decision under a \"Need from you:\" line. No section implies that an answer was accepted, and every section reports the run record as it is: none invents a proposal, a position, a probe verdict, or a decision the record does not hold."
+  },
+  {
+    "label": "F8 skill bullet",
+    "old": "- `~/.claude/skills/synapsis/SKILL.md` lines 8, 22, 34, 72, 78, 85-95, and 101: the three-way ending becomes certificate or close; \"honest typed stalemate\" is removed; the arm-playbook list at line 34 drops `scope-ambiguity.md` and `cap-exhausted.md`; the `answer.md` template at lines 85-95 gains the close form of section 4.6 beside the certificate form; the presentation rule for a close: no certificate, the decision handed back under \"Need from you\". This file is unversioned; the implementer records its pre-edit sha256 in the landing record.",
+    "new": "- `~/.claude/skills/synapsis/SKILL.md` lines 8, 22, 34, 66, 72, 78, 80-99, and 101: the three-way ending becomes certificate or close; \"honest typed stalemate\" is removed; the arm-playbook list at line 34 drops `scope-ambiguity.md` and `cap-exhausted.md`; the run-shape sentence at line 66 ends in \"certificate emission (`emit-resolved`) or close (`close`)\" instead of \"terminal emission or cap ending per the arm playbook\"; the `answer.md` template at lines 80-99 gains the close form of section 4.6 beside the certificate form, with the authority line (83) and the first outcome sentence (86) reading as section 4.6 says for a close; the presentation rule for a close: no certificate, the decision handed back under \"Need from you\". After editing, the implementer greps the file for `stalemate`, `cap-exhausted`, and `cap ending` and expects no hit. This file is unversioned; the implementer records its pre-edit sha256 in the landing record."
+  },
+  {
+    "label": "section 11 nine addenda",
+    "old": "1. ADR-0039, the eight status lines, the eight addenda, the spec, `CONTEXT.md`",
+    "new": "1. ADR-0039, the eight status lines, the nine addenda, the spec, `CONTEXT.md`"
+  },
+  {
+    "label": "section 11 commit sentence",
+    "old": "One commit per step on this branch; landing under the repository's usual review and receipts.",
+    "new": "One commit for each of steps 1 to 3 on this branch; step 4 commits nothing, and its receipts go in the landing record; landing under the repository's usual review and receipts."
+  },
+  {
+    "label": "section 12 item 6 fallback",
+    "old": "If JP meant only that no new command carries findings across, the 0037 addendum is dropped and the playbook sentence stands as written.",
+    "new": "If JP meant only that no new command carries findings across, the 0037 addendum is dropped and the playbook sentence stands as written; that fallback leaves the playbook telling the host to use Synapsis for a remaining disagreement, so it needs JP's explicit direction rather than silence."
+  }
+]

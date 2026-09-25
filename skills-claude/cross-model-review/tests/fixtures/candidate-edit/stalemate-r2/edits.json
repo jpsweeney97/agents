@@ -1,0 +1,92 @@
+[
+  {
+    "label": "F3 section 3 case 1",
+    "old": "The note's required content (bounds with timestamps, close declaration, per-arm reasoning, transport-failure history) is unchanged. What changes: the note is now carried by the `close` op, so the store knows the run is closed.",
+    "new": "The note's required content (bounds with timestamps, close declaration, per-arm reasoning, transport-failure history) is unchanged. So is where and when it is first written: ADR-0030's timestamped close-out record goes into the run's evidence dir **before the final attempt**, because that record is the pre-registration and the `close` op cannot be (it comes after the attempt). What changes: once the final attempt has refused, the host closes the run with that record as the note, extended with the final attempt's result and the close declaration, so the store knows the run is closed. The evidence-dir record proves the bounds preceded the attempt; the op is the store's record that the run ended. Both are required for this case; the host keeps them agreeing (ADR-0009)."
+  },
+  {
+    "label": "F3 section 4.3 note bullet",
+    "old": "- The note text lives inside `run.json`, the way an emitted certificate does, so the record is self-contained. The host may also keep a copy in the evidence dir; the op is the authority.",
+    "new": "- The note text lives inside `run.json`, the way an emitted certificate does, so the record is self-contained. For a probe-refusal close (section 3, case 1) the note is ADR-0030's close-out record, which also stays in the evidence dir as the pre-registration proof. For the other cases no pre-registration exists: the note is composed at close time, and an evidence-dir copy is optional. In every case the op is the record of the ending."
+  },
+  {
+    "label": "F3 section 8.3 close-out note entry",
+    "old": "- **Close-out note**: the host-written prose the close carries verbatim: the reason, the pre-registered bounds and per-arm reasoning where probes refused, the transport-failure history, and the decision owed. Avoid: certificate, classification, verdict, run ending record.",
+    "new": "- **Close-out note**: the host-written prose the close carries verbatim: the reason, the pre-registered bounds and per-arm reasoning where probes refused, the transport-failure history, and the decision owed. For a probe-refusal close it is ADR-0030's timestamped close-out record, written into the evidence dir before the final attempt and carried by the op afterwards. Avoid: certificate, classification, verdict, run ending record."
+  },
+  {
+    "label": "status field",
+    "old": "`status` reports `lifecycle.terminal` as `null`, `{\"kind\": \"resolved\", \"order\": N}`, or `{\"kind\": \"closed\", \"order\": N}`.",
+    "new": "`status` reports `lifecycle.terminal` as `null`, `{\"kind\": \"resolved\", \"order\": N}`, or `{\"kind\": \"closed\", \"order\": N}`, and drops the `cap_tiebreak_exhausted_order` field (`synapsis_driver.py:250-254`)."
+  },
+  {
+    "label": "F4 section 3 table row",
+    "old": "| Close | `close` op, close-out note verbatim, `RunClosed` lifecycle event | `answer.md` (ADR-0038); the note itself |",
+    "new": "| Close | `close` op, close-out note verbatim, `RunClosed` lifecycle event | `answer.md` in its close form (section 4.6); the note itself |"
+  },
+  {
+    "label": "F4 new section 4.6",
+    "old": "Nothing classifies, grades, or derives from a close.\n\n## 5. Contracts layer",
+    "new": "Nothing classifies, grades, or derives from a close.\n\n### 4.6 `answer.md` at a close (ADR-0038)\n\nADR-0038 and the synapsis skill's template require an **Answer** section (the accepted text) and an **Asserts / does not assert** section (the certificate's scope lists, verbatim) at every ending. A close has neither. The close form of `answer.md`, recorded by the ADR-0038 addendum (section 8.1) and the skill (section 8.5):\n\n- Title: the question, one line. Second line: `<date> · closed · <run dir path>`.\n- Authority line: `run.json` is authoritative (the `close` op carries the close-out note verbatim); for a probe-refusal close, the close-out record in the evidence dir is the pre-registration proof.\n- **Outcome**: the first sentence says that no certificate was earned, which of section 3's cases closed the run, and that no sealed probe accepted a final text; the second says what that means for the user.\n- **Where it stands** (in place of **Answer**): the last live proposal, or both positions when the models disagreed, in readable numbered structure, labelled as not accepted by both sides.\n- **Decision needed** (in place of **Asserts / does not assert**): the decision the note hands to the user, in the user's terms.\n- **Follow-ups owed** and **Pointers** as today; Pointers name `run.json` and, for a probe-refusal close, the evidence-dir record.\n\nThe chat presentation follows the file: outcome first (\"no certificate; the run was closed because ...\"), the `answer.md` path, and the decision under a \"Need from you:\" line. No section implies that an answer was accepted.\n\n## 5. Contracts layer"
+  },
+  {
+    "label": "F6 residual drift entry",
+    "old": "- `test_residual_boundary_drift.py` (12): drops the stalemate fixture directories from its scan roots; the resolved anti-laundering set stays.",
+    "new": "- `test_residual_boundary_drift.py` (12 to 8): drops the four stalemate, union, and cap-exhausted fixture directories from `SCAN_ROOTS`; drops the six stalemate- and cap-side literals from `DERIVED_FIELD_LITERALS` (`classification_hint`, `failed_classification_narrative`, `attempted_route`, `degraded_stalemate`, `degraded-stalemate`, `scope_accepted`), keeping the four resolved-side ones (ADR-0002, ADR-0017); deletes `CAP_NARRATIVE_FIELD_KEYS`, `_cap_narrative_pattern`, and the four cap-narrative tests (`test_cap_narrative_pattern_flags_narrative_key_forms`, `test_cap_narrative_pattern_ignores_boundary_disclaiming_prose`, `test_cap_narrative_keys_are_forbidden_outside_projections_too`, `test_no_cap_narrative_fields_in_projections_module`), whose contract (`render_cap_exhausted_ending`, CE-3, X-8) is deleted with it. Keeps `PROJECTIONS_MODULE` and `test_only_projections_module_is_exempt_from_derived_field_scan` (the resolved-side exemption), the path-based allowed-location test, and `PROOF_MACHINERY_ROOTS` and `RESIDUAL_ROOTS` unchanged: a ban list is not vocabulary in use, and trimming it would only weaken the guard. The module docstring is rewritten to the resolved side (X-2, X-3, U-3, Cv-5, Cn-4)."
+  },
+  {
+    "label": "F1 + 5(b) new test entries",
+    "old": "- `test_resolved_emit_gate.py`: one comment.\n",
+    "new": "- `test_resolved_emit_gate.py`: one comment.\n- `test_resolved_cert_schema.py` (6): drops the `terminal_union_support` import (line 16), the union comment block (lines 568-575), and `test_uncontested_cert_is_terminal_union_arm` (lines 576-581); the other five tests stay.\n- `terminal_lifecycle_support.py`: docstring only; it no longer describes itself as shared with the stalemate suite or as mirroring `terminal_union_support.py`.\n"
+  },
+  {
+    "label": "concern 2 counting basis",
+    "old": "Expected suite size: about 310 (from 523).",
+    "new": "Counts in this section are `def test_` functions: 523 today across `tests/`, of which the 14 deleted files hold 222. `pytest` collects 1008 items today because of parametrization, so the collected count after the change will be larger than the function count. Expected suite size after the change: about 300 to 320 functions. The proving command's exit status is the check; the count is orientation."
+  },
+  {
+    "label": "concern 3 ADR-0039 content",
+    "old": "Records: the typed stalemate arm and its six types are retired; the terminal-outcome union is retired (one certificate type); the cap-exhausted ending is retired; the close is the one no-certificate ending and is recorded in the run store; the cap clock stands; ADR-0029's recognition and ADR-0030's close-bounds trigger and note content stand and now flow through the close. Names the evidence: zero stalemate events and zero cap-reached events in 42 runs; the host never offered the route; 14 of 15 real certificates by concession.",
+    "new": "Records: the typed stalemate arm and its six types are retired; the terminal-outcome union is retired (one certificate type); the cap-exhausted ending is retired; the close is the one no-certificate ending and is recorded in the run store; the cap clock stands; ADR-0029's recognition and ADR-0030's close-bounds trigger, pre-attempt close-out record, and note content stand and now flow through the close. Names the evidence: zero stalemate events and zero cap-reached events in 42 runs; the host never offered the route; 14 of 15 real certificates by concession. States two consequences for ADRs it does not otherwise touch: ADR-0002's \"Stalemate application\" paragraph is void with the arm (the resolved derived-free rule stands); and the revisit clauses in ADR-0025, 0026, 0027, and 0036 that name a first live `emit-stalemate` or typed stalemate can no longer fire and are left as history, without addenda. The other kept ADRs that mention the retired surface (0001, 0008, 0013, 0014, 0017, 0023, 0024, 0033, 0035) do so as cross-references or history and are not edited."
+  },
+  {
+    "label": "concern 4 practice wording",
+    "old": "Status changes, per the repository's practice:",
+    "new": "Status changes, per the decision-record lane's rule (no ADR in this repository is superseded today; addenda have precedent in ADR-0031, 0036, and 0037):"
+  },
+  {
+    "label": "F2 + F3 + F4 addendum list",
+    "old": "- Narrowed by an addendum naming 0039: ADR-0003 (a wall vote that cannot name what moved now closes), 0009 (the stalemate residual-routing rows are void; the moderation model stands), 0011 (materiality no longer includes moving between resolved and stalemate or selecting a stalemate type), 0020 (cap clock stands; window moves are retire, press, accept; `CapTiebreakExhausted` and `CAP_EXHAUSTED_RUN_ENDING@v1` retired), 0028 (the unplaybooked-arm trigger is void), 0029 (the counterparty-declined-the-stalemate-route case no longer exists; the close is now recorded), 0030 (the no-store-marker ruling is reversed by the close; everything else stands), 0038 (the ending list is certificate or close).",
+    "new": "- Narrowed by an addendum naming 0039 (nine): ADR-0003 (a wall vote that cannot name what moved now closes), 0009 (the stalemate residual-routing rows are void; the moderation model stands), 0011 (materiality no longer includes moving between resolved and stalemate or selecting a stalemate type), 0020 (cap clock stands; window moves are retire, press, accept; `CapTiebreakExhausted` and `CAP_EXHAUSTED_RUN_ENDING@v1` retired), 0028 (the unplaybooked-arm trigger is void), 0029 (the counterparty-declined-the-stalemate-route case no longer exists; the close is now recorded), 0030 (the no-store-marker ruling is reversed by the close; the close-bounds trigger, the timestamped close-out record written into the evidence dir before the final attempt, its required content, the transport carve-out, and the third and fourth bindings stand; the record's text is now also carried verbatim by the `close` op), 0037 (ruling 2's staging step is narrowed: a review that ends with a standing disagreement hands the decision to the user through the review's own ending; whether a surviving point becomes its own Synapsis question is the user's choice under ADR-0034, never a host step or a route; rulings 1 and 3 stand, ruling 3 binding whenever the user does stage; the revisit clause naming a first live typed stalemate can no longer fire), 0038 (the ending list is certificate or close; at a close, `answer.md` takes the form in section 4.6)."
+  },
+  {
+    "label": "spec invariants",
+    "old": "- Validity Invariants: every stalemate and union invariant is removed; the resolved invariants stay.",
+    "new": "- Validity Invariants: the first bullet (\"either resolved or stalemated, never both\") becomes \"a terminal outcome is a resolved certificate; every other ending is a close\"; the `next_action` bullet and every `SCOPE_AMBIGUITY`, `EVIDENCE_MISSING`, `EVIDENCE_CONFLICT`, `CONSTRAINT_CONFLICT`, `VALUE_TRADEOFF`, and `IRREDUCIBLE` bullet are removed; the resolved bullets stay."
+  },
+  {
+    "label": "F2 run-lifecycle bullet",
+    "old": "- `run-lifecycle.md`: the subcommand list; the live-proof paragraph drops the sentence about the three retired commands and says `close` has not yet run live; \"Ending a run\" is rewritten around the two endings, with the bounded-close paragraph becoming the close's probe-refusal case, ADR-0030's bounds discipline verbatim, and the `close` command shown.",
+    "new": "- `run-lifecycle.md`: the opening sentence (line 5) names the two remaining sibling playbooks; the subcommand list (line 22); the live-proof paragraph (line 26) drops the sentence about the three retired commands and says `close` has not yet run live; in \"Starting a run\" (lines 32-35) the sentence \"Use Synapsis for a consequential disagreement that remains, as its own question\" becomes: if a consequential disagreement remains after review, the review ends by handing that decision to the user, and staging it as its own Synapsis question is the user's choice (ADR-0034; ADR-0037 as narrowed by ADR-0039), never a step the host takes on its own; \"Ending a run\" (lines 120-133) is rewritten around the two endings, with the bounded-close paragraph becoming the close's probe-refusal case, ADR-0030's bounds discipline verbatim including the evidence-dir record written before the final attempt, the `close` command shown after it, and the last paragraph's cap-exhausted presentation sentence (line 132) replaced by the close presentation of section 4.6."
+  },
+  {
+    "label": "skill lines",
+    "old": "- `~/.claude/skills/synapsis/SKILL.md` lines 8, 22, 72, 78, and 101: the three-way ending becomes certificate or close; \"honest typed stalemate\" is removed; the presentation rule for a close: no certificate, the decision handed back under \"Need from you\". This file is unversioned; the implementer records its pre-edit sha256 in the landing record.",
+    "new": "- `~/.claude/skills/synapsis/SKILL.md` lines 8, 22, 34, 72, 78, 85-95, and 101: the three-way ending becomes certificate or close; \"honest typed stalemate\" is removed; the arm-playbook list at line 34 drops `scope-ambiguity.md` and `cap-exhausted.md`; the `answer.md` template at lines 85-95 gains the close form of section 4.6 beside the certificate form; the presentation rule for a close: no certificate, the decision handed back under \"Need from you\". This file is unversioned; the implementer records its pre-edit sha256 in the landing record.\n- `~/.agents/skills-claude/cross-model-review/SKILL.md` needs no change: it already says the reviewer record may later support ADR-0037 staging and that no staging or certificate run happens automatically, which is the narrowed ruling."
+  },
+  {
+    "label": "F5 build order",
+    "old": "2. Contracts: delete the eight modules and the tracer; simplify `terminal_outcomes.py`; trim `registry.py`, `projections.py`, `schema_validation.py`; delete the 14 test files and 66 fixtures; repair the mixed tests. Suite green.\n3. Runtime: `deliberation_run.py`, `run_store.py` (close op, tolerant artifacts), `synapsis_driver.py`. New tests. Suite green.\n4. Playbooks, `AGENTS.md`, the skill text.\n5. `uv run python tools/check.py`; the library tests from `~/.agents`; the scripted close smoke.",
+    "new": "2. Contracts and runtime as one change: delete the eight modules and the tracer; simplify `terminal_outcomes.py`; trim `registry.py`, `projections.py`, `schema_validation.py`; delete the 14 test files and 66 fixtures; `deliberation_run.py`, `run_store.py` (close op, tolerant artifacts), `synapsis_driver.py`; repair the mixed tests; the new tests. Suite green. These cannot be two green steps: the runtime imports the modules being deleted (`deliberation_run.py:44-56`, `run_store.py:38`) and loads the artifacts being deleted (`synapsis_driver.py:70-80`), so a contracts-only commit does not collect.\n3. Playbooks, `AGENTS.md`, the skill text.\n4. `uv run python tools/check.py`; the library tests from `~/.agents`; the scripted close smoke.\n\nStep 1 can land first: `test_residual_boundary_drift.py` scans `src/`, `schemas/`, `registries/`, and fixtures, and `test_pin_comment_drift.py` scans `src/` for `Pinned by` comments; neither reads `docs/`. The only pin comment in a kept file (`registry.py:23`) names a resolved test that stays."
+  },
+  {
+    "label": "section 12 item 4",
+    "old": "4. ADR bookkeeping: eight superseded outright, eight narrowed by addendum (section 8.1).",
+    "new": "4. ADR bookkeeping: eight superseded outright, nine narrowed by addendum (section 8.1)."
+  },
+  {
+    "label": "section 12 item 6",
+    "old": "5. `scope-ambiguity.md` and `cap-exhausted.md` are deleted; the close lives in `run-lifecycle.md`, not in a new arm playbook (section 8.4).",
+    "new": "5. `scope-ambiguity.md` and `cap-exhausted.md` are deleted; the close lives in `run-lifecycle.md`, not in a new arm playbook (section 8.4).\n6. ADR-0037 ruling 2 is narrowed so that a review's standing disagreement stops at the user instead of routing to Synapsis (sections 8.1 and 8.4). This reads JP's 2026-09-23 ruling-out of \"sending a disputed review finding to a Synapsis run\" into the ADR and the playbook. If JP meant only that no new command carries findings across, the 0037 addendum is dropped and the playbook sentence stands as written."
+  }
+]

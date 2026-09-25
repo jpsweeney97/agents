@@ -1,0 +1,86 @@
+[
+  {
+    "old": "with no exit code when the shell ended by a signal (`LocalProcess.swift:463-465`);",
+    "new": "with no exit code when the shell ended by a signal or the wait failed (`LocalProcess.swift:147`, `463-465`);"
+  },
+  {
+    "old": "Two points the review marked for JP are listed at the end of section 3.\n\nRevision 2 (",
+    "new": "Two points the review marked for JP are listed at the end of section 3. **Round 2 of the same review** (closing check of 18:22, folded at 18:26): F1, F4, F5, F7 and F8 resolved; F2, F3 and F6 held with narrower reasons; F9 raised. Folded: section 4 counts every row the detail column keeps, says what happens when the panel's room is under 120 points (it folds to its bar) and recomputes on the composer's own changes; D3 sends its signals to the shell through the vendored library's reaper lock, one recorded addition to the vendored copy (D2; point (c) for JP), and claims no exit reason the library does not report (a `nil` is a signal or a failed wait, and the app observed neither); D4 starts the shell through an app-owned launcher that changes directory before any shell or startup file runs, because no read after launch can tell a failed change from a startup file's own `cd`; D10's terminal view drops every ⌘ chord before SwiftTerm in ordinary and enhanced keyboard modes, since a program that enables enhanced reporting otherwise receives ⌘Return as Super+Enter; section 9 gains the exit-concurrent-with-Stop case and the enhanced-mode keyboard case; ⌘A is the buffer with its scrollback.\n\nRevision 2 ("
+  },
+  {
+    "old": "revision 2 reviewed by Codex, eight findings folded; two points await JP's word (end of section 3);",
+    "new": "revision 2 reviewed by Codex over two rounds, nine findings folded; three points await JP's word (end of section 3);"
+  },
+  {
+    "old": "the reported exit code is `nil` when the child ended by a signal (`exitCode(fromWaitStatus:)`, lines 463 to 465).",
+    "new": "the reported exit code is `nil` when the child ended by a signal or the wait failed (the delegate's contract, line 147; `exitCode(fromWaitStatus:)`, lines 463 to 465), so a `nil` names no cause."
+  },
+  {
+    "old": "a ⌘ key no menu takes is interpreted by the view and not sent to the shell (`MacTerminalView.swift:2026-2045`).",
+    "new": "a ⌘ key no menu takes is interpreted by the view and not sent to the shell in ordinary mode (`MacTerminalView.swift:2041-2045`), but when a program has enabled enhanced keyboard reporting the view encodes ⌘ as the Super modifier and sends the key, Enter included (`MacTerminalView.swift:2076-2110` and `2638`; `KittyKeyboardEncoder.swift:246-255`); `keyDown` is a public override on an open class, so the app's subclass can pre-empt it. Select All selects the whole buffer, scrollback included (`SelectionService.swift:603-613`)."
+  },
+  {
+    "old": "and records the vendored tree's hash in the build record.",
+    "new": "and records the vendored tree's hash in the build record. The vendored copy carries one recorded addition of the app's own, `LocalProcess.send(signal:)` (D3), about ten lines that route a signal through the library's reaper lock and return whether it was sent; its diff sits beside the tree in `Vendor/SwiftTerm/AGENT-OS-CHANGES.md` and is re-applied when the pin moves (point (c) for JP)."
+  },
+  {
+    "old": "Stop sends SIGHUP to the shell's pid with the app's own `kill`, guarded by SwiftTerm still reporting the process running with a positive `shellPid` and by `waitid(P_PID, pid, WEXITED | WNOWAIT | WNOHANG)` reporting no exit; the app never calls `waitpid`, because SwiftTerm's reaper collects the child and the app's own collection would take the exit status from it (the residual window between the guard and the `kill` is the one every `kill` after `waitid` has, bounded by macOS's sequential pid allocation).",
+    "new": "Stop sends SIGHUP to the shell through `LocalProcess.send(signal:)`, the recorded addition to the vendored library (D2), which takes the reaper's own lock (`LocalProcessChildReaper.signal`, `LocalProcess.swift:49-54`): the signal goes only while the child is uncollected, because the reaper collects under that same lock, and the call returns false once it has; the app never calls `waitpid` or `kill` on the shell's pid itself, so nothing races the collector."
+  },
+  {
+    "old": "with the exit code SwiftTerm reports (\"Stopped · exit 1\") or, when it reports none because the shell ended by a signal, \"Stopped · ended by a signal\".",
+    "new": "with the exit code SwiftTerm reports (\"Stopped · exit 1\") or, when it reports none, \"Stopped · exit status not reported\", because a `nil` from the library means a signal or a failed wait and the app observed neither (line 147)."
+  },
+  {
+    "old": "**Force stop**, sends SIGKILL to the shell if it is still uncollected and to each remaining inventoried pid, each checked by start time first, then waits and re-reads again.",
+    "new": "**Force stop**, sends SIGKILL to the shell through the same call if it is still uncollected, and with `kill` to each remaining inventoried pid after its start time is re-read and matches (those are not the library's children; the start-time check is their guard), then waits and re-reads again."
+  },
+  {
+    "old": "Before launch the app checks that the project root is a directory it can enter and refuses with the reason shown (\"Terminal could not start in <root>: the folder is missing\"); New terminal is disabled for a project the sidebar marks unavailable. After launch it reads the shell's working directory once through the kernel (`proc_pidinfo` with `PROC_PIDVNODEPATHINFO`) and, if it is not the project root, stops the shell through D3 and shows the failure, because SwiftTerm's launch ignores a failed `chdir` and would run the shell in the app's own directory under the project's label (`Pty.swift:133-134`).",
+    "new": "New terminal is disabled for a project the sidebar marks unavailable. The shell is started through an app-owned launcher, `os/desktop/Support/terminal-launch.c`, compiled and signed into the bundle's Resources beside `host-owner` (`script/bundle_desktop_resources.sh:47-48`), which SwiftTerm executes with the project root and the shell's path as arguments: it changes directory to the root first and, if that fails, writes \"Terminal could not start in <root>: <the error>\" to its terminal and exits with status 126 before any shell or startup file runs; on success it replaces itself with the account's shell (`execv`, `-l -i`). SwiftTerm's own `currentDirectory` is not used, because its launch ignores a failed `chdir` and would run the shell in the app's own directory under the project's label (`Pty.swift:133-134`), and no read after launch can tell a failed change from a startup file's own `cd`. An exit with status 126 and an empty inventory is shown as the launch failure with the launcher's line."
+  },
+  {
+    "old": "`⌘A` selects the terminal's screen (the three reach",
+    "new": "`⌘A` selects the terminal's buffer, scrollback included (SwiftTerm's Select All, `SelectionService.swift:603-613`; the three reach"
+  },
+  {
+    "old": "and one that presses it in the focused composer and sees one.",
+    "new": "and one that presses it in the focused composer and sees one. Disabling the menu item is not enough on its own: when a program has enabled enhanced keyboard reporting, SwiftTerm encodes ⌘ as the Super modifier and sends the key to it, Enter included (section 2), so the app's terminal view, a subclass of `LocalProcessTerminalView`, overrides `keyDown` and drops every event carrying ⌘ before SwiftTerm's handling, in ordinary and enhanced modes alike; the menu has already had its chance at the chord, so the app's shortcuts still act, and ⌘C, ⌘V and ⌘A never reach `keyDown` because the Edit menu takes them. A program that wants ⌘ chords through the enhanced protocol does not get them: stated limit."
+  },
+  {
+    "old": "The panel's height is a value the app clamps when the splitter moves or the window shrinks, between 120 points and what the detail column has left after the toolbar and the composer; it is not a SwiftUI minimum, so nothing the panel states reaches the hosting view's content minimum and `contentMinSize` stays 700 by 600 (the observer raises to that and keeps a larger stated value; it cannot prevent one, `DesktopRuntime.swift:698-706`). The transcript states no minimum, as today, and scrolls; the M5 rule stands that at the smallest window the composer's chips and notices may leave it no visible height (`DesktopView.swift:918-925`, ruled acceptable 2026-09-19), and with the panel open at 120 that happens sooner. The plan measures, at 700 by 600 with the inspector open and closed, the panel open at 120 and closed, and the composer carrying two chips and the PDF line: the window's `contentMinSize` unchanged, the panel's bar readable, and what height the transcript has.",
+    "new": "The panel's height is a value the app computes, never a SwiftUI minimum, so nothing the panel states reaches the hosting view's content minimum and `contentMinSize` stays 700 by 600 (the observer raises to that and keeps a larger stated value; it cannot prevent one, `DesktopRuntime.swift:698-706`). The room the panel may take is what the detail column has left after every row it keeps: the toolbar, the conversation header, the status row and its dividers, the issue, recovery, retry and interrupt rows when shown, the position notice, and the composer at its current height (`DesktopView.swift:698-748` and `826-857`). The panel takes the saved height clamped to that room and to at least 120 points; **when the room is under 120 points the panel folds to its bar alone** (the tabs, the state line and the menu, about 28 points), the terminal grid hidden and its shell untouched, and unfolds when room returns, the way the sidebar folds under 800. The room is recomputed on every change of the column's, the rows' or the composer's size (`onGeometryChange`), not only on a splitter drag or a window resize, so chips added while the panel is open fold it rather than overlap it. The transcript states no minimum, as today, and scrolls; the M5 rule stands that at the smallest window the composer's chips and notices may leave it no visible height (`DesktopView.swift:918-925`, ruled acceptable 2026-09-19), and with the panel open that happens sooner. The plan measures, at 700 by 600 with the inspector open and closed and the panel open at 120 and closed: the window's `contentMinSize` unchanged; then two chips and the PDF line added with the panel open, the panel folding to its bar; then the chips removed, the panel unfolding; the transcript's height at each step recorded."
+  },
+  {
+    "old": "\"Stopped · exit 0\", \"Stopped · ended by a signal\", \"Shell stopped",
+    "new": "\"Stopped · exit 0\", \"Stopped · exit status not reported\", \"Shell stopped"
+  },
+  {
+    "old": "stopped (with the exit code, or \"ended by a signal\"),",
+    "new": "stopped (with the exit code, or none reported),"
+  },
+  {
+    "old": "`lastState` (`stopped` with the exit code or `signal`,",
+    "new": "`lastState` (`stopped` with the exit code or none,"
+  },
+  {
+    "old": "a launch whose folder is removed between the check and the start (the working-directory check), a relaunch that reports the survivor and stops it,",
+    "new": "a launch into a folder removed after the preflight check (the launcher exits 126 with its line, no shell and no startup file runs, the inventory stays empty), the shell exiting on its own at the moment Stop is pressed (exit concurrent with Stop: the signal call returns false and the state comes from the callback), a relaunch that reports the survivor and stops it,"
+  },
+  {
+    "old": "the start-time check removed, the working-directory check removed) seen to fail.",
+    "new": "the start-time check removed, the launcher's directory check removed, the ⌘ drop in `keyDown` removed) seen to fail."
+  },
+  {
+    "old": "press `⌘Return` in the focused terminal with a draft and see no attempt,",
+    "new": "press `⌘Return` in the focused terminal with a draft and see no attempt and no terminal input, once with the plain shell and once inside a small program that has enabled enhanced keyboard reporting and prints every key it receives,"
+  },
+  {
+    "old": "(section 4: `contentMinSize` unchanged, the bar readable, the transcript's height recorded)",
+    "new": "(section 4: `contentMinSize` unchanged, the panel folding to its bar when chips take the room and unfolding after, the transcript's height recorded)"
+  },
+  {
+    "old": "If JP prefers a deliberate abandonment (remove the project and forget its survivors), that is his ruling to make.",
+    "new": "If JP prefers a deliberate abandonment (remove the project and forget its survivors), that is his ruling to make. (c) F3: the vendored SwiftTerm carries one recorded addition of about ten lines, `LocalProcess.send(signal:)`, so the app's SIGHUP and SIGKILL to the shell go through the library's own reaper lock and can never reach a collected pid. D2's ruling (\"at the pinned commit\") stands for every other byte. If JP refuses any local change to the vendored copy, D3 falls back to `waitid` with `WNOWAIT` and `kill` in one main-queue turn, and the design then states the residual window (an exit, the library's collection and the kernel's reuse of the pid between two consecutive calls) as a limit, not a proof."
+  }
+]

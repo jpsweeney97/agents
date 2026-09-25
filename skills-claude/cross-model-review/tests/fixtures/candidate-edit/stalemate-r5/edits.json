@@ -1,0 +1,6 @@
+[
+  {
+    "old": "- **Where it stands** (in place of **Answer**): the last live proposal, or both positions when the models disagreed, in readable numbered structure, with its standing stated as the log holds it: accepted by both sides but not certified (both `AcceptanceDeclaration`s recorded and no certificate emitted, as when the sealed probe refused the text), accepted by one side, or accepted by neither; when the run closed before any proposal or position was recorded, one line says so.",
+    "new": "- **Where it stands** (in place of **Answer**): the live proposal (the latest `ProposalRevision`), or both positions when the models disagreed, in readable numbered structure, with its standing stated as the log holds it under the resolved gate's live-acceptance rule (`live_acceptances` in `resolved_emit.py`: an owner's acceptance counts only if it names the live proposal, postdates it, and is not staled by that owner's later `ReserveMove`): live acceptance by both sides but no certificate (as when the sealed probe refused the text), live acceptance by one side, or by neither. An acceptance of a superseded revision, or one staled by a reserve, is reported as history, never as standing. When the run closed before any proposal or position was recorded, one line says so."
+  }
+]
