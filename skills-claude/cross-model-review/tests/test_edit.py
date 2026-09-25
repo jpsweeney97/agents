@@ -587,7 +587,11 @@ def test_receipt_destination_collision_keeps_candidate(tmp_path: Path) -> None:
 
 
 def _inject(
-    monkeypatch: pytest.MonkeyPatch, name: str, nth: int, error: type[OSError]
+    monkeypatch: pytest.MonkeyPatch,
+    name: str,
+    nth: int,
+    error: type[OSError],
+    message: str = "boom",
 ) -> None:
     module: Any = tempfile if name == "NamedTemporaryFile" else os
     original = getattr(module, name)
@@ -597,7 +601,7 @@ def _inject(
         nonlocal calls
         calls += 1
         if calls == nth:
-            raise error("boom")
+            raise error(message)
         return original(*args, **kwargs)
 
     monkeypatch.setattr(module, name, wrapper)
@@ -713,7 +717,7 @@ INJECTIONS = [
         False,
         False,
         1,
-        "publish candidate failed: nothing published; boom; temporary left at {tmp}: boom",
+        "publish candidate failed: nothing published; boom; temporary left at {tmp}: cleanup boom",
     ),
     (
         "link",
@@ -723,7 +727,7 @@ INJECTIONS = [
         True,
         False,
         1,
-        "write receipt failed: candidate published at {out}; receipt not written by this invocation; receipt path now exists, created concurrently; boom; temporary left at {tmp}: boom",
+        "write receipt failed: candidate published at {out}; receipt not written by this invocation; receipt path now exists, created concurrently; boom; temporary left at {tmp}: cleanup boom",
     ),
     (
         "link",
@@ -733,7 +737,7 @@ INJECTIONS = [
         False,
         False,
         1,
-        "publish candidate failed: nothing published by this invocation; output now exists, created concurrently; boom; temporary left at {tmp}: boom",
+        "publish candidate failed: nothing published by this invocation; output now exists, created concurrently; boom; temporary left at {tmp}: cleanup boom",
     ),
     (
         "link",
@@ -743,7 +747,7 @@ INJECTIONS = [
         True,
         False,
         1,
-        "write receipt failed: candidate published at {out}; receipt not written; boom; temporary left at {tmp}: boom",
+        "write receipt failed: candidate published at {out}; receipt not written; boom; temporary left at {tmp}: cleanup boom",
     ),
 ]
 
@@ -782,7 +786,7 @@ def test_injected_publication_failures(
     )
     _inject(monkeypatch, name, nth, error)
     if second is not None:
-        _inject(monkeypatch, second[0], second[1], OSError)
+        _inject(monkeypatch, second[0], second[1], OSError, "cleanup boom")
     with pytest.raises(RecordError) as caught:
         cmr_edit._publish(plan)
     monkeypatch.undo()
@@ -855,6 +859,10 @@ def test_cli_relative_paths_resolve_against_the_working_directory(
     assert receipt["edits_file"]["argument"] == "./edits.json"
     assert receipt["edits_file"]["path"] == str(host / "edits.json")
     assert receipt["edits"] == ONE_EDIT
+    assert receipt["out"] == {
+        "path": str(host / "candidate-2.md"),
+        "sha256": result["sha256"],
+    }
 
 
 def test_cli_drafts_reference_resolves_against_the_review_root(tmp_path: Path) -> None:
@@ -1083,3 +1091,81 @@ def test_query_snapshots_the_edited_candidate_and_edit_never_moves_checked(
     assert state["phase"] == "failed"
     assert state["checked"] == checked
     assert state["used"] == 2
+
+
+# 12. Receipt serialization and order of operations (design sections 3.0 and 6.3).
+
+
+def test_receipt_bytes_are_the_specified_serialization(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    edits_path = archive.root.parent / "edits.json"
+    edits = [{"old": "beta", "new": "bêta", "label": "é first"}]
+    result = edit(archive, host, candidate, edits=edits)
+    out = host / "candidate-2.md"
+    expected = {
+        "semantics": 1,
+        "base": {
+            "argument": str(candidate),
+            "path": str(candidate),
+            "sha256": digest(BASE),
+        },
+        "edits_file": {
+            "argument": str(edits_path),
+            "path": str(edits_path),
+            "sha256": digest(edits_path.read_bytes()),
+        },
+        "edits": [{"label": "é first", "old": "beta", "new": "bêta"}],
+        "out": {"path": str(out), "sha256": digest(out.read_bytes())},
+    }
+    receipt_bytes = (host / "candidate-2.md.receipt.json").read_bytes()
+    assert receipt_bytes == (
+        json.dumps(expected, indent=2, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+    assert result["sha256"] == expected["out"]["sha256"]
+
+
+def test_containment_is_checked_before_the_expected_sha(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    with pytest.raises(
+        ReviewError,
+        match="^edit candidate failed: output must be directly inside the review's host directory",
+    ):
+        edit(
+            archive, host, candidate, out=str(archive.root / "new.md"), expect_sha=None
+        )
+    assert not (archive.root / "new.md").exists()
+
+
+def test_base_digest_is_checked_before_the_edits_file_is_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive, host, _candidate = make_review(tmp_path)
+    wrong = "0" * 64
+    monkeypatch.chdir(host)
+    with pytest.raises(ReviewError) as caught:
+        cmr_edit.apply_edits(
+            archive,
+            "./candidate-1.md",
+            str(host / "missing.json"),
+            str(host / "candidate-2.md"),
+            wrong,
+        )
+    assert str(caught.value) == (
+        f"edit candidate failed: base sha256 is {digest(BASE)}, expected {wrong}. "
+        "Got: './candidate-1.md'"
+    )
+    assert_nothing_published(host)
+
+
+def test_base_digest_is_checked_before_the_edits_are_parsed(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    wrong = "0" * 64
+    malformed = archive.root.parent / "malformed.json"
+    malformed.write_text("[{", encoding="utf-8")
+    with pytest.raises(
+        ReviewError, match=f"^edit candidate failed: base sha256 is {digest(BASE)}"
+    ):
+        cmr_edit.apply_edits(
+            archive, str(candidate), str(malformed), str(host / "candidate-2.md"), wrong
+        )
+    assert_nothing_published(host)
