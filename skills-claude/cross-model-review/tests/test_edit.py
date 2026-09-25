@@ -1,0 +1,527 @@
+"""Tests for the ``edit`` command: the next candidate from exact-text edits."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import re
+from pathlib import Path
+from typing import Any
+
+import cmr_edit
+import pytest
+from cmr_archive import Archive, ReviewError
+
+TESTS = Path(__file__).resolve().parent
+SCRIPTS = TESTS.parent / "scripts"
+FIXTURES = TESTS / "fixtures" / "candidate-edit"
+CASES = ("m6-r4", "stalemate-r2", "stalemate-r3", "stalemate-r4", "stalemate-r5")
+SCRIPT = SCRIPTS / "review.py"
+
+assert Path(cmr_edit.__file__).resolve().parent == SCRIPTS, cmr_edit.__file__
+
+BASE = b"# Title\n\nAlpha beta gamma.\n\nDelta epsilon.\n"
+ONE_EDIT = [{"old": "beta", "new": "BETA"}]
+AUTO = "auto"
+
+
+def digest(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def make_review(tmp_path: Path, base: bytes = BASE) -> tuple[Archive, Path, Path]:
+    """Create a review whose ``host/`` holds ``candidate-1.md`` with ``base``."""
+    repo = tmp_path / "target"
+    repo.mkdir(parents=True)
+    source = repo / "plan.md"
+    source.write_bytes(base)
+    archive = Archive.create(tmp_path / "review", repo, source, 3)
+    host = archive.root / "host"
+    host.mkdir()
+    candidate = host / "candidate-1.md"
+    candidate.write_bytes(base)
+    return archive, host, candidate
+
+
+def write_edits(path: Path, edits: Any) -> Path:
+    path.write_text(json.dumps(edits, ensure_ascii=False), encoding="utf-8")
+    return path
+
+
+def edit(
+    archive: Archive,
+    host: Path,
+    candidate: Path,
+    *,
+    edits: Any = ONE_EDIT,
+    out: str | None = None,
+    expect_sha: str | None = AUTO,
+    base: str | None = None,
+) -> dict[str, Any]:
+    """Run ``apply_edits``; ``expect_sha=AUTO`` means the candidate's digest.
+
+    The edits file is written outside the review so ``host/`` holds only what
+    the command itself creates.
+    """
+    edits_path = write_edits(archive.root.parent / "edits.json", edits)
+    sha = digest(candidate.read_bytes()) if expect_sha == AUTO else expect_sha
+    out = str(host / "candidate-2.md") if out is None else out
+    return cmr_edit.apply_edits(
+        archive, str(candidate) if base is None else base, str(edits_path), out, sha
+    )
+
+
+def published(host: Path, name: str = "candidate-2.md") -> tuple[bool, bool, list[str]]:
+    out = host / name
+    receipt = host / (name + ".receipt.json")
+    temporaries = sorted(path.name for path in host.glob("edit-*.tmp"))
+    return os.path.lexists(out), os.path.lexists(receipt), temporaries
+
+
+def assert_nothing_published(host: Path, name: str = "candidate-2.md") -> None:
+    assert published(host, name) == (False, False, [])
+
+
+# 1. Equivalence against the recorded fold scripts.
+
+
+@pytest.mark.parametrize("case", CASES)
+def test_equivalence_with_recorded_fold_scripts(tmp_path: Path, case: str) -> None:
+    base = (FIXTURES / case / "base.md").read_bytes()
+    expected = (FIXTURES / case / "expected.md").read_bytes()
+    archive, host, candidate = make_review(tmp_path, base)
+    edits_file = host / "edits.json"
+    edits_file.write_bytes((FIXTURES / case / "edits.json").read_bytes())
+    result = cmr_edit.apply_edits(
+        archive,
+        str(candidate),
+        str(edits_file),
+        str(host / "candidate-2.md"),
+        digest(base),
+    )
+    assert (host / "candidate-2.md").read_bytes() == expected
+    assert result["sha256"] == digest(expected)
+    assert result["base_sha256"] == digest(base)
+    assert result["edits_applied"] == len(
+        json.loads(edits_file.read_text(encoding="utf-8"))
+    )
+    assert result["lines"] == len(expected.decode("utf-8").splitlines())
+    receipt = json.loads(
+        (host / "candidate-2.md.receipt.json").read_text(encoding="utf-8")
+    )
+    assert receipt["semantics"] == 1
+    assert receipt["out"]["sha256"] == digest(expected)
+    assert receipt["base"]["sha256"] == digest(base)
+    assert receipt["edits_file"]["sha256"] == digest(edits_file.read_bytes())
+    assert receipt["edits"] == json.loads(edits_file.read_text(encoding="utf-8"))
+
+
+# 2. Edits-file validation.
+
+
+@pytest.mark.parametrize(
+    ("content", "reason"),
+    [
+        ("[{", "invalid edits file: Expecting"),
+        (
+            '{"old": "beta", "new": "b"}',
+            "invalid edits file: top level must be an array",
+        ),
+        ("[1]", "invalid edits file: item 1 is not an object"),
+        ('[{"new": "x"}]', "invalid edits file: item 1 needs string old and new"),
+        (
+            '[{"old": 1, "new": "x"}]',
+            "invalid edits file: item 1 needs string old and new",
+        ),
+        (
+            '[{"old": "beta", "new": "x", "extra": 1}]',
+            "invalid edits file: item 1 has unknown key extra",
+        ),
+        ("[]", "invalid edits file: no edits"),
+        ('[{"old": "", "new": "x"}]', "invalid edits file: item 1 has empty old"),
+        (
+            '[{"old": "beta", "new": "x", "label": 3}]',
+            "invalid edits file: item 1 label must be a string",
+        ),
+        (
+            '[{"old": "beta", "new": "\\ud800"}]',
+            "invalid edits file: item 1 new is not encodable as UTF-8",
+        ),
+        (
+            '[{"old": "\\ud800", "new": "x"}]',
+            "invalid edits file: item 1 old is not encodable as UTF-8",
+        ),
+        (
+            '[{"label": "\\ud800", "old": "beta", "new": "x"}]',
+            "invalid edits file: item 1 label is not encodable as UTF-8",
+        ),
+        (
+            '[{"old": "beta", "new": "x"}, {"label": "\\ud800", "old": "gamma", "new": "y"}]',
+            "invalid edits file: item 2 label is not encodable as UTF-8",
+        ),
+    ],
+)
+def test_invalid_edits_file_publishes_nothing(
+    tmp_path: Path, content: str, reason: str
+) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    edits_file = host / "edits.json"
+    edits_file.write_text(content, encoding="utf-8")
+    with pytest.raises(
+        ReviewError, match="^edit candidate failed: " + re.escape(reason)
+    ):
+        cmr_edit.apply_edits(
+            archive,
+            str(candidate),
+            str(edits_file),
+            str(host / "candidate-2.md"),
+            digest(BASE),
+        )
+    assert_nothing_published(host)
+
+
+# 3. Matching.
+
+
+def test_zero_and_several_matches_are_refused(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path, b"one two three\ntwo four\n")
+    with pytest.raises(
+        ReviewError,
+        match=r"^edit candidate failed: edit 1 matched 0 times, not once\. Got: 'five'",
+    ):
+        edit(archive, host, candidate, edits=[{"old": "five", "new": "x"}])
+    with pytest.raises(
+        ReviewError,
+        match=r"^edit candidate failed: edit 1 \(dup\) matched 2 times, not once\. Got: 'two'",
+    ):
+        edit(
+            archive, host, candidate, edits=[{"label": "dup", "old": "two", "new": "x"}]
+        )
+    assert_nothing_published(host)
+
+
+def test_overlapping_occurrences_count_separately(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path, b"aaa\n")
+    with pytest.raises(ReviewError, match=r"edit 1 matched 2 times, not once"):
+        edit(archive, host, candidate, edits=[{"old": "aa", "new": "b"}])
+    assert_nothing_published(host)
+
+
+def test_earlier_edit_may_create_a_later_match(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path, b"one two\n")
+    result = edit(
+        archive,
+        host,
+        candidate,
+        edits=[{"old": "one", "new": "three"}, {"old": "three two", "new": "x"}],
+    )
+    assert (host / "candidate-2.md").read_bytes() == b"x\n"
+    assert result["edits_applied"] == 2
+    assert result["lines"] == 1
+
+
+def test_earlier_edit_making_a_later_match_ambiguous_is_refused(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path, b"one two\n")
+    with pytest.raises(ReviewError, match=r"edit 2 matched 2 times, not once"):
+        edit(
+            archive,
+            host,
+            candidate,
+            edits=[{"old": "one", "new": "two"}, {"old": "two", "new": "x"}],
+        )
+    assert_nothing_published(host)
+
+
+# 4. Base identity.
+
+
+def test_base_identity(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    sha = digest(BASE)
+    wrong = "0" * 64
+    ref = archive.load()["original"]
+    assert ref == f"drafts/{sha}.md"
+
+    result = edit(archive, host, candidate, out=str(host / "ok.md"), expect_sha=sha)
+    assert result["base_sha256"] == sha
+    with pytest.raises(
+        ReviewError,
+        match=f"^edit candidate failed: base sha256 is {sha}, expected {wrong}",
+    ):
+        edit(archive, host, candidate, out=str(host / "bad.md"), expect_sha=wrong)
+    with pytest.raises(
+        ReviewError, match="expected sha256 is required for a filesystem path base"
+    ):
+        edit(archive, host, candidate, out=str(host / "nosha.md"), expect_sha=None)
+    with pytest.raises(
+        ReviewError, match="expected sha256 must be 64 lowercase hex digits"
+    ):
+        edit(archive, host, candidate, out=str(host / "short.md"), expect_sha="abc")
+    with pytest.raises(
+        ReviewError, match="expected sha256 must be 64 lowercase hex digits"
+    ):
+        edit(
+            archive, host, candidate, out=str(host / "upper.md"), expect_sha=sha.upper()
+        )
+
+    edit(
+        archive,
+        host,
+        candidate,
+        base=ref,
+        out=str(host / "ref-none.md"),
+        expect_sha=None,
+    )
+    edit(
+        archive,
+        host,
+        candidate,
+        base=ref,
+        out=str(host / "ref-agree.md"),
+        expect_sha=sha,
+    )
+    with pytest.raises(
+        ReviewError, match="expected sha256 disagrees with the drafts reference"
+    ):
+        edit(
+            archive,
+            host,
+            candidate,
+            base=ref,
+            out=str(host / "ref-disagree.md"),
+            expect_sha=wrong,
+        )
+    with pytest.raises(
+        ReviewError, match="expected sha256 is required for a filesystem path base"
+    ):
+        edit(
+            archive,
+            host,
+            candidate,
+            base="./" + ref,
+            out=str(host / "dot.md"),
+            expect_sha=None,
+        )
+    with pytest.raises(
+        ReviewError, match="expected sha256 is required for a filesystem path base"
+    ):
+        edit(
+            archive,
+            host,
+            candidate,
+            base=str(archive.path(ref)),
+            out=str(host / "abs.md"),
+            expect_sha=None,
+        )
+    with pytest.raises(
+        ReviewError, match="^resolve record failed: record is outside review directory"
+    ):
+        edit(
+            archive,
+            host,
+            candidate,
+            base="drafts/../../outside.md",
+            out=str(host / "escape.md"),
+            expect_sha=None,
+        )
+
+    archive.path(ref).write_bytes(BASE + b"tampered\n")
+    with pytest.raises(
+        ReviewError, match="^read candidate failed: saved candidate content changed"
+    ):
+        edit(
+            archive,
+            host,
+            candidate,
+            base=ref,
+            out=str(host / "tampered.md"),
+            expect_sha=None,
+        )
+    for name in (
+        "bad",
+        "nosha",
+        "short",
+        "upper",
+        "ref-disagree",
+        "dot",
+        "abs",
+        "escape",
+        "tampered",
+    ):
+        assert_nothing_published(host, f"{name}.md")
+
+
+# 5. Byte fidelity.
+
+
+@pytest.mark.parametrize(
+    ("base", "old", "new", "expected"),
+    [
+        (b"a\nb\n", "a", "A", b"A\nb\n"),
+        (b"a\r\nb\r\n", "a", "A", b"A\r\nb\r\n"),
+        (b"a\r\nb\nc", "b", "B", b"a\r\nB\nc"),
+        ("héllo → wörld\n".encode(), "→", "⇒", "héllo ⇒ wörld\n".encode()),
+        (b"no final newline", "final", "last", b"no last newline"),
+    ],
+)
+def test_byte_fidelity(
+    tmp_path: Path, base: bytes, old: str, new: str, expected: bytes
+) -> None:
+    archive, host, candidate = make_review(tmp_path, base)
+    result = edit(archive, host, candidate, edits=[{"old": old, "new": new}])
+    on_disk = (host / "candidate-2.md").read_bytes()
+    assert on_disk == expected
+    assert result["sha256"] == digest(on_disk)
+    assert result["lines"] == len(expected.decode("utf-8").splitlines())
+
+
+def test_empty_base_matches_nothing(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path, b"")
+    with pytest.raises(ReviewError, match=r"edit 1 matched 0 times, not once"):
+        edit(archive, host, candidate, edits=[{"old": "x", "new": "y"}])
+    assert_nothing_published(host)
+
+
+# 6. Output protection.
+
+
+def _existing_file(host: Path, archive: Archive, candidate: Path) -> str:
+    (host / "taken.md").write_bytes(b"x")
+    return str(host / "taken.md")
+
+
+def _directory(host: Path, archive: Archive, candidate: Path) -> str:
+    (host / "taken.md").mkdir()
+    return str(host / "taken.md")
+
+
+def _live_symlink(host: Path, archive: Archive, candidate: Path) -> str:
+    (host / "alias.md").symlink_to(candidate)
+    return str(host / "alias.md")
+
+
+def _dangling_symlink(host: Path, archive: Archive, candidate: Path) -> str:
+    (host / "alias.md").symlink_to(host / "missing.md")
+    return str(host / "alias.md")
+
+
+def _existing_receipt(host: Path, archive: Archive, candidate: Path) -> str:
+    (host / "new.md.receipt.json").write_bytes(b"{}\n")
+    return str(host / "new.md")
+
+
+def _symlinked_parent(host: Path, archive: Archive, candidate: Path) -> str:
+    elsewhere = archive.root.parent / "elsewhere"
+    elsewhere.mkdir()
+    (host / "link").symlink_to(elsewhere)
+    return str(host / "link" / "new.md")
+
+
+def _dotdot(host: Path, archive: Archive, candidate: Path) -> str:
+    return f"{host}/../new.md"
+
+
+def _trailing_dot(host: Path, archive: Archive, candidate: Path) -> str:
+    return f"{host}/new.md/."
+
+
+def _trailing_dotdot(host: Path, archive: Archive, candidate: Path) -> str:
+    return f"{host}/new.md/.."
+
+
+def _trailing_separator(host: Path, archive: Archive, candidate: Path) -> str:
+    return f"{host}/new.md/"
+
+
+def _review_root(host: Path, archive: Archive, candidate: Path) -> str:
+    return str(archive.root / "new.md")
+
+
+def _subdirectory(host: Path, archive: Archive, candidate: Path) -> str:
+    (host / "sub").mkdir()
+    return str(host / "sub" / "new.md")
+
+
+@pytest.mark.parametrize(
+    ("setup", "reason"),
+    [
+        (_existing_file, "output already exists"),
+        (_directory, "output already exists"),
+        (_live_symlink, "output already exists"),
+        (_dangling_symlink, "output already exists"),
+        (_existing_receipt, "receipt path already exists"),
+        (
+            _symlinked_parent,
+            "output must be directly inside the review's host directory",
+        ),
+        (_dotdot, "output must be directly inside the review's host directory"),
+        (_trailing_dot, "output must name a file"),
+        (_trailing_dotdot, "output must name a file"),
+        (_trailing_separator, "output must name a file"),
+        (_review_root, "output must be directly inside the review's host directory"),
+        (_subdirectory, "output must be directly inside the review's host directory"),
+    ],
+)
+def test_output_protection(tmp_path: Path, setup: Any, reason: str) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    out = setup(host, archive, candidate)
+    before = sorted(str(path) for path in archive.root.rglob("*"))
+    with pytest.raises(
+        ReviewError, match="^edit candidate failed: " + re.escape(reason)
+    ):
+        edit(archive, host, candidate, out=out)
+    assert sorted(str(path) for path in archive.root.rglob("*")) == before
+    assert not (host / "new.md").exists()
+    assert not (archive.root / "new.md").exists()
+
+
+def test_output_equal_to_base_is_refused(tmp_path: Path) -> None:
+    archive, host, candidate = make_review(tmp_path)
+    with pytest.raises(
+        ReviewError, match="^edit candidate failed: output already exists"
+    ):
+        edit(archive, host, candidate, out=str(candidate))
+    ghost = host / "ghost.md"
+    with pytest.raises(
+        ReviewError, match="^edit candidate failed: output must differ from the base"
+    ):
+        edit(
+            archive,
+            host,
+            candidate,
+            base=str(ghost),
+            out=str(ghost),
+            expect_sha=digest(BASE),
+        )
+    assert not ghost.exists()
+
+
+def test_host_must_be_a_real_directory(tmp_path: Path) -> None:
+    archive, host, _candidate = make_review(tmp_path)
+    real = archive.root / "real-host"
+    host.rename(real)
+    host.symlink_to(real)
+    moved = real / "candidate-1.md"
+    with pytest.raises(
+        ReviewError,
+        match="^edit candidate failed: host directory must exist and not be a symlink",
+    ):
+        edit(archive, host, moved)
+    host.unlink()
+    host.symlink_to(archive.root)
+    with pytest.raises(
+        ReviewError, match="host directory must exist and not be a symlink"
+    ):
+        edit(archive, host, moved, out=str(host / "02-closing.request.json"))
+    assert not (archive.root / "02-closing.request.json").exists()
+    host.unlink()
+    with pytest.raises(
+        ReviewError, match="host directory must exist and not be a symlink"
+    ):
+        edit(archive, host, moved)
+    host.write_bytes(b"not a directory")
+    with pytest.raises(
+        ReviewError, match="host directory must exist and not be a symlink"
+    ):
+        edit(archive, host, moved)
