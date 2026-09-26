@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import difflib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -313,6 +314,72 @@ def _failure_before_call(archive: Archive, state: dict[str, Any]) -> str | None:
     )
 
 
+def _display_ref(ref: str) -> str:
+    """Show a finding reference literally on one line, inside a code span.
+
+    Newlines become one space. The fence is one backtick longer than the
+    longest backtick run inside the reference. When the reference begins or
+    ends with a backtick or a space, and is not all spaces, one space of
+    padding sits inside the fence at each end: CommonMark strips exactly one
+    leading and one trailing space from such a span, so the reader sees the
+    reference unchanged and a boundary backtick cannot merge with the fence.
+    """
+    text = " ".join(ref.splitlines())
+    longest = max((len(run) for run in re.findall(r"`+", text)), default=0)
+    fence = "`" * (longest + 1)
+    pad = "" if text.isspace() else (" " if text[0] in "` " or text[-1] in "` " else "")
+    return f"{fence}{pad}{text}{pad}{fence}"
+
+
+def _render_findings(state: dict[str, Any], response: dict[str, Any] | None) -> str:
+    """Render the Findings section from the latest valid reviewer response."""
+    lines = ["## Findings", ""]
+    if response is None:
+        lines += ["No valid reviewer response recorded.", ""]
+        return "\n".join(lines)
+    findings = response["findings"]
+    counts = {"resolved": 0, "withdrawn": 0, "standing": 0}
+    material_standing = 0
+    for finding in findings:
+        counts[finding["disposition"]] += 1
+        if finding["disposition"] == "standing" and finding["material"]:
+            material_standing += 1
+    if not findings:
+        lines.append("0 findings.")
+    else:
+        lines.append(
+            f"{len(findings)} findings: {counts['resolved']} resolved, "
+            f"{counts['withdrawn']} withdrawn, {counts['standing']} standing "
+            f"({material_standing} material)."
+        )
+    if state["checked_response"] is None:
+        lines.append(
+            "This is the opening review of the submitted revision "
+            f"{response['revision']} ({state['last_response']}); "
+            "no successful closing check is recorded."
+        )
+    if not findings:
+        lines.append("")
+        return "\n".join(lines)
+    lines += ["", "| Ref | Material | Disposition |", "| --- | --- | --- |"]
+    for finding in findings:
+        cell = _display_ref(finding["ref"]).replace("|", "\\|")
+        material = "yes" if finding["material"] else "no"
+        lines.append(f"| {cell} | {material} | {finding['disposition']} |")
+    lines.append("")
+    for finding in findings:
+        if finding["disposition"] != "standing":
+            continue
+        kind = "material" if finding["material"] else "not material"
+        lines += [
+            f"### {_display_ref(finding['ref'])} ({kind})",
+            "",
+            finding["explanation"],
+            "",
+        ]
+    return "\n".join(lines)
+
+
 def finish(
     archive: Archive, outcome: str, host_note: Path, need: Path
 ) -> dict[str, Any]:
@@ -421,6 +488,8 @@ def finish(
                 f"# Review result: {outcome}\n\n"
                 "## Need from you\n\n"
                 f"{need_text}\n\n"
+                f"{_render_findings(state, response)}\n"
+                "## Record\n\n"
                 f"{label}: [{candidate}]({archive.path(candidate)})\n\n"
                 f"Rounds started: {state['used']} of {state['limit']}.\n\n"
                 f"Saved phase: {state['phase']}.\n\n"

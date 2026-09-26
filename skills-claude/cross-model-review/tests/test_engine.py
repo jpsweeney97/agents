@@ -1245,3 +1245,129 @@ def test_finish_refuses_an_empty_need_before_writing(tmp_path: Path, text: str) 
         engine.finish(archive, "complete", note, _need(tmp_path, text))
     assert not archive.path("result.md").exists()
     assert not archive.path("result.json").exists()
+
+
+def test_result_renders_counts_and_a_table_from_the_latest_response(
+    tmp_path: Path,
+) -> None:
+    archive = _checked_review(tmp_path, MIXED_FINDINGS)
+    note = tmp_path / "note.md"
+    note.write_text("F4 stands; JP must choose whether the cache may stay remote.")
+    engine.finish(archive, "decision", note, _need(tmp_path))
+    text = archive.text("result.md")
+    assert (
+        "## Findings\n\n4 findings: 2 resolved, 1 withdrawn, 1 standing (1 material).\n\n"
+        "| Ref | Material | Disposition |\n"
+        "| --- | --- | --- |\n"
+        "| `F1` | yes | resolved |\n"
+        "| `F2` | no | resolved |\n"
+        "| `F3` | yes | withdrawn |\n"
+        "| `F4` | yes | standing |\n"
+    ) in text
+    assert "opening review of the submitted revision" not in text
+
+
+def test_result_reproduces_only_standing_explanations_verbatim(
+    tmp_path: Path,
+) -> None:
+    archive = _checked_review(tmp_path, MIXED_FINDINGS)
+    note = tmp_path / "note.md"
+    note.write_text("F4 stands; JP must choose whether the cache may stay remote.")
+    engine.finish(archive, "decision", note, _need(tmp_path))
+    text = archive.text("result.md")
+    assert "\n### `F4` (material)\n\nCache still remote.\n\n## Record\n" in text
+    assert "Upload removed." not in text
+    assert "Misread the goal." not in text
+    assert "Typo." not in text
+
+
+def test_opening_only_result_names_the_missing_closing_check(tmp_path: Path) -> None:
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING], [FINDING]])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.finish(archive, "decision", _decision_note(tmp_path), _need(tmp_path))
+    state = archive.load()
+    line = (
+        "This is the opening review of the submitted revision "
+        f"{state['original']} (01-opening.response.json); "
+        "no successful closing check is recorded."
+    )
+    assert (
+        f"1 findings: 0 resolved, 0 withdrawn, 1 standing (1 material).\n{line}\n\n|"
+        in archive.text("result.md")
+    )
+    engine.query(archive, source, host, replies)
+    engine.finish(archive, "decision", _decision_note(tmp_path), _need(tmp_path))
+    assert "opening review of the submitted revision" not in archive.text("result.md")
+
+
+def test_result_without_a_valid_response_says_so(tmp_path: Path) -> None:
+    from cross_model_runtime.codex_transport import CodexTransportError
+
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([CodexTransportError("codex unavailable")])
+    engine.begin(archive)
+    with pytest.raises(CodexTransportError):
+        engine.query(archive, source, host, replies)
+    note = tmp_path / "note.md"
+    note.write_text("The opening call failed; nothing was reviewed.")
+    engine.finish(archive, "failed", note, _need(tmp_path))
+    assert (
+        "## Findings\n\nNo valid reviewer response recorded.\n\n## Record\n"
+        in archive.text("result.md")
+    )
+
+
+@pytest.mark.parametrize(
+    ("ref", "cell", "heading"),
+    [
+        ("F|1\nb`c# d", "``F\\|1 b`c# d``", "``F|1 b`c# d``"),
+        ("`F1", "`` `F1 ``", "`` `F1 ``"),
+        (" F1 ", "`  F1  `", "`  F1  `"),
+        ("  ", "`  `", "`  `"),
+    ],
+)
+def test_refs_display_literally_in_the_table_and_the_heading(
+    tmp_path: Path, ref: str, cell: str, heading: str
+) -> None:
+    standing = dict(FINDING, ref=ref, explanation="Still open.")
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[standing], [standing]])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.query(archive, source, host, replies)
+    note = tmp_path / "note.md"
+    note.write_text("One finding stands; JP must rule on the constraint.")
+    engine.finish(archive, "decision", note, _need(tmp_path))
+    text = archive.text("result.md")
+    assert f"| {cell} | yes | standing |\n" in text
+    assert f"\n### {heading} (material)\n\nStill open.\n" in text
+    assert text.count("\n### ") == 1
+
+
+def test_record_block_is_unchanged_after_the_new_sections(tmp_path: Path) -> None:
+    resolved = dict(FINDING, disposition="resolved", explanation="Removed.")
+    archive = _checked_review(tmp_path, [resolved])
+    note = tmp_path / "note.md"
+    note.write_text("Upload removed; nothing material remains.")
+    engine.finish(archive, "complete", note, _need(tmp_path))
+    state = archive.load()
+    candidate = state["checked"]
+    expected = (
+        "## Record\n\n"
+        f"Last checked candidate: [{candidate}]({archive.path(candidate)})\n\n"
+        "Rounds started: 1 of 3.\n\n"
+        "Saved phase: between.\n\n"
+        "Pending or failed call: none.\n\n"
+        "Failed rounds followed by authorized continuation: none. These rounds were not refunded.\n\n"
+        "Original reviewer record for this candidate: 01-closing.raw.json\n\n"
+        "Latest valid reviewer response: 01-closing.response.json\n\n"
+        "Recorded failure: None\n\n"
+        f"[Changes from submitted version]({archive.path('changes.diff')})\n\n"
+        "## Host account: changes, evidence, disagreements, and limitations\n\n"
+        "Upload removed; nothing material remains."
+        "\n\nThis is a review record, not a certificate or adoption.\n"
+    )
+    text = archive.text("result.md")
+    assert text[text.index("## Record\n") :] == expected
