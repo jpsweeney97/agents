@@ -45,9 +45,10 @@ def apply_edits(
     Args:
         archive: The review whose ``host/`` directory receives the output.
         base: The ``--from`` argument as typed: a ``drafts/`` reference or a
-            filesystem path.
-        edits: The ``--edits`` argument as typed, a filesystem path.
-        out: The ``--out`` argument as typed, a filesystem path.
+            filesystem path, located by ``Archive.locate``.
+        edits: The ``--edits`` argument as typed, located by ``Archive.locate``.
+        out: The ``--out`` argument as typed, a path whose parent must be the
+            review's ``host/`` directory as typed or under the review.
         expect_sha: The ``--expect-sha`` argument, or ``None``.
 
     Returns:
@@ -81,17 +82,26 @@ def _host_directory(archive: Archive) -> Path:
     return host
 
 
-def _output_paths(host: Path, raw: str) -> tuple[Path, Path]:
-    """Apply the containment rules to the ``--out`` string as typed."""
+def _output_paths(archive: Archive, host: Path, raw: str) -> tuple[Path, Path]:
+    """Apply the containment rules to the ``--out`` string.
+
+    The parent is taken as typed when that is the host directory; otherwise
+    the same parent is tried under the review directory. Anything else is
+    refused, naming both directories searched.
+    """
     name = raw.rsplit(os.sep, 1)[-1]
     if raw.endswith(os.sep) or name in ("", ".", ".."):
         fail(OPERATION, "output must name a file", raw)
     supplied = Path(raw)
     parent = resolve_path(supplied.parent)
+    if parent != host and not supplied.is_absolute():
+        parent = resolve_path(archive.root / supplied.parent)
     if parent != host:
         fail(
             OPERATION,
-            "output must be directly inside the review's host directory",
+            "output must be directly inside the review's host directory, as "
+            f"typed under {Path.cwd()} or under the review directory "
+            f"{archive.root}",
             raw,
         )
     out = parent / supplied.name
@@ -203,16 +213,18 @@ def _prepare(
     """Validate, read, apply, and serialize; nothing is written."""
     _check_arguments(base, edits, out)
     host = _host_directory(archive)
-    out_path, receipt_path = _output_paths(host, out)
+    out_path, receipt_path = _output_paths(archive, host, out)
     is_reference, expected = _expected_digest(base, expect_sha)
-    base_path = archive.path(base) if is_reference else resolve_path(Path(base))
+    base_path = (
+        archive.path(base) if is_reference else resolve_path(archive.locate(base))
+    )
     if out_path == base_path:
         fail(OPERATION, "output must differ from the base", str(out_path))
     base_text = archive.text(base) if is_reference else read_text(base_path)
     base_digest = _digest(base_text.encode("utf-8"))
     if base_digest != expected:
         fail(OPERATION, f"base sha256 is {base_digest}, expected {expected}", base)
-    edits_path = resolve_path(Path(edits))
+    edits_path = resolve_path(archive.locate(edits))
     edits_text = read_text(edits_path)
     edit_list = _parse_edits(edits_text, edits)
     text = _apply(base_text, edit_list)

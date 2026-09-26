@@ -125,6 +125,31 @@ class Archive:
             fail("resolve record", "record is outside review directory", name)
         return path
 
+    def locate(self, argument: str | Path) -> Path:
+        """Find a host-supplied file: as typed first, then under the review.
+
+        An absolute path is taken as typed. A relative path is taken as typed
+        when a filesystem entry exists there, under the working directory;
+        otherwise the same path is tried under the review directory, where it
+        must stay inside it. The result is where a read is attempted; whether
+        the entry is readable is the read's own concern.
+
+        Raises:
+            ReviewError: Neither location holds an entry, or the review-relative
+                location escapes the review directory.
+        """
+        typed = Path(argument).expanduser()
+        if typed.is_absolute() or os.path.lexists(typed):
+            return typed
+        if os.path.lexists(self.root / typed):
+            return self.path(str(typed))
+        fail(
+            "locate input",
+            f"not found as typed under {Path.cwd()} nor under the review "
+            f"directory {self.root}",
+            str(argument),
+        )
+
     def text(self, name: str) -> str:
         """Read an archive-local text record."""
         text = read_text(self.path(name))

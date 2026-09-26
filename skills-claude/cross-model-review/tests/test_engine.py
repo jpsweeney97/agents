@@ -1445,3 +1445,74 @@ def test_cli_finish_requires_need(tmp_path: Path) -> None:
     assert passed_through.returncode == 1
     assert "read input failed" in passed_through.stderr
     assert str(missing) in passed_through.stderr
+
+
+def _cli(cwd: Path, review: Path, *args: str) -> Any:
+    import subprocess
+
+    script = Path(__file__).resolve().parents[1] / "scripts" / "review.py"
+    return subprocess.run(
+        [sys.executable, str(script), "--review", str(review), *args],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def test_cli_path_arguments_fall_back_to_the_review_directory(tmp_path: Path) -> None:
+    """Issue #26: every path argument is tried as typed, then under the review."""
+    archive, _source, _host = setup_review(tmp_path)
+    host = archive.root / "host"
+    host.mkdir()
+    (host / "authorization.txt").write_text("JP: one more round.\n")
+    foreign = tmp_path / "far" / "away"
+    foreign.mkdir(parents=True)
+
+    extended = _cli(
+        foreign,
+        archive.root,
+        "extend",
+        "--extra",
+        "1",
+        "--authorization",
+        "host/authorization.txt",
+    )
+    assert extended.returncode == 0, extended.stderr
+    assert json.loads(extended.stdout)["limit"] == 4
+    assert archive.load()["extensions"][0]["authorization"] == "JP: one more round.\n"
+
+    engine.begin(archive)
+    before = archive.load()
+    refused = _cli(
+        foreign,
+        archive.root,
+        "review",
+        "--candidate",
+        before["original"],
+        "--request",
+        "host/request-1.md",
+    )
+    assert refused.returncode == 1
+    assert refused.stdout == ""
+    assert refused.stderr == (
+        f"locate input failed: not found as typed under {foreign} nor under the "
+        f"review directory {archive.root}. Got: 'host/request-1.md'\n"
+    )
+    assert archive.load() == before
+    assert not list(archive.root.glob("*.request.json"))
+
+    (host / "request-1.md").write_text("Goal: keep data local.\n")
+    attempted = _cli(
+        foreign,
+        archive.root,
+        "review",
+        "--candidate",
+        before["original"],
+        "--request",
+        "host/request-1.md",
+    )
+    assert attempted.returncode == 1
+    assert "locate input failed" not in attempted.stderr
+    assert "read input failed" not in attempted.stderr
+    assert archive.path("01-opening.request.json").is_file()

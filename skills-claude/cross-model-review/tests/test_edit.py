@@ -1427,3 +1427,131 @@ def test_candidate_and_receipt_take_the_umask_default_mode(tmp_path: Path) -> No
         host / "candidate-2.md.receipt.json",
     ):
         assert stat.S_IMODE(os.stat(path).st_mode) == expected, path
+
+
+def test_cli_review_relative_paths_resolve_against_the_review_root(
+    tmp_path: Path,
+) -> None:
+    """Issue #26: paths typed relative to the review directory work anywhere."""
+    archive, host, _candidate = make_review(tmp_path)
+    write_edits(host / "edits.json", ONE_EDIT)
+    foreign = tmp_path / "far" / "away"
+    foreign.mkdir(parents=True)
+    done = _run_cli(
+        foreign,
+        archive.root,
+        "--from",
+        "host/candidate-1.md",
+        "--edits",
+        "host/edits.json",
+        "--out",
+        "host/candidate-2.md",
+        "--expect-sha",
+        digest(BASE),
+    )
+    assert done.returncode == 0, done.stderr
+    result = json.loads(done.stdout)
+    assert result["out"] == str(host / "candidate-2.md")
+    assert result["edits_applied"] == 1
+    receipt = json.loads(
+        (host / "candidate-2.md.receipt.json").read_text(encoding="utf-8")
+    )
+    assert receipt["base"]["argument"] == "host/candidate-1.md"
+    assert receipt["base"]["path"] == str(host / "candidate-1.md")
+    assert receipt["edits_file"]["argument"] == "host/edits.json"
+    assert receipt["edits_file"]["path"] == str(host / "edits.json")
+
+
+def test_cli_a_path_that_exists_as_typed_wins_over_the_review_copy(
+    tmp_path: Path,
+) -> None:
+    archive, host, _candidate = make_review(tmp_path)
+    write_edits(host / "edits.json", ONE_EDIT)
+    foreign = tmp_path / "far" / "away"
+    (foreign / "host").mkdir(parents=True)
+    write_edits(foreign / "host" / "edits.json", [{"old": "gamma", "new": "GAMMA"}])
+    done = _run_cli(
+        foreign,
+        archive.root,
+        "--from",
+        archive.load()["original"],
+        "--edits",
+        "host/edits.json",
+        "--out",
+        "host/candidate-2.md",
+    )
+    assert done.returncode == 0, done.stderr
+    assert (host / "candidate-2.md").read_bytes() == BASE.replace(b"gamma", b"GAMMA")
+    receipt = json.loads(
+        (host / "candidate-2.md.receipt.json").read_text(encoding="utf-8")
+    )
+    assert receipt["edits_file"]["path"] == str(foreign / "host" / "edits.json")
+
+
+def test_cli_missing_input_names_both_directories(tmp_path: Path) -> None:
+    archive, host, _candidate = make_review(tmp_path)
+    foreign = tmp_path / "far" / "away"
+    foreign.mkdir(parents=True)
+    refused = _run_cli(
+        foreign,
+        archive.root,
+        "--from",
+        archive.load()["original"],
+        "--edits",
+        "host/edits.json",
+        "--out",
+        "host/candidate-2.md",
+    )
+    assert refused.returncode == 1
+    assert refused.stdout == ""
+    assert refused.stderr == (
+        f"locate input failed: not found as typed under {foreign} nor under the "
+        f"review directory {archive.root}. Got: 'host/edits.json'\n"
+    )
+    assert_nothing_published(host)
+
+    write_edits(host / "edits.json", ONE_EDIT)
+    refused = _run_cli(
+        foreign,
+        archive.root,
+        "--from",
+        archive.load()["original"],
+        "--edits",
+        "host/edits.json",
+        "--out",
+        "elsewhere/candidate-2.md",
+    )
+    assert refused.returncode == 1
+    assert refused.stdout == ""
+    assert refused.stderr == (
+        "edit candidate failed: output must be directly inside the review's host "
+        f"directory, as typed under {foreign} or under the review directory "
+        f"{archive.root}. Got: 'elsewhere/candidate-2.md'\n"
+    )
+    assert_nothing_published(host)
+
+
+def test_cli_review_relative_path_escaping_the_review_is_refused(
+    tmp_path: Path,
+) -> None:
+    archive, host, _candidate = make_review(tmp_path)
+    write_edits(tmp_path / "outside.json", ONE_EDIT)
+    foreign = tmp_path / "far" / "away"
+    foreign.mkdir(parents=True)
+    refused = _run_cli(
+        foreign,
+        archive.root,
+        "--from",
+        archive.load()["original"],
+        "--edits",
+        "../outside.json",
+        "--out",
+        "host/candidate-2.md",
+    )
+    assert refused.returncode == 1
+    assert refused.stdout == ""
+    assert refused.stderr == (
+        "resolve record failed: record is outside review directory. "
+        "Got: '../outside.json'\n"
+    )
+    assert_nothing_published(host)

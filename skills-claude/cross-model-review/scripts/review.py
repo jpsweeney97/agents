@@ -22,10 +22,18 @@ from cross_model_runtime.codex_transport import (
     CodexTransportError,
 )
 
+PATH_RULE = (
+    "Path arguments after the command are taken as typed when a filesystem "
+    "entry exists there, relative to the working directory; otherwise the same "
+    "path is tried relative to the review directory, where it must stay inside "
+    "it. An absolute path is always taken as typed, and a drafts/ reference is "
+    "always relative to the review directory. A miss names both directories."
+)
+
 
 def main() -> int:
     """Dispatch an explicitly requested operation and print its saved result."""
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, epilog=PATH_RULE)
     parser.add_argument("--review", required=True, type=Path)
     commands = parser.add_subparsers(dest="command", required=True)
     create = commands.add_parser("init")
@@ -71,19 +79,31 @@ def main() -> int:
         elif args.command == "resume":
             result = engine.resume(archive)
         elif args.command == "continue":
-            result = engine.continue_after_failure(archive, args.authorization)
+            result = engine.continue_after_failure(
+                archive, archive.locate(args.authorization)
+            )
         elif args.command == "review":
             result = engine.query(
-                archive, args.candidate, args.request, timeout=args.timeout
+                archive,
+                archive.locate(args.candidate),
+                archive.locate(args.request),
+                timeout=args.timeout,
             )
         elif args.command == "finish":
-            result = engine.finish(archive, args.outcome, args.note, args.need)
+            result = engine.finish(
+                archive,
+                args.outcome,
+                archive.locate(args.note),
+                archive.locate(args.need),
+            )
         elif args.command == "edit":
             result = cmr_edit.apply_edits(
                 archive, args.from_, args.edits, args.out, args.expect_sha
             )
         else:
-            result = engine.extend(archive, args.extra, args.authorization)
+            result = engine.extend(
+                archive, args.extra, archive.locate(args.authorization)
+            )
     except (ReviewError, CodexTransportError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
