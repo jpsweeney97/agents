@@ -1326,6 +1326,10 @@ def test_result_without_a_valid_response_says_so(tmp_path: Path) -> None:
         ("`F1", "`` `F1 ``", "`` `F1 ``"),
         (" F1 ", "`  F1  `", "`  F1  `"),
         ("  ", "`  `", "`  `"),
+        ("\n", "` `", "` `"),
+        ("F1\n", "` F1  `", "` F1  `"),
+        ("a\x0bb", "`a\x0bb`", "`a\x0bb`"),
+        (" \t ", "`  \t  `", "`  \t  `"),
     ],
 )
 def test_refs_display_literally_in_the_table_and_the_heading(
@@ -1397,3 +1401,47 @@ def test_cli_finish_requires_need(tmp_path: Path) -> None:
     )
     assert without.returncode == 2
     assert "--need" in without.stderr
+    repo = tmp_path / "target"
+    repo.mkdir()
+    source = repo / "plan.md"
+    source.write_text("# Plan\n")
+    review_root = tmp_path / "review"
+    initialized = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            "--review",
+            str(review_root),
+            "init",
+            "--repo",
+            str(repo),
+            "--source",
+            str(source),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert initialized.returncode == 0, initialized.stderr
+    missing = tmp_path / "missing-need.md"
+    passed_through = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            "--review",
+            str(review_root),
+            "finish",
+            "--outcome",
+            "failed",
+            "--note",
+            str(note),
+            "--need",
+            str(missing),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert passed_through.returncode == 1
+    assert "read input failed" in passed_through.stderr
+    assert str(missing) in passed_through.stderr

@@ -317,17 +317,19 @@ def _failure_before_call(archive: Archive, state: dict[str, Any]) -> str | None:
 def _display_ref(ref: str) -> str:
     """Show a finding reference literally on one line, inside a code span.
 
-    Newlines become one space. The fence is one backtick longer than the
-    longest backtick run inside the reference. When the reference begins or
-    ends with a backtick or a space, and is not all spaces, one space of
-    padding sits inside the fence at each end: CommonMark strips exactly one
-    leading and one trailing space from such a span, so the reader sees the
-    reference unchanged and a boundary backtick cannot merge with the fence.
+    Each line break (LF, CRLF, or CR) becomes one space; nothing else is
+    changed. The fence is one backtick longer than the longest backtick run
+    inside the reference. When the reference begins or ends with a backtick
+    or a space, and is not all spaces, one space of padding sits inside the
+    fence at each end: CommonMark strips exactly one leading and one trailing
+    space from such a span, so the reader sees the reference unchanged and a
+    boundary backtick cannot merge with the fence.
     """
-    text = " ".join(ref.splitlines())
+    text = re.sub(r"\r\n|\r|\n", " ", ref)
     longest = max((len(run) for run in re.findall(r"`+", text)), default=0)
     fence = "`" * (longest + 1)
-    pad = "" if text.isspace() else (" " if text[0] in "` " or text[-1] in "` " else "")
+    padded = text.strip(" ") != "" and (text[0] in "` " or text[-1] in "` ")
+    pad = " " if padded else ""
     return f"{fence}{pad}{text}{pad}{fence}"
 
 
