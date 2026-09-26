@@ -42,7 +42,7 @@ def main() -> int:
     create = commands.add_parser("init")
     create.add_argument("--repo", required=True, type=Path)
     create.add_argument("--source", required=True, type=Path)
-    create.add_argument("--rounds", type=int, default=3)
+    create.add_argument("--rounds", type=int, default=8)
     commands.add_parser("begin")
     commands.add_parser("status")
     commands.add_parser("resume")

@@ -5,7 +5,7 @@ description: "Use when the user wants Claude and Codex to review and revise a pl
 
 # Cross-Model Review
 
-Improve a submitted draft with Codex, within a user-adjustable allowance of three rounds. Keep the submitted file unchanged and return a separate candidate, changes and reasons, check evidence, and unresolved findings or decisions. This is review, not certification or adoption.
+Improve a submitted draft with Codex, within a user-adjustable allowance of eight rounds. Keep the submitted file unchanged and return a separate candidate, changes and reasons, check evidence, and unresolved findings or decisions. This is review, not certification or adoption.
 
 Only operate in a user-visible Claude Code session. Do not launch this workflow from a scheduled job, hidden subagent, or unattended trigger. A user request for this review authorizes the stated review scope; do not require another blanket confirmation when the target and goals are already clear.
 
@@ -35,7 +35,7 @@ Only Codex creates formal findings and resolves or withdraws them. Your still-he
 
 For a follow-up, use the previous closing response as the findings to investigate. Call `begin` before that investigation starts. There is no repeated opening review on unchanged text. A dispute can progress through reasoning without a text change or new evidence. Absence of new evidence is not an automatic user-decision stop.
 
-Every correction after a closing check, and every new material finding discovered during it, needs another round for investigation, any correction, and checking. If no allowance remains, do not start that work. The default permits one opening call and up to three closing calls. Do not make uncounted reviewer calls or request an extra final-summary call.
+Every correction after a closing check, and every new material finding discovered during it, needs another round for investigation, any correction, and checking. If no allowance remains, do not start that work. The default permits one opening call and up to seven closing calls. Do not make uncounted reviewer calls or request an extra final-summary call.
 
 ## Resume or stop
 

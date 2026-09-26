@@ -442,7 +442,9 @@ def test_cli_initializes_from_foreign_cwd_without_model_calls(tmp_path: Path) ->
         check=False,
     )
     assert initialized.returncode == 0, initialized.stderr
-    assert json.loads(initialized.stdout)["used"] == 0
+    initial = json.loads(initialized.stdout)
+    assert initial["used"] == 0
+    assert initial["limit"] == 8, "the default allowance is eight rounds"
     begun = subprocess.run(
         [sys.executable, str(script), "--review", str(review_root), "begin"],
         cwd=repo,
