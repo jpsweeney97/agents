@@ -23,11 +23,14 @@ from cross_model_runtime.codex_transport import (
 )
 
 PATH_RULE = (
-    "Path arguments after the command are taken as typed when a filesystem "
-    "entry exists there, relative to the working directory; otherwise the same "
-    "path is tried relative to the review directory, where it must stay inside "
-    "it. An absolute path is always taken as typed, and a drafts/ reference is "
-    "always relative to the review directory. A miss names both directories."
+    "Input files (--candidate, --request, --note, --need, --authorization, "
+    "--edits, and a filesystem-path --from) are taken as typed when a "
+    "filesystem entry exists there, relative to the working directory; "
+    "otherwise the same path is tried relative to the review directory, where "
+    "it must stay inside it. An absolute path is always taken as typed. A miss "
+    "names both directories. --out must name a new file directly inside the "
+    "review's host/ directory, as typed or relative to the review directory. "
+    "A drafts/ reference is accepted by --from only."
 )
 
 

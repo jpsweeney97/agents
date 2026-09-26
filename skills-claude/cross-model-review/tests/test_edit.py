@@ -1505,7 +1505,7 @@ def test_cli_missing_input_names_both_directories(tmp_path: Path) -> None:
     assert refused.returncode == 1
     assert refused.stdout == ""
     assert refused.stderr == (
-        f"locate input failed: not found as typed under {foreign} nor under the "
+        f"locate input failed: not found as typed under {foreign} or under the "
         f"review directory {archive.root}. Got: 'host/edits.json'\n"
     )
     assert_nothing_published(host)
@@ -1553,5 +1553,47 @@ def test_cli_review_relative_path_escaping_the_review_is_refused(
     assert refused.stderr == (
         "resolve record failed: record is outside review directory. "
         "Got: '../outside.json'\n"
+    )
+    assert_nothing_published(host)
+
+
+def test_cli_unknown_home_directory_is_refused_through_fail(tmp_path: Path) -> None:
+    archive, host, _candidate = make_review(tmp_path)
+    refused = _run_cli(
+        host,
+        archive.root,
+        "--from",
+        archive.load()["original"],
+        "--edits",
+        "~no-such-user-for-cmr/edits.json",
+        "--out",
+        "host/candidate-2.md",
+    )
+    assert refused.returncode == 1
+    assert refused.stdout == ""
+    assert refused.stderr.startswith("locate input failed: ")
+    assert refused.stderr.endswith(". Got: '~no-such-user-for-cmr/edits.json'\n")
+    assert_nothing_published(host)
+
+
+def test_cli_absolute_out_refusal_names_no_searched_directories(
+    tmp_path: Path,
+) -> None:
+    archive, host, _candidate = make_review(tmp_path)
+    write_edits(host / "edits.json", ONE_EDIT)
+    refused = _run_cli(
+        host,
+        archive.root,
+        "--from",
+        archive.load()["original"],
+        "--edits",
+        "edits.json",
+        "--out",
+        str(tmp_path / "candidate-2.md"),
+    )
+    assert refused.returncode == 1
+    assert refused.stderr == (
+        "edit candidate failed: output must be directly inside the review's host "
+        f"directory. Got: {str(tmp_path / 'candidate-2.md')!r:.100}\n"
     )
     assert_nothing_published(host)

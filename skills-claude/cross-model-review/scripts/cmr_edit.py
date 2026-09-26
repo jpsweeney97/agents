@@ -97,11 +97,15 @@ def _output_paths(archive: Archive, host: Path, raw: str) -> tuple[Path, Path]:
     if parent != host and not supplied.is_absolute():
         parent = resolve_path(archive.root / supplied.parent)
     if parent != host:
+        searched = (
+            ""
+            if supplied.is_absolute()
+            else f", as typed under {Path.cwd()} or under the review directory "
+            f"{archive.root}"
+        )
         fail(
             OPERATION,
-            "output must be directly inside the review's host directory, as "
-            f"typed under {Path.cwd()} or under the review directory "
-            f"{archive.root}",
+            f"output must be directly inside the review's host directory{searched}",
             raw,
         )
     out = parent / supplied.name

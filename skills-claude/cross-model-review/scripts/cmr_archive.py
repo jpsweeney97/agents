@@ -138,14 +138,17 @@ class Archive:
             ReviewError: Neither location holds an entry, or the review-relative
                 location escapes the review directory.
         """
-        typed = Path(argument).expanduser()
+        try:
+            typed = Path(argument).expanduser()
+        except RuntimeError as exc:  # ``~user`` with no such home directory
+            fail("locate input", str(exc), str(argument))
         if typed.is_absolute() or os.path.lexists(typed):
             return typed
         if os.path.lexists(self.root / typed):
             return self.path(str(typed))
         fail(
             "locate input",
-            f"not found as typed under {Path.cwd()} nor under the review "
+            f"not found as typed under {Path.cwd()} or under the review "
             f"directory {self.root}",
             str(argument),
         )

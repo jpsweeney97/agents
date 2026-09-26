@@ -1496,7 +1496,7 @@ def test_cli_path_arguments_fall_back_to_the_review_directory(tmp_path: Path) ->
     assert refused.returncode == 1
     assert refused.stdout == ""
     assert refused.stderr == (
-        f"locate input failed: not found as typed under {foreign} nor under the "
+        f"locate input failed: not found as typed under {foreign} or under the "
         f"review directory {archive.root}. Got: 'host/request-1.md'\n"
     )
     assert archive.load() == before
