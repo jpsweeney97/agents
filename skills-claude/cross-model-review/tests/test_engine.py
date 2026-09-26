@@ -159,8 +159,8 @@ def test_result_preserves_disagreement_and_does_not_invent_completion(
         "Claude still holds the local-only concern. Codex requests a constraint change that only JP can authorize; both positions remain open."
     )
     with pytest.raises(ReviewError, match="standing material findings"):
-        engine.finish(archive, "complete", note)
-    result = engine.finish(archive, "decision", note)
+        engine.finish(archive, "complete", note, note)
+    result = engine.finish(archive, "decision", note, note)
     assert result["candidate_checked"] is True
     assert result["rounds_used"] == 1
     assert "still holds" in archive.text("result.md")
@@ -182,7 +182,7 @@ def test_resolved_candidate_returns_diff_without_adopting_it(tmp_path: Path) -> 
     note.write_text(
         "Remote upload removed; local-only goal preserved. No held material concerns or user decisions remain."
     )
-    result = engine.finish(archive, "complete", note)
+    result = engine.finish(archive, "complete", note, note)
     assert result["candidate_checked"] is True
     assert "Search local files" in archive.text("changes.diff")
     assert "Upload all data remotely" in source.read_text()
@@ -206,7 +206,7 @@ def test_failure_does_not_return_unchecked_revision_as_checked(tmp_path: Path) -
         engine.query(archive, pending, host, replies)
     note = tmp_path / "failure.md"
     note.write_text("Round two closing validation failed. Its candidate is unverified.")
-    result = engine.finish(archive, "failed", note)
+    result = engine.finish(archive, "failed", note, note)
     assert result["candidate"] == str(archive.path(checked))
     assert result["rounds_used"] == 2
     assert result["reviewer_record"] == "01-closing.raw.json"
@@ -297,7 +297,7 @@ def test_authorized_continuation_preserves_records_and_charges_next_round(
     with pytest.raises(
         ReviewError, match="latest round has no successful closing check"
     ):
-        engine.finish(archive, "complete", note)
+        engine.finish(archive, "complete", note, note)
 
     assert engine.begin(archive)["used"] == 3
     engine.query(archive, source, host, replies)
@@ -309,7 +309,7 @@ def test_authorized_continuation_preserves_records_and_charges_next_round(
     ]
     assert archive.read(archive.load()["last_response"])["findings"] == [resolved]
     note.write_text("The third closing check passed; no held material concerns remain.")
-    result = engine.finish(archive, "complete", note)
+    result = engine.finish(archive, "complete", note, note)
     assert result["rounds_used"] == 3
     assert result["continuations"] == after["continuations"]
 
@@ -405,7 +405,7 @@ def test_continuation_does_not_create_more_allowance(tmp_path: Path) -> None:
     note.write_text(
         "Round two failed. Round one's checked candidate still has F1; no allowance remains."
     )
-    result = engine.finish(archive, "exhausted", note)
+    result = engine.finish(archive, "exhausted", note, note)
     assert result["reviewer_record"] == "01-closing.raw.json"
     assert result["continuations"][0]["failed_call"] == "02-closing"
     extra = tmp_path / "extra.md"
@@ -522,7 +522,7 @@ def test_one_time_response_write_failure_keeps_call_resumable(
     assert resumed["checked_response"] == "01-closing.response.json"
     note = tmp_path / "complete.md"
     note.write_text("Upload removed; no held concerns or user decisions remain.")
-    assert engine.finish(archive, "complete", note)["candidate_checked"] is True
+    assert engine.finish(archive, "complete", note, note)["candidate_checked"] is True
     assert replies.sessions == [None, "review-session"]
 
 
@@ -586,10 +586,10 @@ def test_finish_refuses_when_checked_reviewer_record_is_missing(
     raw.rename(raw.with_suffix(".aside"))
     for outcome in ("complete", "decision"):
         with pytest.raises(ReviewError, match="reviewer record .* is missing"):
-            engine.finish(archive, outcome, note)
+            engine.finish(archive, outcome, note, note)
     assert not archive.path("result.json").exists()
     raw.with_suffix(".aside").rename(raw)
-    result = engine.finish(archive, "complete", note)
+    result = engine.finish(archive, "complete", note, note)
     assert result["reviewer_record"] == "01-closing.raw.json"
     assert archive.path(result["reviewer_record"]).is_file()
 
@@ -605,10 +605,10 @@ def test_finish_refuses_when_reviewer_record_disagrees_with_response(
     record["final_message"] = json.dumps(reply)
     raw.write_text(json.dumps(record))
     with pytest.raises(ReviewError, match="reviewer record disagrees"):
-        engine.finish(archive, "complete", note)
+        engine.finish(archive, "complete", note, note)
     raw.write_text("not json")
     with pytest.raises(ReviewError, match="read record failed"):
-        engine.finish(archive, "complete", note)
+        engine.finish(archive, "complete", note, note)
 
 
 @pytest.mark.parametrize(
@@ -660,7 +660,7 @@ def test_diff_marks_missing_final_newlines(
     engine.begin(archive)
     engine.query(archive, source, host, replies)
     engine.query(archive, revised, host, replies)
-    engine.finish(archive, "complete", host)
+    engine.finish(archive, "complete", host, host)
     header = "--- submitted\n+++ checked-candidate\n"
     assert archive.text("changes.diff") == header + expected_hunk
     assert archive.path(archive.load()["checked"]).read_bytes() == candidate.encode()
@@ -704,7 +704,7 @@ def test_finish_refuses_when_reviewer_record_fails_replay(tmp_path: Path) -> Non
     record["exit_code"] = 23
     raw.write_text(json.dumps(record))
     with pytest.raises(ReviewError, match="failed replay validation"):
-        engine.finish(archive, "complete", note)
+        engine.finish(archive, "complete", note, note)
     assert not archive.path("result.json").exists()
 
 
@@ -741,7 +741,7 @@ def test_request_record_failure_before_call_renders_failed_ending(
     assert replies.sessions == []
     note = tmp_path / "failed.md"
     note.write_text("The request record failed to save before any reviewer call.")
-    result = engine.finish(archive, "failed", note)
+    result = engine.finish(archive, "failed", note, note)
     assert result["outcome"] == "failed"
     assert result["candidate_checked"] is False
     assert result["candidate"] == str(archive.path(state["original"]))
@@ -795,7 +795,7 @@ def test_pending_save_failure_after_checked_round_renders_failed_ending(
     assert replies.sessions == [None, "review-session"]
     note = tmp_path / "failed.md"
     note.write_text("Progress failed to save before the round-two closing call.")
-    result = engine.finish(archive, "failed", note)
+    result = engine.finish(archive, "failed", note, note)
     assert result["outcome"] == "failed"
     assert result["candidate_checked"] is True
     assert result["candidate"] == str(archive.path(checked))
@@ -820,10 +820,10 @@ def test_failed_ending_before_call_leaves_other_operations_unchanged(
     note = tmp_path / "note.md"
     note.write_text("No closing check happened in round two.")
     with pytest.raises(ReviewError, match="no successful closing check"):
-        engine.finish(archive, "complete", note)
+        engine.finish(archive, "complete", note, note)
     with pytest.raises(ReviewError, match="between-round boundary"):
-        engine.finish(archive, "exhausted", note)
-    engine.finish(archive, "failed", note)
+        engine.finish(archive, "exhausted", note, note)
+    engine.finish(archive, "failed", note, note)
     assert archive.path("state.json").read_bytes() == progress
     assert replies.sessions == [None, "review-session"]
 
@@ -843,7 +843,7 @@ def test_unreadable_request_record_before_call_still_renders_failed_ending(
         archive.read("01-opening.request.json")
     note = tmp_path / "failed.md"
     note.write_text("The request record is truncated; no reviewer call was made.")
-    result = engine.finish(archive, "failed", note)
+    result = engine.finish(archive, "failed", note, note)
     assert result["outcome"] == "failed"
     assert "01-opening.request.json" in result["failure"]
     assert replies.sessions == []
@@ -876,7 +876,7 @@ def test_failed_ending_refused_without_a_recorded_failure(
     note = tmp_path / "note.md"
     note.write_text("Nothing failed; a started round is not a failure.")
     with pytest.raises(ReviewError, match="no failed or incomplete call is recorded"):
-        engine.finish(archive, "failed", note)
+        engine.finish(archive, "failed", note, note)
     assert not archive.path("result.json").exists()
 
 
@@ -915,8 +915,8 @@ def test_decision_discloses_pre_call_failure_like_failed(
     calls = list(replies.sessions)
     progress = archive.path("state.json").read_bytes()
     note = _decision_note(tmp_path)
-    failed = engine.finish(archive, "failed", note)
-    result = engine.finish(archive, "decision", note)
+    failed = engine.finish(archive, "failed", note, note)
+    result = engine.finish(archive, "decision", note, note)
     assert result["outcome"] == "decision"
     assert result["phase"] == phase
     assert result["failure"] == failed["failure"]
@@ -964,7 +964,9 @@ def test_decision_renders_while_a_round_is_open_and_discloses_it(
     checked = state["checked"]
     calls = list(replies.sessions)
     progress = archive.path("state.json").read_bytes()
-    result = engine.finish(archive, "decision", _decision_note(tmp_path))
+    result = engine.finish(
+        archive, "decision", _decision_note(tmp_path), _decision_note(tmp_path)
+    )
     assert (result["outcome"], result["phase"], result["rounds_used"]) == (
         "decision",
         phase,
@@ -1042,7 +1044,9 @@ def test_decision_at_pending_discloses_the_call_and_leaves_resume_intact(
     used = 1 if kind == "opening" else 2
     calls = list(replies.sessions)
     progress = archive.path("state.json").read_bytes()
-    result = engine.finish(archive, "decision", _decision_note(tmp_path))
+    result = engine.finish(
+        archive, "decision", _decision_note(tmp_path), _decision_note(tmp_path)
+    )
     assert (result["outcome"], result["phase"], result["rounds_used"]) == (
         "decision",
         "pending",
@@ -1108,7 +1112,9 @@ def test_decision_at_failed_discloses_the_failure_and_leaves_recovery_intact(
     )
     calls = list(replies.sessions)
     progress = archive.path("state.json").read_bytes()
-    result = engine.finish(archive, "decision", _decision_note(tmp_path))
+    result = engine.finish(
+        archive, "decision", _decision_note(tmp_path), _decision_note(tmp_path)
+    )
     assert (result["outcome"], result["phase"], result["rounds_used"]) == (
         "decision",
         "failed",
@@ -1156,7 +1162,7 @@ def test_between_round_endings_carry_phase_and_unchanged_failure(
     from cross_model_runtime.codex_transport import CodexTransportError
 
     archive, note = _complete_one_round(tmp_path)
-    result = engine.finish(archive, "complete", note)
+    result = engine.finish(archive, "complete", note, note)
     assert (result["phase"], result["failure"], result["continuations"]) == (
         "between",
         None,
@@ -1179,10 +1185,63 @@ def test_between_round_endings_carry_phase_and_unchanged_failure(
     authorization = tmp_path / "continue.md"
     authorization.write_text("JP: authorize continuation; no extra rounds granted.")
     engine.continue_after_failure(archive, authorization)
-    result = engine.finish(archive, "exhausted", note)
+    result = engine.finish(archive, "exhausted", note, note)
     assert (result["phase"], result["failure"]) == ("between", None)
     assert result["continuations"][0]["failed_call"] == "02-closing"
     rendered = archive.text("result.md")
     assert "Saved phase: between." in rendered
     assert "remains open" not in rendered
     assert "Failed rounds followed by authorized continuation: 2." in rendered
+
+
+def _need(tmp_path: Path, text: str = "Decide whether to adopt the candidate.") -> Path:
+    need = tmp_path / "need.md"
+    need.write_text(text)
+    return need
+
+
+MIXED_FINDINGS = [
+    dict(FINDING, ref="F1", disposition="resolved", explanation="Upload removed."),
+    dict(
+        FINDING, ref="F2", disposition="resolved", material=False, explanation="Typo."
+    ),
+    dict(FINDING, ref="F3", disposition="withdrawn", explanation="Misread the goal."),
+    dict(FINDING, ref="F4", disposition="standing", explanation="Cache still remote."),
+]
+
+
+def _checked_review(tmp_path: Path, findings: list[dict[str, Any]]) -> Archive:
+    archive, source, host = setup_review(tmp_path)
+    replies = Replies([[FINDING], findings])
+    engine.begin(archive)
+    engine.query(archive, source, host, replies)
+    engine.query(archive, source, host, replies)
+    return archive
+
+
+def test_need_text_opens_the_result_and_is_recorded(tmp_path: Path) -> None:
+    resolved = dict(FINDING, disposition="resolved", explanation="Removed.")
+    archive = _checked_review(tmp_path, [resolved])
+    note = tmp_path / "note.md"
+    note.write_text("Upload removed; nothing material remains.")
+    need = _need(tmp_path, "\n  Decide whether to adopt candidate 2.  \n")
+    result = engine.finish(archive, "complete", note, need)
+    text = archive.text("result.md")
+    assert text.startswith(
+        "# Review result: complete\n\n## Need from you\n\n"
+        "Decide whether to adopt candidate 2.\n\n## Findings\n\n"
+    )
+    assert result["need_from_user"] == "Decide whether to adopt candidate 2."
+    assert archive.read("result.json")["need_from_user"] == result["need_from_user"]
+
+
+@pytest.mark.parametrize("text", ["", "  \n\t\n"])
+def test_finish_refuses_an_empty_need_before_writing(tmp_path: Path, text: str) -> None:
+    resolved = dict(FINDING, disposition="resolved", explanation="Removed.")
+    archive = _checked_review(tmp_path, [resolved])
+    note = tmp_path / "note.md"
+    note.write_text("Upload removed; nothing material remains.")
+    with pytest.raises(ReviewError, match='"Need from you" text is required'):
+        engine.finish(archive, "complete", note, _need(tmp_path, text))
+    assert not archive.path("result.md").exists()
+    assert not archive.path("result.json").exists()

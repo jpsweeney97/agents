@@ -313,13 +313,18 @@ def _failure_before_call(archive: Archive, state: dict[str, Any]) -> str | None:
     )
 
 
-def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
+def finish(
+    archive: Archive, outcome: str, host_note: Path, need: Path
+) -> dict[str, Any]:
     """Render the host's declared ending; do not adjudicate its reasoning."""
     note = read_text(host_note)
+    need_text = read_text(need).strip()
     if outcome not in {"complete", "decision", "exhausted", "failed"}:
         fail("finish review", "unknown ending", outcome)
     if not note.strip():
         fail("finish review", "an evidence and limitations note is required", host_note)
+    if not need_text:
+        fail("finish review", 'a "Need from you" text is required', need)
     with archive.locked():
         state = archive.load()
         response = (
@@ -386,6 +391,7 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
             "latest_response": state["last_response"],
             "failure": failure,
             "host_note": note,
+            "need_from_user": need_text,
             "pending_or_failed_call": state["call"],
             "continuations": state["continuations"],
         }
@@ -413,6 +419,8 @@ def finish(archive: Archive, outcome: str, host_note: Path) -> dict[str, Any]:
             call = state["call"]["prefix"] if state["call"] is not None else "none"
             archive.path("result.md").write_text(
                 f"# Review result: {outcome}\n\n"
+                "## Need from you\n\n"
+                f"{need_text}\n\n"
                 f"{label}: [{candidate}]({archive.path(candidate)})\n\n"
                 f"Rounds started: {state['used']} of {state['limit']}.\n\n"
                 f"Saved phase: {state['phase']}.\n\n"
