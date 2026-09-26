@@ -1371,3 +1371,29 @@ def test_record_block_is_unchanged_after_the_new_sections(tmp_path: Path) -> Non
     )
     text = archive.text("result.md")
     assert text[text.index("## Record\n") :] == expected
+
+
+def test_cli_finish_requires_need(tmp_path: Path) -> None:
+    import subprocess
+
+    script = Path(__file__).resolve().parents[1] / "scripts" / "review.py"
+    note = tmp_path / "note.md"
+    note.write_text("note")
+    without = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            "--review",
+            str(tmp_path / "review"),
+            "finish",
+            "--outcome",
+            "failed",
+            "--note",
+            str(note),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert without.returncode == 2
+    assert "--need" in without.stderr

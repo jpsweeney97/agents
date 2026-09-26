@@ -48,6 +48,7 @@ def main() -> int:
         choices=("complete", "decision", "exhausted", "failed"),
     )
     finish.add_argument("--note", required=True, type=Path)
+    finish.add_argument("--need", required=True, type=Path)
     extend = commands.add_parser("extend")
     extend.add_argument("--extra", required=True, type=int)
     extend.add_argument("--authorization", required=True, type=Path)
@@ -76,7 +77,7 @@ def main() -> int:
                 archive, args.candidate, args.request, timeout=args.timeout
             )
         elif args.command == "finish":
-            result = engine.finish(archive, args.outcome, args.note)
+            result = engine.finish(archive, args.outcome, args.note, args.need)
         elif args.command == "edit":
             result = cmr_edit.apply_edits(
                 archive, args.from_, args.edits, args.out, args.expect_sha
